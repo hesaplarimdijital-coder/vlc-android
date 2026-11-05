@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Bu hazır ayarı silmek istediğinize emin misiniz?</string>
     <string name="confirm_delete_vlc_eq">Bu hazır ayarı gizlemek istediğinize emin misiniz?\nDengeleyici ayarlarından geri yükleyebilirsiniz.</string>
     <string name="confirm_replace_playlist">\'%1$s\' oynatma listesini değiştirmek istediğinize emin misiniz?</string>
-    <string name="invalid_settings_file">Ayarlar dosyası geçersiz</string>
     <string name="confirm_delete_message">Bu işlem kalıcıdır ve geri alınamaz.</string>
     <string name="confirm_delete_album">\'%1$s\' albümü silinsin mi?</string>
     <string name="confirm_delete_several_media">Bu %1$d ortam silinsin mi?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 görüntü</item>
         <item quantity="other">%d görüntü</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="other">%d film</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV dizisi</item>
-        <item quantity="other">%d TV dizisi</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 iz</item>
         <item quantity="other">%d iz</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Henüz bir oynatma geçmişiniz yok.</string>
     <string name="cant_ban_root">Bir kök klasörü yasaklayamazsınız</string>
 
-    <string name="cover_art">Kapak görseli</string>
     <string name="shuffle_all_title">Tümünü karıştır</string>
     <string name="shuffle_title">Karıştırma kipi</string>
     <string name="shuffle">Karıştırma kapalı</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Görüntü oynatıcı kumandası</string>
     <string name="remote_keyboard_navigation">Klavye gezinmesi</string>
 
-    <string name="server_add_title">Sık kullanılanlara yeni sunucu ekle</string>
     <string name="server_domain_hint">Sunucu adresi (sunucu adı ya da IP adresi)</string>
     <string name="server_share_hint">Sunucu adresi (sunucu adı ya da IP adresi)</string>
     <string name="server_folder_hint">Klasör yolu (isteğe bağlı)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Sık kullanılanlara ekle</string>
     <string name="favorites_remove">Sık kullanılanlardan çıkar</string>
     <string name="favorites_edit">Düzenle</string>
-    <string name="favorite_added">Sık kullanılanlara eklendi</string>
-    <string name="favorite_removed">Sık kullanılanlardan çıkarıldı</string>
 
     <string name="streams">Akışlar</string>
     <string name="open_mrl_dialog_msg">Bir ağ adresi yazın. Örnek: http://, mms://, or rtsp://</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Yok</string>
     <string name="subtitle_decoration_shadow">Gölge</string>
     <string name="subtitle_decoration_outline">Çerçeve</string>
-    <string name="previous_color">Önceki renk</string>
-    <string name="new_color">Yeni renk</string>
 
     <string name="audio_prefs_category">Ses</string>
     <string name="lockscreen_cover_title">Kilit ekranında ortam görseli</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Uzaktan erişim bilgileri</string>
     <string name="remote_access_content">İçerik</string>
     <string name="remote_access_medialibrary_content">Ortam kitaplığı içeriği</string>
-    <string name="remote_access_medialibrary_content_summary">Açık: %1$s\nKapalı: %2$s</string>
     <string name="remote_access_file_browser_content">Dosya tarayıcı</string>
     <string name="remote_access_network_browser_content">Ağ tarayıcı</string>
     <string name="remote_access_playback_control">Oynatma denetlensin</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Bu değer 0 ile 60000 ms arasında olmalıdır</string>
     <string name="quit">Çık ve uygulamayı yeniden başlat</string>
     <string name="restart_message">Değişikliklerin geçerli olması için uygulama yeniden başlatılmalıdır.\n\nYeniden başlatılsın mı?</string>
-    <string name="restart_message_OK">Tamam</string>
-    <string name="restart_message_Later">Sonra</string>
     <string name="browser_show_all_title">Yalnızca çoklu ortam dosyaları görüntülensin</string>
 
     <string name="developer_prefs_category">Geliştirici</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Günlük gönderiliyor…</string>
 
 
-    <string name="no_result">Herhangi bir sonuç bulunamadı</string>
-    <string name="no_internet_connection">İnternet bağlantınızı denetleyin</string>
     <string name="retry">Yeniden dene</string>
 
     <string name="network_browsing">Yerel ağ</string>
-    <string name="browsing">Göz at</string>
 
     <string name="file_size">Dosya boyutu</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Tarayıcıda aç</string>
     <string name="install">Kur</string>
     <string name="install_nightly">Gecelik sürümü kur</string>
-    <string name="install_nightly_alert">Gecelik sürümler her gün güncellenen deneysel sürümlerdir.\n\nYeni özelliklerin yanında yeni hatalarla karşılaşmayı da bekleyin!</string>
     <string name="nightly_version">Bulunan sürüm: %2$s - %1$s</string>
     <string name="update_nightly_alert">Gecelik sürümü kullanıyorsunuz. Güncellemelerin düzenli olarak denetlenmesini ister misiniz?</string>
     <string name="update_nightly">Otomatik güncellensin</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Görüntü açılan pencerede oynatılsın</string>
     <string name="open_subtitles_vip">Bir VIP OpenSubtitles kullanıcısısınız</string>
     <string name="browse_folder">Klasöre göz at</string>
-    <string name="listen">Dinle</string>
     <string name="episodes">bölüm</string>
     <string name="movies">film</string>
     <string name="videos">görüntü</string>
     <string name="default_action_videos">Görüntüler</string>
-    <string name="videos_all">Tüm görüntüler</string>
     <string name="clear_playback_history">Oynatma geçmişini temizle</string>
     <string name="ml_scanning">Ortam dosyaları taranıyor</string>
     <string name="ml_parse_media">Ortam işleniyor</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Kendinizi evinizde hissedin</string>
     <string name="done">Bitti</string>
     <string name="onboarding_scan_title">Ortamları otomatik tarayın</string>
-    <string name="onboarding_all_set">Nağmedar ayarları tamamlandı!</string>
-    <string name="onboarding_permission_given">Ortamlar otomatik olarak algılanacak, dış alt yazılar kullanılabilecek ve akış ya da ağ ortamları oynatılabilecek</string>
     <string name="daynight_system_explanation">Nağmedar sistem ayarlarına göre kendiliğinden koyu kipe geçecek</string>
     <string name="daynight_legacy_explanation">Nağmedar, zamanı geldiğinde kendiliğinden gece kipine geçecek</string>
     <string name="onboarding_scanning_enable">Nağmedar ortamları bulmak için aygıtımı tarayabilsin</string>
@@ -737,7 +711,6 @@
     <string name="create">Ekle</string>
     <string name="resume_card_message">%1$s oynatımı sürdürülsün mü?</string>
     <string name="misc">Çeşitli</string>
-    <string name="device_default">Aygıt varsayılanı</string>
     <string name="track_number">%d kayıt</string>
     <string name="jump_to">Şuraya atla</string>
     <string name="show_video_thumbnails">Görüntü küçük görselleri</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d kayıt sona eklendi</item>
     </plurals>
     <string name="remove_current">Geçerli ögeyi çıkar</string>
-    <string name="validation_delete_playlist">Bu listeyi silmek istediğinize emin misiniz?</string>
-    <string name="validation_delete_playlist_text">Bu işlem geri alınamaz.</string>
     <string name="display_settings">Görüntü ayarları</string>
     <string name="incognito_mode">Gizli kip</string>
     <string name="persistent_incognito_mode">Kalıcı gizli kip</string>
     <string name="persistent_incognito_mode_summary">Uygulama yeniden başlatılsa bile gizli kipi açık tutar</string>
     <string name="display_in_list">Liste olarak görüntüle</string>
     <string name="display_in_grid">Tablo olarak görüntüle</string>
-    <string name="dump_db_succes">Veri tabanı iç depolama kök klasörüne kopyalandı</string>
     <string name="dump_db_failure">Veri tabanı indirilemedi</string>
     <string name="send_crash_title">Nağmedar çökme bildirici</string>
     <string name="send_crash_description">Çökme bilgilerini göndermeniz Nağmedar uygulamsını geliştirmemizi sağlar.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Şurada: %s</string>
     <string name="share_track_info">Kayıt bilgilerini paylaş</string>
     <string name="share_track">Şu anda %s dinleniyor</string>
-    <string name="find_metadata">Üst verileri bul</string>
-    <string name="moviepedia_hint">Üst veri arama</string>
-    <string name="moviepedia_result">Görüntü sonuçları</string>
-    <string name="directed_by">Yönetmen</string>
-    <string name="casting">Aktarım</string>
-    <string name="produced_by">Yapımcı</string>
-    <string name="written_by">Yazar</string>
-    <string name="music_by">Müzikler</string>
-    <string name="posters">Afişler</string>
-    <string name="backdrops">Arka plan</string>
-    <string name="header_tvshows">TV dizileri</string>
-    <string name="header_movies">Filmler</string>
-    <string name="season_number">%s. sezon</string>
-    <string name="resume_episode">Sürdür (%s)</string>
-    <string name="start_over">Baştan başla</string>
-    <string name="next_episode">Sonraki bölüm</string>
-    <string name="open_network_settings">Ağ ayarları açılsın mı?</string>
-    <string name="recently_played">Son oynatılanlar</string>
-    <string name="recently_added">Son eklenenler</string>
     <string name="playback_multiple_errors">Aynı anda birden çok ortam oynatılamaz</string>
     <string name="clear_media_db_message">Oluşturduğunuz işlemleri, yer imlerini ve listeleri yitireceksiniz. Ancak Nağmedar ayarları korunacak</string>
     <string name="clear_app_data_message">İlerlemeleri, yer imlerini, oynatma listeleri ve tüm Nağmedar ayarlarınızı yitireceksiniz</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">Aboneliğinizi Play Store üzerinden sona erdirebilirsiniz</string>
     <string name="subscription_cancel_tv">Aboneliğimi nasıl sona erdirebilirim</string>
     <string name="donate_unsubscribe_tv">Aboneliğinizi sona erdirmek için bir telefon ya da bilgisayar üzerinde %s uygulamasını açtıktan sonra şu kodu tarayın:</string>
-    <string name="tip_jar">VLC projesini destekleyin</string>
     <string name="thank_you">Teşekkürler</string>
     <string name="thank_you_desc">Desteğiniz için teşekkürler!\nVLC uygulamasının geliştirilmesine çok yardımınız olacak!</string>
     <string name="donate_again">Uygulamaya yeniden destek olun</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">Dokun yedekle erişimine izin ver</string>
     <string name="allow_otg_description">Nağmedar tarafından erişilmesini istediğiniz dokun yedekle sürücüsünü seçin.</string>
     <string name="video_hud_timeout">Görüntü oynatıcı denetimlerini gizleme gecikmesi</string>
-    <string name="remove_from_history">Geçmişten kaldır</string>
     <string name="prefersmbv1">SMB 1 yeğlensin</string>
     <string name="prefersmbv1_summary">SMB sunucunuza erişmekte sorun yaşıyorsanız bu seçeneği kapatın</string>
     <string name="audio_delay_global">Tüm görüntüler için ses gecikmesi %s ms olarak ayarlandı</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Kilidi aç</string>
     <string name="lock_with_pin">PIN kilidini yeniden aç</string>
     <string name="unlock_with_pin">Güvenli kip kilidini aç</string>
-    <string name="lock_with_pin_short">PIN kilidi</string>
     <string name="restrict_settings">Ayarlara erişimi engelle</string>
     <string name="search_prefs">Arama ayarları</string>
     <string name="stop_unpaubale">Bu ortam duraklatılamaz. Onun yerine durdurmak ister misiniz?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Bu bir beta sürümü özelliği olduğundan çökme ve kararsızlıklara neden olabilir</string>
     <string name="network_indexing">Ağ dizini oluşturma</string>
     <string name="network_indexing_warning">Ağ dizini oluşturma özelliği şu anda beta aşamasındadır.\nBilinen sorunlar:\n• Düşük başarım\n\nBaşka sorunlarla karşılaşırsanız, lütfen forumumuzda yazın.</string>
-    <string name="start_vlc">Nağmedar\'ı başlat</string>
     <string name="jump_delay">İleri/geri sarma gecikmesi</string>
     <string name="long_jump_delay">Uzun dokunarak ileri/geri sarma gecikmesi</string>
     <string name="jump_delay_summary">%s saniye</string>
-    <string name="move_up">Yukarı taşı</string>
-    <string name="move_down">Aşağı taşı</string>
-    <string name="remove_from_playlist">Listeden çıkar</string>
-    <string name="play_media">%s oynat</string>
     <string name="edit_eq_preset">Dengeleyici hazır ayarını düzenle</string>
     <string name="edit_eq_name_not_allowed">Bu ad kullanılamaz</string>
     <string name="export_equalizer">Dengeleyiciyi dışa aktar</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">İndiriliyor</string>
     <string name="talkback_action_rewind">%s saniye geri atla</string>
     <string name="talkback_action_forward">%s saniye ileri atla</string>
-    <string name="talkback_display_settings">Görüntü ayarları</string>
     <string name="talkback_already_played">Zaten oynatılmış</string>
     <string name="show_only_favs">Yalnızca sık kullanılanlar görüntülensin</string>
     <string name="ignore_headset_media_button_presses">Kulaklık düğmesine basma yok sayılsın</string>

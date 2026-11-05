@@ -70,7 +70,6 @@
     <string name="directorynotfound">\'%1$s\' निर्देशिकाचा मार्ग नाही सापडला</string>
     <string name="nohistory">आपल्याकडे आतापर्यंत प्लेबॅक इतिहास नाही.</string>
 
-    <string name="cover_art">कव्हर आर्ट</string>
     <string name="previous">मागील</string>
     <string name="stop">थांबा</string>
     <string name="unseekable_stream">सीक करता न येणारी स्ट्रीम</string>

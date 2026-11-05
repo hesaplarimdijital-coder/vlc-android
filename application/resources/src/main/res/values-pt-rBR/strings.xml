@@ -111,16 +111,6 @@
         <item quantity="many">%d vídeos</item>
         <item quantity="other">%d vídeos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 filme</item>
-        <item quantity="many">%d filmes</item>
-        <item quantity="other">%d filmes</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 Programa de TV</item>
-        <item quantity="many">%d Programas de TV</item>
-        <item quantity="other">%d Programas de TV</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 trilha</item>
         <item quantity="many">%d trilhas</item>
@@ -148,7 +138,6 @@
     <string name="nohistory">Você não possui histórico de reprodução.</string>
     <string name="cant_ban_root">Não é possível banir uma pasta raiz</string>
 
-    <string name="cover_art">Capa</string>
     <string name="shuffle_all_title">Todos em aleatório</string>
     <string name="shuffle_title">Modo aleatório</string>
     <string name="shuffle">Desabilitar o Aleatório</string>
@@ -196,7 +185,6 @@
     <string name="video_player_remote">Reprodutor de vídeo remoto</string>
     <string name="remote_keyboard_navigation">Navegação por teclado</string>
 
-    <string name="server_add_title">Adicionar um novo servidor aos favoritos</string>
     <string name="server_folder_hint">Caminho da pasta (opcional)</string>
     <string name="server_username_hint">Nome de usuário</string>
     <string name="server_port">Porta:</string>
@@ -207,8 +195,6 @@
     <string name="favorites_add">Adicionar aos favoritos</string>
     <string name="favorites_remove">Excluir dos favoritos</string>
     <string name="favorites_edit">Editar</string>
-    <string name="favorite_added">Adicionado aos favoritos</string>
-    <string name="favorite_removed">Excluído dos favoritos</string>
 
     <string name="streams">transmissões</string>
     <string name="search">Pesquisar</string>
@@ -309,8 +295,6 @@
     <string name="subtitle_decoration_none">Nenhum</string>
     <string name="subtitle_decoration_shadow">Sombra</string>
     <string name="subtitle_decoration_outline">Contorno</string>
-    <string name="previous_color">Cor anterior</string>
-    <string name="new_color">Nova cor</string>
 
     <string name="audio_prefs_category">Áudio</string>
     <string name="lockscreen_cover_title">Capa da mídia na Tela de Bloqueio</string>
@@ -364,7 +348,6 @@
     <string name="remote_access_info">Informação do acesso remoto</string>
     <string name="remote_access_content">Conteúdo</string>
     <string name="remote_access_medialibrary_content">Conteúdo da biblioteca de mídias</string>
-    <string name="remote_access_medialibrary_content_summary">Habilitados: %1$s\nDesabilitados: %2$s</string>
     <string name="remote_access_file_browser_content">Explorador de arquivos</string>
     <string name="remote_access_network_browser_content">Explorador de rede</string>
     <string name="remote_access_playback_control">Controlar a reprodução</string>
@@ -427,8 +410,6 @@
     <string name="network_caching_popup">Este valor deve estar entre 0 e 60000 ms</string>
     <string name="quit">Fechar e reiniciar o programa</string>
     <string name="restart_message">As modificações terão efeito quando o aplicativo for reiniciado.\n\nReiniciar agora?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Mais tarde</string>
     <string name="browser_show_all_title">Exibir apenas arquivos multimídia</string>
 
     <string name="developer_prefs_category">Desenvolvedor</string>
@@ -456,11 +437,8 @@
     <string name="sending_log">Enviando o registro…</string>
 
 
-    <string name="no_result">Nenhum resultado encontrado</string>
-    <string name="no_internet_connection">Verifique a sua conexão com a Internet</string>
     <string name="retry">Tentar novamente</string>
     <string name="network_browsing">Rede</string>
-    <string name="browsing">Procurando</string>
 
     <string name="file_size">Tamanho do arquivo</string>
 
@@ -546,8 +524,6 @@
     <string name="add_to_playlist">Adicionar à lista de reprodução</string>
     <string name="popup_playback_title">Reproduzir vídeo em uma janela pop-up</string>
     <string name="browse_folder">Procurar pasta</string>
-    <string name="listen">Ouvir</string>
-    <string name="videos_all">Todos os vídeos</string>
     <string name="clear_playback_history">Limpar histórico de reprodução</string>
     <string name="ml_scanning">Procurando arquivos de mídia</string>
     <string name="ml_parse_media">Analisando a mídia</string>
@@ -634,8 +610,6 @@
     <string name="onboarding_theme_title">Fique à vontade.</string>
     <string name="done">Concluído</string>
     <string name="onboarding_scan_title">Descobrir automaticamente sua mídia</string>
-    <string name="onboarding_all_set">O VLC está todo configurado!</string>
-    <string name="onboarding_permission_given">É possível agora descobrir automaticamente a sua mídia, usar legendas externas, bem como reproduzir transmissões ou mídias de rede</string>
     <string name="daynight_system_explanation">O VLC alternará para o modo noturno de acordo com a configuração do sistema</string>
     <string name="daynight_legacy_explanation">O VLC alternará para o modo noturno no momento adequado</string>
     <string name="onboarding_scanning_enable">Deixar o VLC procurar mídias em meu dispositivo</string>
@@ -646,7 +620,6 @@
     <string name="add_to_new_playlist">Adiciona à nova Lista de Reprodução</string>
     <string name="resume_card_message">Retomar a reprodução de%1$s?</string>
     <string name="misc">Outros</string>
-    <string name="device_default">Dispositivo padrão</string>
     <string name="track_number">%d trilhas</string>
     <string name="jump_to">Ir para</string>
     <string name="show_video_thumbnails">Miniaturas de vídeos</string>
@@ -665,11 +638,8 @@
         <item quantity="other">%d Tracks adicionadas</item>
     </plurals>
     <string name="remove_current">Excluir atual</string>
-    <string name="validation_delete_playlist">Tem certeza que deseja excluir esta lista de reprodução?</string>
-    <string name="validation_delete_playlist_text">Esta ação não pode ser desfeita.</string>
     <string name="display_in_list">Exibir em lista</string>
     <string name="display_in_grid">Exibir em grade</string>
-    <string name="dump_db_succes">Banco de dados descarregado na raiz do armazenamento interno</string>
     <string name="dump_db_failure">Falha ao descarregar o banco de dados</string>
     <string name="send_crash_title">Relato de falhas do VLC</string>
     <string name="send_crash_description">Enviar as informações de falha ajuda a melhorar a estabilidade do VLC.</string>
@@ -697,25 +667,6 @@
     <string name="invalid_file">Arquivo inválido. Não é possível compartilhá-lo.</string>
     <string name="share_file">Compartilhar 1%s</string>
     <string name="share_message">Aqui está 1%s</string>
-    <string name="find_metadata">Encontrar metadados</string>
-    <string name="moviepedia_hint">Pesquisar metadados</string>
-    <string name="moviepedia_result">Resultados de vídeo</string>
-    <string name="directed_by">Dirigido por</string>
-    <string name="casting">Estrelando</string>
-    <string name="produced_by">Produzido por</string>
-    <string name="written_by">Escrito por</string>
-    <string name="music_by">Música de</string>
-    <string name="posters">Pôsteres</string>
-    <string name="backdrops">Painéis Pantográficos</string>
-    <string name="header_tvshows">Programas de TV</string>
-    <string name="header_movies">Filmes</string>
-    <string name="season_number">Temporada %s</string>
-    <string name="resume_episode">Retomar (%s)</string>
-    <string name="start_over">Reiniciar</string>
-    <string name="next_episode">Próximo episódio</string>
-    <string name="open_network_settings">Abrir configurações de rede?</string>
-    <string name="recently_played">Reproduzido recentemente</string>
-    <string name="recently_added">Adicionado recentemente</string>
     <string name="playback_multiple_errors">Não é possível reproduzir múltiplas mídias</string>
     <string name="clear_media_db_message">Você perderá seus progressos, favoritos e as listas de reprodução que criou, mas manterá suas configurações do VLC para Android</string>
     <string name="clear_app_data_message">Você perderá seus progressos, favoritos, as listas de reprodução e todas as configurações do VLC</string>
@@ -762,7 +713,6 @@
     <string name="subscription_cancel">Você pode se desinscrever na Play Store</string>
     <string name="subscription_cancel_tv">Como se desinscrever</string>
     <string name="donate_unsubscribe_tv">Para se desinscrever, por favor abra o %s em um telefone ou um computador, ou escaneie este código:</string>
-    <string name="tip_jar">Ajude o VLC</string>
     <string name="thank_you">Obrigado</string>
     <string name="thank_you_desc">Obrigado pelo seu patrocínio!\nEle nos ajudará muito a melhorar o VLC!</string>
     <string name="donate_again">Patrocinar o aplicativo novamente</string>
@@ -774,7 +724,6 @@
     <string name="allow_otg">Permitir acesso OTG</string>
     <string name="allow_otg_description">Por favor, selecione sua unidade OTG para permitir acesso ao VLC.</string>
     <string name="video_hud_timeout">Controles do reprodutor de vídeo ocultando o atraso</string>
-    <string name="remove_from_history">Remover do histórico</string>
     <string name="prefersmbv1">Priorizar SMB 1</string>
     <string name="prefersmbv1_summary">Desmarque esta configuração se tiver alguma dificuldade em navegar em seu servidor SMB</string>
     <string name="audio_delay_global">Definir atraso em %s ms para todos os vídeos</string>
@@ -798,14 +747,9 @@
     <string name="optional_features_warning">Esta funcionalidade está beta e pode causar falhas e instabilidades</string>
     <string name="network_indexing">Indexação na rede</string>
     <string name="network_indexing_warning">A indexação na rede é atualmente beta.\nProblemas conhecidos:\n• Desempenho lento\n\nSe encontrar algum outro problema, por favor reporte-os no nosso fórum.</string>
-    <string name="start_vlc">Iniciar o VLC</string>
     <string name="jump_delay">Atraso de Avanço/Retrocesso</string>
     <string name="long_jump_delay">Atraso no toque longo do avanço/retrocesso</string>
     <string name="jump_delay_summary">%s segundos</string>
-    <string name="move_up">Subir</string>
-    <string name="move_down">Descer</string>
-    <string name="remove_from_playlist">Excluir da lista de reprodução</string>
-    <string name="play_media">Reproduzir %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Adicionar item(ns) duplicado(s)?</string>
     <string name="add_button">Adicionar</string>

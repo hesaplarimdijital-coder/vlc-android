@@ -114,18 +114,6 @@
         <item quantity="many">%d відэа</item>
         <item quantity="other">%d відэа</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 відэа</item>
-        <item quantity="few">%d відэа</item>
-        <item quantity="many">%d відэа</item>
-        <item quantity="other">%d відэа</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 тэлеперадача</item>
-        <item quantity="few">%d тэлеперадачы</item>
-        <item quantity="many">%d тэлеперадач</item>
-        <item quantity="other">%d тэлеперадач</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 дарожка</item>
         <item quantity="few">%d дарожкі</item>
@@ -153,7 +141,6 @@
     <string name="nohistory">Няма гісторыі прайгравання.</string>
     <string name="cant_ban_root">Нельга выключыць каранёвую папку</string>
 
-    <string name="cover_art">Вокладка</string>
     <string name="shuffle_all_title">Перамяшаць усё</string>
     <string name="shuffle_title">Рэжым перамешвання</string>
     <string name="shuffle">Перамешванне выкл</string>
@@ -194,7 +181,6 @@
     <string name="sleep_title">Таймер сну</string>
     <string name="sleep_in">Заснуць праз</string>
     <string name="jump_to_time">Пераход да часу</string>
-    <string name="server_add_title">Дадаць у Абраныя сервер</string>
     <string name="server_folder_hint">Шлях да папкі (неабавязковы)</string>
     <string name="server_username_hint">Імя карыстальніка</string>
     <string name="server_port">Порт:</string>
@@ -205,8 +191,6 @@
     <string name="favorites_add">Дадаць у абраныя</string>
     <string name="favorites_remove">Выдаліць з абраных</string>
     <string name="favorites_edit">Рэдагаванне</string>
-    <string name="favorite_added">Захавана ў абраныя</string>
-    <string name="favorite_removed">Выдалена з абраных</string>
 
     <string name="streams">Патокі</string>
     <string name="search">Пошук</string>
@@ -296,8 +280,6 @@
     <string name="subtitle_decoration_none">Няма</string>
     <string name="subtitle_decoration_shadow">Цень</string>
     <string name="subtitle_decoration_outline">Контур</string>
-    <string name="previous_color">Папярэдні колер</string>
-    <string name="new_color">Новы колер</string>
 
     <string name="audio_prefs_category">Аўдыя</string>
     <string name="lockscreen_cover_title">Вокладка на экране блакіравання</string>
@@ -334,7 +316,6 @@
     <string name="enable_remote_access">Уключыць аддалены доступ</string>
     <string name="remote_access_content">Змесціва</string>
     <string name="remote_access_medialibrary_content">Змесціва медыятэкі</string>
-    <string name="remote_access_medialibrary_content_summary">Уключана: %1$s\nАдключана: %2$s</string>
     <string name="remote_access_file_browser_content">Файлавы менеджар</string>
     <string name="remote_access_network_browser_content">Сеткавы агляд</string>
     <string name="remote_access_playback_control">Кіраванне прайграваннем</string>
@@ -387,8 +368,6 @@
     <string name="network_caching_popup">Гэта значэнне павінна быць ад 0 да 60000 мс</string>
     <string name="quit">Выйсці і перазапусціць праграму</string>
     <string name="restart_message">Змены набудуць сілу толькі пасля перазапуску праграмы.\n\nПеразапусціць зараз?</string>
-    <string name="restart_message_OK">ОК</string>
-    <string name="restart_message_Later">Пазней</string>
     <string name="browser_show_all_title">Паказваць толькі медыяфайлы</string>
 
     <string name="developer_prefs_category">Распрацоўнік</string>
@@ -415,11 +394,8 @@
     <string name="sending_log">Адпраўка журнала…</string>
 
 
-    <string name="no_result">Нічога не знойдзена</string>
-    <string name="no_internet_connection">Праверце злучэнне з інтэрнетам</string>
     <string name="retry">Паўтарыць</string>
     <string name="network_browsing">Лакальная сетка</string>
-    <string name="browsing">Агляд</string>
 
     <string name="file_size">Памер файла</string>
 
@@ -453,7 +429,6 @@
     <string name="open_in_browser">Адкрыць у менеджары файлаў</string>
     <string name="install">Усталяваць</string>
     <string name="install_nightly">Усталяваць начную зборку</string>
-    <string name="install_nightly_alert">Начныя зборкі — гэта эксперыментальныя версіі, якія абнаўляюцца штодзённа.\n\nСустракайце новыя функцыі, а таксама новыя памылкі!</string>
     <string name="nightly_version">Знойдзена версія: %2$s - %1$s</string>
     <string name="update_nightly_alert">Запушчана начная версія праграмы. Хочаце, каб рэгулярна правяралася наяўнасць абнаўленняў?</string>
     <string name="update_nightly">Аўтаабнаўленне</string>
@@ -500,11 +475,9 @@
     <string name="popup_playback_title">Прайграць відэа ў акне</string>
     <string name="open_subtitles_vip">Вы VIP-карыстальнік OpenSubtitles</string>
     <string name="browse_folder">Агляд папкі</string>
-    <string name="listen">Слухаць</string>
     <string name="episodes">серыі</string>
     <string name="movies">фільмы</string>
     <string name="videos">відэа</string>
-    <string name="videos_all">Усе відэа</string>
     <string name="clear_playback_history">Ачысціць гісторыю прайгравання</string>
     <string name="ml_scanning">Пошук медыяфайлаў</string>
     <string name="ml_discovering">Даследаванне</string>
@@ -579,7 +552,6 @@
     <string name="onboarding_theme_title">Адчувайце сябе як дома</string>
     <string name="done">Гатова</string>
     <string name="onboarding_scan_title">Аўтавыяўленне медыяфайлаў</string>
-    <string name="onboarding_all_set">VLC усё наладзіў!</string>
     <string name="onboarding_scanning_enable">Дазволіць VLC сканаваць прыладу, каб знаходзіць медыяфайлы</string>
     <string name="onboarding_scan_customize">Хачу выбраць якія папкі будуць сканавацца</string>
     <string name="button_medialibrary_preferences">Перайсці ў налады медыятэкі</string>
@@ -609,13 +581,10 @@
         <item quantity="other">Дададзена %d дарожак</item>
     </plurals>
     <string name="remove_current">Выдаліць бягучы</string>
-    <string name="validation_delete_playlist">Сапраўды выдаліць плэйліст?</string>
-    <string name="validation_delete_playlist_text">Гэтае дзеянне нельга скасаваць.</string>
     <string name="display_settings">Налады адлюстравання</string>
     <string name="incognito_mode">Прыватны рэжым</string>
     <string name="display_in_list">Спіс</string>
     <string name="display_in_grid">Табліца</string>
-    <string name="dump_db_succes">База даных выгружана ў корань знешняга сховішча</string>
     <string name="dump_db_failure">Не ўдалося выгрузіць базу даных</string>
     <string name="welcome_beta_description">Вітаем у бэта-версіі праграмы VLC.\nПомніце, што яна можа змяшчаць памылкі.</string>
     <string name="welcome_beta_description_bugs">Калі вы заўважылі памылку, паведаміце пра яе праз форум або баг-трэкер.</string>
@@ -637,17 +606,6 @@
     <string name="invalid_file">Памылковы файл. Немагчыма абагуліць.</string>
     <string name="share_file">Абагуліць %s</string>
     <string name="share_track_info">Абагуліць звесткі дарожкі</string>
-    <string name="moviepedia_hint">Пошук метаданых</string>
-    <string name="directed_by">Рэжысёр</string>
-    <string name="casting">Трансляванне</string>
-    <string name="written_by">Сцэнарыст</string>
-    <string name="header_tvshows">Тэлеперадачы</string>
-    <string name="header_movies">Фільмы</string>
-    <string name="season_number">Сезон %s</string>
-    <string name="resume_episode">Узнавіць (%s)</string>
-    <string name="start_over">Запусціць спачатку</string>
-    <string name="next_episode">Наступная серыя</string>
-    <string name="open_network_settings">Адкрыць сеткавыя налады?</string>
     <string name="clear">Ачысціць</string>
     <string name="abrepeat_add_first_marker">Задаць пачатковы пункт</string>
     <string name="abrepeat_add_second_marker">Задаць канцавы пункт</string>
@@ -687,7 +645,6 @@
     <string name="donate_subscribtion">Хачу рабіць ўнёсак штомесяц</string>
     <string name="donate_send">Зрабіць грашовы ўнёсак</string>
     <string name="donation_description">Ваш грашовы ўнёсак дазволіць нам:\nПаляпшаць VLC для Android\nПадтрымліваць VideoLAN Association</string>
-    <string name="tip_jar">Дапамагчы VLC</string>
     <string name="thank_you">Дзякуй</string>
     <string name="mark_as_played">Пазначыць як прагледжанае</string>
     <string name="mark_as_not_played">Пазначыць як непрагледжанае</string>
@@ -697,7 +654,6 @@
     <string name="allow_otg">Дазволіць доступ да OTG</string>
     <string name="allow_otg_description">Выберыце прыладу OTG, каб даць да яе доступ VLC.</string>
     <string name="video_hud_timeout">Затрымка знікнення элементаў кіравання ў відэапрайгравальніку</string>
-    <string name="remove_from_history">Выдаліць з гісторыі</string>
     <string name="prefersmbv1">Пажадана SMB 1</string>
     <string name="audio_delay_global">Затрымка гуку для ўсіх відэа зададзена на %s мс</string>
     <string name="go_to_folder">Перайсці ў папку</string>
@@ -739,14 +695,9 @@
     <string name="bookmark_added">Закладка дададзена</string>
     <string name="optional_features">Дадатковыя магчымасці</string>
     <string name="network_indexing">Індэксаванне сеткі</string>
-    <string name="start_vlc">Запусціць VLC</string>
     <string name="jump_delay">Прамежак часу для перамотвання наперад/назад</string>
     <string name="long_jump_delay">Прамежак часу для перамотвання працяглым націсканнем</string>
     <string name="jump_delay_summary">%s секунд</string>
-    <string name="move_up">Перамясціць вышэй</string>
-    <string name="move_down">Перамясціць ніжэй</string>
-    <string name="remove_from_playlist">Прыбраць з плэйліста</string>
-    <string name="play_media">Прайграць %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Дадаць дублікат(ы)?</string>
     <string name="add_button">Дадаць</string>

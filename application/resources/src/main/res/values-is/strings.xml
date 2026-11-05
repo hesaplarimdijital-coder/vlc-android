@@ -94,14 +94,6 @@
         <item quantity="one">1 myndskeið</item>
         <item quantity="other">%d myndskeið</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 kvikmynd</item>
-        <item quantity="other">%d kvikmyndir</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 sjónvarpsþáttur</item>
-        <item quantity="other">%d sjónvarpsþættir</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 lag</item>
         <item quantity="other">%d lög</item>
@@ -127,7 +119,6 @@
     <string name="nohistory">Enginn afspilunarferill er til staðar.</string>
     <string name="cant_ban_root">Þú getur ekki bannað rótarmöppu</string>
 
-    <string name="cover_art">Umslög</string>
     <string name="shuffle_all_title">Stokka allt</string>
     <string name="shuffle_title">Stokkunarhamur</string>
     <string name="shuffle">Stokkun af</string>
@@ -168,7 +159,6 @@
     <string name="sleep_in">Sofa lengur</string>
     <string name="jump_to_time">Hoppa á tíma</string>
     <string name="video_player_remote">Myndspilarafjarstýring</string>
-    <string name="server_add_title">Bæta nýjum þjóni í eftirlæti</string>
     <string name="server_folder_hint">Slóð á möppu (valkvætt)</string>
     <string name="server_username_hint">Notandanafn</string>
     <string name="server_port">Gátt:</string>
@@ -179,8 +169,6 @@
     <string name="favorites_add">Bæta í eftirlæti</string>
     <string name="favorites_remove">Fjarlægja úr eftirlætum</string>
     <string name="favorites_edit">Breyta</string>
-    <string name="favorite_added">Vistað í eftirlæti</string>
-    <string name="favorite_removed">Fjarlægt úr eftirlætum</string>
 
     <string name="streams">Straumar</string>
     <string name="search">Leita</string>
@@ -266,8 +254,6 @@
     <string name="subtitle_decoration_none">Ekkert</string>
     <string name="subtitle_decoration_shadow">Skuggi</string>
     <string name="subtitle_decoration_outline">Útlínur</string>
-    <string name="previous_color">Fyrri litur</string>
-    <string name="new_color">Nýr litur</string>
 
     <string name="audio_prefs_category">Hljóð</string>
     <string name="lockscreen_cover_title">Mynd á læsiskjá</string>
@@ -363,8 +349,6 @@
     <string name="network_caching_popup">Gildið verður að vera á milli 0 og 60000 ms</string>
     <string name="quit">Hætta og endurræsa forrit</string>
     <string name="restart_message">Breytingar munu taka gildi eftir að forritið hefur verið endurræst.\n\nEndurræsa núna?</string>
-    <string name="restart_message_OK">Í lagi</string>
-    <string name="restart_message_Later">Seinna</string>
     <string name="browser_show_all_title">Sýna eingöngu margmiðlunarskrár</string>
 
     <string name="developer_prefs_category">Forritari</string>
@@ -391,11 +375,8 @@
     <string name="sending_log">Sendi annál…</string>
 
 
-    <string name="no_result">Engar niðurstöður fundust</string>
-    <string name="no_internet_connection">Athugaðu með nettenginguna þína</string>
     <string name="retry">Reyna aftur</string>
     <string name="network_browsing">Staðarnet</string>
-    <string name="browsing">Vafur</string>
 
     <string name="file_size">Skráarstærð</string>
 
@@ -463,11 +444,9 @@
     <string name="add_to_playlist">Bæta við spilunarlista</string>
     <string name="popup_playback_title">Spila myndskeið í sprettglugga</string>
     <string name="browse_folder">Flakka í möppu</string>
-    <string name="listen">Hlusta</string>
     <string name="episodes">þættir</string>
     <string name="movies">kvikmyndir</string>
     <string name="videos">myndskeið</string>
-    <string name="videos_all">Öll myndskeið</string>
     <string name="clear_playback_history">Hreinsa feril afspilunar</string>
     <string name="ml_scanning">Leita að margmiðlunarskrám</string>
     <string name="ml_parse_media">Þátta gagnamiðla</string>
@@ -557,7 +536,6 @@
     <string name="onboarding_theme_title">Gerðu þig heimakominn</string>
     <string name="done">Búið</string>
     <string name="onboarding_scan_title">Finndu margmiðlunargögnin þín sjálfvirkt</string>
-    <string name="onboarding_all_set">VLC er tilbúið!</string>
     <string name="daynight_system_explanation">VLC mun skipta sjálfvirkt í dökkan ham í samræmi við kerfisstillingar</string>
     <string name="daynight_legacy_explanation">VLC mun skipta sjálfvirkt í næturham á viðeigandi tíma</string>
     <string name="onboarding_scanning_enable">Láta VLC leita að margmiðlunarskrám á tækinu</string>
@@ -568,7 +546,6 @@
     <string name="add_to_new_playlist">Bæta á nýjan spilunarlista</string>
     <string name="resume_card_message">Halda áfram afspilun á %1$s?</string>
     <string name="misc">Ýmislegt</string>
-    <string name="device_default">Sjálfgefið á tæki</string>
     <string name="track_number">%d hljóðspor </string>
     <string name="jump_to">Hoppa á</string>
     <string name="show_video_thumbnails">Smámyndir myndskeiða</string>
@@ -585,13 +562,10 @@
         <item quantity="other">%d lögum bætt við</item>
     </plurals>
     <string name="remove_current">Fjarlægja fyrirliggjandi</string>
-    <string name="validation_delete_playlist">Ertu viss um að þú viljir eyða þessum spilunarlista?</string>
-    <string name="validation_delete_playlist_text">Þessa aðgerð er ekki hægt að afturkalla.</string>
     <string name="display_settings">Stillingar skjás</string>
     <string name="incognito_mode">Nafnleysishamur</string>
     <string name="display_in_list">Birta í lista</string>
     <string name="display_in_grid">Birta í reitum</string>
-    <string name="dump_db_succes">Dembdi gagnagrunni á rót innri gagnageymslu</string>
     <string name="dump_db_failure">Mistókst að demba gagnagrunni</string>
     <string name="send_crash_title">Hrunskýrslugerð VLC</string>
     <string name="send_crash_description">Með því að senda okkur upplýsingar um hrunið hjá þér, þá ertu að hjálpa okkur við að bæta stöðugleika VLC.</string>
@@ -619,25 +593,6 @@
     <string name="invalid_file">Ógild skrá. Er ekki hægt að deila.</string>
     <string name="share_file">Deila %s</string>
     <string name="share_message">Hér er %s</string>
-    <string name="find_metadata">Finna lýsigögn</string>
-    <string name="moviepedia_hint">Leita að lýsigögnum</string>
-    <string name="moviepedia_result">Niðurstöður myndskeiða</string>
-    <string name="directed_by">Leikstýrt af</string>
-    <string name="casting">Leikarar</string>
-    <string name="produced_by">Framleitt af</string>
-    <string name="written_by">Skrifað af</string>
-    <string name="music_by">Tónlist eftir</string>
-    <string name="posters">Auglýsingaspjöld</string>
-    <string name="backdrops">Bakgrunnar</string>
-    <string name="header_tvshows">Sjónvarpsþættir</string>
-    <string name="header_movies">Kvikmyndir</string>
-    <string name="season_number">Árgangur %s</string>
-    <string name="resume_episode">Halda áfram  (%s)</string>
-    <string name="start_over">Byrja aftur</string>
-    <string name="next_episode">Næsti þáttur</string>
-    <string name="open_network_settings">Opna netstillingar?</string>
-    <string name="recently_played">Nýlega spilað</string>
-    <string name="recently_added">Nýlega bætt við</string>
     <string name="playback_multiple_errors">Ekki er hægt að spila margar gagnaskrár</string>
     <string name="clear">Hreinsa</string>
     <string name="abrepeat_add_first_marker">Setja upphafspunkt</string>
@@ -682,7 +637,6 @@
     <string name="subscription_cancel">Þú getur sagt upp áskriftinni í Play Store</string>
     <string name="subscription_cancel_tv">Hvernig er hægt að segja upp áskrift</string>
     <string name="donate_unsubscribe_tv">Til að segja upp áskriftinni skaltu opna %s á síma eða tölvu eða skanna þennan kóða:</string>
-    <string name="tip_jar">Hjálpa VLC</string>
     <string name="thank_you">Takk fyrir</string>
     <string name="thank_you_desc">Takk fyrir styrkinn frá þér!\nÞetta mun hjálpa okkur við að bæta VLC!</string>
     <string name="donate_again">Styrkja forritið aftur</string>
@@ -694,7 +648,6 @@
     <string name="allow_otg">Leyfa OTG-aðgang</string>
     <string name="allow_otg_description">Veldu það OTG-drif sem þú vilt leyfa að hafi aðgang að VLC.</string>
     <string name="video_hud_timeout">Töf við að fela stýringar myndspilara</string>
-    <string name="remove_from_history">Fjarlægja úr ferli</string>
     <string name="prefersmbv1">Kjósa frekar SMB 1</string>
     <string name="prefersmbv1_summary">Taktu merkið úr þessari stillingu ef þú átt í vandræðum með SMB-þjóninn þinn</string>
     <string name="audio_delay_global">Hljóðtöf sett á %s ms fyrir öll myndskeið</string>
@@ -715,12 +668,7 @@
     <string name="bookmark_added">Bókamerki bætt við</string>
     <string name="show">Sýna</string>
     <string name="optional_features">Valkvæðir eiginleikar</string>
-    <string name="start_vlc">Ræsa VLC</string>
     <string name="jump_delay_summary">%s sekúndur</string>
-    <string name="move_up">Færa upp</string>
-    <string name="move_down">Færa niður</string>
-    <string name="remove_from_playlist">Fjarlægja af spilunarlista</string>
-    <string name="play_media">Spila %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Bæta við tvíteknum atriðum?</string>
     <string name="add_button">Bæta við</string>
@@ -797,7 +745,6 @@
     <string name="downloading">Sæki</string>
     <string name="talkback_action_rewind">Spóla til baka um %s sekúndur</string>
     <string name="talkback_action_forward">Spóla áfram um %s sekúndur</string>
-    <string name="talkback_display_settings">Stillingar skjás</string>
     <string name="talkback_already_played">Þegar spilað</string>
     <string name="show_only_favs">Sýna aðeins eftirlæti</string>
     <string name="ra_remote_access">Fjaraðgangur</string>

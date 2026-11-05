@@ -73,12 +73,6 @@
     <plurals name="videos_quantity">
         <item quantity="other">%d วิดีโอ</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="other">ภาพยนตร์ %d เรื่อง</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="other">รายการทีวี %d รายการ</item>
-    </plurals>
     <string name="internal_memory">หน่วยความจำภายใน</string>
     <string name="audio">เสียง</string>
     <string name="video">วิดีโอ</string>
@@ -96,7 +90,6 @@
     <string name="nosubfolder">ไม่มีโฟลเดอร์ย่อย</string>
     <string name="directorynotfound">ไม่พบเส้นทางไดเรกทอรี \'%1$s\'</string>
     <string name="nohistory">ยังไม่มีประวัติการเล่นของคุณ</string>
-    <string name="cover_art">ภาพหน้าปก</string>
     <string name="shuffle_all_title">เล่นทั้งหมดแบบสลับ</string>
     <string name="shuffle_title">โหมดสุ่มเล่น</string>
     <string name="shuffle">โหมดสุ่มเล่นปิด</string>
@@ -134,7 +127,6 @@
     <string name="sleep_title">พักเครื่อง</string>
     <string name="sleep_in">พักเครื่องใน</string>
     <string name="jump_to_time">ไปยังเวลาที่</string>
-    <string name="server_add_title">เพิ่มเซิร์ฟเวอร์ใหม่ลงในรายการโปรด</string>
     <string name="server_domain_hint">ที่อยู่เซิร์ฟเวอร์ (ชื่อโดเมนหรือ IP)</string>
     <string name="server_share_hint">ชื่อเครือข่ายแชร์ (หรือที่อยู่ IP)</string>
     <string name="server_folder_hint">เส้นทางโฟลเดอร์ (ทางเลือก)</string>
@@ -147,8 +139,6 @@
     <string name="favorites_add">เพิ่มลงในรายการโปรด</string>
     <string name="favorites_remove">เอาออกจากรายการโปรด</string>
     <string name="favorites_edit">แก้ไข</string>
-    <string name="favorite_added">บันทึกลงในรายการโปรดแล้ว</string>
-    <string name="favorite_removed">เอาออกจากรายการโปรดแล้ว</string>
 
     <string name="streams">สตรีม</string>
     <string name="open_mrl_dialog_msg">ป้อนที่อยู่เครือข่าย: เช่น http://, mms:// หรือ rtsp://</string>
@@ -267,8 +257,6 @@
     <string name="blurred_cover_background_summary">ปกแบบเบลอในพื้นหลังของโปรแกรมเล่นเสียง</string>
     <string name="quit">ออกและเริ่มแอปพลิเคชันใหม่</string>
     <string name="restart_message">การเปลี่ยนแปลงจะมีผลเมื่อเริ่มการทำงานแอปพลิเคชันใหม่\n\nเริ่มการทำงานใหม่ตอนนี้หรือไม่</string>
-    <string name="restart_message_OK">ตกลง</string>
-    <string name="restart_message_Later">ภายหลัง</string>
     <string name="developer_prefs_category">นักพัฒนา</string>
     <string name="enable_verbose_mode">รายละเอียด</string>
     <string name="enable_verbose_mode_summary">เพิ่มรายละเอียด (บันทึก)</string>
@@ -292,10 +280,7 @@
     <string name="sending_log">กำลังส่งไฟล์บันทึก…</string>
 
 
-    <string name="no_result">ไม่พบผลลัพธ์</string>
-    <string name="no_internet_connection">ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ</string>
     <string name="network_browsing">เครือข่ายเฉพาะที่</string>
-    <string name="browsing">เรียกดู</string>
 
     <string name="file_size">ขนาดไฟล์</string>
 
@@ -350,8 +335,6 @@
     <string name="add_to_playlist">เพิ่มลงในเพลย์ลิสต์</string>
     <string name="popup_playback_title">เล่นวิดีโอในหน้าต่างป๊อปอัพ</string>
     <string name="browse_folder">เรียกดูโฟลเดอร์</string>
-    <string name="listen">ฟัง</string>
-    <string name="videos_all">วิดีโอทั้งหมด</string>
     <string name="clear_playback_history">ล้างประวัติการเล่น</string>
     <string name="ml_scanning">กำลังสแกนไฟล์สื่อ</string>
     <string name="ml_parse_media">กำลังแยกวิเคราะห์สื่อ</string>
@@ -443,7 +426,6 @@
     <string name="add_to_new_playlist">เพิ่มลงในเพลย์ลิสต์ใหม่</string>
     <string name="resume_card_message">เล่น %1$s ต่อหรือไม่</string>
     <string name="misc">เบ็ดเตล็ด</string>
-    <string name="device_default">ค่าเริ่มต้นของอุปกรณ์</string>
     <string name="track_number">%d แทร็ก</string>
     <string name="jump_to">ข้ามไปยัง</string>
     <string name="show_video_thumbnails">รูปขนาดย่อของวิดีโอ</string>
@@ -459,11 +441,8 @@
         <item quantity="other">ผนวก %d แทร็กแล้ว</item>
     </plurals>
     <string name="remove_current">เอารายการปัจจุบันออก</string>
-    <string name="validation_delete_playlist">คุณแน่ใจหรือไม่ว่าคุณต้องการลบเพลย์ลิสต์นี้</string>
-    <string name="validation_delete_playlist_text">การกระทำนี้ไม่สามารถยกเลิกได้</string>
     <string name="display_in_list">แสดงเป็นรายกา</string>
     <string name="display_in_grid">แสดงเป็นเส้นตาราง</string>
-    <string name="dump_db_succes">บันทึกฐานข้อมูลบนรากที่เก็บข้อมูลภายในแล้ว</string>
     <string name="dump_db_failure">ไม่สามารถถ่ายโอนฐานข้อมูลได้</string>
     <string name="send_crash_title">โปรแกรมรายงานข้อขัดข้องของ VLC</string>
     <string name="send_crash_description">การส่งข้อขัดข้องของคุณจะช่วยเราปรับปรุงความเสถียรของ VLC ได้</string>
@@ -491,25 +470,6 @@
     <string name="invalid_file">ไฟล์ไม่ถูกต้อง ไม่สามารถแชร์ได้</string>
     <string name="share_file">แชร์ %s</string>
     <string name="share_message">ที่นี่คือ %s</string>
-    <string name="find_metadata">ค้นหาข้อมูลกำกับ</string>
-    <string name="moviepedia_hint">ค้นหาข้อมูลกำกับ</string>
-    <string name="moviepedia_result">ผลลัพธ์วิดีโอ</string>
-    <string name="directed_by">กำกับโดย</string>
-    <string name="casting">นักแสดง</string>
-    <string name="produced_by">ผลิตโดย</string>
-    <string name="written_by">เขียนโดย</string>
-    <string name="music_by">เพลงโดย</string>
-    <string name="posters">โปสเตอร์</string>
-    <string name="backdrops">ฉากหลัง</string>
-    <string name="header_tvshows">รายการทีวี</string>
-    <string name="header_movies">ภาพยนตร์</string>
-    <string name="season_number">ซีซัน %s</string>
-    <string name="resume_episode">เล่นต่อ (%s)</string>
-    <string name="start_over">เริ่มเล่นใหม่</string>
-    <string name="next_episode">ตอนถัดไป</string>
-    <string name="open_network_settings">เปิดการตั้งค่าเครือข่ายหรือไม่</string>
-    <string name="recently_played">ที่เล่นเมื่อล่าสุด</string>
-    <string name="recently_added">ที่เพิ่มเมื่อล่าสุด</string>
     <string name="playback_multiple_errors">ไม่สามารถเล่นสื่อหลายรายการได้</string>
     <string name="abrepeat_add_first_marker">ตั้งค่าจุดเริ่มต้น</string>
     <string name="abrepeat_add_second_marker">ตั้งค่าจุดสิ้นสุด</string>
@@ -551,7 +511,6 @@
     <string name="subscription_cancel">คุณสามารถเลิกบอกรับได้ใน Play Store</string>
     <string name="subscription_cancel_tv">วิธีเลิกบอกรับ</string>
     <string name="donate_unsubscribe_tv">เมื่อต้องการเลิกบอกรับ โปรดเปิด %s บนโทรศัพท์หรือคอมพิวเตอร์ หรือสแกนรหัสนี้:</string>
-    <string name="tip_jar">ช่วย VLC</string>
     <string name="thank_you">ขอบคุณ</string>
     <string name="thank_you_desc">ขอบคุณที่ร่วมสนับสนุน!\nการร่วมสนับสนุนของคุณจะช่วยเราปรับปรุง VLC ได้มากขึ้น!</string>
     <string name="donate_again">ร่วมสนับสนุนแอปอีกครั้ง</string>
@@ -562,7 +521,6 @@
     <string name="allow_otg">อนุญาตการเข้าถึง OTG</string>
     <string name="allow_otg_description">โปรดเลือกไดรฟ์ OTG ของคุณเพื่ออนุญาตการเข้าถึง VLC</string>
     <string name="video_hud_timeout">การหน่วงเวลาการซ่อนส่วนควบคุมตัวเล่นวิดีโอ</string>
-    <string name="remove_from_history">เอาออกจากประวัติ</string>
     <string name="prefersmbv1">ต้องการ SMB 1</string>
     <string name="prefersmbv1_summary">เลิกกาเครื่องหมายกล่องการตั้งค่านี้หากคุณมีปัญหาบางอย่างในการเรียกดูเซิร์ฟเวอร์ SMB ของคุณ</string>
     <string name="audio_delay_global">การหน่วงเวลาเสียงถูกตั้งเป็น %s ms สำหรับวิดีโอทั้งหมด</string>

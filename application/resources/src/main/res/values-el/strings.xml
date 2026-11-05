@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Είστε σίγουροι ότι θέλετε να διαγράψετε αυτήν την προρύθμιση;</string>
     <string name="confirm_delete_vlc_eq">Είστε σίγουροι ότι θέλετε να αποκρύψετε αυτή την προρύθμιση;\nΜπορείτε να την επαναφέρετε από τις ρυθμίσεις ισοσταθμιστή.</string>
     <string name="confirm_replace_playlist">Είστε σίγουροι ότι θέλετε να αντικαταστήσετε τη λίστα αναπαραγωγής \'%1$s\';</string>
-    <string name="invalid_settings_file">Μη έγκυρο αρχείο ρυθμίσεων</string>
     <string name="confirm_delete_message">Αυτό είναι μόνιμο και δεν μπορεί να αναιρεθεί.</string>
     <string name="confirm_delete_album">Διαγραφή του άλμπουμ \'%1$s\';</string>
     <string name="confirm_delete_several_media">Διαγραφή %1$d αρχείων;</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 βίντεο</item>
         <item quantity="other">%d βίντεο</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 ταινία</item>
-        <item quantity="other">%d ταινίες</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 τηλεοπτική εκπομπή</item>
-        <item quantity="other">%d τηλεοπτικές εκπομπές</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 κομμάτι</item>
         <item quantity="other">%d κομμάτια</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Δεν έχετε ιστορικό αναπαραγωγής ακόμα.</string>
     <string name="cant_ban_root">Δεν μπορείτε να αποκλείσετε τον φάκελο ρίζας</string>
 
-    <string name="cover_art">Εξώφυλλο</string>
     <string name="shuffle_all_title">Ανακάτεμα όλων</string>
     <string name="shuffle_title">Λειτουργία ανακατέματος</string>
     <string name="shuffle">Απενεργοποίηση ανακατέματος</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Τηλεχειρισμός λειτουργίας αναπαραγωγής βίντεο</string>
     <string name="remote_keyboard_navigation">Πλοήγηση μέσω πληκτρολογίου</string>
 
-    <string name="server_add_title">Προσθήκη νέου διακομιστή στα αγαπημένα</string>
     <string name="server_folder_hint">Διαδρομή φακέλου (προαιρετικό)</string>
     <string name="server_username_hint">Όνομα χρήστη</string>
     <string name="server_port">Θύρα:</string>
@@ -230,8 +219,6 @@
     <string name="favorites_add">Προσθήκη στα αγαπημένα</string>
     <string name="favorites_remove">Αφαίρεση από τα αγαπημένα</string>
     <string name="favorites_edit">Επεξεργασία</string>
-    <string name="favorite_added">Αποθηκεύθηκε στα αγαπημένα</string>
-    <string name="favorite_removed">Αφαιρέθηκε από τα αγαπημένα</string>
 
     <string name="streams">Μεταδόσεις</string>
     <string name="search">Αναζήτηση</string>
@@ -348,8 +335,6 @@
     <string name="subtitle_decoration_none">Χωρίς</string>
     <string name="subtitle_decoration_shadow">Σκιά</string>
     <string name="subtitle_decoration_outline">Περίγραμμα</string>
-    <string name="previous_color">Προηγούμενο χρώμα</string>
-    <string name="new_color">Νέο χρώμα</string>
 
     <string name="audio_prefs_category">Ήχος</string>
     <string name="lockscreen_cover_title">Εξώφυλλο στην οθόνη κλειδώματος</string>
@@ -403,7 +388,6 @@
     <string name="remote_access_info">Πληροφορίες απομακρυσμένης πρόσβασης</string>
     <string name="remote_access_content">Περιεχόμενο</string>
     <string name="remote_access_medialibrary_content">Περιεχόμενο βιβλιοθήκης πολυμέσων</string>
-    <string name="remote_access_medialibrary_content_summary">Ενεργά:%1$s\nΑνενεργά: %2$s</string>
     <string name="remote_access_file_browser_content">Περιηγητής αρχείων</string>
     <string name="remote_access_network_browser_content">Περιηγητής δικτύου</string>
     <string name="remote_access_playback_control">Έλεγχος αναπαραγωγής</string>
@@ -466,8 +450,6 @@
     <string name="network_caching_popup">Αυτή η τιμή πρέπει να είναι μεταξύ 0 και 60000 ms</string>
     <string name="quit">Έξοδος και επανεκκίνηση της εφαρμογής</string>
     <string name="restart_message">Οι αλλαγές θα πραγματοποιηθούν όταν η εφαρμογή επανεκκινηθεί.\n\nΕπανεκκίνηση τώρα;</string>
-    <string name="restart_message_OK">Εντάξει</string>
-    <string name="restart_message_Later">Αργότερα</string>
     <string name="browser_show_all_title">Εμφάνιση μόνο αρχείων πολυμέσων</string>
 
     <string name="developer_prefs_category">Για προγραμματιστές</string>
@@ -501,12 +483,9 @@
     <string name="sending_log">Το αρχείο καταγραφής αποστέλλεται…</string>
 
 
-    <string name="no_result">Δεν βρέθηκαν αποτελέσματα</string>
-    <string name="no_internet_connection">Ελέγξτε τη σύνδεσή σας στο διαδίκτυο</string>
     <string name="retry">Ξαναπροσπαθήστε</string>
 
     <string name="network_browsing">Τοπικό δίκτυο</string>
-    <string name="browsing">Περιήγηση</string>
 
     <string name="file_size">Μέγεθος αρχείου</string>
 
@@ -548,7 +527,6 @@
     <string name="open_in_browser">Άνοιγμα στο πρόγραμμα περιήγησης διαδικτύου</string>
     <string name="install">Εγκατάσταση</string>
     <string name="install_nightly">Εγκατάσταση της έκδοσης nightly.</string>
-    <string name="install_nightly_alert">Οι εκδόσεις nightly είναι πειραματικές και ενημερώνονται καθημερινά.\n\nΝα αναμένετε νέα χαρακτηριστικά, όπως επίσης και πιθανά σφάλματα!</string>
     <string name="nightly_version">Βρέθηκε έκδοση: %2$s- %1$s</string>
     <string name="update_nightly_alert">Εκτελείτε μία έκδοση nightly. Θα θέλατε να γίνεται περιοδική αναζήτηση ενημερώσεων;</string>
     <string name="update_nightly">Αυτόματη ενημέρωση</string>
@@ -616,12 +594,10 @@
     <string name="popup_playback_title">Αναπαραγωγή βίντεο σε αναδυόμενο παράθυρο</string>
     <string name="open_subtitles_vip">Είσαστε χρήστης VIP του OpenSubtitles</string>
     <string name="browse_folder">Περιήγηση σε φάκελο</string>
-    <string name="listen">Ακρόαση</string>
     <string name="episodes">επεισόδια</string>
     <string name="movies">ταινίες</string>
     <string name="videos">βίντεο</string>
     <string name="default_action_videos">Βίντεο</string>
-    <string name="videos_all">Όλα τα βίντεο</string>
     <string name="clear_playback_history">Εκκαθάριση ιστορικού αναπαραγωγής</string>
     <string name="ml_scanning">Σάρωση για αρχεία πολυμέσων</string>
     <string name="ml_parse_media">Ανάλυση πολυμέσων</string>
@@ -716,8 +692,6 @@
     <string name="onboarding_theme_title">Σαν στο σπίτι σας</string>
     <string name="done">Έτοιμο</string>
     <string name="onboarding_scan_title">Αυτόματη ανίχνευση</string>
-    <string name="onboarding_all_set">Το VLC είναι έτοιμο!</string>
-    <string name="onboarding_permission_given">Τώρα μπορείτε να ανακαλύψετε αυτόματα τα αρχεία πολυμέσων σας, να χρησιμοποιήσετε εξωτερικούς υπότιτλους, καθώς και να αναπαράγετε μεταδόσεις ή αρχεία πολυμέσων μέσω δικτύου</string>
     <string name="daynight_system_explanation">Το VLC θα μεταβεί αυτόματα σε σκούρο θέμα σύμφωνα με τις ρυθμίσεις του συστήματος</string>
     <string name="daynight_legacy_explanation">Το VLC θα μεταβεί αυτόματα σε νυχτερινό θέμα την κατάλληλη χρονική στιγμή</string>
     <string name="onboarding_scanning_enable">Επίτρεψε στο VLC να σαρώνει τη συσκευή μου για περιεχόμενο πολυμέσων</string>
@@ -730,7 +704,6 @@
     <string name="create">Δημιουργία</string>
     <string name="resume_card_message">Συνέχιση αναπαραγωγής του %1$s;</string>
     <string name="misc">Διάφορα</string>
-    <string name="device_default">Προεπιλογή συσκευής</string>
     <string name="track_number">%d κομμάτια</string>
     <string name="jump_to">Άλμα σε</string>
     <string name="show_video_thumbnails">Μικρογραφίες βίντεο</string>
@@ -747,15 +720,12 @@
         <item quantity="other">Προσαρτήθηκαν %d κομμάτια</item>
     </plurals>
     <string name="remove_current">Αφαίρεση τρέχοντος</string>
-    <string name="validation_delete_playlist">Είστε σίγουροι ότι θέλετε να διαγράψετε αυτήν τη λίστα αναπαραγωγής;</string>
-    <string name="validation_delete_playlist_text">Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
     <string name="display_settings">Ρυθμίσεις οθόνης</string>
     <string name="incognito_mode">Ανώνυμη λειτουργία</string>
     <string name="persistent_incognito_mode">Επιβεβλημένη ανώνυμη λειτουργία</string>
     <string name="persistent_incognito_mode_summary">Διατήρηση της ανώνυμης λειτουργίας ως ενεργή ακόμη και εάν γίνει επανέναρξη της εφαρμογής</string>
     <string name="display_in_list">Εμφάνιση σε λίστα</string>
     <string name="display_in_grid">Εμφάνιση σε πλέγμα</string>
-    <string name="dump_db_succes">Η βάση δεδομένων αντιγράφηκε στον ριζικό φάκελο της εσωτερικής συσκευής αποθήκευσης</string>
     <string name="dump_db_failure">Αποτυχία αντιγραφής βάσης δεδομένων</string>
     <string name="send_crash_title">Αναφορά σφαλμάτων του VLC</string>
     <string name="send_crash_description">Αποστέλλοντας την αναφορά κατάρρευσης, συμβάλλετε στη βελτίωση της σταθερότητας του VLC.</string>
@@ -788,25 +758,6 @@
     <string name="share_message">Εδώ είναι το %s</string>
     <string name="share_track_info">Διαμοιρασμός των πληροφοριών του κομματιού</string>
     <string name="share_track">Γίνεται αναπαραγωγή του %s</string>
-    <string name="find_metadata">Εύρεση μεταδεδομένων</string>
-    <string name="moviepedia_hint">Αναζήτηση μεταδεδομένων</string>
-    <string name="moviepedia_result">Αποτελέσματα βίντεο</string>
-    <string name="directed_by">Σκηνοθεσία από</string>
-    <string name="casting">Πρωταγωνιστούν</string>
-    <string name="produced_by">Παραγωγή από</string>
-    <string name="written_by">Γράφτηκε από</string>
-    <string name="music_by">Μουσική από</string>
-    <string name="posters">Αφίσες</string>
-    <string name="backdrops">Σκηνικά</string>
-    <string name="header_tvshows">Τηλεοπτικές εκπομπές</string>
-    <string name="header_movies">Ταινίες</string>
-    <string name="season_number">Κύκλος %s</string>
-    <string name="resume_episode">Συνέχιση (%s)</string>
-    <string name="start_over">Επανέναρξη</string>
-    <string name="next_episode">Επόμενο επεισόδιο</string>
-    <string name="open_network_settings">Να ανοίξουν οι ρυθμίσεις δικτύου;</string>
-    <string name="recently_played">Πρόσφατη αναπαραγωγή</string>
-    <string name="recently_added">Πρόσφατη προσθήκη</string>
     <string name="playback_multiple_errors">Αδύνατη η αναπαραγωγή πολλαπλών αρχείων πολυμέσων</string>
     <string name="clear_media_db_message">Θα χάσετε την πρόοδο της αναπαραγωγής σας, τους σελιδοδείκτες σας και τις λίστες αναπαραγωγής που δημιουργήσατε, αλλά θα διατηρηθούν οι ρυθμίσεις του VLC για Android</string>
     <string name="clear_app_data_message">Θα χάσετε την πρόοδο της αναπαραγωγής σας, τους σελιδοδείκτες σας, τις λίστες αναπαραγωγής και τις ρυθμίσεις του VLC</string>
@@ -854,7 +805,6 @@
     <string name="subscription_cancel">Μπορείτε να καταργήσετε τη συνδρομή σας μέσω του Play Store</string>
     <string name="subscription_cancel_tv">Πώς να καταργήσετε τη συνδρομή σας</string>
     <string name="donate_unsubscribe_tv">Για την κατάργηση της συνδρομής σας, παρακαλούμε ανοίξτε το %s από ένα τηλέφωνο ή υπολογιστή, ή σαρώστε αυτό τον κωδικό:</string>
-    <string name="tip_jar">Βοηθήστε το VLC</string>
     <string name="thank_you">Σας ευχαριστούμε</string>
     <string name="thank_you_desc">Σας ευχαριστούμε για τη χορηγία σας!\nΘα μας βοηθήσει πολύ στη βελτίωση του VLC!</string>
     <string name="donate_again">Γίνετε ξανά χορηγοί της εφαρμογής</string>
@@ -867,7 +817,6 @@
     <string name="allow_otg">Παραχώρηση πρόσβασης OTG</string>
     <string name="allow_otg_description">Παρακαλούμε επιλέξτε τη συσκευή OTG στην οποία θα παραχωρηθεί πρόσβαση για χρήση από το VLC.</string>
     <string name="video_hud_timeout">Χρόνος καθυστέρησης απόκρυψης επιλογών χειρισμού της λειτουργίας αναπαραγωγής βίντεο</string>
-    <string name="remove_from_history">Αφαίρεση από το ιστορικό</string>
     <string name="prefersmbv1">Προτίμηση SMBv1</string>
     <string name="prefersmbv1_summary">Αποεπιλέξτε αυτήν τη ρύθμιση εάν αντιμετωπίζετε δυσκολίες κατά την περιήγηση του διακομιστή SMB σας.</string>
     <string name="audio_delay_global">Η καθυστέρηση ήχου έχει οριστεί σε %s ms για όλα τα βίντεο</string>
@@ -902,7 +851,6 @@
     <string name="unlock">Ξεκλείδωμα</string>
     <string name="lock_with_pin">Επανενεργοποίηση κλειδώματος PIN</string>
     <string name="unlock_with_pin">Ξεκλείδωμα ασφαλούς λειτουργίας</string>
-    <string name="lock_with_pin_short">Κλείδωμα PIN</string>
     <string name="restrict_settings">Περιορισμός πρόσβασης ρυθμίσεων</string>
     <string name="search_prefs">Ρυθμίσεις αναζήτησης</string>
     <string name="stop_unpaubale">Δεν είναι δυνατή η παύση αυτού του αρχείου πολυμέσων. Να γίνει διακοπή;</string>
@@ -922,14 +870,9 @@
     <string name="optional_features_warning">Αυτό το χαρακτηριστικό είναι στη φάση beta και μπορεί να δημιουργήσει αστάθειες και σφάλματα.</string>
     <string name="network_indexing">Ευρετηρίαση δικτύου</string>
     <string name="network_indexing_warning">Η ευρετηρίαση δικτύου βρίσκεται αυτή τη στιγμή σε δοκιμαστική έκδοση.\nΓνωστά ζητήματα:\n• Αργή απόδοση\n\nΕάν αντιμετωπίζετε άλλα προβλήματα, αναφέρατέ τα στο φόρουμ μας.</string>
-    <string name="start_vlc">Έναρξη VLC</string>
     <string name="jump_delay">Χρονική καθυστέρηση μπροστά/πίσω</string>
     <string name="long_jump_delay">Παρατεταμένο πάτημα για χρονική καθυστέρηση μπροστά/πίσω</string>
     <string name="jump_delay_summary">%s δευτερόλεπτα</string>
-    <string name="move_up">Μετακίνηση επάνω</string>
-    <string name="move_down">Μετακίνηση κάτω</string>
-    <string name="remove_from_playlist">Κατάργηση από τη λίστα αναπαραγωγής</string>
-    <string name="play_media">Αναπαραγωγή %s</string>
     <string name="edit_eq_preset">Επεξεργασία ρύθμισης ισοστάθμισης</string>
     <string name="edit_eq_name_not_allowed">Αυτό το όνομα δεν είναι επιτρεπτό</string>
     <string name="export_equalizer">Εξαγωγή ισοστάθμισης</string>
@@ -1050,7 +993,6 @@
     <string name="downloading">Γίνεται λήψη...</string>
     <string name="talkback_action_rewind">Οπισθοχώρηση %s δευτερόλεπτα</string>
     <string name="talkback_action_forward">Αναζήτηση μπροστά %s δευτερόλεπτα</string>
-    <string name="talkback_display_settings">Ρυθμίσεις οθόνης</string>
     <string name="talkback_already_played">Έχει αναπαραχθεί</string>
     <string name="show_only_favs">Εμφάνιση μόνο αγαπημένων</string>
     <string name="ignore_headset_media_button_presses">Αγνοήστε τα πατήματα των κουμπιών πολυμέσων στα ακουστικά</string>

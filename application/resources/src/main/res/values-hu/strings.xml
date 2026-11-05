@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Biztos, hogy törli ezt az előbeállítást?</string>
     <string name="confirm_delete_vlc_eq">Biztos, hogy elrejti ezt az előbeállítást? A hangszínszabályzó beállításaiban állíthatja helyre.</string>
     <string name="confirm_replace_playlist">Biztos, hogy törli a(z) „%1$s” lejátszólistát?</string>
-    <string name="invalid_settings_file">Érvénytelen beállítófájl</string>
     <string name="confirm_delete_message">Ez végleges, és nem lehet visszavonni.</string>
     <string name="confirm_delete_album">Törli ezt az albumot: „%1$s”?</string>
     <string name="confirm_delete_several_media">Törli ezt a(z) %1$d médiát?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 videó</item>
         <item quantity="other">%d videó</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="other">%d film</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 sorozat</item>
-        <item quantity="other">%d sorozat</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 szám</item>
         <item quantity="other">%d szám</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Még nincsenek lejátszási előzmények.</string>
     <string name="cant_ban_root">Gyökérkönyvtárat nem tilthat ki</string>
 
-    <string name="cover_art">Borító</string>
     <string name="shuffle_all_title">Az összes véletlen sorrendben</string>
     <string name="shuffle_title">Véletlen mód</string>
     <string name="shuffle">Véletlen sorrend ki</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Videólejátszó-távirányító</string>
     <string name="remote_keyboard_navigation">Billentyűzetes navigáció</string>
 
-    <string name="server_add_title">Új kiszolgáló hozzáadása a kedvencekhez</string>
     <string name="server_domain_hint">Kiszolgálócím (doménnév vagy IP-cím)</string>
     <string name="server_share_hint">Kiszolgálócím (doménnév vagy IP-cím)</string>
     <string name="server_folder_hint">Mappaútvonal (nem kötelező)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Hozzáadás a kedvencekhez</string>
     <string name="favorites_remove">Eltávolítás a kedvencek közül</string>
     <string name="favorites_edit">Szerkesztés</string>
-    <string name="favorite_added">Mentve a kedvencek közé</string>
-    <string name="favorite_removed">Eltávolítva a kedvencek közül</string>
 
     <string name="streams">Közvetítések</string>
     <string name="open_mrl_dialog_msg">Írjon be egy hálózati címet, például egy http://, mms:// vagy rtsp:// címet</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Nincs</string>
     <string name="subtitle_decoration_shadow">Árnyék</string>
     <string name="subtitle_decoration_outline">Körvonal</string>
-    <string name="previous_color">Előző szín</string>
-    <string name="new_color">Új szín</string>
 
     <string name="audio_prefs_category">Hang</string>
     <string name="lockscreen_cover_title">Médiaborító a zárképernyőn</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">A távoli elérési információi</string>
     <string name="remote_access_content">Tartalom</string>
     <string name="remote_access_medialibrary_content">Médiatár tartalma</string>
-    <string name="remote_access_medialibrary_content_summary">Engedélyezve: %1$s\nLetiltva: %2$s</string>
     <string name="remote_access_file_browser_content">Fájlböngésző</string>
     <string name="remote_access_network_browser_content">Hálózatböngésző</string>
     <string name="remote_access_playback_control">Lejátszás vezérlése</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Az értéknek 0 és 60000 ms között kell lennie</string>
     <string name="quit">Kilépés és az alkalmazás újraindítása</string>
     <string name="restart_message">A változások az alkalmazás újraindítása után lépnek érvénybe.\n\nÚjraindítja most?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Később</string>
     <string name="browser_show_all_title">Csak a multimédiafájlok megjelenítése</string>
 
     <string name="developer_prefs_category">Fejlesztő</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Naplófájl küldése…</string>
 
 
-    <string name="no_result">Nincs találat</string>
-    <string name="no_internet_connection">Ellenőrizze az internetkapcsolatát</string>
     <string name="retry">Újra</string>
 
     <string name="network_browsing">Helyi hálózat</string>
-    <string name="browsing">Tallózás</string>
 
     <string name="file_size">Fájlméret</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Megnyitás böngészőben</string>
     <string name="install">Telepítés</string>
     <string name="install_nightly">A napi verzió telepítése</string>
-    <string name="install_nightly_alert">A napi összeállítások naponta frissülő kísérleti verziók.\n\nÚj funkciókra, de új hibákra is számítson!</string>
     <string name="nightly_version">Talált verzió: %2$s - %1$s</string>
     <string name="update_nightly_alert">A nightly verziót futtatja. Szeretne időnként frissítéseket keresni?</string>
     <string name="update_nightly">Automatikus frissítés</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Videó lejátszása egy felugró ablakban</string>
     <string name="open_subtitles_vip">Ön VIP OpenSubtitles felhasználó</string>
     <string name="browse_folder">Mappa tallózása</string>
-    <string name="listen">Hallgatás</string>
     <string name="episodes">epizódok</string>
     <string name="movies">filmek</string>
     <string name="videos">videók</string>
     <string name="default_action_videos">Videók</string>
-    <string name="videos_all">Összes videó</string>
     <string name="clear_playback_history">Lejátszási előzmények törlése</string>
     <string name="ml_scanning">Médiafájlok felkutatása</string>
     <string name="ml_parse_media">Média feldolgozása</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Érezze magát otthon</string>
     <string name="done">Kész</string>
     <string name="onboarding_scan_title">A médiafájljainak automatikus felkutatása</string>
-    <string name="onboarding_all_set">A VLC beállítása kész!</string>
-    <string name="onboarding_permission_given">Mostantól automatikusan be tudja olvasni a médiafájljait, használhat külső feliratokat, valamint lejátszhat internetes közvetítéseket és hálózati médiát</string>
     <string name="daynight_system_explanation">A VLC automatikusan sötét módra vált, a rendszer beállításainak megfelelően</string>
     <string name="daynight_legacy_explanation">A VLC automatikusan éjszakai módba vált a megfelelő időben</string>
     <string name="onboarding_scanning_enable">A VLC vizsgálja át az eszközömet, médiatartalmakat keresve</string>
@@ -737,7 +711,6 @@
     <string name="create">Létrehozás</string>
     <string name="resume_card_message">Folytatja a(z) %1$s lejátszását?</string>
     <string name="misc">Egyéb</string>
-    <string name="device_default">Eszköz alapértelmezése</string>
     <string name="track_number">%d szám</string>
     <string name="jump_to">Ugrás</string>
     <string name="show_video_thumbnails">Videó bélyegképek</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d szám hozzáfűzve</item>
     </plurals>
     <string name="remove_current">Jelenlegi eltávolítása</string>
-    <string name="validation_delete_playlist">Biztos, hogy törli ezt a lejátszólistát?</string>
-    <string name="validation_delete_playlist_text">Ez a művelet nem vonható vissza.</string>
     <string name="display_settings">Megjelenítési beállítások</string>
     <string name="incognito_mode">Inkognitó mód</string>
     <string name="persistent_incognito_mode">Állandó inkognitó mód</string>
     <string name="persistent_incognito_mode_summary">Az inkognitó mód bekapcsolva tartása, az alkalmazás újraindítása után is</string>
     <string name="display_in_list">Megjelenítés listában</string>
     <string name="display_in_grid">Megjelenítés rácsban</string>
-    <string name="dump_db_succes">Adatbázis kiírva a belső tárhely gyökerében</string>
     <string name="dump_db_failure">Az adatbázis kiírása sikertelen</string>
     <string name="send_crash_title">VLC összeomlás-jelentő</string>
     <string name="send_crash_description">Az összeomlás elküldésével segít a VLC stabilitásának fejlesztésében.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Itt van: %s</string>
     <string name="share_track_info">Sávinformáció megosztása</string>
     <string name="share_track">Jelenleg ezt hallgatja: %s</string>
-    <string name="find_metadata">Metaadatok keresése</string>
-    <string name="moviepedia_hint">Metaadatok keresése</string>
-    <string name="moviepedia_result">Videótalálatok</string>
-    <string name="directed_by">Rendezte:</string>
-    <string name="casting">Szereposztás</string>
-    <string name="produced_by">Producer:</string>
-    <string name="written_by">Írta:</string>
-    <string name="music_by">Zenét szerezte:</string>
-    <string name="posters">Poszterek</string>
-    <string name="backdrops">Hátterek:</string>
-    <string name="header_tvshows">TV-sorozatok</string>
-    <string name="header_movies">Filmek</string>
-    <string name="season_number">%s. évad</string>
-    <string name="resume_episode">Folytatás (%s)</string>
-    <string name="start_over">Újrakezdés</string>
-    <string name="next_episode">Következő epizód</string>
-    <string name="open_network_settings">Megnyitja a hálózati beállításokat?</string>
-    <string name="recently_played">Legutóbb játszott</string>
-    <string name="recently_added">Legutóbb hozzáadott</string>
     <string name="playback_multiple_errors">Több média nem játszható le</string>
     <string name="clear_media_db_message">Elveszíti az előrehaladásokat, a könyvjelzőket és a létrehozott lejátszási listákat, de megtartja a VLC for Android beállításait</string>
     <string name="clear_app_data_message">El fogja veszíteni az előrehaladásokat, a könyvjelzőket, a lejátszási listákat és az összes VLC-beállítást</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">A Play Store-ban iratkozhat le</string>
     <string name="subscription_cancel_tv">Hogyan iratkozzon le</string>
     <string name="donate_unsubscribe_tv">A leiratkozáshoz nyissa meg a %s alkalmazást a telefonján vagy számítógépén, vagy olvassa le ezt a kódot:</string>
-    <string name="tip_jar">Segítse a VLC-t</string>
     <string name="thank_you">Köszönjük</string>
     <string name="thank_you_desc">Köszönjük a támogatását!\nSokat fog nekünk segíteni a VLC fejlesztésében!</string>
     <string name="donate_again">Támogassa újra az alkalmazást</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">OTG hozzáférés bekapcsolása</string>
     <string name="allow_otg_description">Válassza ki az OTG eszközt, hogy hozzáférést kérjen a VLC-hez</string>
     <string name="video_hud_timeout">Videó vezérlők elrejtési késleltetése</string>
-    <string name="remove_from_history">Eltávolítás az előzményekből</string>
     <string name="prefersmbv1">SMB 1 előnyben részesítése</string>
     <string name="prefersmbv1_summary">Kapcsolja ki ezt a beállítást, ha problémákba ütközik az SMB-kiszolgálók tallózásakor</string>
     <string name="audio_delay_global">Hangkésleltetés %s ms-ra állítva az összes videónál</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Feloldás</string>
     <string name="lock_with_pin">A PIN-kódos zárolás újbóli engedélyezése</string>
     <string name="unlock_with_pin">Biztonságos mód feloldása</string>
-    <string name="lock_with_pin_short">PIN-kódos zárolás</string>
     <string name="restrict_settings">Beállítások elérésének korlátozása</string>
     <string name="search_prefs">Keresési beállítások</string>
     <string name="stop_unpaubale">Ez a média nem szüneteltethető. Megállítja helyette?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Ez a funkció béta állapotú és összeomlást vagy instabilitást okozhat</string>
     <string name="network_indexing">Hálózati indexelés</string>
     <string name="network_indexing_warning">A hálózati indexelés jelenleg béta állapotú.\nIsmert problémák:\n• Alacsony teljesítmény\n\nHa más problémákat is tapasztal, jelentse azt a fórumon.</string>
-    <string name="start_vlc">VLC indítása</string>
     <string name="jump_delay">Előre-/hátratekerés késleltetése</string>
     <string name="long_jump_delay">Hosszú érintéses előre-/hátratekerés időbeni késleltetése</string>
     <string name="jump_delay_summary">%s mp</string>
-    <string name="move_up">Mozgatás felfelé</string>
-    <string name="move_down">Mozgatás lefelé</string>
-    <string name="remove_from_playlist">Eltávolítás a lejátszólistáról</string>
-    <string name="play_media">%s lejátszása</string>
     <string name="edit_eq_preset">Hangszínszabályzó-előbeállítás szerkesztése</string>
     <string name="edit_eq_name_not_allowed">Ez a név nem engedélyezett</string>
     <string name="export_equalizer">Hangszínszabályzó exportálása</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Letöltés</string>
     <string name="talkback_action_rewind">Visszatekerés %s másodperccel</string>
     <string name="talkback_action_forward">Előretekerés %s másodperccel</string>
-    <string name="talkback_display_settings">Kijelzőbeállítások</string>
     <string name="talkback_already_played">Már lejátszva</string>
     <string name="show_only_favs">Csak a kedvencek megjelenítése</string>
     <string name="ignore_headset_media_button_presses">Fejhallgató médiagombjainak figyelmen kívül hagyása</string>

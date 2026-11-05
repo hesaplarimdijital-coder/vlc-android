@@ -59,8 +59,9 @@ class AboutScreenTest {
     @Test
     fun theListIsS005s() {
         // 85 and Haze (Desktop Kit 1.0's glass); 1.0: without the subtitle translation's engine, tokenizer and models
-        // and the Dolby Vision parser; 1.0.2: without the speech recognition's engine, models and GPU headers
-        assertEquals(73, libraries.size)
+        // and the Dolby Vision parser; 1.0.2: without the speech recognition's engine, models and GPU headers;
+        // 1.0.3: without the Android TV module's colour picker and Moviepedia's Retrofit
+        assertEquals(71, libraries.size)
         val byTitle = libraries.associateBy { it.title }
         // 1.0.1: the list keys its rows by title, and a title listed twice would end the app
         assertEquals(libraries.size, byTitle.size)
@@ -76,7 +77,7 @@ class AboutScreenTest {
         assertEquals("mit", byTitle.getValue("Vue").license?.id)
         assertEquals("mit", byTitle.getValue("Bootstrap").license?.id)
         // 1.0: what only the video features used is gone
-        listOf("dovi_tool", "CTranslate2", "SentencePiece", "spdlog").forEach { assertFalse(it, it in byTitle) }
+        listOf("dovi_tool", "CTranslate2", "SentencePiece", "spdlog", "Color Picker", "Retrofit").forEach { assertFalse(it, it in byTitle) }
         assertTrue(libraries.all { it.license != null })
     }
 

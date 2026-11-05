@@ -75,7 +75,6 @@
     <string name="directorynotfound">ບໍ່ພົບເສັ້ນທາງໄດເຣັກທໍຣີ \'%1$s\'.</string>
     <string name="nohistory">ທ່ານຍັງບໍ່ມີປະຫວັດການຫຼິ້ນເທື່ອ.</string>
 
-    <string name="cover_art">ຮູບພາບໜ້າປົກ</string>
     <string name="shuffle_title">ໂໝດສະຫຼັບເພງ</string>
     <string name="shuffle">ປິດໂໝດສະຫຼັບເພງ</string>
     <string name="shuffle_on">ເປີດໂໝດສະຫຼັບເພງ</string>
@@ -105,7 +104,6 @@
     <string name="sleep_title">ຕັ້ງເວລາປິດເຄື່ອງ</string>
     <string name="sleep_in">ປິດເຄື່ອງໃນ</string>
     <string name="jump_to_time">ຂ້າມໄປເວລາ</string>
-    <string name="server_add_title">ເພີ່ມເຊີບເວີໃໝ່ເຂົ້າໃນລາຍການທີ່ມັກ</string>
     <string name="server_username_hint">ຊື່ຜູ້ໃຊ້</string>
     <string name="server_port">ພອດ:</string>
     <string name="login">ເຂົ້າສູ່ລະບົບ</string>
@@ -115,8 +113,6 @@
     <string name="favorites_add">ເພີ່ມເຂົ້າໃນລາຍການທີ່ມັກ</string>
     <string name="favorites_remove">ເອົາອອກຈາກລາຍການທີ່ມັກ</string>
     <string name="favorites_edit">ແກ້ໄຂ</string>
-    <string name="favorite_added">ບັນທຶກລົງໃນລາຍການທີ່ມັກແລ້ວ</string>
-    <string name="favorite_removed">ເອົາອອກຈາກລາຍການທີ່ມັກແລ້ວ</string>
 
     <string name="encountered_error_title">ການຫຼິ້ນຜິດພາດ</string>
     <string name="invalid_location">ບໍ່ສາມາດຫຼິ້ນທີ່ຕັ້ງ %1$s ໄດ້.</string>

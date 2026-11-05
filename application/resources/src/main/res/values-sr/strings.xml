@@ -84,16 +84,6 @@
         <item quantity="few">%d видео</item>
         <item quantity="other">%d видео</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 филм</item>
-        <item quantity="few">%d филма</item>
-        <item quantity="other">%d филмова</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 ТВ серија</item>
-        <item quantity="few">%d ТВ серије</item>
-        <item quantity="other">%d ТВ серија</item>
-    </plurals>
     <string name="internal_memory">Интерна меморија</string>
     <string name="audio">Аудио</string>
     <string name="video">Видео</string>
@@ -112,7 +102,6 @@
     <string name="directorynotfound">Путања „%1$s“ није пронађена.</string>
     <string name="nohistory">Још нисте репродуковали ниједну датотеку.</string>
 
-    <string name="cover_art">Омот</string>
     <string name="shuffle_all_title">Измешај све</string>
     <string name="shuffle_title">Режим мешања</string>
     <string name="shuffle">Мешање искључено</string>
@@ -150,7 +139,6 @@
     <string name="sleep_title">Аутом. гашење</string>
     <string name="sleep_in">Спавај за</string>
     <string name="jump_to_time">Пређи на време</string>
-    <string name="server_add_title">Додај нови сервер у омиљене</string>
     <string name="server_domain_hint">Адреса сервера (домен или ИП)</string>
     <string name="server_folder_hint">Путања фасцикле (опционо)</string>
     <string name="server_username_hint">Корисничко име</string>
@@ -162,8 +150,6 @@
     <string name="favorites_add">Додај у омиљене</string>
     <string name="favorites_remove">Уклони из омиљених</string>
     <string name="favorites_edit">Уреди</string>
-    <string name="favorite_added">Сачувај у омиљене</string>
-    <string name="favorite_removed">Уклоњено из омиљених</string>
 
     <string name="streams">Токови</string>
     <string name="open_mrl_dialog_msg">Унесите адресу: нпр. http://, mms:// или rtsp://</string>
@@ -274,7 +260,6 @@
     <string name="onboarding_scanning_enable">Дозволи скенирање уређаја</string>
     <string name="onboarding_scan_customize">Желим да одаберем фасцикле које ће бити скениране</string>
     <string name="light_theme">Светла тема</string>
-    <string name="validation_delete_playlist_text">Ова радња је неповратна.</string>
     <string name="display_in_list">Прикажи у виду листе</string>
     <string name="display_in_grid">Прикажи у виду мреже</string>
     <string name="unknown">Непознато</string>

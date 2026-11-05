@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Möchten Sie diese Voreinstellung wirklich löschen?</string>
     <string name="confirm_delete_vlc_eq">Möchten Sie diese Voreinstellung wirklich ausblenden?\nSie können sie in den Equalizer-Einstellungen wiederherstellen.</string>
     <string name="confirm_replace_playlist">Möchten Sie die Playlist \'%1$s\' wirklich ersetzen?</string>
-    <string name="invalid_settings_file">Ungültige Einstellungsdatei</string>
     <string name="confirm_delete_message">Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden.</string>
     <string name="confirm_delete_album">Das Album \'%1$s\' löschen?</string>
     <string name="confirm_delete_several_media">%1$d wirklich löschen?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 Video</item>
         <item quantity="other">%d Videos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 Film</item>
-        <item quantity="other">%d Filme</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV-Sendung</item>
-        <item quantity="other">%d TV-Sendungen</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 Titel</item>
         <item quantity="other">%d Titel</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Sie haben noch keinen Wiedergabeverlauf.</string>
     <string name="cant_ban_root">Sie können einen Stammordner nicht sperren</string>
 
-    <string name="cover_art">Titelbild</string>
     <string name="shuffle_all_title">Zufallswiedergabe für alles</string>
     <string name="shuffle_title">Zufallsmodus</string>
     <string name="shuffle">Zufallswiedergabe AUS</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Videoplayer-Fernbedienung</string>
     <string name="remote_keyboard_navigation">Tastaturnavigation</string>
 
-    <string name="server_add_title">Einen neuen Server zu den Favoriten hinzufügen</string>
     <string name="server_domain_hint">Serveradresse (Hostname oder IP-Adresse)</string>
     <string name="server_share_hint">Serveradresse (Hostname oder IP-Adresse)</string>
     <string name="server_folder_hint">Ordnerpfad (optional)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Zu Favoriten hinzufügen</string>
     <string name="favorites_remove">Aus Favoriten entfernen</string>
     <string name="favorites_edit">Bearbeiten</string>
-    <string name="favorite_added">In Favoriten gespeichert</string>
-    <string name="favorite_removed">Von Favoriten entfernt</string>
 
     <string name="streams">Streams</string>
     <string name="open_mrl_dialog_msg">Eine Netzwerkadresse eingeben, z. B. http://, mms:// oder rtsp://.</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Kein</string>
     <string name="subtitle_decoration_shadow">Schatten</string>
     <string name="subtitle_decoration_outline">Kontur</string>
-    <string name="previous_color">Vorherige Farbe</string>
-    <string name="new_color">Neue Farbe</string>
 
     <string name="audio_prefs_category">Audio</string>
     <string name="lockscreen_cover_title">Medien-Cover auf Sperrbildschirm</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Fernzugriff-Info</string>
     <string name="remote_access_content">Inhalt</string>
     <string name="remote_access_medialibrary_content">Medienbibliotheksinhalt</string>
-    <string name="remote_access_medialibrary_content_summary">Aktiviert: %1$s\nDeaktiviert: %2$s</string>
     <string name="remote_access_file_browser_content">Datei-Browser</string>
     <string name="remote_access_network_browser_content">Netzwerk-Browser</string>
     <string name="remote_access_playback_control">Wiedergabe steuern</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Der Wert muss zwischen 0 und 60000 ms liegen</string>
     <string name="quit">Anwendung beenden und neu starten</string>
     <string name="restart_message">Änderungen werden nach einem Neustart übernommen.\n\nJetzt neu starten?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Später</string>
     <string name="browser_show_all_title">Nur Multimediadateien anzeigen</string>
 
     <string name="developer_prefs_category">Entwickler</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Fehlerbericht wird gesendet…</string>
 
 
-    <string name="no_result">Keine Ergebnisse gefunden</string>
-    <string name="no_internet_connection">Überprüfen Sie Ihre Internetverbindung</string>
     <string name="retry">Erneut versuchen</string>
 
     <string name="network_browsing">Lokales Netzwerk</string>
-    <string name="browsing">Durchsuchen</string>
 
     <string name="file_size">Dateigröße</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Im Browser öffnen</string>
     <string name="install">Installieren</string>
     <string name="install_nightly">Die Nightly-Version installieren</string>
-    <string name="install_nightly_alert">Nightly-Builds sind experimentelle Versionen, die täglich aktualisiert werden.\n\nErwarten Sie neue Funktionen, aber auch neue Fehler!</string>
     <string name="nightly_version">Gefundene Version: %2$s - %1$s</string>
     <string name="update_nightly_alert">Sie verwenden eine Nightly-Version. Möchten Sie regelmäßig nach Updates suchen?</string>
     <string name="update_nightly">Automatisch aktualisieren</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Video im Pop-Up-Fenster abspielen</string>
     <string name="open_subtitles_vip">Sie sind ein VIP-OpenSubtitles-Benutzer</string>
     <string name="browse_folder">Ordner durchsuchen</string>
-    <string name="listen">Hören</string>
     <string name="episodes">Episoden</string>
     <string name="movies">Filme</string>
     <string name="videos">Videos</string>
     <string name="default_action_videos">Videos</string>
-    <string name="videos_all">Alle Videos</string>
     <string name="clear_playback_history">Wiedergabeverlauf löschen</string>
     <string name="ml_scanning">Nach Mediendateien suchen</string>
     <string name="ml_parse_media">Durchsuche Medien</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Fühlen Sie sich wie zu Hause</string>
     <string name="done">Fertig</string>
     <string name="onboarding_scan_title">Automatische Erkennung Ihrer Medien</string>
-    <string name="onboarding_all_set">VLC ist für alles eingerichtet!</string>
-    <string name="onboarding_permission_given">Sie können jetzt Ihre Medien automatisch durchsuchen, externe Untertitel verwenden sowie Streams oder Netzwerkmedien wiedergeben</string>
     <string name="daynight_system_explanation">VLC wechselt entsprechend der Systemeinstellung automatisch in den Dunkelmodus</string>
     <string name="daynight_legacy_explanation">VLC wechselt zur passenden Zeit automatisch in den Nachtmodus</string>
     <string name="onboarding_scanning_enable">VLC mein Gerät nach neuen Medieninhalten durchsuchen lassen</string>
@@ -737,7 +711,6 @@
     <string name="create">Erstellen</string>
     <string name="resume_card_message">Wiedergabe fortsetzen von %1$s?</string>
     <string name="misc">Verschiedenes</string>
-    <string name="device_default">Systemsprache</string>
     <string name="track_number">%d Titel</string>
     <string name="jump_to">Springe zu</string>
     <string name="show_video_thumbnails">Video-Vorschau</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d Titel angehängt</item>
     </plurals>
     <string name="remove_current">Aktuelles entfernen</string>
-    <string name="validation_delete_playlist">Diese Wiedergabeliste wirklich löschen?</string>
-    <string name="validation_delete_playlist_text">Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="display_settings">Anzeigeeinstellungen</string>
     <string name="incognito_mode">Inkognito-Modus</string>
     <string name="persistent_incognito_mode">Permanenter Inkognito-Modus</string>
     <string name="persistent_incognito_mode_summary">Den Inkognito-Modus aktiviert lassen, auch wenn die App neu gestartet wird</string>
     <string name="display_in_list">Als Liste anzeigen</string>
     <string name="display_in_grid">Als Gitter anzeigen</string>
-    <string name="dump_db_succes">Die Datenbank wurde im internen Speicherstammordner abgelegt</string>
     <string name="dump_db_failure">Datenbank konnte nicht gesichert werden</string>
     <string name="send_crash_title">VLC-Absturzbericht senden</string>
     <string name="send_crash_description">Indem Sie Ihren Absturz senden, helfen Sie uns, die VLC-Stabilität zu verbessern.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Hier ist %s</string>
     <string name="share_track_info">Die Titel-Informationen teilen</string>
     <string name="share_track">Derzeit höre ich %s</string>
-    <string name="find_metadata">Metadaten finden</string>
-    <string name="moviepedia_hint">Metadaten suchen</string>
-    <string name="moviepedia_result">Video-Ergebnisse</string>
-    <string name="directed_by">Unter der Regie von</string>
-    <string name="casting">Besetzung</string>
-    <string name="produced_by">Produziert von</string>
-    <string name="written_by">Verfasst von</string>
-    <string name="music_by">Musik von</string>
-    <string name="posters">Poster</string>
-    <string name="backdrops">Kulissen</string>
-    <string name="header_tvshows">TV-Sendungen</string>
-    <string name="header_movies">Filme</string>
-    <string name="season_number">Staffel %s</string>
-    <string name="resume_episode">Fortsetzen (%s)</string>
-    <string name="start_over">Von vorn beginnen</string>
-    <string name="next_episode">Nächste Episode</string>
-    <string name="open_network_settings">Netzwerk-Einstellungen öffnen?</string>
-    <string name="recently_played">Zuletzt wiedergegeben</string>
-    <string name="recently_added">Zuletzt hinzugefügt</string>
     <string name="playback_multiple_errors">Mehrere Medien können nicht abgespielt werden</string>
     <string name="clear_media_db_message">Sie verlieren Ihren Verlauf, Lesezeichen und die von Ihnen erstellten Wiedergabelisten, Sie behalten aber Ihre VLC für Android Einstellungen</string>
     <string name="clear_app_data_message">Sie verlieren Ihren Verlauf, Lesezeichen, Wiedergabelisten und alle VLC-Einstellungen</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">Sie können die Unterstützung im PlayStore beenden</string>
     <string name="subscription_cancel_tv">Wie wird die Unterstützung beendet</string>
     <string name="donate_unsubscribe_tv">Zum Beenden, bitte %s auf einem Computer oder Handy öffnen und diesen Code scannen:</string>
-    <string name="tip_jar">VLC helfen</string>
     <string name="thank_you">Vielen Dank</string>
     <string name="thank_you_desc">Danke für Ihre Unterstützung!\nDies wird uns bei der Verbesserung von VLC helfen.</string>
     <string name="donate_again">Die App nochmals unterstützen</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">OTG-Zugriff erlauben</string>
     <string name="allow_otg_description">Bitte wählen Sie Ihr OTG-Laufwerk aus, um den Zugriff auf VLC zu ermöglichen</string>
     <string name="video_hud_timeout">Der Video-Player steuert die Verzögerung beim Ausblenden</string>
-    <string name="remove_from_history">Aus dem Verlauf entfernen</string>
     <string name="prefersmbv1">SMB 1 aktivieren</string>
     <string name="prefersmbv1_summary">Deaktivieren Sie diese Einstellung, wenn Sie Probleme beim Durchsuchen Ihres SMB-Servers haben</string>
     <string name="audio_delay_global">Tonverzögerung für alle Videos auf %s ms gesetzt</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Entsperren</string>
     <string name="lock_with_pin">PIN-Sperre wieder aktivieren</string>
     <string name="unlock_with_pin">Sicheren Modus entsperren</string>
-    <string name="lock_with_pin_short">PIN-Sperre</string>
     <string name="restrict_settings">Einstellungszugriff einschränken</string>
     <string name="search_prefs">Suche in Einstellungen</string>
     <string name="stop_unpaubale">Dieses Medium kann nicht pausiert werden. Stattdessen stoppen?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Diese Funktion befindet sich in der Betaphase und kann zu Abstürzen und Instabilitäten führen</string>
     <string name="network_indexing">Netzwerkindexierung</string>
     <string name="network_indexing_warning">Die Netzwerkindexierung befindet sich derzeit in der Betaphase.\nBekannte Probleme:\n• Geringe Leistung\n\nWenn Sie auf andere Probleme stoßen, melden Sie diese bitte in unserem Forum.</string>
-    <string name="start_vlc">VLC starten</string>
     <string name="jump_delay">Zeitverzögerung vorwärts/rückwärts</string>
     <string name="long_jump_delay">Zeitverzögerung für langes tippen vorwärts/rückwärts</string>
     <string name="jump_delay_summary">%s Sekunden</string>
-    <string name="move_up">Nach oben verschieben</string>
-    <string name="move_down">Nach unten verschieben</string>
-    <string name="remove_from_playlist">Aus der Wiedergabeliste entfernen</string>
-    <string name="play_media">%s wiedergeben</string>
     <string name="edit_eq_preset">Equalizervoreinstellung bearbeiten</string>
     <string name="edit_eq_name_not_allowed">Dieser Name ist nicht zulässig</string>
     <string name="export_equalizer">Equalizer exportieren</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Wird heruntergeladen</string>
     <string name="talkback_action_rewind">%s Sek. zurückspulen</string>
     <string name="talkback_action_forward">%s Sek. vorspulen</string>
-    <string name="talkback_display_settings">Anzeigeeinstellungen</string>
     <string name="talkback_already_played">Bereits wiedergegeben</string>
     <string name="show_only_favs">Nur Favoriten anzeigen</string>
     <string name="ignore_headset_media_button_presses">Das Drücken der Medientaste am Headset ignorieren</string>

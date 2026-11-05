@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">ნამდვილად გსურთ ამ მზა გამართვის წაშლა?</string>
     <string name="confirm_delete_vlc_eq">ნამდვილად გსურთ, დაიმალოს ეს მზა გამართვა?\nაღდგენას შეძლებთ მათანაბრებლის პარამეტრებიდან.</string>
     <string name="confirm_replace_playlist">ნამდვილად გსურთ, ჩანაცვლდეს დასაკრავი სია „%1$s“?</string>
-    <string name="invalid_settings_file">პარამეტრების უმართებულო ფაილი</string>
     <string name="confirm_delete_message">სამუდამოა და შეუქცევადი.</string>
     <string name="confirm_delete_album">წაიშალოს ალბომი „%1$s“?</string>
     <string name="confirm_delete_several_media">წაიშალოს %1$d მედიაფაილი?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 ვიდეო</item>
         <item quantity="other">%d ვიდეო</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 ფილმი</item>
-        <item quantity="other">%d ფილმი</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 გადაცემა</item>
-        <item quantity="other">%d გადაცემა</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 ჩანაწერი</item>
         <item quantity="other">%d ჩანაწერი</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">დაკვრის ისტორია ჯერ არ გაქვთ.</string>
     <string name="cant_ban_root">ვერ ამოაკლებთ ძირეულ საქაღალდეს</string>
 
-    <string name="cover_art">გარეკანის სურათი</string>
     <string name="shuffle_all_title">ყველას არევა</string>
     <string name="shuffle_title">არევის რეჟიმი</string>
     <string name="shuffle">არევა გამორთულია</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">ვიდეოდამკვრელი დაშორებულად</string>
     <string name="remote_keyboard_navigation">კლავიატურით გადასვლა</string>
 
-    <string name="server_add_title">ახალი სერვერის დამატება რჩეულებში</string>
     <string name="server_domain_hint">სერვერის მისამართი (დასახელება ან IP)</string>
     <string name="server_share_hint">სერვერის მისამართი (დასახელება ან IP)</string>
     <string name="server_folder_hint">საქაღალდის მდებარეობა (არასავალდებულო)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">დამატება რჩეულებში</string>
     <string name="favorites_remove">მოცილება რჩეულებიდან</string>
     <string name="favorites_edit">ჩასწორება</string>
-    <string name="favorite_added">შენახულია რჩეულებში</string>
-    <string name="favorite_removed">მოცილებულია რჩეულებიდან</string>
 
     <string name="streams">ნაკადები</string>
     <string name="open_mrl_dialog_msg">შეიყვანეთ ქსელის მისამართი: მაგ. http://, mms:// ან rtsp://</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">არცერთი</string>
     <string name="subtitle_decoration_shadow">ჩრდილი</string>
     <string name="subtitle_decoration_outline">გარემოხაზულობა</string>
-    <string name="previous_color">წინა ფერი</string>
-    <string name="new_color">ახალი ფერი</string>
 
     <string name="audio_prefs_category">ხმა</string>
     <string name="lockscreen_cover_title">გარეკანის ჩვენება ჩაკეტილ ეკრანზე</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">დაშორებული წვდომის შესახებ</string>
     <string name="remote_access_content">შიგთავსი</string>
     <string name="remote_access_medialibrary_content">მედიათეკის შიგთავსი</string>
-    <string name="remote_access_medialibrary_content_summary">ჩართულია: %1$s\nგამორთულია: %2$s</string>
     <string name="remote_access_file_browser_content">ფაილის ასარჩევი</string>
     <string name="remote_access_network_browser_content">ქსელში საძიებო</string>
     <string name="remote_access_playback_control">დაკვრის მართვა</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">მნიშვნელობის ზღვრებია 0 და 60000 მწმ</string>
     <string name="quit">გამოსვლა და კვლავ გაშვება</string>
     <string name="restart_message">ცვლილებები აისახება ხელახლა გაშვების შემდგომ.\n\nახლავე გაეშვას?</string>
-    <string name="restart_message_OK">კარგი</string>
-    <string name="restart_message_Later">მოგვიანებით</string>
     <string name="browser_show_all_title">მხოლოდ მულტიმედიური ფაილების ჩვენება</string>
 
     <string name="developer_prefs_category">შემმუშავებლისთვის</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">იგზავნება აღრიცხული ჩანაწერები...</string>
 
 
-    <string name="no_result">შედეგები არაა</string>
-    <string name="no_internet_connection">შეამოწმეთ ქსელთან კავშირი</string>
     <string name="retry">გამეორება</string>
 
     <string name="network_browsing">ადგილობრივი ქსელი</string>
-    <string name="browsing">არჩევა</string>
 
     <string name="file_size">ფაილის ზომა</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">ბრაუზერში გახსნა</string>
     <string name="install">დაყენება</string>
     <string name="install_nightly">საცდელი Nightly-ანაწყობის დაყენება</string>
-    <string name="install_nightly_alert">Nightly-ანაწყობები საცდელია და ახლდება ყოველდღე.\n\nმოსალოდნელია ახალი შესაძლებლობები, მაგრამ ახალი ხარვეზებიც!</string>
     <string name="nightly_version">მოიძებნა ვერსია: %2$s - %1$s</string>
     <string name="update_nightly_alert">გაშვებული გაქვთ Nightly-ანაწყობი. გსურთ დროდადრო შემოწმდეს განახლებისთვის?</string>
     <string name="update_nightly">თვითგანახლება</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">ვიდეოს გაშვება ამომხტარ ფანჯარაში</string>
     <string name="open_subtitles_vip">თქვენ OpenSubtitles-ის რჩეული მომხმარებელი ხართ</string>
     <string name="browse_folder">საქაღალდის ამორჩევა</string>
-    <string name="listen">მოსმენა</string>
     <string name="episodes">სერიები</string>
     <string name="movies">ფილმები</string>
     <string name="videos">ვიდეოები</string>
     <string name="default_action_videos">ვიდეოები</string>
-    <string name="videos_all">ყველა ვიდეო</string>
     <string name="clear_playback_history">დაკვრის ისტორიის გასუფთავება</string>
     <string name="ml_scanning">ეძებს ფაილებს</string>
     <string name="ml_parse_media">ფაილის გარჩევა</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">თავი ისე იგრძენით, როგორც შინ</string>
     <string name="done">მზადაა</string>
     <string name="onboarding_scan_title">ფაილების თვითაღმოჩენა</string>
-    <string name="onboarding_all_set">VLC გამართულია!</string>
-    <string name="onboarding_permission_given">შეგეძლებათ ფაილების თვითმოძიება, ქვეწარწერების ფაილის გახსნა და პირდაპირი ეთერების ნახვა ან ქსელიდან ფაილების გაშვება</string>
     <string name="daynight_system_explanation">VLC თავად გადავა მუქ რეჟიმში სისტემის პარამეტრების შესაბამისად.</string>
     <string name="daynight_legacy_explanation">VLC თავად გადავა მუქ რეჟიმში შესაბამის დროს</string>
     <string name="onboarding_scanning_enable">ნებართვა, რომ VLC შეძლებს მონახოს მედიაფაილები</string>
@@ -737,7 +711,6 @@
     <string name="create">შექმნა</string>
     <string name="resume_card_message">გაეშვას შეჩერებული %1$s?</string>
     <string name="misc">სხვადასხვა</string>
-    <string name="device_default">მოწყობილობის ნაგულისხმევი</string>
     <string name="track_number">%d ჩანაწერი</string>
     <string name="jump_to">გადასვლა</string>
     <string name="show_video_thumbnails">ვიდეოს გარეკანები</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d ჩანაწერი მიემატა</item>
     </plurals>
     <string name="remove_current">მიმდინარეს მოცილება</string>
-    <string name="validation_delete_playlist">ნამდვილად გსურთ, ამ სიის წაშლა?</string>
-    <string name="validation_delete_playlist_text">ეს ქმედება შეუქცევადია.</string>
     <string name="display_settings">ჩვენების პარამეტრები</string>
     <string name="incognito_mode">ფარული რეჟიმი</string>
     <string name="persistent_incognito_mode">მუდმივად ფარული რეჟიმი</string>
     <string name="persistent_incognito_mode_summary">ფარული რეჟიმის შენარჩუნება პროგრამის ახლიდან გაშვების დროსაც</string>
     <string name="display_in_list">სიაში ჩვენება</string>
     <string name="display_in_grid">ცხრილურად ჩვენება</string>
-    <string name="dump_db_succes">მონაცემთა კრებული გადატანილია შიდა მეხსიერების ძირეულ საქაღალდეში.</string>
     <string name="dump_db_failure">ვერ მოხერხდა მონაცემთა კრებულის გადატანა</string>
     <string name="send_crash_title">VLC გათიშვების მომხსენებელი</string>
     <string name="send_crash_description">უეცარი გათიშვების მოხსენებით, დაგვეხმარებით, გავხადოთ VLC მეტად მდგრადი.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">აქაა %s</string>
     <string name="share_track_info">ჩანაწერის მონაცემების გაზიარება</string>
     <string name="share_track">ამჟამად ისმინება %s</string>
-    <string name="find_metadata">თანმხლები მონაცემების პოვნა</string>
-    <string name="moviepedia_hint">თანმხლები მონაცემების ძიება</string>
-    <string name="moviepedia_result">ვიდეოს შედეგები</string>
-    <string name="directed_by">რეჟისორი</string>
-    <string name="casting">გადაცემა</string>
-    <string name="produced_by">მწარმოებელი</string>
-    <string name="written_by">შემქმნელი</string>
-    <string name="music_by">მუსიკის შემქმნელი</string>
-    <string name="posters">ბანერები</string>
-    <string name="backdrops">ფონები</string>
-    <string name="header_tvshows">ტელეგადაცემები</string>
-    <string name="header_movies">ფილმები</string>
-    <string name="season_number">სეზონი %s</string>
-    <string name="resume_episode">გაგრძელება (%s)</string>
-    <string name="start_over">თავიდან დაწყება</string>
-    <string name="next_episode">შემდეგი სერია</string>
-    <string name="open_network_settings">გაიხსნას ქსელის პარამეტრები?</string>
-    <string name="recently_played">ბოლოს გაშვებული</string>
-    <string name="recently_added">ბოლოს დამატებული</string>
     <string name="playback_multiple_errors">რამდენიმე ფაილი ვერ დაიკვრება</string>
     <string name="clear_media_db_message">დაკარგავთ წინსვლას, სანიშნებსა და შექმნილ დასაკრავ სიებს, თუმცა შეინარჩუნებთ VLC-ს Android-პარამეტრებს.</string>
     <string name="clear_app_data_message">დაკარგავთ წინსვლას, სანიშნებსა და შექმნილ დასაკრავ სიებს, ამასთან VLC-ს Android-პარამეტრებსაც.</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">შეგიძლიათ გამოწერის გაუქმება Play Store-დან</string>
     <string name="subscription_cancel_tv">ხელმოწერის გაუქმების შესახებ</string>
     <string name="donate_unsubscribe_tv">გამოწერის გასაუქმებლად, გახსენით %s ტელეფონში ან კომპიუტერში, ან წააკითხეთ ეს კოდი:</string>
-    <string name="tip_jar">დაეხმარეთ VLC-ს</string>
     <string name="thank_you">მადლობა</string>
     <string name="thank_you_desc">გმადლობთ, ფინანსური მხარდაჭერისთვის!\nმეტად დაგვეხმარება VLC-ს განვითარებაში!</string>
     <string name="donate_again">პროგრამის კვლავ დაფინანსება</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">ნებართვა OTG-წვდომის</string>
     <string name="allow_otg_description">გთხოვთ, აირჩიოთ თქვენი OTG-საცავი, რომელთან წვდომასაც შეძლებს VLC.</string>
     <string name="video_hud_timeout">ვიდეოდამკვრელის სამართავის დამალვის დაყოვნება</string>
-    <string name="remove_from_history">ისტორიიდან მოცილება</string>
     <string name="prefersmbv1">ამჯობინოს SMB 1</string>
     <string name="prefersmbv1_summary">მოხსენით მონიშვნა ამ პარამეტრზე თუ გაქვთ შეფერხებები SMB-სერვერის მოძიებისას.</string>
     <string name="audio_delay_global">ხმის დაყოვნებად მითითებულია %s მწმ ყველა ვიდეოსთვის</string>
@@ -909,7 +858,6 @@
     <string name="unlock">გახსნა</string>
     <string name="lock_with_pin">PIN-საკეტის კვლავ ამოქმედება</string>
     <string name="unlock_with_pin">უსაფრთხო რეჟიმის მოხსნა</string>
-    <string name="lock_with_pin_short">PIN-ჩამკეტი</string>
     <string name="restrict_settings">პარამეტრებთან წვდომის შეზღუდვა</string>
     <string name="search_prefs">ძიების პარამეტრები</string>
     <string name="stop_unpaubale">ეს ფაილი ვერ შეჩერდება. გსურთ, შეწყვიტოთ სანაცვლოდ?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">ეს შესაძლებლობა ჯერ საცდელია და შეიძლება იწვევდეს არამდგრადობასა და უეცარ გათიშვებს. </string>
     <string name="network_indexing">ქსელით აღნუსხვა</string>
     <string name="network_indexing_warning">ქსელით აღნუსხვა ჯერ საცდელია.\nგამოვლენილი ხარვეზებია:\nშენელებული მუშაობა\n\nთუ სხვა ხარვეზსაც წააწყდებით, გთხოვთ გვაცნობოთ ფორუმზე.</string>
-    <string name="start_vlc">ჩართეთ VLC</string>
     <string name="jump_delay">წინ/უკან გადახვევის დაყოვნება</string>
     <string name="long_jump_delay">დიდხანს შეხებით წინ/უკან გადახვევის დაყოვნება</string>
     <string name="jump_delay_summary">%s წამი</string>
-    <string name="move_up">აწევა</string>
-    <string name="move_down">ჩამოწევა</string>
-    <string name="remove_from_playlist">დასაკრავი სიიდან მოცილება</string>
-    <string name="play_media">გაეშვას %s</string>
     <string name="edit_eq_preset">მათანაბრებლის მზა გამართვის ჩასწორება</string>
     <string name="edit_eq_name_not_allowed">ეს სახელი არაა ნებადართული</string>
     <string name="export_equalizer">მათანაბრებლის გადატანა</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">ჩამოიტვირთება</string>
     <string name="talkback_action_rewind">%s წამით უკან</string>
     <string name="talkback_action_forward">%s წამით წინ გადახვევა</string>
-    <string name="talkback_display_settings">ჩვენების პარამეტრები</string>
     <string name="talkback_already_played">უკვე დაკრულია</string>
     <string name="show_only_favs">მხოლოდ რჩეულების ჩვენება</string>
     <string name="ignore_headset_media_button_presses">ყურსასმენების ღილაკებზე დაწოლის უგულებელყოფა</string>

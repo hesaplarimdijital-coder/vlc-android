@@ -20979,12 +20979,6 @@ Lorg/videolan/mobile/app/VLCApplication;
 SPLorg/videolan/mobile/app/VLCApplication;-><init>()V
 SPLorg/videolan/mobile/app/VLCApplication;->onCreate()V
 SPLorg/videolan/mobile/app/VLCApplication;->setupApplication(Landroid/app/Application;)V
-Lorg/videolan/mobile/app/delegates/IIndexersDelegate;
-Lorg/videolan/mobile/app/delegates/IMediaContentDelegate;
-Lorg/videolan/mobile/app/delegates/IndexersDelegate;
-SPLorg/videolan/mobile/app/delegates/IndexersDelegate;-><init>()V
-Lorg/videolan/mobile/app/delegates/MediaContentDelegate;
-SPLorg/videolan/mobile/app/delegates/MediaContentDelegate;-><init>()V
 Lorg/videolan/resources/AndroidDevices;
 SPLorg/videolan/resources/AndroidDevices;-><clinit>()V
 SPLorg/videolan/resources/AndroidDevices;-><init>()V
@@ -21070,9 +21064,6 @@ SPLorg/videolan/resources/util/VLCCrashHandler;-><init>()V
 Lorg/videolan/resources/util/VLCCrashHandler$Companion;
 SPLorg/videolan/resources/util/VLCCrashHandler$Companion;-><init>()V
 SPLorg/videolan/resources/util/VLCCrashHandler$Companion;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-Lorg/videolan/television/util/TVSearchProvider;
-SPLorg/videolan/television/util/TVSearchProvider;-><init>()V
-SPLorg/videolan/television/util/TVSearchProvider;->onCreate()Z
 Lorg/videolan/tools/AppScope;
 SPLorg/videolan/tools/AppScope;-><clinit>()V
 SPLorg/videolan/tools/AppScope;-><init>()V

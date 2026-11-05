@@ -118,12 +118,6 @@ platform :android do
     capture_android_screenshots(device_type:"tenInch" ,app_apk_path:"../../application/app/build/outputs/apk/debug/VLC-Android-"+options[:version]+"-debug-all.apk", tests_apk_path:"../../application/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")
   end
 
-  lane :screenshots_tv do |options|
-    gradle(task: 'assemble', build_type: 'Debug', project_dir:'../..')
-    gradle(task: ':application:app:assemble', build_type: 'DebugAndroidTest', project_dir:'../..')
-    capture_android_screenshots(device_type:"tv",use_tests_in_classes:'org.videolan.vlc.TvScreenhotsInstrumentedTest', app_apk_path:"../../application/app/build/outputs/apk/debug/VLC-Android-"+options[:version]+"-debug-all.apk", tests_apk_path:"../../application/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")
-  end
-
   lane :huawei_info do
       huawei_appgallery_connect_get_app_info(
           client_id: ENV["HUAWEI_CLIENT_ID"],

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail the build when VLC's own visuals come back where Nagmedar shows itself.
 
-The classic interface is gone from phones, tablets and DeX (the leanback TV keeps it), but a
+The classic interface is gone from phones, tablets and DeX (and the Android TV module with it), but a
 branch can bring one of VLC's pictures back without anyone seeing it before a device does. Two
 checks, each a GitHub annotation per finding, exit status 1 when there is one:
 
@@ -21,7 +21,7 @@ import sys
 
 ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
 
-# Where Nagmedar's notifications, media session and windows are drawn (not the TV's module)
+# Where Nagmedar's notifications, media session and windows are drawn
 CODE = ['application/nagmedar-*/src/main', 'application/vlc-android/src', 'application/vlc-android/res',
         'application/app/src/main', 'application/remote-access-server/src/main', 'application/tools/src/main']
 GLYPH = re.compile(r'(?:R\.drawable\.|@drawable/)(ic_notif_\w+|ic_widget_\w+|ic_auto_speed\w*)\b')
@@ -48,8 +48,6 @@ def rel(path):
 def files(patterns, suffixes):
     for pattern in patterns:
         for top in glob.glob(os.path.join(ROOT, pattern)):
-            if '/television/' in top:
-                continue
             for folder, _, names in os.walk(top):
                 if '/build/' in folder + '/':
                     continue
@@ -84,7 +82,7 @@ def resource_files(kind, name):
     out = []
     for pattern in RES_DIRS:
         for res in glob.glob(os.path.join(ROOT, pattern)):
-            if '/television/' in res or '/build/' in res:
+            if '/build/' in res:
                 continue
             out += glob.glob(os.path.join(res, kind + '*', name + '.xml'))
     return out

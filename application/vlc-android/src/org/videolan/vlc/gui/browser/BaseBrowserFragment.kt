@@ -22,7 +22,6 @@
  */
 package org.videolan.vlc.gui.browser
 
-import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
@@ -72,8 +71,6 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.media.MediaLibraryItem
 import org.videolan.resources.AndroidDevices
 import org.videolan.resources.KEY_MRL
-import org.videolan.resources.MOVIEPEDIA_ACTIVITY
-import org.videolan.resources.MOVIEPEDIA_MEDIA
 import org.videolan.resources.util.getFromMl
 import org.videolan.resources.util.parcelable
 import org.videolan.tools.BROWSER_DISPLAY_IN_CARDS
@@ -134,7 +131,6 @@ import org.videolan.vlc.util.ContextOption.CTX_BAN_FOLDER
 import org.videolan.vlc.util.ContextOption.CTX_DELETE
 import org.videolan.vlc.util.ContextOption.CTX_FAV_ADD
 import org.videolan.vlc.util.ContextOption.CTX_FAV_REMOVE
-import org.videolan.vlc.util.ContextOption.CTX_FIND_METADATA
 import org.videolan.vlc.util.ContextOption.CTX_INFORMATION
 import org.videolan.vlc.util.ContextOption.CTX_PLAY
 import org.videolan.vlc.util.ContextOption.CTX_PLAY_ALL
@@ -883,14 +879,6 @@ abstract class BaseBrowserFragment : MediaBrowserFragment<BrowserModel>(), IRefr
             CTX_ADD_TO_PLAYLIST -> requireActivity().addToPlaylist(mw.tracks, SavePlaylistDialog.KEY_NEW_TRACKS)
             CTX_FAV_REMOVE -> lifecycleScope.launch(Dispatchers.IO) { browserFavRepository.deleteBrowserFav(mw.uri) }
             CTX_ADD_SCANNED -> addToScannedFolders(mw)
-            CTX_FIND_METADATA -> {
-                val intent = Intent().apply {
-                    setClassName(requireContext().applicationContext, MOVIEPEDIA_ACTIVITY)
-                    putExtra(MOVIEPEDIA_MEDIA, mw)
-                }
-                startActivity(intent)
-            }
-
             CTX_ADD_FOLDER_PLAYLIST -> {
                 requireActivity().addToPlaylistAsync(mw.uri.toString(), false, mw.title)
             }

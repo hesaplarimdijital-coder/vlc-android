@@ -48,14 +48,6 @@
         <item quantity="one">1 videu</item>
         <item quantity="other">%d vídeos</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 película</item>
-        <item quantity="other">%d películes</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 programa de TV</item>
-        <item quantity="other">%d programes de TV</item>
-    </plurals>
     <string name="internal_memory">Memoria interna</string>
     <string name="audio">Audiu</string>
     <string name="video">Videu</string>
@@ -136,8 +128,6 @@
     <string name="set_locale">Afitar una locale</string>
     <string name="quit">Colar y reaniciar l\'aplicación</string>
     <string name="restart_message">Los cambeos van facer efeutu namás que se reanicie l\'aplicación.\n\n¿Reaniciar agora?</string>
-    <string name="restart_message_OK">Sí</string>
-    <string name="restart_message_Later">Dempués</string>
     <string name="browser_show_all_title">Amosar tolos ficheros</string>
 
     <string name="debug_logs">Rexistros de depuración</string>
@@ -153,9 +143,7 @@
     <string name="serious_crash">Desafortunadamente, asocedió un fallu grabe y VLC tuvo de zarrase.</string>
     <string name="sending_log">Unviando\'l rexistru...</string>
 
-    <string name="no_result">Nun s\'alcontraron resultaos</string>
     <string name="network_browsing">Rede llocal</string>
-    <string name="browsing">Restolar</string>
 
     <string name="network_shares_discovery">Guetando comparticiones de rede</string>
     <string name="network_empty">Esti direutoriu ta baleru.</string>
@@ -180,7 +168,6 @@
     <!-- Plugins -->
     <string name="plugins">Plugins</string>
     <string name="network_shared_folders">Carpetes compartíes</string>
-    <string name="videos_all">Tolos vídeos</string>
     <string name="clear_playback_history">Llimpiar l\'historial de reproducciones</string>
     <string name="ml_scanning">Escanéu de ficheros</string>
     <string name="ml_parse_media">Analizando ficheros:</string>
@@ -221,8 +208,6 @@
     <string name="resume_card_message">¿Siguir cola reproducción de %1$s?</string>
     <string name="misc">Miscelánea</string>
     <string name="track_number">%d pistes</string>
-    <string name="validation_delete_playlist">¿De xuru que quies desaniciar esta llista de reproducción?</string>
-    <string name="validation_delete_playlist_text">Esta aición nun pue desfacese.</string>
     <string name="display_in_list">Vista de llista</string>
     <string name="display_in_grid">Vista de rexáu</string>
     <string name="dump_db_failure">Fallu al volquiar la base de datos</string>
@@ -238,11 +223,6 @@
     <string name="url_copied_to_clipboard">La URL copióse al cartafueyu</string>
     <string name="share">Compartir</string>
     <string name="share_file">Compartición de %s</string>
-    <string name="header_tvshows">Programes de TV</string>
-    <string name="header_movies">Películes</string>
-    <string name="next_episode">Episodiu siguiente</string>
-    <string name="recently_played">Reprodúxose apocayá</string>
-    <string name="recently_added">Amestóse apocayá</string>
 
     <string name="channels">Canales</string>
     <string name="resolution">Resolución</string>

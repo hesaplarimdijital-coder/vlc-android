@@ -93,14 +93,6 @@
         <item quantity="one">1 वीडियो</item>
         <item quantity="other">%d वीडियो</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 सिनेमा</item>
-        <item quantity="other">%d सिनेमा</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 टीवी शो</item>
-        <item quantity="other">%d टीवी शो</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 ट्रैक</item>
         <item quantity="other">%d पगडंडीयां</item>
@@ -125,7 +117,6 @@
     <string name="nohistory">आपके पास अभी तक कोई प्लेबैक इतिहास नहीं है।</string>
     <string name="cant_ban_root">बुनियादी फोल्डर से सम्बन्ध खत्म नहीं कर सकते</string>
 
-    <string name="cover_art">आवरण कला</string>
     <string name="shuffle_all_title">कभी ये कभी वो</string>
     <string name="shuffle_title">कभी ये कभी वो का तरीका</string>
     <string name="shuffle">कभी ये कभी वो बंद</string>
@@ -166,7 +157,6 @@
     <string name="sleep_in">निद्रा घड़ी</string>
     <string name="jump_to_time"> समय पर कूदें</string>
     <string name="wait_before_sleep">पहले ये कलाकृति खत्म हो जाए फिर</string>
-    <string name="server_add_title">पसंदीदा में एक नया सर्वर जोड़ें</string>
     <string name="server_domain_hint">सर्वर का पता (डोमेन नाम या आईपी)</string>
     <string name="server_share_hint">नेटवर्क शेयर नाम (या आईपी पता)</string>
     <string name="server_folder_hint">फोल्डर पथ (वैकल्पिक)</string>
@@ -180,8 +170,6 @@
     <string name="favorites_add">पसंदीदा में जोड़ें</string>
     <string name="favorites_remove">पसंदीदा से हटाएँ</string>
     <string name="favorites_edit">संपादन</string>
-    <string name="favorite_added">पसंदीदा में जोड़ा गया</string>
-    <string name="favorite_removed">पसंदीदा से हटाया गया</string>
 
     <string name="streams">धाराएं</string>
     <string name="open_mrl_dialog_msg">नेटवर्क पता बताएं : उदाहरण : http://, mms:// या rtsp://</string>
@@ -269,8 +257,6 @@
     <string name="subtitle_decoration_none">कोई नहीं</string>
     <string name="subtitle_decoration_shadow">छाया</string>
     <string name="subtitle_decoration_outline">परिक्रमा</string>
-    <string name="previous_color">पहले वाला रंग</string>
-    <string name="new_color">नया रंग</string>
     <string name="audio_prefs_category">ऑडियो</string>
     <string name="lockscreen_cover_title">लॉकस्क्रीन पर कलाकृति चित्र दिखाना है</string>
     <string name="lockscreen_cover_summary">अगर हो सके तो, चल रही कलाकृति चित्र को लॉकस्क्रीन पर वॉलपेपर की तरह लगाना है</string>
@@ -317,8 +303,6 @@
     <string name="resume_playback_summary">अन्यथा रोके रहें</string>
     <string name="force_shuffle_title">कभी ये कभी वो</string>
     <string name="quit">एप से बहार निकलें और पुनः शुरू करें</string>
-    <string name="restart_message_OK">ठीक है</string>
-    <string name="restart_message_Later">बाद में</string>
     <string name="browser_show_all_title">केवल कलाकृतियाँ ही दिखायी दें</string>
 
     <string name="developer_prefs_category">डेवलपर</string>
@@ -336,7 +320,6 @@
 
 
     <string name="network_browsing">स्थानीय नेटवर्क</string>
-    <string name="browsing">ब्राउज़िंग</string>
 
     <string name="file_size">फाइल का आकार</string>
 
@@ -370,8 +353,6 @@
     <string name="add_to_playlist">प्लेलिस्ट में जोड़ें</string>
     <string name="open_subtitles_vip">आप OpenSubtitles के वीआईपी यूजर हैं।</string>
     <string name="browse_folder">फोल्डर ढूंढें</string>
-    <string name="listen">सुनें</string>
-    <string name="videos_all">सभी वीडियो</string>
     <string name="clear_playback_history">प्लेबैक इतिहास को मिटायें</string>
     <string name="ml_scanning">कलाकृतियाँ बीनीं जा रहीं हैं</string>
     <string name="ml_parse_media">कलाकृति को समझा जा रहा है</string>
@@ -421,7 +402,6 @@
     <string name="ctx_player_subs_track">लिखितसंवाद पगडंडी</string>
     <string name="removed_from_playlist_anonymous">प्लेलिस्ट से हटाए गए आइटम</string>
     <string name="welcome_title">वीएलसी आपका स्वागत करता है!</string>
-    <string name="onboarding_all_set">वीएलसी अब तैयार है!</string>
     <string name="light_theme">गोरा रंगरूप</string>
     <string name="add">जोड़ें</string>
     <string name="add_to_new_playlist">नयी प्लेलिस्ट में जोड़ें</string>
@@ -434,7 +414,6 @@
     <string name="show_video_thumbnails">वीडियो थंबनेल दिखाएं</string>
     <string name="enable_equalizer">चालू करें</string>
     <string name="reset">मूल स्थिति में लायें</string>
-    <string name="validation_delete_playlist">क्या आप सचमुच इस प्लेलिस्ट को मिटाना चाहते हैं?</string>
     <string name="send">भेजें</string>
     <string name="send_crash_action_title">आप क्या करना चाहते हैं?</string>
     <string name="report_a_bug">एप्प में गड़बड़ी की सूचना दें</string>
@@ -445,16 +424,6 @@
     <string name="directory_not_scanned">ये फोल्डर स्कैन नहीं हुआ है</string>
     <string name="video_group_size_summary">पहले %s अक्षरों के आधार पर समूह बनायें</string>
     <string name="share_track_info">लिखितसंवाद पगडंडी का परिचय औरों को दें</string>
-    <string name="moviepedia_result">वीडियो के परिणाम</string>
-    <string name="written_by">लेखक</string>
-    <string name="music_by">संगीतज्ञ</string>
-    <string name="header_movies">फिल्में</string>
-    <string name="resume_episode">पुनः आरम्भ करें (%s)</string>
-    <string name="start_over">शुरू से चलायें</string>
-    <string name="next_episode">अगला एपिसोड</string>
-    <string name="open_network_settings">नेटवर्क सेटिंग खोलें?</string>
-    <string name="recently_played">हाल ही में चलाये गए</string>
-    <string name="recently_added">हाल ही में जोडें गए</string>
     <string name="playback_multiple_errors">एक साथ कई सारी कलाकृतियाँ नहीं चलायी जा सकतीं</string>
     <string name="clear_media_db_message">वीएलसी सेटिंगें छोड़कर आपकी सभी गतिविधियाँ, बूक्मार्क और प्लेलिस्टें मिट जायेंगी।</string>
     <string name="clear_app_data_message">आपकी सभी गतिविधियाँ, बूक्मार्क, प्लेलिस्टें और वीएलसी की सेटिंगें मिट जायेंगी।</string>
@@ -480,7 +449,6 @@
     <string name="empty_directory">खाली</string>
 
     <string name="donate">वीएलसी की सहायता करें</string>
-    <string name="tip_jar">वीएलसी की सहायता करें</string>
     <string name="thank_you">धन्यवाद</string>
     <string name="mark_as_played">चला हुआ चिन्हित करें</string>
     <string name="mark_as_not_played">बिना चला हुआ चिन्हित करें</string>
@@ -496,12 +464,7 @@
     <string name="browser_show_missing_media">जो न मिल रही हों उनको भी दिखायें?</string>
     <string name="stop_unpaubale">ये कलाकृति चलना रुक नहीं रही है। बंद कर दें?</string>
     <string name="add_to_existing_playlist">पहले से बनी हुई प्लेलिस्ट में जोड़ें</string>
-    <string name="start_vlc">वीएलसी चलायें</string>
     <string name="jump_delay_summary">%s सेकण्ड</string>
-    <string name="move_up">ऊपर खिसकाएं</string>
-    <string name="move_down">नीचे खिसकाएं</string>
-    <string name="remove_from_playlist">प्लेलिस्ट से हटायें</string>
-    <string name="play_media">%s चलायें</string>
 
     <string name="add_button">जोड़ें</string>
     <string name="add_all_button">सभी को जोड़ें</string>

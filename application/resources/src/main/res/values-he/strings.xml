@@ -73,7 +73,6 @@
     <string name="confirm_delete_eq">למחוק את הערכה הזאת?</string>
     <string name="confirm_delete_vlc_eq">להסתיר את הערכה הזאת?\nאפשר לשחזור אותה בהגדרות האקוולייזרים.</string>
     <string name="confirm_replace_playlist">להחליף את רשימת הנגינה ‚%1$s’?</string>
-    <string name="invalid_settings_file">קובץ הגדרות שגוי</string>
     <string name="confirm_delete_message">מדובר בשינוי קבוע ולא ניתן לבטל אותו.</string>
     <string name="confirm_delete_album">למחוק את האלבום ‚%1$s’?</string>
     <string name="confirm_delete_several_media">למחוק את %1$d פריטי המדיה האלו?</string>
@@ -127,17 +126,6 @@
         <item quantity="two">%d סרטונים</item>
         <item quantity="other">%d סרטונים</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">סרט אחד</item>
-        <item quantity="two">%d סרטים</item>
-        <item quantity="many">%d סרטים</item>
-        <item quantity="other">%d סרטים</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">סדרת טלוויזיה אחת</item>
-        <item quantity="two">%d סדרות טלוויזיה</item>
-        <item quantity="other">%d סדרות טלוויזיה</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">רצועה אחת</item>
         <item quantity="two">%d רצועות</item>
@@ -174,7 +162,6 @@
     <string name="nohistory">אין לך היסטוריית נגינה עדיין.</string>
     <string name="cant_ban_root">אי אפשר לחסום תיקייה עליונה</string>
 
-    <string name="cover_art">האומנות על העטיפה</string>
     <string name="shuffle_all_title">לערבב את הכול</string>
     <string name="shuffle_title">מצב ערבול</string>
     <string name="shuffle">כיבוי הערבול</string>
@@ -235,7 +222,6 @@
     <string name="video_player_remote">שלט לנגן הווידאו</string>
     <string name="remote_keyboard_navigation">ניווט עם מקלדת</string>
 
-    <string name="server_add_title">הוספת שרת חדש למועדפים</string>
     <string name="server_domain_hint">כתובת השרת (שם מארח או כתובת IP)</string>
     <string name="server_share_hint">כתובת השרת (שם מארח או כתובת IP)</string>
     <string name="server_folder_hint">נתיב התיקייה (רשות)</string>
@@ -249,8 +235,6 @@
     <string name="favorites_add">להוסיף למועדפים</string>
     <string name="favorites_remove">להסיר מהמועדפים</string>
     <string name="favorites_edit">לערוך</string>
-    <string name="favorite_added">נשמר למועדפים</string>
-    <string name="favorite_removed">הוסר מהמועדפים</string>
 
     <string name="streams">תזרימים</string>
     <string name="open_mrl_dialog_msg">נא למלא כתובת רשת כגון http://‎,‏ mms://‎, או rtsp://‎</string>
@@ -371,8 +355,6 @@
     <string name="subtitle_decoration_none">ללא</string>
     <string name="subtitle_decoration_shadow">הצללה</string>
     <string name="subtitle_decoration_outline">קו מתאר</string>
-    <string name="previous_color">הצבע הקודם</string>
-    <string name="new_color">צבע חדש</string>
 
     <string name="audio_prefs_category">שמע</string>
     <string name="lockscreen_cover_title">תמונת המדיה במסך הנעילה</string>
@@ -426,7 +408,6 @@
     <string name="remote_access_info">פרטי גישה מרחוק</string>
     <string name="remote_access_content">תוכן</string>
     <string name="remote_access_medialibrary_content">תוכן ספריית מדיה</string>
-    <string name="remote_access_medialibrary_content_summary">מופעל: %1$s\nמושבת: %2$s</string>
     <string name="remote_access_file_browser_content">דפדפן קבצים</string>
     <string name="remote_access_network_browser_content">דפדפן רשת</string>
     <string name="remote_access_playback_control">שליטה בנגינה</string>
@@ -489,8 +470,6 @@
     <string name="network_caching_popup">הערך חייב להיות בין 0 ל־60000 מ״ש</string>
     <string name="quit">יציאה מהיישום והפעלה מחדש</string>
     <string name="restart_message">השינויים יחולו עם הפעלת היישום מחדש.\n\nלהפעיל מחדש כעת?</string>
-    <string name="restart_message_OK">אישור</string>
-    <string name="restart_message_Later">אחר כך</string>
     <string name="browser_show_all_title">הצגת קובצי מולטימדיה בלבד</string>
 
     <string name="developer_prefs_category">למתכנתים</string>
@@ -524,12 +503,9 @@
     <string name="sending_log">הדוח נשלח…</string>
 
 
-    <string name="no_result">לא נמצאו תוצאות</string>
-    <string name="no_internet_connection">נא לבדוק את החיבור שלך לאינטרנט</string>
     <string name="retry">לנסות שוב</string>
 
     <string name="network_browsing">רשת מקומית</string>
-    <string name="browsing">עיון</string>
 
     <string name="file_size">גודל קובץ</string>
 
@@ -571,7 +547,6 @@
     <string name="open_in_browser">פתיחה בדפדפן</string>
     <string name="install">התקנה</string>
     <string name="install_nightly">התקנת המהדורה שנבנתה בלילה</string>
-    <string name="install_nightly_alert">מהדורות ליליות הן גרסאות ניסיוניות שמתעדכנות מדי יום.\n\nיכולות החדשות עלולות גם להצטרף תקלות!</string>
     <string name="nightly_version">גרסה שנמצאה: %2$s - %1$s</string>
     <string name="update_nightly_alert">הגרסה שפועלת אצלך היא הגרסה הליילית. לחפש עדכונים מדי פעם?</string>
     <string name="update_nightly">עדכון אוטומטי</string>
@@ -639,12 +614,10 @@
     <string name="popup_playback_title">נגינת סרטונים במצב חלונית</string>
     <string name="open_subtitles_vip">יש לך מינוי אח״מים (VIP) ל־OpenSubtitles</string>
     <string name="browse_folder">עיון בתיקייה</string>
-    <string name="listen">האזנה</string>
     <string name="episodes">פרקים</string>
     <string name="movies">סרטים</string>
     <string name="videos">סרטונים</string>
     <string name="default_action_videos">סרטונים</string>
-    <string name="videos_all">כל הסרטונים</string>
     <string name="clear_playback_history">מחיקת היסטוריית הנגינה</string>
     <string name="ml_scanning">מתבצעת סריקה לאיתור קובצי מדיה</string>
     <string name="ml_parse_media">המדיה עוברת ניתוח</string>
@@ -739,8 +712,6 @@
     <string name="onboarding_theme_title">להרגיש כמו בבית</string>
     <string name="done">סיום</string>
     <string name="onboarding_scan_title">זיהוי אוטומטי של המדיה שלך</string>
-    <string name="onboarding_all_set">הנגן VLC מוכן!</string>
-    <string name="onboarding_permission_given">כעת ניתן לגלות את המדיה שלך אוטומטית, להשתמש בכתוביות חיצוניות לרבות נגינה של תזרימים או מדיה מהרשת</string>
     <string name="daynight_system_explanation">VLC יעבור למצב כהה בהתאם להגדרות המערכת</string>
     <string name="daynight_legacy_explanation">VLC יעבור אוטומטית למצב לילה בזמן המתאים</string>
     <string name="onboarding_scanning_enable">לאפשר ל־VLC לסרוק את המכשיר שלי לאיתור תוכן מדיה</string>
@@ -753,7 +724,6 @@
     <string name="create">יצירה</string>
     <string name="resume_card_message">להמשיך בנגינה של %1$s?</string>
     <string name="misc">שונות</string>
-    <string name="device_default">בררת המחדל של המכשיר</string>
     <string name="track_number">%d רצועות</string>
     <string name="jump_to">קפיצה אל</string>
     <string name="show_video_thumbnails">תמונות ייצוגיות של סרטונים</string>
@@ -772,15 +742,12 @@
         <item quantity="other">%d רצועות נוספו לסוף</item>
     </plurals>
     <string name="remove_current">הסרת הנוכחית</string>
-    <string name="validation_delete_playlist">למחוק את רשימת הנגינה הזו?</string>
-    <string name="validation_delete_playlist_text">פעולה זו היא בלתי הפיכה.</string>
     <string name="display_settings">הגדרות תצוגה</string>
     <string name="incognito_mode">מצב אלמוני</string>
     <string name="persistent_incognito_mode">מצב אלמוניות קבוע</string>
     <string name="persistent_incognito_mode_summary">להשאיר את מצב האלמוניות פעיל אפילו לאחר הפעלת היישומון מחדש</string>
     <string name="display_in_list">הצגה ברשימה</string>
     <string name="display_in_grid">הצגה בטבלה</string>
-    <string name="dump_db_succes">מסד הנתונים נלכד ונשמר בנתיב השורש של האחסון הפנימי</string>
     <string name="dump_db_failure">לכידת מסד הנתונים נכשלה</string>
     <string name="send_crash_title">מדווח הקריסות של VLC</string>
     <string name="send_crash_description">שליחת דוח הקריסה שלך, מסייעת לנו בשיפור היציבות של VLC.</string>
@@ -813,25 +780,6 @@
     <string name="share_message">הנה %s</string>
     <string name="share_track_info">שיתוף פרטי הרצועה</string>
     <string name="share_track">כרגע בהאזנה ל־%s</string>
-    <string name="find_metadata">איתור נתוני על</string>
-    <string name="moviepedia_hint">חיפוש נתוני על</string>
-    <string name="moviepedia_result">תוצאות וידאו</string>
-    <string name="directed_by">בוים על ידי</string>
-    <string name="casting">ליהוק</string>
-    <string name="produced_by">הופק על ידי</string>
-    <string name="written_by">נכתב על ידי</string>
-    <string name="music_by">מוזיקה על ידי</string>
-    <string name="posters">כרזות</string>
-    <string name="backdrops">תפאורות</string>
-    <string name="header_tvshows">סדרות טלוויזיה</string>
-    <string name="header_movies">סרטים</string>
-    <string name="season_number">עונה %s</string>
-    <string name="resume_episode">להמשיך (%s)</string>
-    <string name="start_over">להתחיל מההתחלה</string>
-    <string name="next_episode">הפרק הבא</string>
-    <string name="open_network_settings">לפתוח הגדרות רשת?</string>
-    <string name="recently_played">התנגנו לאחרונה</string>
-    <string name="recently_added">נוספו לאחרונה</string>
     <string name="playback_multiple_errors">לא ניתן לנגן מגוון פריטי מדיה יחדיו</string>
     <string name="clear_media_db_message">התקדמות הנגינה, הסימניות ורשימות הנגינה שיצרת יאבדו אך ההגדרות של VLC ל־Android תישמרנה</string>
     <string name="clear_app_data_message">התקדמות הנגינה, הסימניות, רשימות הנגינה וכל ההגדרות של VLC</string>
@@ -879,7 +827,6 @@
     <string name="subscription_cancel">ניתן לבטל את המינוי דרך חנות Play</string>
     <string name="subscription_cancel_tv">איך לבטל מינוי</string>
     <string name="donate_unsubscribe_tv">כדי לבטל מינוי, נא לפתוח את %s בטלפון או במחשב או לסרוק את הקוד הזה:</string>
-    <string name="tip_jar">סיוע ל־VLC</string>
     <string name="thank_you">תודה רבה לך</string>
     <string name="thank_you_desc">תודה על המימון\nהוא יסייע לנו מאוד בשיפור VLC!</string>
     <string name="donate_again">לממן את היישומון שוב</string>
@@ -892,7 +839,6 @@
     <string name="allow_otg">לאפשר גישה ל־OTG</string>
     <string name="allow_otg_description">נא לבחור את כונן ה־OTG כדי לאפשר גישה ל־VLC.</string>
     <string name="video_hud_timeout">השהיית הסתרת פקדי נגן וידאו</string>
-    <string name="remove_from_history">הסרה מההיסטוריה</string>
     <string name="prefersmbv1">להעדיף SMB 1</string>
     <string name="prefersmbv1_summary">יש לבטל את ההגדרה הזאת אם נתקלת בתקלות בגלישה בשרת ה־SMB שלך</string>
     <string name="audio_delay_global">השהיית השמע הוגדרה ל־%s מילישניות לכל הסרטונים</string>
@@ -927,7 +873,6 @@
     <string name="unlock">שחרור</string>
     <string name="lock_with_pin">הפעלת נעילה קוד אישי מחדש</string>
     <string name="unlock_with_pin">שחרור מצב בטוח</string>
-    <string name="lock_with_pin_short">נעילה בקוד אישי</string>
     <string name="restrict_settings">הגבלת גישה להגדרות</string>
     <string name="search_prefs">חיפוש בהגדרות</string>
     <string name="stop_unpaubale">אי אפשר להשהות את המדיה הזאת. לעצור אותה במקום?</string>
@@ -947,14 +892,9 @@
     <string name="optional_features_warning">תכונה זו היא בטא ועשויה לגרום לקריסה ולערעור היציבות</string>
     <string name="network_indexing">יצירת אינדקס קובצי רשת</string>
     <string name="network_indexing_warning">יצירת אינדקס קובצי רשת נמצאת בבדיקה.\nתקלות מוכרות:\n• ביצועים אטיים\n\nאם נתקלת בבעיות אחרות, נא לדווח עליהן בפורום שלנו.</string>
-    <string name="start_vlc">הפעלת VLC</string>
     <string name="jump_delay">זמן השהיית קדימה/אחורה</string>
     <string name="long_jump_delay">זמן השהיית נגיעה ארוכה לקדימה/אחורה</string>
     <string name="jump_delay_summary">%s שניות</string>
-    <string name="move_up">להעלות למעלה</string>
-    <string name="move_down">להוריד למטה</string>
-    <string name="remove_from_playlist">הסרה מרשימת הנגינה</string>
-    <string name="play_media">לנגן את %s</string>
     <string name="edit_eq_preset">עריכת ערכת אקוולייזרים</string>
     <string name="edit_eq_name_not_allowed">השם הזה אסור לשימוש</string>
     <string name="export_equalizer">ייצוא אקוולייזר</string>
@@ -1079,7 +1019,6 @@
     <string name="downloading">מתקבל</string>
     <string name="talkback_action_rewind">לחזור %s שניות</string>
     <string name="talkback_action_forward">להתקדם %s שניות</string>
-    <string name="talkback_display_settings">הגדרות תצוגה</string>
     <string name="talkback_already_played">כבר התנגן</string>
     <string name="show_only_favs">להציג מועדפים בלבד</string>
     <string name="ignore_headset_media_button_presses">התעלמות מלחיצות על כפתור מדיה באוזניות</string>

@@ -2,7 +2,6 @@ package org.videolan.vlc.media
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -35,10 +34,7 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.medialibrary.interfaces.media.Playlist
 import org.videolan.medialibrary.interfaces.media.VideoGroup
 import org.videolan.medialibrary.media.MediaLibraryItem
-import org.videolan.resources.ACTION_OPEN_CONTENT
 import org.videolan.resources.AppContextProvider
-import org.videolan.resources.CONTENT_PREFIX
-import org.videolan.resources.EXTRA_CONTENT_ID
 import org.videolan.resources.MEDIALIBRARY_PAGE_SIZE
 import org.videolan.resources.VLCOptions
 import org.videolan.resources.interfaces.IMediaContentResolver
@@ -47,7 +43,6 @@ import org.videolan.resources.util.getFromMl
 import org.videolan.tools.AppScope
 import org.videolan.tools.Notices
 import org.videolan.tools.Settings
-import org.videolan.tools.localBroadcastManager
 import org.videolan.tools.markBidi
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.R
@@ -391,49 +386,6 @@ object MediaUtils {
     }
 
     fun deletePlaylist(playlist: Playlist) = AppScope.launch(Dispatchers.IO) { playlist.delete() }
-
-    fun openMediaNoUiFromTvContent(context: Context, data: Uri?) = AppScope.launch {
-        val id = data?.lastPathSegment ?: return@launch
-        when {
-            id.startsWith(CONTENT_PREFIX) -> {
-                val intent = Intent(ACTION_OPEN_CONTENT).putExtra(EXTRA_CONTENT_ID, id)
-                context.localBroadcastManager.sendBroadcast(intent)
-            }
-            else -> { //Media from medialib
-                val mw = context.getFromMl {
-                    val longId = id.substringAfter("_").toLong()
-                    when {
-                        id.startsWith("album_") -> getAlbum(longId)
-                        id.startsWith("artist_") -> getArtist(longId)
-                        else -> getMedia(longId)
-                    }
-                } ?: return@launch
-                when (mw) {
-                    is MediaWrapper -> openMediaNoUi(context, mw.uri)
-                    is Album -> playAlbum(context, mw)
-                    is Artist -> playArtist(context, mw)
-                }
-            }
-        }
-    }
-
-    private fun playAlbum(context: Context?, album: Album) {
-        if (context == null) return
-        SuspendDialogCallback(context) { service ->
-            album.tracks?.takeIf { it.isNotEmpty() }?.let { list ->
-                service.load(list, 0)
-            }
-        }
-    }
-
-    private fun playArtist(context: Context?, artist: Artist) {
-        if (context == null) return
-        SuspendDialogCallback(context) { service ->
-            artist.tracks?.takeIf { it.isNotEmpty() }?.let { list ->
-                service.load(list, 0)
-            }
-        }
-    }
 
     suspend fun useAsSoundFont(context: Context, uri:Uri) {
         withContext(Dispatchers.IO) {

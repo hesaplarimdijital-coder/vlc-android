@@ -99,18 +99,6 @@
         <item quantity="many">%d filmów</item>
         <item quantity="other">%d filmy</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="few">%d filmy</item>
-        <item quantity="many">%d filmów</item>
-        <item quantity="other">%d filmy</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 serial</item>
-        <item quantity="few">%d seriale</item>
-        <item quantity="many">%d serialów</item>
-        <item quantity="other">%d seriale</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 utwór</item>
         <item quantity="few">%d utwory</item>
@@ -135,7 +123,6 @@
     <string name="nosubfolder">Brak podfolderów</string>
     <string name="directorynotfound">Nie znaleziono ścieżki katalogu \'%1$s\'.</string>
     <string name="nohistory">Nie posiadasz jeszcze historii odtwarzania.</string>
-    <string name="cover_art">Okładka</string>
     <string name="shuffle_all_title">Losowo wszystkie</string>
     <string name="shuffle_title">Tryb losowo</string>
     <string name="shuffle">Losowo wyłączone</string>
@@ -177,7 +164,6 @@
     <string name="sleep_title">Wyłącznik czasowy</string>
     <string name="sleep_in">Zmień wyłącznik czasowy</string>
     <string name="jump_to_time">Skocz do czasu</string>
-    <string name="server_add_title">Dodaj nowy serwer do ulubionych</string>
     <string name="server_folder_hint">Ścieżka folderu (opcjonalnie)</string>
     <string name="server_username_hint">Nazwa użytkownika</string>
     <string name="server_port">Port: </string>
@@ -188,8 +174,6 @@
     <string name="favorites_add">Dodaj do ulubionych</string>
     <string name="favorites_remove">Usuń z ulubionych</string>
     <string name="favorites_edit">Edytuj</string>
-    <string name="favorite_added">Zapisano do ulubionych</string>
-    <string name="favorite_removed">Usunięto z ulubionych</string>
 
     <string name="streams">Strumienie</string>
     <string name="search">Szukaj</string>
@@ -260,8 +244,6 @@
     <string name="subtitles_color">Kolor</string>
     <string name="subtitle_decoration_none">Brak</string>
     <string name="subtitle_decoration_shadow">Cień</string>
-    <string name="previous_color">Poprzedni kolor</string>
-    <string name="new_color">Nowy kolor</string>
 
     <string name="audio_prefs_category">Dźwięk</string>
     <string name="lockscreen_cover_title">Okładka albumu na ekranie blokady</string>
@@ -329,8 +311,6 @@
     <string name="blurred_cover_background_summary">Niewyraźna okładka w tle odtwarzacza audio </string>
     <string name="quit">Zamknij i uruchom ponownie aplikację</string>
     <string name="restart_message">Zmiany będą zaakceptowane po ponownym uruchomieniu aplikacji.\n\nZrestartować teraz?</string>
-    <string name="restart_message_OK">Tak</string>
-    <string name="restart_message_Later">Później</string>
     <string name="developer_prefs_category">Programisty</string>
     <string name="enable_verbose_mode">Szczegółowość</string>
     <string name="enable_verbose_mode_summary">Zwiększenie liczby komunikatów (logcat)</string>
@@ -354,11 +334,8 @@
     <string name="sending_log">Wysyłanie dziennika…</string>
 
 
-    <string name="no_result">Nie znaleziono wyników</string>
-    <string name="no_internet_connection">Sprawdź swoje połączenie internetowe</string>
     <string name="retry">Ponów</string>
     <string name="network_browsing">Sieć lokalna</string>
-    <string name="browsing">Przeglądanie</string>
 
     <string name="file_size">Rozmiar pliku</string>
 
@@ -416,8 +393,6 @@
     <string name="add_to_playlist">Dodaj do listy odtwarzania</string>
     <string name="popup_playback_title">Odtwórz wideo w oknie pop-up</string>
     <string name="browse_folder">Przeglądaj folder</string>
-    <string name="listen">Posłuchaj</string>
-    <string name="videos_all">Wszystkie filmy</string>
     <string name="clear_playback_history">Wyczyść historię odtwarzania</string>
     <string name="ml_scanning">Wyszukiwanie plików multimedialnych</string>
     <string name="ml_parse_media">Parsowanie multimediów</string>
@@ -512,7 +487,6 @@
     <string name="add_to_new_playlist">Dodaj do nowej listy odtwarzania</string>
     <string name="resume_card_message">Wznowić odtwarzanie %1$s?</string>
     <string name="misc">Różne</string>
-    <string name="device_default">Systemowy</string>
     <string name="track_number">%d utwory</string>
     <string name="jump_to">Przejdź do</string>
     <string name="show_video_thumbnails">Miniaturki wideo</string>
@@ -533,11 +507,8 @@
         <item quantity="other">Dołączono %d utworów</item>
     </plurals>
     <string name="remove_current">Usuń bieżące</string>
-    <string name="validation_delete_playlist">Na pewno chcesz usunąć tę listę odtwarzania?</string>
-    <string name="validation_delete_playlist_text">Ta akcja nie może zostać cofnięta.</string>
     <string name="display_in_list">Wyświetl w liście</string>
     <string name="display_in_grid">Wyświetl w siatce</string>
-    <string name="dump_db_succes">Baza danych zrzucona do głównego katalogu pamięci wewnętrznej</string>
     <string name="dump_db_failure">Nie udało się zrzucić bazy danych</string>
     <string name="send_crash_title">Reporter awarii VLC</string>
     <string name="send_crash_description">Wysyłając awarię, pomożesz nam poprawić stabilność VLC.</string>
@@ -565,25 +536,6 @@
     <string name="invalid_file">Nieprawidłowy plik. Nie można udostępnić.</string>
     <string name="share_file">Udostępnij %s</string>
     <string name="share_message">Tutaj jest %s</string>
-    <string name="find_metadata">Znajdź metadane</string>
-    <string name="moviepedia_hint">Wyszukaj metadane</string>
-    <string name="moviepedia_result">Wyniki wideo</string>
-    <string name="directed_by">Reżyseria:</string>
-    <string name="casting">Obsada:</string>
-    <string name="produced_by">Produkcja:</string>
-    <string name="written_by">Scenariusz:</string>
-    <string name="music_by">Muzyka:</string>
-    <string name="posters">Plakaty</string>
-    <string name="backdrops">Tła</string>
-    <string name="header_tvshows">Seriale</string>
-    <string name="header_movies">Filmy</string>
-    <string name="season_number">Sezon %s</string>
-    <string name="resume_episode">Wznów (%s)</string>
-    <string name="start_over">Zacznij od początku</string>
-    <string name="next_episode">Następny odcinek</string>
-    <string name="open_network_settings">Otworzyć ustawienia sieciowe?</string>
-    <string name="recently_played">Ostatnio odtwarzane</string>
-    <string name="recently_added">Ostatnio dodane</string>
     <string name="playback_multiple_errors">Nie można odtwarzać kilku multimediów</string>
     <string name="clear_media_db_message">Utracisz swoje postępy, zakładki i utworzone listy odtwarzania, ale zachowasz ustawienia VLC dla Androida</string>
     <string name="clear_app_data_message">Utracisz swoje postępy, zakładki, listy odtwarzania i wszystkie ustawienia VLC</string>
@@ -630,7 +582,6 @@
     <string name="subscription_cancel">Możesz zrezygnować z subskrypcji w Sklepie Play</string>
     <string name="subscription_cancel_tv">Jak zrezygnować z subskrypcji</string>
     <string name="donate_unsubscribe_tv">Aby anulować subskrypcję, otwórz %s na telefonie lub komputerze albo zeskanuj ten kod:</string>
-    <string name="tip_jar">Pomóż VLC</string>
     <string name="thank_you">Dziękujemy</string>
     <string name="thank_you_desc">Dziękujemy za wsparcie!\nPomoże nam to w ulepszaniu VLC!</string>
     <string name="donate_again">Ponownie zasponsoruj aplikację</string>
@@ -642,7 +593,6 @@
     <string name="allow_otg">Zezwól na dostęp do OTG</string>
     <string name="allow_otg_description">Wybierz swój dysk OTG, aby umożliwić dostęp do VLC</string>
     <string name="video_hud_timeout">Opóźnienie ukrywania kontroli odtwarzacza wideo</string>
-    <string name="remove_from_history">Usuń z historii</string>
     <string name="prefersmbv1">Preferuj SMB 1</string>
     <string name="prefersmbv1_summary">Wyłącz to ustawienie, jeśli masz problemy z przeglądaniem serwera SMB</string>
     <string name="audio_delay_global">Opóźnienie dźwięku ustawione na %s ms dla wszystkich filmów</string>
@@ -664,12 +614,7 @@
     <string name="optional_features">Funkcje opcjonalne</string>
     <string name="optional_features_summary">Funkcje beta, które są obecnie testowane i mogą być niestabilne</string>
     <string name="optional_features_warning">Ta funkcja jest w wersji beta i może powodować awarie i niestabilność</string>
-    <string name="start_vlc">Uruchom VLC</string>
     <string name="jump_delay_summary">%s sekundy</string>
-    <string name="move_up">Przenieś w górę</string>
-    <string name="move_down">Przenieś w dół</string>
-    <string name="remove_from_playlist">Usuń z playlisty</string>
-    <string name="play_media">Odtwarzaj %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Dodać zduplikowane element(y)?</string>
     <string name="add_button">Dodaj</string>

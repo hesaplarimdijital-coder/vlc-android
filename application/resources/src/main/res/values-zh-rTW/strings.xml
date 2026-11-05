@@ -70,7 +70,6 @@
     <string name="confirm_delete_eq">您確定您想要刪除此預先設定集嗎？</string>
     <string name="confirm_delete_vlc_eq">您確定您想要隱藏此預先設定集？\n您可以在等化器設定中還原。</string>
     <string name="confirm_replace_playlist">您確定您要取代播放清單「%1$s」嗎？</string>
-    <string name="invalid_settings_file">無效的設定檔</string>
     <string name="confirm_delete_message">此為永久且無法復原。</string>
     <string name="confirm_delete_album">刪除專輯「%1$s」？</string>
     <string name="confirm_delete_several_media">刪除這 %1$d 個媒體嗎？</string>
@@ -111,12 +110,6 @@
     <plurals name="videos_quantity">
         <item quantity="other">%d 個影片</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="other">%d 部電影</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="other">%d 部電視節目</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="other">%d 個軌道</item>
     </plurals>
@@ -150,7 +143,6 @@
     <string name="nohistory">目前並無播放記錄。</string>
     <string name="cant_ban_root">您無法封鎖根資料夾</string>
 
-    <string name="cover_art">專輯封面</string>
     <string name="shuffle_all_title">全部隨機</string>
     <string name="shuffle_title">隨機模式</string>
     <string name="shuffle">關閉隨機</string>
@@ -208,7 +200,6 @@
     <string name="video_player_remote">影片播放器遠端</string>
     <string name="remote_keyboard_navigation">鍵盤導覽</string>
 
-    <string name="server_add_title">新增伺服器至收藏</string>
     <string name="server_folder_hint">資料夾路徑 (可選)</string>
     <string name="server_username_hint">使用者名稱</string>
     <string name="server_port">連接埠:</string>
@@ -219,8 +210,6 @@
     <string name="favorites_add">加入至收藏</string>
     <string name="favorites_remove">從收藏中移除</string>
     <string name="favorites_edit">編輯</string>
-    <string name="favorite_added">已儲存至收藏</string>
-    <string name="favorite_removed">已從收藏中移除</string>
 
     <string name="streams">串流</string>
     <string name="search">搜尋</string>
@@ -337,8 +326,6 @@
     <string name="subtitle_decoration_none">無</string>
     <string name="subtitle_decoration_shadow">陰影</string>
     <string name="subtitle_decoration_outline">輪廓</string>
-    <string name="previous_color">先前的色彩</string>
-    <string name="new_color">新色彩</string>
 
     <string name="audio_prefs_category">音訊</string>
     <string name="lockscreen_cover_title">鎖定畫面中的媒體封面</string>
@@ -392,7 +379,6 @@
     <string name="remote_access_info">遠端存取資訊</string>
     <string name="remote_access_content">內容</string>
     <string name="remote_access_medialibrary_content">媒體庫內容</string>
-    <string name="remote_access_medialibrary_content_summary">已啟用：%1$s\n已停用：%2$s</string>
     <string name="remote_access_file_browser_content">檔案瀏覽器</string>
     <string name="remote_access_network_browser_content">網路瀏覽器</string>
     <string name="remote_access_playback_control">控制播放</string>
@@ -455,8 +441,6 @@
     <string name="network_caching_popup">此值必須介於 0 至 60000 毫秒間</string>
     <string name="quit">離開並重新啟動應用程式</string>
     <string name="restart_message">應用程式重新啟動後，變更才會生效。\n\n現在要重新啟動嗎？</string>
-    <string name="restart_message_OK">確定</string>
-    <string name="restart_message_Later">稍後</string>
     <string name="browser_show_all_title">僅顯示多媒體檔案</string>
 
     <string name="developer_prefs_category">開發者</string>
@@ -490,11 +474,8 @@
     <string name="sending_log">正在發送紀錄…</string>
 
 
-    <string name="no_result">沒有找到結果</string>
-    <string name="no_internet_connection">檢查您的網路連線</string>
     <string name="retry">重試</string>
     <string name="network_browsing">區域網路</string>
-    <string name="browsing">瀏覽中</string>
 
     <string name="file_size">檔案大小</string>
 
@@ -536,7 +517,6 @@
     <string name="open_in_browser">在瀏覽器中開啟</string>
     <string name="install">安裝</string>
     <string name="install_nightly">安裝每日更新版</string>
-    <string name="install_nightly_alert">每日更新版是每天更新的實驗性版本。\n\n可以享受到最新的功能，但也可能會遇到新的臭蟲！</string>
     <string name="nightly_version">找到的版本：%2$s - %1$s</string>
     <string name="update_nightly_alert">您正在執行每夜版本。您想要定期尋找更新嗎？</string>
     <string name="update_nightly">自動更新</string>
@@ -604,12 +584,10 @@
     <string name="popup_playback_title">在彈出式視窗中撥放影片</string>
     <string name="open_subtitles_vip">您是 VIP OpenSubtitles 使用者</string>
     <string name="browse_folder">瀏覽資料夾</string>
-    <string name="listen">聽</string>
     <string name="episodes">劇集</string>
     <string name="movies">電影</string>
     <string name="videos">影片</string>
     <string name="default_action_videos">視訊</string>
-    <string name="videos_all">所有視訊</string>
     <string name="clear_playback_history">清除播放記錄</string>
     <string name="ml_scanning">正在掃描媒體檔案</string>
     <string name="ml_parse_media">正在解析媒體</string>
@@ -704,8 +682,6 @@
     <string name="onboarding_theme_title">隨便自由使用</string>
     <string name="done">完成</string>
     <string name="onboarding_scan_title">自動探索媒體</string>
-    <string name="onboarding_all_set">VLC 已準備就緒！</string>
-    <string name="onboarding_permission_given">您現在可以自動探索您的媒體、使用外部字幕以及播放串流或網路媒體</string>
     <string name="daynight_system_explanation">VLC 將會根據系統設定自動切換到深色模式</string>
     <string name="daynight_legacy_explanation">VLC 將會在適當的時間自動切換到夜間模式</string>
     <string name="onboarding_scanning_enable">讓 VLC 掃描裝置的媒體內容</string>
@@ -718,7 +694,6 @@
     <string name="create">建立</string>
     <string name="resume_card_message">繼續播放 %1$s 嗎？</string>
     <string name="misc">雜項</string>
-    <string name="device_default">裝置預設值</string>
     <string name="track_number">%d 個軌道</string>
     <string name="jump_to">跳至</string>
     <string name="show_video_thumbnails">影片縮圖</string>
@@ -733,15 +708,12 @@
         <item quantity="other">%d 軌道已附加</item>
     </plurals>
     <string name="remove_current">移除目前的</string>
-    <string name="validation_delete_playlist">您確定要刪除這個播放清單嗎？</string>
-    <string name="validation_delete_playlist_text">這個動作無法復原。</string>
     <string name="display_settings">顯示設定</string>
     <string name="incognito_mode">無痕模式</string>
     <string name="persistent_incognito_mode">持續無痕模式</string>
     <string name="persistent_incognito_mode_summary">即便重新啟動應用程式，仍維持啟用無痕模式</string>
     <string name="display_in_list">以清單顯示</string>
     <string name="display_in_grid">以方格顯示</string>
-    <string name="dump_db_succes">資料庫已傾印到內部儲存空間根目錄</string>
     <string name="dump_db_failure">無法傾印資料庫</string>
     <string name="send_crash_title">VLC 當機回報</string>
     <string name="send_crash_description">您可以藉由傳送當機報告，幫助我們改善 VLC 的穩定性。</string>
@@ -774,25 +746,6 @@
     <string name="share_message">這是 %s</string>
     <string name="share_track_info">分享軌道資訊</string>
     <string name="share_track">目前正在聆聽 %s</string>
-    <string name="find_metadata">尋找詮釋資料</string>
-    <string name="moviepedia_hint">搜尋詮釋資料</string>
-    <string name="moviepedia_result">視訊結果</string>
-    <string name="directed_by">導演為</string>
-    <string name="casting">正在投放</string>
-    <string name="produced_by">製作人為</string>
-    <string name="written_by">編劇為</string>
-    <string name="music_by">音樂製作人為</string>
-    <string name="posters">海報</string>
-    <string name="backdrops">背景</string>
-    <string name="header_tvshows">電視節目</string>
-    <string name="header_movies">電影</string>
-    <string name="season_number">第 %s 季</string>
-    <string name="resume_episode">繼續 (%s)</string>
-    <string name="start_over">重頭開始</string>
-    <string name="next_episode">下一集</string>
-    <string name="open_network_settings">開啟網路設定？</string>
-    <string name="recently_played">最近播放</string>
-    <string name="recently_added">最近新增</string>
     <string name="playback_multiple_errors">無法播放多種媒體</string>
     <string name="clear_media_db_message">您會遺失您的進度、書籤與您建立的播放清單，但會保留您的 Android 版 VLC 設定</string>
     <string name="clear_app_data_message">您將會遺失您的進度、書籤、播放清單與所有 VLC 設定</string>
@@ -840,7 +793,6 @@
     <string name="subscription_cancel">您可在 Play 商店中取消訂閱</string>
     <string name="subscription_cancel_tv">如何取消訂閱</string>
     <string name="donate_unsubscribe_tv">要取消訂閱，請在手機或電腦上開啟 %s，或是掃描此條碼：</string>
-    <string name="tip_jar">協助 VLC</string>
     <string name="thank_you">謝謝</string>
     <string name="thank_you_desc">感謝您的贊助！\n這將協助我們大大地改善 VLC！</string>
     <string name="donate_again">再次贊助應用程式</string>
@@ -853,7 +805,6 @@
     <string name="allow_otg">允許 OTG 存取</string>
     <string name="allow_otg_description">請選取您的 OTG 磁碟以允許 VLC 存取。</string>
     <string name="video_hud_timeout">影片播放器控制介面隱藏延遲</string>
-    <string name="remove_from_history">從歷史紀錄中移除</string>
     <string name="prefersmbv1">偏好 SMB 1</string>
     <string name="prefersmbv1_summary">如果您在瀏覽您的 SMB 伺服器時遇到一些問題，請取消勾選此設定</string>
     <string name="audio_delay_global">所有影片的音訊延遲設定為 %s 毫秒</string>
@@ -888,7 +839,6 @@
     <string name="unlock">解鎖</string>
     <string name="lock_with_pin">重新啟用 PIN 碼鎖定</string>
     <string name="unlock_with_pin">解鎖安全模式</string>
-    <string name="lock_with_pin_short">PIN 碼鎖定</string>
     <string name="restrict_settings">受限設定存取</string>
     <string name="search_prefs">搜尋設定</string>
     <string name="stop_unpaubale">此媒體不能暫停。要中止嗎？</string>
@@ -908,14 +858,9 @@
     <string name="optional_features_warning">此功能處於測試階段，可能造成當機與不穩定</string>
     <string name="network_indexing">網路索引</string>
     <string name="network_indexing_warning">網路索引目前正在測試中。\n已知問題：\n• 效能較差\n\n若您愈到了其他問題，請在我們的論壇上回報。</string>
-    <string name="start_vlc">啟動 VLC</string>
     <string name="jump_delay">向前／向後快轉時間延遲</string>
     <string name="long_jump_delay">長按向前／向後快轉時間延遲</string>
     <string name="jump_delay_summary">%s秒</string>
-    <string name="move_up">上移</string>
-    <string name="move_down">下移</string>
-    <string name="remove_from_playlist">從播放清單中移除</string>
-    <string name="play_media">播放 %s</string>
     <string name="edit_eq_preset">編輯等化器預先設定集</string>
     <string name="edit_eq_name_not_allowed">不允許此名稱</string>
     <string name="export_equalizer">匯出等化器</string>
@@ -1034,7 +979,6 @@
     <string name="downloading">正在下載</string>
     <string name="talkback_action_rewind">倒帶%s秒</string>
     <string name="talkback_action_forward">快轉%s秒</string>
-    <string name="talkback_display_settings">顯示設定</string>
     <string name="talkback_already_played">已播放</string>
     <string name="show_only_favs">僅顯示最愛</string>
     <string name="ignore_headset_media_button_presses">忽略按下耳機媒體按鈕</string>

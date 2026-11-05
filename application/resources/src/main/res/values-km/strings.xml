@@ -78,7 +78,6 @@
     <string name="directorynotfound">រកមិនឃើញផ្លូវរបស់ថត \'%1$s\' ។</string>
     <string name="nohistory">អ្នក​មិន​មាន​ប្រវត្តិ​ចាក់​ឡើងវិញ​នៅ​ឡើយ​ទេ។</string>
 
-    <string name="cover_art">រូប​គម្រប​មុខ</string>
     <string name="shuffle_title">ទម្រង់បញ្ចូលគ្នា</string>
     <string name="shuffle">បិទបញ្ចូលគ្នា</string>
     <string name="shuffle_on">បើកបញ្ចូលគ្នា</string>
@@ -167,7 +166,6 @@
     <string name="send_log">ផ្ញើចូល</string>
     <string name="sending_log">កំពុង​ផ្ញើចូល…</string>
 
-    <string name="browsing">រុករក</string>
 
     <string name="next">បន្ទាប់</string>
     </resources>

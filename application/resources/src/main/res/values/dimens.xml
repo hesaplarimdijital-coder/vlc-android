@@ -10,7 +10,6 @@
     <dimen name="grid_card_thumb_width">160dp</dimen>
     <dimen name="grid_card_thumb_height">100dp</dimen>
     <dimen name="tv_grid_card_thumb_width">192dp</dimen>
-    <dimen name="tv_grid_card_thumb_height">120dp</dimen>
     <dimen name="grid_card_title_text_size">12sp</dimen>
     <dimen name="grid_card_subtitle_text_size">10sp</dimen>
     <dimen name="grid_card_vertical_spacing">0dp</dimen>
@@ -38,7 +37,6 @@
     <dimen name="media_ctrl_margin_top">20dp</dimen>
     <dimen name="tv_overscan_vertical">27dp</dimen>
     <dimen name="tv_overscan_horizontal">48dp</dimen>
-    <dimen name="tv_overscan_horizontal_progressbar">32dp</dimen>
 
 
 
@@ -100,10 +98,8 @@
     <dimen name="audio_item_title_size">14sp</dimen>
     <dimen name="wizard_dialog_width">288dp</dimen>
     <dimen name="recycler_section_header_height">36dp</dimen>
-    <dimen name="recycler_section_header_tv_height">56dp</dimen>
     <dimen name="recycler_section_header_spacing">12dp</dimen>
 
-    <dimen name="tv_card_padding">16dp</dimen>
     <dimen name="navigation_margin">0dp</dimen>
 
     <dimen name="audio_cover">48dp</dimen>

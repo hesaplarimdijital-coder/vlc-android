@@ -98,14 +98,6 @@
         <item quantity="one">1 वीडियो</item>
         <item quantity="other">%d भिडियोहरू</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 movie</item>
-        <item quantity="other">%dचलचित्रहरू</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV show</item>
-        <item quantity="other">%dटिभी कार्यक्रमहरू</item>
-    </plurals>
     <string name="internal_memory">आन्तरिक भण्डारण</string>
     <string name="audio">अडियो</string>
     <string name="video">भिडियो</string>
@@ -124,7 +116,6 @@
     <string name="nosubfolder">कुनै पनि सबफोल्डर छैन</string>
     <string name="directorynotfound">डाइरेक्टरी पाथ %1$s भेटिएन।</string>
     <string name="nohistory">अहिले सम्म तपाईँसँग बजाएको मिडियाको इतिहास छैन ।</string>
-    <string name="cover_art">कभर आर्ट</string>
     <string name="shuffle_all_title">सबै फिट्नुहोस्</string>
     <string name="shuffle_title">फिट्ने मोड</string>
     <string name="shuffle">फिट्ने बन्द गर्नुहोस्</string>
@@ -165,7 +156,6 @@
     <string name="sleep_in">बन्दहुने</string>
     <string name="jump_to_time">समयमा जानुहोस्</string>
     <string name="wait_before_sleep">हालको मिडिया वस्तु पहिले समाप्त हुनको लागि पर्खनुहोस्</string>
-    <string name="server_add_title">नयाँ सर्वर मनपर्ने सूचीमा थप्नुहोस्</string>
     <string name="server_domain_hint">सर्भर ठेगाना (डोमेन नाम वा आईपी)</string>
     <string name="server_share_hint">नेटवर्क शेयर नाम (वा आईपी ठेगाना)</string>
     <string name="server_folder_hint">फोल्डर पाथ (ऐच्छिक)</string>
@@ -179,8 +169,6 @@
     <string name="favorites_add">मनपर्ने सूचीमा थप्नुहोस्</string>
     <string name="favorites_remove">मनपर्नेबाट सूचीबाट हटाउनुहोस्</string>
     <string name="favorites_edit">सम्पादन गर्नुहोस्</string>
-    <string name="favorite_added">मनपर्नेको सूचीमा सङ्ग्रह गरियो</string>
-    <string name="favorite_removed">मनपर्नेको सूचीबाट हटाइयो</string>
 
     <string name="streams">स्ट्रिमहरू</string>
     <string name="open_mrl_dialog_msg">सञ्जाल ठेगाना राख्नुहोस्: उदा॰ http://, mms:// or rtsp://</string>
@@ -308,8 +296,6 @@
     <string name="set_locale">स्थान सेट गर्नुहोस</string>
     <string name="quit">छोड्नुहोस् र अनुप्रयोग पुन: सुरु गर्नुहोस्</string>
     <string name="restart_message">एकपटक अनुप्रयोग पुनः सुरु भएपछि परिवर्तन प्रभावी हुनेछ।\n\nअहिले नै पुनः सुरु गर्ने हो?</string>
-    <string name="restart_message_OK">ठीक</string>
-    <string name="restart_message_Later">पछि</string>
     <string name="developer_prefs_category">डेभलपर</string>
     <string name="enable_verbose_mode">वाचाल</string>
     <string name="enable_verbose_mode_summary">वर्बोसिटी (लगक्याट) वृद्धि गर्नुहोस्</string>
@@ -326,11 +312,8 @@
     <string name="sending_log">लग पठाउँद…</string>
 
 
-    <string name="no_result">कुनै नतिजा फेला परेन</string>
-    <string name="no_internet_connection">तपाईँको इन्टरनेट जडान जाँच गर्नुहोस्</string>
     <string name="retry">पुनः प्रयास गर्नुहोस्</string>
     <string name="network_browsing">लोकल नेटवर्क</string>
-    <string name="browsing">ब्राउजिङ</string>
 
     <string name="file_size">फाइल आकार</string>
 
@@ -392,8 +375,6 @@
     <string name="add_to_playlist">वाद्यसूचीमा थप्नुहोस्</string>
     <string name="popup_playback_title">पप-अप सञ्झ्यालमा भिडियो प्ले गर्नुहोस्</string>
     <string name="browse_folder">फोल्डर अन्वेषण गर्नुहोस्</string>
-    <string name="listen">सुन्नुहोस्</string>
-    <string name="videos_all">सबै भिडियोहरू</string>
     <string name="clear_playback_history">प्लेब्याक इतिहास मेटाउनुहोस्</string>
     <string name="ml_scanning">मिडिया फाइलहरूको लागि स्क्यान गर्दै</string>
     <string name="ml_discovering">खोजि जारी छ</string>
@@ -453,10 +434,8 @@
     <string name="permission_media">तपाईँको यन्त्रमा भएको मिडिया पहँच गर्न VLC लाई तपाईँको अनुमति आवश्यक छ</string>
     <string name="medialibrary_scan_explanation">VLC ले तपाईँको मिडिया सङ्ग्रह व्यवस्थित गर्न स्वचालित रूपमा तपाईँको यन्त्र स्क्यान गर्न सक्छ</string>
     <string name="done">भयो</string>
-    <string name="onboarding_all_set">VLC पूर्ण रूपमा तयार छ!</string>
     <string name="add">थप्नुहोस्</string>
     <string name="add_to_new_playlist">नयाँ प्लेलिस्ट थप्नुहोस्</string>
-    <string name="device_default">यन्त्र पूर्वनिर्धारित</string>
     <string name="track_number">%dट्रायकहरू</string>
     <string name="jump_to">यसमा जानुहोस्</string>
     <string name="reset">रिसेट गर्नुहोस्</string>
@@ -475,25 +454,6 @@
     <string name="invalid_file">अमान्य फाइल। साझा गर्न सकिँदैन।</string>
     <string name="share_file">%s साझा गर्नुहोस्</string>
     <string name="share_message">यहाँ %s छ</string>
-    <string name="find_metadata">मेटाडाटा फेला पार्नुहोस्</string>
-    <string name="moviepedia_hint">मेटाडाटा खोज्नुहोस्</string>
-    <string name="moviepedia_result">भिडियो नतिजा</string>
-    <string name="directed_by">द्वारा निर्देशित</string>
-    <string name="casting">कास्टिङ</string>
-    <string name="produced_by">निर्माता</string>
-    <string name="written_by">लेखक</string>
-    <string name="music_by">सङ्गीतकार</string>
-    <string name="posters">पोस्टरहरू</string>
-    <string name="backdrops">ब्याकड्रपहरू</string>
-    <string name="header_tvshows">टिभी कार्यक्रमहरू</string>
-    <string name="header_movies">चलचित्रहरू</string>
-    <string name="season_number">सिजन %s</string>
-    <string name="resume_episode">रिज्युम (%s)</string>
-    <string name="start_over">सुरुबाट चलाउनुहोस्</string>
-    <string name="next_episode">अर्को भाग</string>
-    <string name="open_network_settings">नेटवर्क सेटिङहरू खोल्ने हो?</string>
-    <string name="recently_played">भर्खरै प्ले गरिएको</string>
-    <string name="recently_added">भर्खरै थपिएको</string>
 
     <string name="channels">च्यानलहरू</string>
     <string name="resolution">रिज्योलुसन</string>
@@ -533,7 +493,6 @@
     <string name="subscription_cancel">तपाईँले Play Store मा सदस्यता रद्द गर्न सक्नुहुन्छ</string>
     <string name="subscription_cancel_tv">सदस्यता कसरी रद्द गर्ने</string>
     <string name="donate_unsubscribe_tv">सदस्यता रद्द गर्न, कृपया फोन वा कम्प्युटरमा %s खोल्नुहोस् वा यो कोड स्क्यान गर्नुहोस्:</string>
-    <string name="tip_jar">VLC मद्दत</string>
     <string name="thank_you">धन्यवाद</string>
     <string name="thank_you_desc">तपाईँको प्रायोजनको लागि धन्यवाद!\nIt ले VLC सुधार गर्न हामीलाई धेरै मद्दत गर्नेछ!</string>
     <string name="donate_again">एपलाई फेरि प्रायोजन गर्नुहोस्</string>
@@ -544,7 +503,6 @@
     <string name="allow_otg"> OTG पहुँच अनुमति दिनुहोस्</string>
     <string name="allow_otg_description"> कृपया VLC मा पहुँच गर्न अनुमति दिन तपाईँको OTG यन्त्र छनौट गर्नुहोस्  </string>
     <string name="video_hud_timeout">भिडियो प्लेयरले लुकाउने ढिलाइ नियन्त्रण गर्दछ</string>
-    <string name="remove_from_history">इतिहासबाट हटाउनुहोस्</string>
     <string name="prefersmbv1">SMB 1 लाई प्राथमिकता दिनुहोस्</string>
     <string name="prefersmbv1_summary">तपाईँको SMB सर्भर ब्राउज गर्न केही कठिनाई भएमा यस सेटिङ अनचेक गर्नुहोस्  </string>
     <string name="audio_delay_global">सबै भिडियोहरूको लागि %s ms अडियो ढिलाइ सेट भयो</string>

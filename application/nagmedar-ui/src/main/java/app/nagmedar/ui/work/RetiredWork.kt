@@ -27,6 +27,8 @@ import java.io.File
  * screenshots and recordings) leave their queued work, their files and their folders ([videoFeatures]).
  * 1.0.2: the podcast transcripts made with Whisper (removed) leave their queued jobs, the models, the
  * transcripts and the audio the jobs fetched, and their settings ([whisper]).
+ * 1.0.3: the Android TV interface and its film metadata (Moviepedia) leave the metadata's database and
+ * the sort of its film and series lists ([moviepedia]).
  * Off the main thread: it reads preferences, the databases and the disk.
  */
 object RetiredWork {
@@ -35,6 +37,7 @@ object RetiredWork {
     private const val TABLES_DONE = "video_tables"
     private const val VIDEO_DONE = "video_features"
     private const val WHISPER_DONE = "whisper"
+    private const val MOVIEPEDIA_DONE = "moviepedia"
 
     /** What TV Lab kept in the app's files: its profiles, the charts it shared, its bitrate cache. */
     private const val TV_LAB_FILES = "tvlab"
@@ -63,6 +66,19 @@ object RetiredWork {
         if (!prefs.getBoolean(TABLES_DONE, false)) tables(app, prefs)
         if (!prefs.getBoolean(VIDEO_DONE, false)) videoFeatures(app, prefs)
         if (!prefs.getBoolean(WHISPER_DONE, false)) whisper(app, prefs)
+        if (!prefs.getBoolean(MOVIEPEDIA_DONE, false)) moviepedia(app, prefs)
+    }
+
+    /**
+     * The TV interface's film metadata kept its database, made by the system's search (the TV module's search
+     * provider answered it on any device) and filled by the TV's film and series pages, and the sort of those
+     * lists in the app's preferences (one, under the provider's class name). deleteDatabase takes the journal and the -wal
+     * and -shm files with it.
+     */
+    private fun moviepedia(app: Context, prefs: SharedPreferences) {
+        runCatching { app.deleteDatabase(MOVIEPEDIA_DATABASE) }
+        runCatching { Settings.getInstance(app).edit().apply { MOVIEPEDIA_KEYS.forEach { remove(it) } }.apply() }
+        prefs.edit().putBoolean(MOVIEPEDIA_DONE, true).apply()
     }
 
     private fun tvLab(app: Context, prefs: SharedPreferences) {
@@ -181,6 +197,12 @@ object RetiredWork {
         "nagmedar_whisper_timed_out",
         "nagmedar_podcast_auto_transcribe",
     )
+
+    /** Moviepedia's Room database (MoviePediaDatabase's name). */
+    private const val MOVIEPEDIA_DATABASE = "moviepedia_database"
+
+    /** The sort of the TV's film and series lists (one provider class for both): its name, and that with "_desc". */
+    val MOVIEPEDIA_KEYS = listOf("MediaScrapingMovieProvider", "MediaScrapingMovieProvider_desc")
 
     /** The video features' unique works: the conversion's queue, the subtitle tools' extraction and translation, the models' downloads. */
     private val VIDEO_WORK = listOf(

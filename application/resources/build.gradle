@@ -93,15 +93,11 @@ dependencies {
 
     api "androidx.preference:preference-ktx:$androidxPreferencesVersion"
     api "androidx.leanback:leanback:$rootProject.ext.androidxLeanbackVersion"
-    api "androidx.leanback:leanback-preference:$rootProject.ext.androidxLeanbackVersion"
 
-    // Retrofit
     api "com.squareup.okhttp3:okhttp:4.9.3"
-    api 'com.squareup.okhttp3:logging-interceptor:4.9.3'
-    api 'com.github.mrmike:ok2curl:0.8.0'
-    api "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofit"
-    api "com.squareup.retrofit2:converter-moshi:$rootProject.ext.retrofit"
-    api "com.squareup.moshi:moshi-adapters:$rootProject.ext.moshi"
+    // the remote access server's JSON, the settings backup, the licences (Retrofit, its converter
+    // and the adapters went with Moviepedia, the logging and curl interceptors with its client)
+    api "com.squareup.moshi:moshi:$rootProject.ext.moshi"
 
     api "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
     testImplementation "androidx.test:core:$rootProject.ext.testCore"
