@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -85,6 +86,10 @@ internal suspend fun androidx.compose.ui.input.pointer.AwaitPointerEventScope.co
  * Wraps [content] with a context menu built by [entries] when it opens. Besides the pointer
  * gestures, the Menu key or Shift+F10 opens it for the focused element, and TalkBack gets a
  * custom action with the same label.
+ *
+ * While the menu is open, a click or a tap elsewhere only closes it, where it is; a right click
+ * elsewhere closes it and opens the menu of what is under the pointer (Desktop Kit 0.2.2). Esc
+ * closes it too.
  */
 @Composable
 fun ContextMenuArea(
@@ -120,12 +125,16 @@ fun ContextMenuArea(
         if (asSheet && NagTheme.inputMode == InputMode.Touch) {
             MenuSheet(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) currentEntries() else emptyList(), title = sheetTitle)
         } else {
-            MenuPopup(
-                visible = menu.isOpen,
-                onDismiss = menu::close,
-                entries = if (menu.isOpen) currentEntries() else emptyList(),
-                offset = menu.offset ?: IntOffset.Zero,
-            )
+            // a new pop-up for every opening: opened again elsewhere, the old menu goes at once instead of moving to
+            // the new place; closed, it fades out where it was
+            key(menu.generation) {
+                MenuPopup(
+                    visible = menu.isOpen,
+                    onDismiss = menu::close,
+                    entries = if (menu.isOpen) currentEntries() else emptyList(),
+                    offset = menu.offset ?: IntOffset.Zero,
+                )
+            }
         }
     }
 }

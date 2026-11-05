@@ -1,13 +1,16 @@
 package app.nagmedar.ui.components
 
 import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,6 +54,7 @@ import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.key.Key
@@ -65,6 +69,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
@@ -83,6 +88,8 @@ import app.nagmedar.ui.input.MenuBarKey
 import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
@@ -109,14 +116,23 @@ class MenuSpec(val title: String, val entries: () -> List<MenuEntry>)
 
 /**
  * Menu surface shared by the menu bar and context menus. It opens at [offset] from the
- * anchor's top-left corner and moves inside the window when it would overflow (flipping above
- * the anchor point near the bottom edge, like desktop menus).
+ * anchor's top-left corner and moves inside the window when it would overflow: near the bottom
+ * edge a menu at a point flips above that point, like desktop menus, and a drop-down (offset at or
+ * below the anchor's bottom: a menu button's) above its button instead of over it (Desktop Kit 2.1).
  *
  * As Android's own pop-up menus (Desktop Kit 0.2.0) it grows in from its corner while fading in
- * ([NagMotion.COLOR]) and fades out when closed ([NagMotion.SHORT]); while it fades it takes
- * neither the focus nor a click. With "Remove animations" it simply appears and goes. Inside the
- * shell it is frosted glass over the screen (Desktop Kit 1.0, [NagGlass]); elsewhere a solid
- * raised surface with a shadow.
+ * ([NagMotion.COLOR]) and fades out where it is when closed ([NagMotion.SHORT]); while it fades it
+ * takes neither the focus nor a click, and it keeps its place and its entries (callers pass an empty
+ * list and often no offset when closed). On a phone it grows from the point it was opened at: from
+ * its bottom corner when it had to flip above the finger, from under the finger when it was pushed
+ * in from the window's edge (Desktop Kit 2.3); wider windows keep its top start corner. With
+ * "Remove animations" it simply appears and goes. Inside the shell it is frosted glass over the
+ * screen (Desktop Kit 1.0, [NagGlass]); elsewhere a solid raised surface with a shadow.
+ *
+ * A press outside closes it and does nothing else, as Material's and Android's menus; a right click
+ * outside closes it and is handed to the window below, so the menu of what is under the pointer
+ * opens in the same click, as on desktops. Esc closes it even when none of its items has the focus
+ * (Desktop Kit 0.2.2).
  */
 @Composable
 fun MenuPopup(
@@ -138,16 +154,29 @@ fun MenuPopup(
     onAlt: (() -> Unit)? = null,
 ) {
     val open = visible && entries.isNotEmpty()
-    // the last entries stay on screen while the menu fades out; callers pass an empty list when closed
-    val held = remember { MenuEntriesHolder(entries) }
-    if (open) held.entries = entries
+    // the last entries and place stay while the menu fades out: callers pass an empty list (and often no offset) when
+    // closed, and the fading menu must not jump to the anchor's corner there (Desktop Kit 0.2.2)
+    val held = remember { MenuEntriesHolder(entries, offset) }
+    if (open) {
+        held.entries = entries
+        held.offset = offset
+    }
     val transition = remember { MutableTransitionState(false) }
     SideEffect { transition.targetState = open }
+    val latestOnDismiss by rememberUpdatedState(onDismiss)
+    val latestOpen by rememberUpdatedState(open)
+    val latestOnEscape by rememberUpdatedState(onEscape)
+    // a menu already closing takes no more dismiss requests or choices
+    val dismiss = remember { { if (latestOpen) latestOnDismiss() } }
+    val escape = remember { { if (latestOpen) (latestOnEscape ?: latestOnDismiss)() } }
+    val anchorView = LocalView.current
     if (!open && !transition.currentState && !transition.targetState) return
     val shownEntries = held.entries
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
+    val tier = LocalMotionTier.current
+    val reduced = motion.reduced || tier == MotionTier.Reduced
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
     // glass only over the shell's own window: a menu opened in a dialog would blur the window behind the dialog (1.0.1)
     val inShellWindow = shellOverlayHere() != null
@@ -155,16 +184,23 @@ fun MenuPopup(
     val glassy = source != null && NagGlass.mode != GlassMode.Solid
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val ownKeys = onEscape != null
-    val latestOnDismiss by rememberUpdatedState(onDismiss)
-    val latestOpen by rememberUpdatedState(open)
-    // the corner it grows from: its start, at the top when it opens downwards
-    val origin = if (rtl) TransformOrigin(1f, 0f) else TransformOrigin(0f, 0f)
+    val provider = remember(held.offset) { ClampedOffsetPositionProvider(held.offset) }
     Popup(
-        popupPositionProvider = remember(offset) { ClampedOffsetPositionProvider(offset) },
+        popupPositionProvider = provider,
         // a menu fading out is gone already: what is outside it gets the click
-        onDismissRequest = { if (latestOpen) latestOnDismiss() },
+        onDismissRequest = dismiss,
         properties = PopupProperties(focusable = open, dismissOnBackPress = open && !ownKeys, dismissOnClickOutside = open),
     ) {
+        val popupView = LocalView.current
+        DisposableEffect(popupView, anchorView) {
+            val root = popupView.rootView
+            root.setOnTouchListener(OutsidePressHandler(anchorView, dismiss))
+            val keys = EscapeListener(escape).also(root::addOnUnhandledKeyEventListener)
+            onDispose {
+                root.setOnTouchListener(null)
+                root.removeOnUnhandledKeyEventListener(keys)
+            }
+        }
         val menu = remember { FocusRequester() }
         val first = remember { FocusRequester() }
         val last = remember { FocusRequester() }
@@ -174,12 +210,41 @@ fun MenuPopup(
         val lastEnabled = shownEntries.indexOfLast { it is MenuEntry.Item && it.enabled }
         AnimatedVisibility(
             visibleState = transition,
-            enter = fadeIn(motion.enter(NagMotion.COLOR)) + scaleIn(motion.enter(NagMotion.COLOR), initialScale = 0.92f, transformOrigin = origin),
-            exit = fadeOut(motion.exit()) + scaleOut(motion.exit(), targetScale = 0.96f, transformOrigin = origin),
+            enter = fadeIn(motion.enter(NagMotion.COLOR)),
+            exit = fadeOut(motion.exit()),
             label = "menu",
         ) {
+            // the growth is drawn in a layer rather than with scaleIn: where it grows from is known only once the
+            // pop-up is placed (flipped above, pushed in from an edge), and the layer reads it while drawing
+            val scale = this.transition.animateFloat(
+                transitionSpec = {
+                    when {
+                        reduced -> snap()
+                        targetState == EnterExitState.Visible -> motion.enter(NagMotion.COLOR)
+                        else -> motion.exit()
+                    }
+                },
+                label = "menuScale",
+            ) { state ->
+                when {
+                    reduced -> 1f
+                    state == EnterExitState.PreEnter -> MENU_SCALE_IN
+                    state == EnterExitState.PostExit -> MENU_SCALE_OUT
+                    else -> 1f
+                }
+            }
             Column(
                 modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = scale.value
+                        scaleY = scale.value
+                        // a phone's menu grows from where it was opened; wider windows keep its top start corner
+                        transformOrigin = when {
+                            tier == MotionTier.Gesture -> provider.origin
+                            rtl -> TransformOrigin(1f, 0f)
+                            else -> TransformOrigin(0f, 0f)
+                        }
+                    }
                     // a menu on its way out takes no click
                     .then(if (open) Modifier else Modifier.pointerInput(Unit) { consumeEveryPointerEvent() })
                     .widthIn(min = minWidth, max = 420.dp)
@@ -197,7 +262,7 @@ fun MenuPopup(
                         when (event.key) {
                             // acted on when released, so the release does not reach the window below
                             Key.Escape, Key.Back -> {
-                                if (!down) (if (event.key == Key.Escape) onEscape ?: onDismiss else onDismiss)()
+                                if (!down) (if (event.key == Key.Escape) escape else dismiss)()
                                 true
                             }
                             Key.DirectionLeft, Key.DirectionRight -> {
@@ -228,8 +293,10 @@ fun MenuPopup(
                                 .then(if (index == firstEnabled) Modifier.focusRequester(first) else Modifier)
                                 .then(if (index == lastEnabled) Modifier.focusRequester(last) else Modifier)
                             MenuItemRow(entry, modifier) {
-                                onDismiss()
-                                entry.onClick()
+                                if (latestOpen) {
+                                    latestOnDismiss()
+                                    entry.onClick()
+                                }
                             }
                         }
                         MenuEntry.Separator -> HorizontalRule(Modifier.padding(vertical = 4.dp))
@@ -243,8 +310,75 @@ fun MenuPopup(
     }
 }
 
-/** The entries a menu shows, kept while it fades out; plain, so keeping them never redraws anything. */
-private class MenuEntriesHolder(var entries: List<MenuEntry>)
+/** Where a menu grows from as it opens, and the size it shrinks to as it goes. */
+private const val MENU_SCALE_IN = 0.92f
+private const val MENU_SCALE_OUT = 0.96f
+
+/** The entries and the place a menu shows, kept while it fades out; plain, so keeping them never redraws anything. */
+private class MenuEntriesHolder(var entries: List<MenuEntry>, var offset: IntOffset)
+
+/**
+ * Presses outside a menu (Desktop Kit 0.2.2). The pop-up window takes the focus, so Android sends
+ * it every press in the app's window, as with any focused pop-up; its Compose content sees only the
+ * ones on the menu, and this listener on the pop-up's root view gets the rest first.
+ *
+ * Any press outside closes the menu and the rest of that gesture is swallowed, so a click or a tap
+ * that closes a menu does nothing else. A right click is also handed to [anchor]'s window at the
+ * same point of the screen, so what is under the pointer opens its own menu there.
+ */
+private class OutsidePressHandler(private val anchor: View, private val dismiss: () -> Unit) : View.OnTouchListener {
+    private var swallowing = false
+
+    override fun onTouch(view: View, event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            swallowing = event.x < 0 || event.y < 0 || event.x >= view.width || event.y >= view.height
+            if (swallowing) {
+                dismiss()
+                val secondary = event.buttonState and (MotionEvent.BUTTON_SECONDARY or MotionEvent.BUTTON_STYLUS_SECONDARY) != 0
+                if (secondary && event.pointerCount == 1) replaySecondaryClick(event)
+            }
+            return swallowing
+        }
+        if (!swallowing) return false
+        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) swallowing = false
+        return true
+    }
+
+    private fun replaySecondaryClick(event: MotionEvent) {
+        val target = anchor.rootView
+        val origin = IntArray(2)
+        target.getLocationOnScreen(origin)
+        val x = event.rawX - origin[0]
+        val y = event.rawY - origin[1]
+        if (x < 0 || y < 0 || x >= target.width || y >= target.height) return
+        val down = event.copyAt(MotionEvent.ACTION_DOWN, event.buttonState, x, y)
+        val up = event.copyAt(MotionEvent.ACTION_UP, 0, x, y)
+        target.dispatchTouchEvent(down)
+        target.dispatchTouchEvent(up)
+        down.recycle()
+        up.recycle()
+    }
+
+    private fun MotionEvent.copyAt(action: Int, buttons: Int, x: Float, y: Float): MotionEvent {
+        val properties = arrayOf(MotionEvent.PointerProperties().also { getPointerProperties(0, it) })
+        val coords = arrayOf(MotionEvent.PointerCoords().also { getPointerCoords(0, it); it.x = x; it.y = y })
+        return MotionEvent.obtain(downTime, eventTime, action, 1, properties, coords, metaState, buttons,
+            xPrecision, yPrecision, deviceId, edgeFlags, source, flags)
+    }
+}
+
+/**
+ * Esc while none of a menu's views has the focus (Desktop Kit 0.2.2): the pop-up window has the
+ * keyboard but nothing in it took the key, which then reaches only the unhandled-key listeners.
+ * Acted on when released, as the menu's own Esc, so the release does not reach the window below.
+ */
+private class EscapeListener(private val escape: () -> Unit) : View.OnUnhandledKeyEventListener {
+    override fun onUnhandledKeyEvent(view: View, event: KeyEvent): Boolean {
+        val isEscape = event.keyCode == KeyEvent.KEYCODE_ESCAPE
+        if (isEscape && event.action == KeyEvent.ACTION_UP) escape()
+        return isEscape
+    }
+}
 
 /** Takes every pointer event before the children see it. */
 private suspend fun PointerInputScope.consumeEveryPointerEvent() {
@@ -451,21 +585,44 @@ fun RowScope.MenuBarMenus(menus: List<MenuSpec>, state: MenuBarState = rememberM
     }
 }
 
-private class ClampedOffsetPositionProvider(private val offset: IntOffset) : PopupPositionProvider {
+/**
+ * Places a menu at [offset] from its anchor's top-left corner, moved inside the window when it would
+ * overflow: near the bottom a drop-down (asked for at or below the anchor's bottom) goes above its
+ * button, a menu at a point above that point (Desktop Kit 2.1).
+ */
+internal class ClampedOffsetPositionProvider(private val offset: IntOffset) : PopupPositionProvider {
+    /**
+     * Where the point the menu was asked for lies in the placed menu, 0..1 on each axis: the corner a
+     * phone's menu grows from (the top left while nothing moved it). Known once the pop-up is placed.
+     */
+    var origin by mutableStateOf(TransformOrigin(0f, 0f))
+        private set
+
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize,
     ): IntOffset {
-        var x = anchorBounds.left + offset.x
-        var y = anchorBounds.top + offset.y
+        val askedX = anchorBounds.left + offset.x
+        val askedY = anchorBounds.top + offset.y
+        var x = askedX
+        var y = askedY
         if (x + popupContentSize.width > windowSize.width) x = windowSize.width - popupContentSize.width
         if (y + popupContentSize.height > windowSize.height) {
-            val above = anchorBounds.top + offset.y - popupContentSize.height
+            // a drop-down under its button goes above the button, not over it; a menu at a point inside the anchor
+            // (a right click, a long press) above that point
+            val dropDown = offset.y >= anchorBounds.height
+            val above = (if (dropDown) anchorBounds.top else askedY) - popupContentSize.height
             y = if (above >= 0) above else windowSize.height - popupContentSize.height
         }
-        return IntOffset(x.coerceAtLeast(0), y.coerceAtLeast(0))
+        x = x.coerceAtLeast(0)
+        y = y.coerceAtLeast(0)
+        origin = TransformOrigin(
+            if (popupContentSize.width > 0) ((askedX - x).toFloat() / popupContentSize.width).coerceIn(0f, 1f) else 0f,
+            if (popupContentSize.height > 0) ((askedY - y).toFloat() / popupContentSize.height).coerceIn(0f, 1f) else 0f,
+        )
+        return IntOffset(x, y)
     }
 }
 
@@ -477,10 +634,18 @@ class MenuState {
     var offset by androidx.compose.runtime.mutableStateOf<IntOffset?>(null)
         private set
 
+    /**
+     * Counts the openings (Desktop Kit 0.2.2): a menu opened again elsewhere (a right click outside it on the same
+     * element) is a new pop-up, so the old one is never drawn at the new place.
+     */
+    var generation by mutableIntStateOf(0)
+        private set
+
     val isOpen: Boolean get() = offset != null
 
     fun open(at: IntOffset) {
         offset = at
+        generation++
     }
 
     fun close() {

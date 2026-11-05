@@ -49,6 +49,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalGlassMode
@@ -312,7 +313,8 @@ fun NagmedarShell(
                                     translationY = overlayHost.expandProgress() * size.height
                                     alpha = if (playerOver) 0f else 1f
                                 }
-                                .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier),
+                                .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier)
+                                .coveredByLayer(playerOver),
                             onGlass = onBottomGlass,
                         )
                     }
@@ -440,10 +442,11 @@ fun Modifier.floatingPlayerCard(): Modifier {
  * What the phone's expanded player covers (1.0), while [covered]: not drawn (no overdraw, no blur
  * under the opaque player on every frame of its seek bar or visualiser) and not read out, as
  * [DetailTransition]'s covered list. The layer is always there, so the player's first move down
- * only turns it visible again, without recording anything anew.
+ * only turns it visible again, without recording anything anew. 1.0.3: nor focused by a hardware
+ * keyboard's Tab, nor given the screen's keys (Ctrl+A) ([coveredByLayer]).
  */
 private fun Modifier.underPlayer(covered: Boolean): Modifier =
-    graphicsLayer { alpha = if (covered) 0f else 1f }.then(if (covered) Modifier.clearAndSetSemantics {} else Modifier)
+    graphicsLayer { alpha = if (covered) 0f else 1f }.then(if (covered) Modifier.clearAndSetSemantics {} else Modifier).coveredByLayer(covered)
 
 /** Where a new screen grows from in the fade-through: a phone's, a tablet's (no movement on a desktop). */
 private fun screenScale(kind: NavKind): Float = if (kind == NavKind.BottomBar) NagMotion.PHONE_SCALE else NagMotion.TABLET_SCALE

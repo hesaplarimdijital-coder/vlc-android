@@ -51,11 +51,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -96,6 +96,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.animatedAccent
+import java.text.NumberFormat
 import kotlin.math.roundToInt
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
@@ -827,6 +828,9 @@ private fun VolumeControl(volume: Int, onVolume: (Int) -> Unit) {
     var level by remember(volume) { mutableIntStateOf(volume) }
     var beforeMute by remember { mutableIntStateOf(volume.takeIf { it > 0 } ?: 100) }
     val label = stringResource(R.string.nag_volume)
+    // TalkBack reads the volume as the system's sliders do: "40 %" in the window's language
+    val locale = LocalConfiguration.current.locales[0]
+    val percent = remember(locale) { NumberFormat.getPercentInstance(locale) }
     val muted = level == 0
     NagIconButton(
         NagIcons.Volume,
@@ -849,6 +853,8 @@ private fun VolumeControl(volume: Int, onVolume: (Int) -> Unit) {
             level = (fraction * 100).roundToInt()
             onVolume(level)
         },
-        modifier = Modifier.width(96.dp).semantics { contentDescription = label },
+        modifier = Modifier.width(96.dp),
+        label = label,
+        valueText = { fraction -> percent.format(fraction.toDouble()) },
     )
 }
