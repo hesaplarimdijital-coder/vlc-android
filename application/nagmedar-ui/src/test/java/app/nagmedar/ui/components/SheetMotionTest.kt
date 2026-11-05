@@ -45,6 +45,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import kotlin.math.abs
 
 /**
  * 1.0.3 (Desktop Kit 2.3) frame by frame, as the kit's own sheet tests: a phone's sheet flung down carries on at
@@ -162,22 +163,34 @@ class SheetMotionTest {
         compose.onNodeWithTag("sheet").assertDoesNotExist()
     }
 
+    /**
+     * A finger on the sheet's first row moved by [segments] (in twentieths of the sheet's height, down positive),
+     * each segment sent and settled on its own (moves sent together reach the sheet as their sum), then lifted.
+     */
+    private fun drag(vararg segments: Int): List<Float> {
+        val step = compose.onNodeWithTag("sheet").fetchSemanticsNode().size.height / 20f
+        val row = compose.onNodeWithText("Oynat")
+        val tops = mutableListOf<Float>()
+        row.performTouchInput { down(center) }
+        for (n in segments) {
+            row.performTouchInput { repeat(abs(n)) { moveBy(Offset(0f, if (n > 0) step else -step)) } }
+            compose.waitForIdle()
+            tops += top()
+        }
+        row.performTouchInput { up() }
+        compose.waitForIdle()
+        return tops
+    }
+
     /** Pulled past a third, back above it and past it again: a tick each time it passes the closing point, by touch only. */
     @Test
     fun theDragTicksAsItPassesTheClosingPoint() {
         sheet()
-        val height = compose.onNodeWithTag("sheet").getBoundsInRoot().let { (it.bottom - it.top).value }
-        compose.onNodeWithText("Oynat").performTouchInput {
-            down(center)
-            // well past a third, in small steps (slow: no fling), back up short of it, down past it again
-            val step = height * density / 20f
-            repeat(10) { moveBy(Offset(0f, step)) }
-            repeat(6) { moveBy(Offset(0f, -step)) }
-            repeat(6) { moveBy(Offset(0f, step)) }
-            repeat(10) { moveBy(Offset(0f, -step)) }
-            up()
-        }
-        compose.waitForIdle()
+        val rest = top()
+        val third = compose.onNodeWithTag("sheet").getBoundsInRoot().let { (it.bottom - it.top).value } / 3f
+        // well past a third (slow: no fling), back up short of it, down past it again, back to its place
+        val tops = drag(10, -6, 6, -10)
+        assertTrue("pulled past a third: ${tops.map { it - rest }} of ${third * 3f}", tops[0] - rest > third && tops[1] - rest < third)
         assertEquals(listOf(HapticFeedbackType.GestureThresholdActivate, HapticFeedbackType.GestureThresholdActivate), felt)
         // back up and let go: it stays
         assertEquals(0, dismissed)
@@ -186,16 +199,9 @@ class SheetMotionTest {
     @Test
     fun withAMouseNothingTicks() {
         sheet(mode = InputMode.Pointer)
-        val height = compose.onNodeWithTag("sheet").getBoundsInRoot().let { (it.bottom - it.top).value }
-        compose.onNodeWithText("Oynat").performTouchInput {
-            down(center)
-            val step = height * density / 20f
-            repeat(10) { moveBy(Offset(0f, step)) }
-            repeat(10) { moveBy(Offset(0f, -step)) }
-            up()
-        }
-        compose.waitForIdle()
+        drag(10, -10)
         assertEquals(emptyList<HapticFeedbackType>(), felt)
+        assertEquals(0, dismissed)
     }
 
     /** An on/off action is a switch at the row's end: it flips, a screen reader reads a switch, and the sheet stays. */
