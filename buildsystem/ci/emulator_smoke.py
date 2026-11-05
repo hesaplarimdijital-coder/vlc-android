@@ -1478,6 +1478,7 @@ class Smoke:
             self.first_run_walk("First run again")
             time.sleep(8)
             self.step("After the scan")
+            self.music_after_restart()
         else:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
         self.visit_destinations("Reopen")
@@ -1537,6 +1538,34 @@ class Smoke:
         self.step("Home during playback")
         self.launch(force=False)
         self.step("Back to the app after playback")
+
+    def music_after_restart(self):
+        """1.0.3: the library is scanned once. After the first run's scan the app is ended and started again (a cold
+        start from the launcher): the Music lists the walk's tracks within a few seconds, and neither the loading state
+        nor a scan strip ("Scanning the library", "Looking for media folders") shows in front of the known list."""
+        s = self.strings[self.lang]
+        busy = {s[k] for k in ("nag_state_scanning", "nag_state_discovering", "nag_library_loading") if k in s}
+        is_row = lambda n: n.text.startswith("Profile track") or n.text.strip() == "Smoke tone"
+        self.sh("am force-stop " + self.pkg)
+        time.sleep(1)
+        started = time.time()
+        out = self.sh("am start -W -n %s" % self.launcher, timeout=90)
+        launched = re.search(r"TotalTime:\s*(\d+)", out)
+        seen_busy, rows, nodes = set(), [], []
+        # the screen is read as often as uiautomator allows (about a dump a second) until the tracks show
+        while time.time() - started < 15:
+            nodes = self.nodes(self.dump())
+            seen_busy |= busy & self.texts(nodes)
+            rows = [n for n in self.app_nodes(nodes) if is_row(n)]
+            if rows:
+                break
+        took = time.time() - started
+        detail = "%d rows %.1f s after the start%s%s" % (len(rows), took,
+                                                        " (first frame %s ms)" % launched.group(1) if launched else "",
+                                                        "; seen: " + ", ".join(sorted(seen_busy)) if seen_busy else "")
+        self.step("Cold start: the Music's list", lambda: detail, wait=0.3)
+        self.check("after a restart the Music lists its tracks at once, without a scanning state",
+                   bool(rows) and took <= 8 and not seen_busy, detail)
 
     def auto_tree(self):
         """1.0.3: Android Auto's tree as a car reads it, by application/benchmark's AutoBrowseTest (--auto-apk, the
