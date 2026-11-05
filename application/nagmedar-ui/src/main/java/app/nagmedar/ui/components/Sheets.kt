@@ -426,30 +426,32 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
     internal var onClose: () -> Unit = {}
     internal var tier: MotionTier = MotionTier.Gesture
 
-    /** A finger (or a pressed button) is on the sheet, or was until the last of its drag reached the sheet ([let]). */
+    /** A finger (or a pressed button) is on the sheet, or was until the rest of its drag reached the sheet ([touch]). */
     internal var held = false
         private set
 
-    /** Bumped by every press and release: a release's late "let go" sees whether a press came after it. */
-    private var touches = 0
+    /** The pending end of [held] after a release; a new press cancels it. */
+    private var letGo: Job? = null
 
     /**
-     * A pointer pressed on the sheet ([pressed]), or the last one lifted. 1.0.3 (the walk's flaky
-     * drag, API 37): a drag's moves reach [nestedScroll] later than the pointer's events reach
-     * [sheetDrag]'s watch: a scrollable sends them to a coroutine on the UI thread. A finger lifted
-     * within the same frame as its last move used to turn [held] off first, and the move that
-     * carried the drag was dropped (the sheet stayed). Let go, [held] is turned off by a coroutine
-     * queued behind the drag's own, unless a pointer is pressed again by then.
+     * A pointer pressed on the sheet ([pressed]), or none any more. 1.0.3 (the walk's flaky drag,
+     * API 37): a drag's moves reach [nestedScroll] later than the pointer's events reach
+     * [sheetDrag]'s watch, since a scrollable hands them to a coroutine on the UI thread. A finger
+     * lifted within the frame of its last move turned [held] off first, and the move that carried
+     * the drag was dropped: the sheet stayed. Let go, [held] now ends in a coroutine queued behind
+     * the drag's own, unless a pointer is pressed again before it runs.
      */
     internal fun touch(pressed: Boolean) {
-        touches++
         if (pressed) {
+            letGo?.cancel()
+            letGo = null
             held = true
-            return
+        } else if (held && letGo == null) {
+            letGo = scope.launch {
+                held = false
+                letGo = null
+            }
         }
-        if (!held) return
-        val release = touches
-        scope.launch { if (touches == release) held = false }
     }
 
     /** Let go far enough: it is going, nothing pulls it any more. */
