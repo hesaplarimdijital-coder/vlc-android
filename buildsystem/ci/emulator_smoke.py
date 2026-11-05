@@ -1814,10 +1814,13 @@ class Smoke:
                     time.sleep(1.5)
                     self.sh("input text Profile")
                     time.sleep(1.5)
-                    self.key(4, record=False)  # the keyboard away: the bars come back
-                    time.sleep(1.0)
+                    # the on-screen keyboard away (the bars come back); a Back without one would leave the page
+                    if self.keyboard_shown():
+                        self.key(4, record=False)
+                        time.sleep(1.0)
                     nodes = self.step("Search (%s, %s)" % (letter, theme), wait=1.0)
-                    shots += self.glass_shots(nodes, letter, theme, "search")
+                    if self.by_id(nodes, "search"):
+                        shots += self.glass_shots(nodes, letter, theme, "search")
                     self.key(4, record=False)
                     self.step("Back from the search page")
                 self.back_to_tabs()
@@ -1875,6 +1878,10 @@ class Smoke:
             with open(os.path.join(local, "list.m3u"), "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n" + "".join(os.path.basename(t) + "\n" for t in mine))
             self.adb("push", os.path.join(local, "list.m3u"), "%s/Profile album %d.m3u" % (folder, album), timeout=60)
+
+    def keyboard_shown(self):
+        """The on-screen keyboard is up (the input method service says so)."""
+        return "mInputShown=true" in self.sh("dumpsys input_method", timeout=60)
 
     def glass_top(self, nodes):
         """The page's list back at its top, the bars shown."""
