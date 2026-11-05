@@ -154,6 +154,7 @@ class Smoke:
         # 1.0.3: the system's own ANRs and crashes (System UI, the launcher: the emulator's), recorded, not failures
         self.system_events = []
         self.dialogs_seen = []  # what dump() dealt with: "permission", "notice", "app" or "system", in order
+        self.step_mark = 0  # len(dialogs_seen) when the last step began
         self.last_app_sig = None  # the app's part of the screen at the end of the last step
         self.library_ready = False  # the walk's media pushed and granted, and scanned (the first run with them)
         self.sheet_trials = []  # the sheet-drag pass's trials
@@ -268,6 +269,8 @@ class Smoke:
                                  % (self.cur_pass, attempt + 1, " ".join(out.split())[:300], " / ".join(top)[:300]))
             self.wait_boot(timeout=180)
             self.sh("input keyevent 82")
+            # 1.0.3: a system dialog in front (the launcher's ANR) is dealt with by reading the screen
+            self.dump()
 
     def set_display(self, size=None, density=None):
         self.sh("wm size %s" % (size or "reset"))
@@ -462,8 +465,9 @@ class Smoke:
         w = who.strip().strip("\"'“”").lower()
         if not w or w == "?":
             return True  # unnamed: taken as the app's, to be safe
-        # the label (with whatever a build adds after it), the package, or one of its processes ("<package>:logger")
-        return any(w.startswith(l.lower()) for l in APP_LABELS) or w == self.pkg.lower() or w.startswith(self.pkg.lower() + ":")
+        # the label, the package or one of its processes, also as "Process app.nagmedar.debug:logger" (a process
+        # without a label of its own)
+        return any(l.lower() in w for l in APP_LABELS) or self.pkg.lower() in w
 
     # ---------------------------------------------------------------- logcat
 
@@ -499,7 +503,7 @@ class Smoke:
                     found.append(self.add_crash("FATAL EXCEPTION", text, "java"))
                 else:
                     m = re.search(r"Process: (\S+?),", text)
-                    self.system_event("crash", m.group(1) if m else "?", block[1] if len(block) > 1 else text[:200])
+                    self.system_event("crash", m.group(1) if m else "?", " ".join(block[1:3]) or text[:200])
                 i = j
                 continue
             if tag in ("DEBUG", "crash_dump64", "crash_dump32") and (">>> %s" % pkg) in msg:
@@ -594,7 +598,7 @@ class Smoke:
         name = "%03d-%s-%s" % (n, self.cur_pass, slug(title))
         t = time.time()
         note = []
-        mark = len(self.dialogs_seen)
+        mark = self.step_mark = len(self.dialogs_seen)
         before = self.last_app_sig
         for attempt in (1, 2):
             try:
@@ -838,6 +842,8 @@ class Smoke:
 
     def check(self, name, ok, detail=""):
         """One of 1.0's checks, with the step it was read at; a failed one fails the run."""
+        if not ok and "system" in self.dialogs_seen[self.step_mark:]:
+            detail = (detail + "; " if detail else "") + "a system dialog came meanwhile"
         self.checks.append({"pass": self.cur_pass, "name": name, "ok": bool(ok), "detail": detail, "step": self.n})
         self.log("check [%s] %s: %s %s" % (self.cur_pass, name, "ok" if ok else "FAILED", detail))
         if self.steps and not ok:
