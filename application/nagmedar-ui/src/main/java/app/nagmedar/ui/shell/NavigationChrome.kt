@@ -43,7 +43,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -554,7 +553,7 @@ fun MenuBarChrome(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val chip = caption?.showsAppChip(LocalLayoutDirection.current) == true
+    val chip = caption.showsAppChip()
     Column(modifier.fillMaxWidth().background(colors.chrome)) {
         Row(
             modifier = Modifier

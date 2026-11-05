@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -56,6 +57,10 @@ fun rememberCaptionBar(): CaptionBar? {
     }
     return with(density) { CaptionBar(top.toDp(), left.toDp(), right.toDp()) }
 }
+
+/** 1.0.3: whether the system's app chip shows at the start of this caption bar, in the window's direction; false without one. */
+@Composable
+fun CaptionBar?.showsAppChip(): Boolean = this?.showsAppChip(LocalLayoutDirection.current) == true
 
 /** Keeps clear of the system's buttons in the caption bar. */
 fun Modifier.captionPadding(caption: CaptionBar?): Modifier =

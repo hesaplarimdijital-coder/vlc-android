@@ -182,7 +182,7 @@ class DragStartTest {
         assertTrue(one.pointerY < one.height)
         // a long title ends in "…" instead of widening the card past its limit
         val long = card("Buhûrîzâde Mustafa Itrî — Neva Kâr (Sabah Ezanından Önce, Yeniden Kayıt)", 1)
-        assertTrue("${long.width}", long.width <= with(density) { (240.dp + 2 * 14.dp + 2 * 12.dp).roundToPx() } + 1)
+        assertTrue("${long.width}", long.width <= with(density) { (240.dp + 14.dp * 2 + 12.dp * 2).roundToPx() } + 1)
     }
 
     @Test
