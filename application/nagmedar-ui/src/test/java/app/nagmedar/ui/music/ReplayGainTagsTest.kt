@@ -1,18 +1,29 @@
 package app.nagmedar.ui.music
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.data.AudioTechEntry
+import app.nagmedar.ui.playback.Artwork
+import app.nagmedar.ui.screenshots.ShellScreenshotTest
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
+import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -21,6 +32,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * 1.0.3: the inspector's tags tab shows a file's ReplayGain tags (the track's and the album's gain
@@ -121,6 +133,48 @@ class ReplayGainTagsTest {
         compose.onAllNodesWithText("Parça kazancı").assertCountEquals(0)
         compose.onAllNodesWithText("—").assertCountEquals(0)
     }
+
+    /** The selected track's tags tab as a DeX window's inspector shows it: what the rows look like. */
+    private fun capture(name: String, track: Track, theme: ThemeMode) {
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
+        compose.setContent {
+            NagmedarTheme(themeMode = theme, inputMode = InputMode.Pointer) {
+                Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
+                    Box(Modifier.width(384.dp).fillMaxHeight().background(NagTheme.colors.surface).testTag("pane")) {
+                        TrackInspector(
+                            track = track,
+                            selected = 1,
+                            waveform = MusicSamples.waveform,
+                            rating = MusicSamples.stats[track.statsKey]?.rating ?: 0,
+                            onRate = {},
+                            stats = MusicSamples.stats,
+                            replayGain = MusicSamples.gains[track.uri],
+                            cover = { size -> Artwork(null, size, corner = 8.dp, video = false) },
+                        )
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val pane = compose.onNodeWithTag("pane").fetchSemanticsNode().boundsInWindow
+        val window = compose.activity.window.decorView
+        val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
+        compose.runOnIdle { window.draw(Canvas(bitmap)) }
+        val left = pane.left.roundToInt().coerceIn(0, bitmap.width - 1)
+        val top = pane.top.roundToInt().coerceIn(0, bitmap.height - 1)
+        val picture = Bitmap.createBitmap(
+            bitmap, left, top,
+            pane.width.roundToInt().coerceIn(1, bitmap.width - left),
+            pane.height.roundToInt().coerceIn(1, bitmap.height - top),
+        )
+        ShellScreenshotTest.save(name, picture)
+    }
+
+    @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
+    fun taggedScreenshot() = capture("inspector-replaygain-dex-dark", neva, ThemeMode.Dark)
+
+    @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-keysexposed-qwerty")
+    fun untaggedScreenshot() = capture("inspector-replaygain-dex-light-en", yagmur, ThemeMode.Light)
 
     @Test @Config(qualifiers = "en-w1280dp-h800dp-mdpi-keysexposed-qwerty")
     fun inEnglish() {
