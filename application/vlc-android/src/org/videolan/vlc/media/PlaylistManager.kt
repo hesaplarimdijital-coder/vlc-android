@@ -89,6 +89,7 @@ import org.videolan.vlc.util.isSchemeStreaming
 import org.videolan.vlc.util.updateWithMLMeta
 import org.videolan.vlc.util.validateLocation
 import android.net.Uri
+import app.nagmedar.network.LocalNetwork
 import app.nagmedar.playback.CastHandover
 import app.nagmedar.playback.CastItem
 import app.nagmedar.playback.EngineHost
@@ -771,6 +772,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         // S-1302: a track handed over while paused stays paused
         val resumePaused = if (resume?.paused == true) MediaWrapper.MEDIA_PAUSED else 0
         VLCOptions.setMediaOptions(media, ctx, flags or mw.flags or resumePaused, PlaybackService.hasRenderer())
+        // Android 17: a server, a radio or a feed on the local network is reached only with the local network permission
+        LocalNetwork.opening(ctx, uri.toString())
         // Nağmedar (S-1301): a saved network server's sign-in, as libVLC's options take it, never in the address
         NetworkMediaHook.options?.let { hook -> withContext(Dispatchers.IO) { runCatching { hook.optionsFor(uri) }.getOrDefault(emptyList()) } }
             ?.forEach { media.addOption(it) }

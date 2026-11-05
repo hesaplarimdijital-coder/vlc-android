@@ -110,6 +110,9 @@ const val NAGMEDAR_MUSIC_COLUMNS = "nagmedar_music_columns"
 /** S-1007: the alarm, as app.nagmedar.ui.sleep.Alarm.encode writes it. */
 const val NAGMEDAR_ALARM = "nagmedar_alarm"
 
+/** Android 17: the app asked for the local network permission once (app.nagmedar.network.LocalNetwork); refused since, Android may no longer ask. */
+const val NAGMEDAR_LOCAL_NETWORK_ASKED = "nagmedar_local_network_asked"
+
 /** S-1003: lyrics are looked up on LRCLIB when the device has no synced ones (default on); what is found is kept for offline use. */
 const val NAGMEDAR_LYRICS_ONLINE = "nagmedar_lyrics_online"
 

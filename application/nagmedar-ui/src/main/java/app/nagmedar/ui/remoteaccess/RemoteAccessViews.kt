@@ -17,11 +17,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.FilterChip
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.components.StateAction
+import app.nagmedar.ui.components.StatePanel
+import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.network.LocalNetworkAccess
+import app.nagmedar.ui.network.localNetworkWords
+import app.nagmedar.ui.network.rememberLocalNetworkState
 import app.nagmedar.ui.screens.SettingsSection
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.Settings
@@ -42,16 +50,39 @@ internal fun rememberRemoteAccessSettings(): RemoteAccessSettings {
  * S-1304: Settings › Remote access: the switch, what a browser may see and do, how it is kept safe
  * (said, not set: the one-time code and the encrypted connection are always there), and the pages
  * with the addresses and with how it works. The screenshot and unit tests give [settings] over
- * their own preferences and a recording control; the app builds its own.
+ * their own preferences and a recording control; the app builds its own. Android 17: browsers on
+ * this network reach the server only with the local network permission ([access]): turning it on
+ * asks for it, and while it is missing the section says so, with the way to give it.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun RemoteAccessSection(settings: RemoteAccessSettings = rememberRemoteAccessSettings()) {
+internal fun RemoteAccessSection(
+    settings: RemoteAccessSettings = rememberRemoteAccessSettings(),
+    access: LocalNetworkState = rememberLocalNetworkState(),
+    onAllowLocalNetwork: (() -> Unit)? = null,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val context = LocalContext.current
+    val allow = onAllowLocalNetwork ?: { LocalNetworkAccess.ask(context) }
     SettingsSection(stringResource(R.string.nag_ra_settings)) {
         SettingRow(stringResource(R.string.nag_ra_enable), subtitle = stringResource(R.string.nag_ra_enable_hint)) {
-            RaSwitch(settings.enabled, settings::enable, "ra-enable")
+            RaSwitch(settings.enabled, { on ->
+                settings.enable(on)
+                if (on && (access == LocalNetworkState.Ask || access == LocalNetworkState.Denied)) allow()
+            }, "ra-enable")
+        }
+        val words = localNetworkWords(access)
+        if (settings.enabled && words != null) {
+            StatePanel(
+                StateTone.Warning,
+                NagIcons.Shield,
+                stringResource(words.title),
+                Modifier.fillMaxWidth().padding(vertical = dimens.gapS).testTag("ra-permission"),
+                description = stringResource(R.string.nag_lan_remote_access),
+                primary = StateAction(stringResource(words.action), allow),
+                dense = true,
+            )
         }
         Column(Modifier.fillMaxWidth().padding(vertical = dimens.gapS)) {
             Text(stringResource(R.string.nag_ra_library), style = NagTheme.type.bodyStrong, color = colors.text)

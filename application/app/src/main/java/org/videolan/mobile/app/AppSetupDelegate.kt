@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import app.nagmedar.ui.ProcessState
 import app.nagmedar.ui.cast.Casting
 import app.nagmedar.ui.library.NewDrives
+import app.nagmedar.ui.network.LocalNetworkAccess
 import app.nagmedar.ui.network.NetworkDialogs
 import app.nagmedar.ui.radio.record.RecordingAlarms
 import app.nagmedar.ui.work.RetiredWork
@@ -152,6 +153,8 @@ class AppSetupDelegate : AppDelegate {
         Settings.initPostMigration(this@backgroundInit)
         // Nağmedar (S-1302): the new interface's device picker and "Play on …"
         Casting.install()
+        // Android 17: a media on the local network opened without the local network permission is said, with the way to give it
+        LocalNetworkAccess.install(this@backgroundInit)
         // Nağmedar: a new drive is said by the new interface, not by VLC's DialogActivity
         NewStorageHook.handler = NewDrives
         // Nağmedar (S-1107): a scheduled radio recording a restart cut off is taken up again, and the runs that passed unrecorded are marked missed

@@ -1588,6 +1588,17 @@
     <string name="nag_net_nothing_to_play">“%s” holds nothing to play</string>
     <string name="nag_net_gathering">Reading “%s”…</string>
     <string name="nag_net_play_on">Play on %s</string>
+    <!-- Android 17: the local network permission (app.nagmedar.network.LocalNetwork) -->
+    <string name="nag_lan_ask_title">Local network access</string>
+    <string name="nag_lan_ask_desc">Android 17 asks before an app reaches the devices on your Wi-Fi or Ethernet network. Nağmedar needs it to find and open the servers and shares here, to cast to a TV or a speaker, and to let a browser on this network open remote access. Internet radio and podcasts work without it.</string>
+    <string name="nag_lan_denied_title">Local network access is off</string>
+    <string name="nag_lan_denied_desc">Without it Nağmedar cannot reach the servers and shares on this network, cast, or be reached by remote access, and network folders in the library are not scanned. You can allow it now.</string>
+    <string name="nag_lan_blocked_desc">Android no longer asks. In the system settings, allow “Nearby devices” for Nağmedar (Permissions › Nearby devices).</string>
+    <string name="nag_lan_allow">Allow</string>
+    <string name="nag_lan_open_settings">Open settings</string>
+    <string name="nag_lan_media_blocked">%1$s is on your local network, and Nağmedar may not reach it: allow local network access.</string>
+    <string name="nag_lan_server_blocked">%1$s is on your local network, and Nağmedar cannot reach it without local network access.</string>
+    <string name="nag_lan_remote_access">Browsers on this network reach remote access only with local network access.</string>
     <!-- S-1301: libVLC's server certificate question (gnutls), in the interface's language -->
     <string name="nag_cert_insecure_site">Insecure site</string>
     <string name="nag_cert_view">View certificate</string>

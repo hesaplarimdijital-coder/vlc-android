@@ -1582,6 +1582,17 @@
     <string name="nag_net_nothing_to_play">“%s” içinde oynatılacak bir şey yok</string>
     <string name="nag_net_gathering">“%s” okunuyor…</string>
     <string name="nag_net_play_on">%s cihazında oynat</string>
+    <!-- Android 17: the local network permission (app.nagmedar.network.LocalNetwork) -->
+    <string name="nag_lan_ask_title">Yerel ağ izni</string>
+    <string name="nag_lan_ask_desc">Android 17, bir uygulama Wi-Fi ya da Ethernet ağınızdaki cihazlara ulaşmadan önce izninizi sorar. Nağmedar bu izinle bu ağdaki sunucuları ve paylaşımları bulup açar, bir TV\'ye ya da hoparlöre yayınlar ve bu ağdaki bir tarayıcının uzaktan erişimi açmasına izin verir. İnternet radyoları ve podcastler bu izin olmadan da çalışır.</string>
+    <string name="nag_lan_denied_title">Yerel ağ izni kapalı</string>
+    <string name="nag_lan_denied_desc">Bu izin olmadan Nağmedar bu ağdaki sunuculara ve paylaşımlara ulaşamaz, yayınlayamaz, uzaktan erişimle açılamaz ve kütüphanedeki ağ klasörlerini tarayamaz. İzni şimdi verebilirsiniz.</string>
+    <string name="nag_lan_blocked_desc">Android artık sormuyor. Sistem ayarlarında Nağmedar için “Yakındaki cihazlar” iznini açın (İzinler › Yakındaki cihazlar).</string>
+    <string name="nag_lan_allow">İzin ver</string>
+    <string name="nag_lan_open_settings">Ayarları aç</string>
+    <string name="nag_lan_media_blocked">%1$s yerel ağınızda ve Nağmedar\'ın oraya ulaşma izni yok: yerel ağ iznini verin.</string>
+    <string name="nag_lan_server_blocked">%1$s yerel ağınızda ve Nağmedar yerel ağ izni olmadan oraya ulaşamaz.</string>
+    <string name="nag_lan_remote_access">Bu ağdaki tarayıcılar uzaktan erişime yalnızca yerel ağ izniyle ulaşır.</string>
     <!-- S-1301: libVLC's server certificate question (gnutls), in the interface's language -->
     <string name="nag_cert_insecure_site">Güvenli olmayan site</string>
     <string name="nag_cert_view">Sertifikayı göster</string>
