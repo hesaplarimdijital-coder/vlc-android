@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.lyrics.RequestPaceTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T08:38:21.407Z" hostname="ip-10-0-129-217" time="0.004">
+  <properties/>
+  <testcase name="atMostSoManyAMinute" classname="app.nagmedar.ui.lyrics.RequestPaceTest" time="0.004"/>
+  <testcase name="longerWithEachRefusal" classname="app.nagmedar.ui.lyrics.RequestPaceTest" time="0.0"/>
+  <testcase name="notWhileTheServerAskedToWait" classname="app.nagmedar.ui.lyrics.RequestPaceTest" time="0.0"/>
+  <testcase name="aSecondApart" classname="app.nagmedar.ui.lyrics.RequestPaceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
