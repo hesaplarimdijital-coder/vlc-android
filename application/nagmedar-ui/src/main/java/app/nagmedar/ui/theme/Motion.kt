@@ -16,6 +16,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -114,9 +115,8 @@ class NagMotion private constructor(val reduced: Boolean) {
     fun screenEnter(desktop: Boolean = false, initialScale: Float = TABLET_SCALE, tier: MotionTier = MotionTier.Timed): EnterTransition = when {
         reduced || tier == MotionTier.Reduced -> EnterTransition.None
         desktop -> fadeIn(tween(CROSSFADE, easing = Standard))
-        // a phone (Desktop Kit 1.0): the scale-in is the gesture spring, the fade stays timed
-        tier == MotionTier.Gesture -> fadeIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate)) +
-            scaleIn(gesture(), initialScale = initialScale)
+        // 1.0.3 (Desktop Kit 2.3.0): the growth starts with the fade, on a phone too. On the gesture spring it began
+        // [FADE_OUT] ms earlier, while the new screen was still invisible: only its last 2 % could be seen
         else -> fadeIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate)) +
             scaleIn(tween(FADE_IN, delayMillis = FADE_OUT, easing = EmphasizedDecelerate), initialScale = initialScale)
     }
@@ -216,7 +216,7 @@ class NagMotion private constructor(val reduced: Boolean) {
     }
 
     private fun pageSlide(tier: MotionTier): FiniteAnimationSpec<IntOffset> =
-        if (tier == MotionTier.Gesture) gesture() else tween(LONG, easing = Emphasized)
+        if (tier == MotionTier.Gesture) gesture(IntOffset.VisibilityThreshold) else tween(LONG, easing = Emphasized)
 
     /**
      * The top bar's title, back arrow and search button changing with the page: the old ones fade out in
@@ -316,11 +316,36 @@ class NagMotion private constructor(val reduced: Boolean) {
         const val COLOR_CHANGE = COLOR
 
         /**
-         * The phone's spring for everything a finger moves or flings (Desktop Kit 1.0): bars, sheets,
-         * the player, a screen's scale. No bounce, medium-low stiffness, so a new touch can catch it
-         * anywhere and a fling hands over its speed.
+         * Where a spring over pixels counts as arrived (1.0.3, Desktop Kit 2.3.0): half a pixel. See [gesture].
          */
-        fun <T> gesture(): SpringSpec<T> = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+        const val PIXEL = 0.5f
+
+        /** Where a spring over a fraction (0 … 1: a progress, a scale) counts as arrived: a thousandth. See [gesture]. */
+        const val FRACTION = 0.001f
+
+        /**
+         * The phone's spring for everything a finger lets go of (Desktop Kit 1.0; 2.3.0's tuning): bars,
+         * sheets, the player, a swiped strip, a page pushed over another. All but critically damped (0.92)
+         * at 600, so a new touch can catch it anywhere, a fling hands over its speed, and it settles in
+         * about 300 ms without the long soft tail of 1.0's spring (no bounce at 400).
+         *
+         * [visibilityThreshold] is where the spring counts as arrived: [PIXEL] for pixel values,
+         * [androidx.compose.animation.core.VisibilityThreshold] for offsets and rects, [FRACTION] for
+         * fractions. Without one Compose stops a spring only 0.01 from its target in the value's own
+         * unit, and a spring that looks settled after 300 ms runs some 300 ms more to shave the last
+         * hundredth of a pixel: both screens of a transition stay composed, a hidden bar keeps
+         * redrawing and re-measuring what lies under it, the player's close lingers.
+         */
+        fun <T> gesture(visibilityThreshold: T? = null): SpringSpec<T> =
+            spring(dampingRatio = 0.92f, stiffness = 600f, visibilityThreshold = visibilityThreshold)
+
+        /**
+         * The phone's spring for what a tap opens or closes (1.0.3, Desktop Kit 2.3.0): Android's own
+         * standard spatial spring (0.9 at 700), quicker than [gesture], settled in about 250 ms, its
+         * overshoot too small to see. [visibilityThreshold] as for [gesture].
+         */
+        fun <T> open(visibilityThreshold: T? = null): SpringSpec<T> =
+            spring(dampingRatio = 0.9f, stiffness = 700f, visibilityThreshold = visibilityThreshold)
 
         /** The tier of a window: springs on a phone, the timed curves from tablet width up, nothing with [reduced] motion. */
         fun tier(widthClass: WidthClass, reduced: Boolean = false): MotionTier = when {
@@ -330,11 +355,12 @@ class NagMotion private constructor(val reduced: Boolean) {
         }
 
         /**
-         * A spatial animation (position, size, scale) for [tier]: the [gesture] spring on a phone,
-         * [timed] (the 0.2.0 curve) on wider windows, a jump to the end with reduced motion.
+         * A spatial animation (position, size, scale) for [tier]: the [gesture] spring on a phone (arrived
+         * within [visibilityThreshold], see there), [timed] (the 0.2.0 curve) on wider windows, a jump to
+         * the end with reduced motion.
          */
-        fun <T> spatial(tier: MotionTier, timed: FiniteAnimationSpec<T>): FiniteAnimationSpec<T> = when (tier) {
-            MotionTier.Gesture -> gesture()
+        fun <T> spatial(tier: MotionTier, timed: FiniteAnimationSpec<T>, visibilityThreshold: T? = null): FiniteAnimationSpec<T> = when (tier) {
+            MotionTier.Gesture -> gesture(visibilityThreshold)
             MotionTier.Timed -> timed
             MotionTier.Reduced -> snap()
         }
