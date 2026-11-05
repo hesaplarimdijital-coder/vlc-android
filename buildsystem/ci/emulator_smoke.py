@@ -1748,10 +1748,11 @@ class Smoke:
         self.ensure_library()
         nodes = self.open_music()
         rx = self.fmt_regex(s["nag_more_actions_for"])
-        for i in range(int(os.environ.get("SHEET_TRIALS", "10")) * 2):
+        kinds = ("swipe", "drag", "stalled")
+        for i in range(int(os.environ.get("SHEET_TRIALS", "10")) * len(kinds)):
             if self.over_time():
                 break
-            how = "swipe" if i % 2 == 0 else "drag"
+            how = kinds[i % len(kinds)]
             nodes = self.nodes(self.dump())
             w, h = self.screen_size(nodes)
             buttons = [n for n in self.app_nodes(nodes) if rx.match(n.desc.strip()) and h * 0.2 < n.center[1] < h * 0.75]
@@ -1768,8 +1769,14 @@ class Smoke:
             t = time.time()
             if how == "swipe":
                 self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97)))
-            else:
+            elif how == "drag":
                 self.drag(x, y, x, int(h * 0.97))
+            else:
+                # what `input swipe` sends when the app stalls on an early move past the swipe's 300 ms: a few
+                # short moves, then the lift at the far end (the lift's jump is no drag, and a pause makes no fling)
+                self.sh(" ; ".join(["input motionevent DOWN %d %d" % (x, y)] + ["input motionevent MOVE %d %d" % (x, y + d)
+                                                                               for d in (40, 80, 120)]
+                                   + ["sleep 0.1", "input motionevent UP %d %d" % (x, int(h * 0.97))]), timeout=60)
             ms = int((time.time() - t) * 1000)
             moves = self.delivered_moves()
             time.sleep(1.5)
@@ -1781,9 +1788,15 @@ class Smoke:
             if not closed:
                 self.key(4)
                 self.step("Trial %d: Back closes the sheet" % (i + 1))
-        for how in ("swipe", "drag"):
+        for how in kinds:
             done = [t for t in self.sheet_trials if t["how"] == how and t["closed"] is not None]
             self.warnings.append("[sheet-trials] %s: %d of %d closed the sheet" % (how, sum(1 for t in done if t["closed"]), len(done)))
+        with open(os.path.join(self.out, "sheet-trials.md"), "w", encoding="utf-8") as f:
+            f.write("| trial | how | closed | ms | from y | sheet height | events (action@y+ms, the display's own pixels) |\n"
+                    "|---|---|---|---|---|---|---|\n")
+            for t in self.sheet_trials:
+                f.write("| %s | %s | %s | %s | %s | %s | %s |\n" % (t["trial"], t["how"], t["closed"], t.get("ms", ""), t.get("from", ""),
+                                                                t.get("height", ""), t.get("moves", t.get("note", ""))))
 
     def delivered_moves(self):
         """The last touch gesture the input dispatcher sent (dumpsys input's recent events): each MotionEvent's action, y
@@ -1795,19 +1808,20 @@ class Smoke:
             f.write("==== trial at step %d\n%s\n" % (self.n, "\n".join(lines[-40:])))
         seq = []
         for l in lines:
-            t = re.search(r"eventTime=(\d+)", l)
-            a = re.search(r"action=(?:AMOTION_EVENT_ACTION_|ACTION_)?(DOWN|MOVE|UP)", l)
-            y = re.search(r"(?:y\[0\]|\by)=(-?[\d.]+)", l)
+            # API 35/37: "MotionEvent(…, eventTime=318172000000ns, …, action=MOVE, …, pointers=[0: (1280.0, 976.8)]), …"
+            t = re.search(r"eventTime=(\d+)(ns)?", l)
+            a = re.search(r"action=(?:AMOTION_EVENT_ACTION_|ACTION_)?(DOWN|MOVE|UP)\b", l)
+            y = re.search(r"pointers=\[0: \(-?[\d.]+, (-?[\d.]+)\)", l) or re.search(r"(?:y\[0\]|\by)=(-?[\d.]+)", l)
             if t and a and y:
-                seq.append((int(t.group(1)), a.group(1), int(float(y.group(1)))))
-        # the last gesture: from its last DOWN
-        downs = [i for i, e in enumerate(seq) if e[1].startswith("DOWN")]
+                ms = int(t.group(1)) // (1000000 if t.group(2) else 1)
+                seq.append((ms, a.group(1), int(float(y.group(1)))))
+        # the last gesture: from its last DOWN (the queue keeps the last few events only: a long gesture loses its start)
+        downs = [i for i, e in enumerate(seq) if e[1] == "DOWN"]
         seq = seq[downs[-1]:] if downs else seq[-16:]
         if not seq:
             return "?"
         t0 = seq[0][0]
-        scale = 1e6 if t0 > 10 ** 12 else 1  # nanoseconds or milliseconds, as the dump gives them
-        return " ".join("%s@%d+%dms" % (a, y, (t - t0) / scale) for t, a, y in seq[:20])
+        return " ".join("%s@%d+%dms" % (a, y, t - t0) for t, a, y in seq[:20])
 
     def rotation_and_background(self):
         self.rotate(1)
