@@ -426,33 +426,8 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
     internal var onClose: () -> Unit = {}
     internal var tier: MotionTier = MotionTier.Gesture
 
-    /** A finger (or a pressed button) is on the sheet, or was until the rest of its drag reached the sheet ([touch]). */
+    /** A finger (or a pressed button) is on the sheet. */
     internal var held = false
-        private set
-
-    /** The pending end of [held] after a release; a new press cancels it. */
-    private var letGo: Job? = null
-
-    /**
-     * A pointer pressed on the sheet ([pressed]), or none any more. 1.0.3 (the walk's flaky drag,
-     * API 37): a drag's moves reach [nestedScroll] later than the pointer's events reach
-     * [sheetDrag]'s watch, since a scrollable hands them to a coroutine on the UI thread. A finger
-     * lifted within the frame of its last move turned [held] off first, and the move that carried
-     * the drag was dropped: the sheet stayed. Let go, [held] now ends in a coroutine queued behind
-     * the drag's own, unless a pointer is pressed again before it runs.
-     */
-    internal fun touch(pressed: Boolean) {
-        if (pressed) {
-            letGo?.cancel()
-            letGo = null
-            held = true
-        } else if (held && letGo == null) {
-            letGo = scope.launch {
-                held = false
-                letGo = null
-            }
-        }
-    }
 
     /** Let go far enough: it is going, nothing pulls it any more. */
     private var closing = false
@@ -554,7 +529,7 @@ internal fun Modifier.sheetDrag(drag: SheetDrag): Modifier = this
         // watches, before anything in the sheet, whether a pointer is pressed; consumes nothing
         awaitPointerEventScope {
             while (true) {
-                drag.touch(awaitPointerEvent(PointerEventPass.Initial).changes.any { it.pressed })
+                drag.held = awaitPointerEvent(PointerEventPass.Initial).changes.any { it.pressed }
             }
         }
     }

@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
@@ -30,8 +29,6 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -40,7 +37,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import kotlin.coroutines.CoroutineContext
 
 /**
  * 1.0.2: a phone's sheet (a track's "⋯") goes down with a drag anywhere on it, not only on its
@@ -96,22 +92,6 @@ class SheetDragTest {
         // the row the drag began on did not run
         assertEquals(emptyList<String>(), ran)
         compose.onNodeWithTag("sheet").assertDoesNotExist()
-    }
-
-    /** 1.0.3: the input the walk's emulator gave (one move across the sheet, then the lift) closes it. */
-    @Test
-    fun aDragLiftedWithItsLastMoveStillCloses() {
-        sheet()
-        val height = sheetHeight()
-        compose.onNodeWithText("Oynat").performTouchInput {
-            down(center)
-            moveBy(Offset(0f, height * 0.5f * density))
-            up()
-        }
-        compose.waitForIdle()
-        assertEquals(1, dismisses)
-        assertFalse(open)
-        assertEquals(emptyList<String>(), ran)
     }
 
     @Test
@@ -212,60 +192,6 @@ class SheetDragTest {
         assertTrue("moved $moved", moved < -100f)
         assertTrue(open)
         assertEquals(top, sheetTop(), 0.5f)
-    }
-
-    /**
-     * 1.0.3 (the walk's flaky drag on API 37): the order a lift within the frame of the drag's
-     * last move gives. The pointer's release reaches the sheet's watch first; the move reaches
-     * the sheet after it, from the coroutine a scrollable hands its moves to. It still pulls (it
-     * was dropped, and the sheet stayed), and the release counts once the UI thread gets to it.
-     */
-    @Test
-    fun aMoveHandledAfterTheReleaseStillPulls() {
-        val ui = QueuedDispatcher()
-        val drag = SheetDrag(CoroutineScope(ui), flingClosePx = 2000f)
-        drag.height = 900
-        var closes = 0
-        drag.onClose = { closes++ }
-        drag.touch(pressed = true)
-        drag.touch(pressed = false)
-        val taken = drag.nestedScroll.onPostScroll(Offset.Zero, Offset(0f, 400f), NestedScrollSource.UserInput)
-        assertEquals(400f, taken.y, 0.01f)
-        assertEquals(400f, drag.offset, 0.01f)
-        // the drag's end with no fling of the list's own: past a third, it closes
-        drag.release(0f)
-        assertEquals(1, closes)
-        ui.runAll()
-        assertFalse(drag.held)
-        // let go, a wheel's or a fling's rest moves nothing
-        assertEquals(0f, drag.nestedScroll.onPostScroll(Offset.Zero, Offset(0f, 50f), NestedScrollSource.UserInput).y, 0.01f)
-    }
-
-    @Test
-    fun aPressBeforeTheReleaseCountsKeepsItHeld() {
-        val ui = QueuedDispatcher()
-        val drag = SheetDrag(CoroutineScope(ui), flingClosePx = 2000f)
-        drag.touch(pressed = true)
-        drag.touch(pressed = false)
-        drag.touch(pressed = true)
-        ui.runAll()
-        assertTrue(drag.held)
-        drag.touch(pressed = false)
-        ui.runAll()
-        assertFalse(drag.held)
-    }
-
-    /** The UI thread's queue, run by hand. */
-    private class QueuedDispatcher : CoroutineDispatcher() {
-        private val queue = ArrayDeque<Runnable>()
-
-        override fun dispatch(context: CoroutineContext, block: Runnable) {
-            queue.addLast(block)
-        }
-
-        fun runAll() {
-            while (queue.isNotEmpty()) queue.removeFirst().run()
-        }
     }
 
     @Test

@@ -1084,11 +1084,13 @@ class Smoke:
         return prev[0].b if prev else None
 
     def drag(self, x0, y0, x1, y1, moves=12):
-        """1.0.3: a finger's slow drag from (x0, y0) to (x1, y1): down, [moves] moves, up where the last move ended.
-        `input swipe` waits for each move to be handled before it sends the next and stops sending moves when its time
-        is up: on an emulator whose frames take 100 ms and more it can send one move and then lift the finger at the far
-        end, and no drag takes the way the lift carries (1.0.2's flaky sheet check). Here each point is a move of its
-        own and the finger lifts where the last one ended. Returns {"moves", "ms"}."""
+        """1.0.3: a finger's drag from (x0, y0) to (x1, y1): down, [moves] moves, up where the last move ended.
+        `input swipe x0 y0 x1 y1 300` waits for each move to be handled and sends no more once its 300 ms are up, then
+        lifts the finger at (x1, y1): when the app or the emulator stalls on an early move, the finger jumps from there
+        to the end as it lifts. That jump is not part of a drag (Compose drags by the moves; the lift is no move), and
+        the pause before it leaves no fling: 1.0.2's sheet sprang back and stayed (the evidence: the sheet-trials pass,
+        "stalled", 0 of 10 closed on API 37 with the app of master and with a changed one alike; drag 10 of 10). Here
+        every point is a move of its own and the lift comes where the last move ended. Returns {"moves", "ms"}."""
         pts = [(x0 + (x1 - x0) * i // moves, y0 + (y1 - y0) * i // moves) for i in range(1, moves + 1)]
         cmds = ["input motionevent DOWN %d %d" % (x0, y0)] + ["input motionevent MOVE %d %d" % p for p in pts] \
             + ["input motionevent UP %d %d" % (x1, y1)]
