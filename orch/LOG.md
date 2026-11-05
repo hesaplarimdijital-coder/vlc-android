@@ -392,3 +392,30 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   cihazlarım Android 17." → minSdk 34 (platform agent told; prompt and brief updated). 08:45 PR #96 landed: master bc333e2
   (merge.sh now fetches only master + the story branch: a plain fetch failed on refspecs of branches not pushed yet).
   Deleting diag/fix-1.0.1-podcast, ci/baseline-profile-diag, ci/apk refused by the classifier ("Git Destructive"): left.
+- 09:00 Auto Music piece done (agent 4): 4ec2e2c, CI green, CarMusicTest; personal walk of a56b9ab: the Auto check PASSED
+  (four tabs, 64 tracks, podcast) — the root fix works on the R8 personal build; the run itself failed on a Pixel Launcher
+  ANR. Merged master into story/auto-browse (60fd901) for landing #97. Podcast piece on a new branch story/auto-podcasts
+  (from 60fd901), agent 5 launched. Waiting for CI of 60fd901 (byropp8km) and the walks of 4ec2e2c, then land #97.
+- 08:54 the user: "Uygulamayı her açtığımda müzik listemi baştan tarıyor. Bu da çok uzun sürüyor. Diğer uygulamalarda bir kere
+  tarıyorum sonra müzik listem hemen açılıyor." Leads: MediaParsingService.startScan → KEY_MEDIALIBRARY_AUTO_RESCAN reload(null)
+  on every start; LibraryStates ScanState/isWorking in front of a known library; SafLibrary's listing only in memory (every
+  process start walks the document trees again). 09:10 launched story/library-fast (opus; prompts/library-fast.md).
+- 09:45 PR #97 landed: master 60fd901 (Auto: one root for every build b4ccaf3, the personal walk's Auto check a56b9ab, the
+  Music tab 4ec2e2c, master merged). Evidence: CI green; debug walk of 60fd901 245 steps 0/119 failed; personal walk of
+  4ec2e2c 246 steps 0 crash/ANR 0/119 failed, check 121 AutoBrowseTest OK (four tabs, 64 tracks, podcast).
+- 13:45 Podcast piece done (agent 5): story/auto-podcasts 7f53e33, PR #100, CI green (Keşfet from Apple charts + iTunes
+  lookup, 19 categories, 55 countries; Abone ol row + custom browse action, mediaVersion 1.7.0; "Yeni podcastler" in search;
+  Devam eden order fixed by noting each episode start). Personal walk 42006532076 running. Radio piece launched on
+  story/auto-radio (from 7f53e33). Other PRs: #98 walk-robust (split works: tablet job ok, phone job failed — agent on it),
+  #99 platform (debug GREEN on 9a4328e, release + walk running), #101 library-fast (CI green).
+- 14:25 PR #100 landed: master 7f53e33 (Podcast tab: Keşfet, Abone ol, Yeni podcastler, Devam eden order). Personal walk of
+  7f53e33: 246 steps, 0 crash/ANR, 0/119 failed, AutoBrowseTest OK (23.8 s). story/auto-radio is based on it.
+- 14:40 walk-robust done (PR #98, HEAD 1e6a657, CI green; all 8 walk jobs green on 1d37fbc incl. personal 35/37.0 with the
+  Auto check): flaky sheet = the walk's `input swipe` (stall → lift jumps, Compose does not drag): drag() with motion events,
+  10/10 vs 0/10 stalled, app unchanged; matrix tablet job (tablet-en, workstation, phone-tr) + phone job (phone-en) per API,
+  evidence ci/emulator[-api<l>][-personal]-<group>, "Emülatör · özet" summary; walk 22–31 min per job (was 47–50); system
+  ANRs/crashes recorded + Wait/Close + retry, app's fail; `wm dismiss-keyguard`; testmedia audio-only 41 MB (artifact upload
+  of test media kept). Resumed it to merge master (#97/#100 Auto step) and re-run walks before landing.
+- 15:20 PR #98 landed: master 1e6a657 (walk split tablet/phone per API + summary, system ANRs skipped, drag(), audio-only
+  test media). Evidence on 1e6a657: debug 35/37.0 4 jobs 0 failed, personal 35 both jobs 0 failed (Auto check ok). Brief 0000
+  got the new evidence branch names. Told platform, library-fast, auto-radio agents to merge master.

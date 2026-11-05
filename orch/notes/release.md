@@ -27,3 +27,29 @@
 - Same trap elsewhere: any text field disabled on Enter (ScrobbleSection's NagTextFields with enabled = !working, BackupViews) can hand Enter's release to the next button. Prefer readOnly while working.
 - The diag generator trick (BaselineProfileGenerator#diagSubscribeLoop + full logcat in baseline-profile.sh, profile pushed to ci/baseline-profile-diag) is a cheap way to reproduce generator-only issues without touching ci/baseline-profile.
 - DenseTable: header Column has coversRowsBeneath() (whole header band is hit, rows beneath never get a press); fixed column widths are max(fixed, title width + 2×8 dp + 16 dp arrow if sortable), via fittedWidths(); TableRow takes the widths list.
+
+## 1.0.3 walk (story/walk-robust, PR #98) - NOTES FOR THE NEXT STORY
+- The flaky "a drag down from the sheet's middle closes it" (1.0.2, personal API 37.0, 1 in 6) was the WALK's input, not the
+  app. `input swipe … 300` sends no more moves once its 300 ms are up and lifts the finger at the end point. After a stall the
+  lift jumps to the end, Compose does not drag by it, the pause leaves no fling, and the sheet springs back. Proof, from the
+  on-demand pass `sheet-trials` on API 37.0, 10 trials each: swipe 10/10, drag() 10/10, "stalled" 0/10, with master's app
+  (run 42001225449) and with a changed app (42001241247) alike. Evidence: sheet-trials.md and input-trials.txt (dumpsys input).
+  The app is unchanged. Use `self.drag(x0, y0, x1, y1)` (input motionevent, 12 moves) for any drag whose distance matters.
+- Split: the plan job gives runs [{api, group, passes, evidence}]; groups "tablet" (tablet-en, workstation, phone-tr) and
+  "phone" (phone-en); any other pass gets a job of its own. Evidence: ci/emulator[-api<l>][-personal]-<group> (the old
+  ci/emulator* branches are no longer written). Each job builds its own APK. Deadline 38 min, step timeout 50.
+  The "Emülatör · özet" job reads each job's conclusion and its "Emulator Ekran görüntüleri" notice through the API, and fails
+  when a job failed. Walks of 1d37fbc: 25-31 min per job (was 47-50), jobs 33-46 min (was 56-70).
+- A pass must stand on its own: pass_phone_en goes through a fresh app's first run, and workstation/phone-tr call
+  ensure_library() (media + "first run again") when phone-en is not in their job. open_by_scrolling() stops at the end of the
+  page (the equaliser button is absent without the engine and used to cost 30 swipes).
+- `inputs[ref]` walks another commit's app with the run's own driver (the "Kaynak" step copies emulator_smoke.py).
+- System dialogs: dump() handles them everywhere. A dialog that names the app (label, package or process) fails the run.
+  Any other is recorded in report.md "## The system's ANRs and crashes" and as an annotation warning: "Wait" the first time,
+  "Close app" when the same process stops responding again. step() repeats its action, or the pending tap/key/combo recorded
+  by remember_input(), when a dialog swallowed it. Logcat "ANR in <other>" and other processes' FATAL EXCEPTIONs are recorded
+  only. unlock() = KEYCODE_WAKEUP + `wm dismiss-keyguard` (the menu key 82 led to a windowless googlesdksetup ANR, 268 times).
+  Offline checks (no device): $SCRATCH/agents/walk-robust/pytest/check_dialogs.py and check_step.py, run with
+  `python3 -I <script> <worktree>/buildsystem/ci/emulator_smoke.py`.
+- Test media: testmedia/ is audio, podcast and radio only (13 samples, 11 generated, ~41 MB). pgs.py and the
+  dovi_tool/hdr10plus_tool/mkvtoolnix downloads are gone; numpy stays (tools/dsf.py).

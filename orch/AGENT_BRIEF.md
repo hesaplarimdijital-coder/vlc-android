@@ -45,6 +45,11 @@ master yourself.
 - Tests are on again (`NAGMEDAR_RUN_TESTS: '1'`): §0's "no new tests" is void. New logic gets tests; changed screenshots are
   looked at one by one and committed in a separate "Screenshots: …" commit (§4.5). The emulator walk must stay green on
   phone and tablet; it is close to its 50 min limit, so new walk steps must be few and fast.
+- **The walk since PR #98 (master 1e6a657):** each API level runs two jobs, "tablet" (tablet-en, workstation, phone-tr) and
+  "phone" (phone-en), plus an "Emülatör · özet" summary job. Evidence branches are `ci/emulator[-api<level>][-personal]-<tablet|phone>`
+  (e.g. `ci/emulator-personal-phone`, `ci/emulator-api37.0-tablet`); the old `ci/emulator*` names are no longer written.
+  System ANRs are recorded and skipped; the app's fail the run. Sheets and drags use the walk's `drag()` (motion events),
+  not `input swipe`. Notes: $ORCH/notes/release.md "## 1.0.3 walk".
 - Do not edit CHANGELOG.md, the version or `buildsystem/release/README.md` (the orchestrator writes them).
 
 ## 000. NAĞMEDAR 1.0.2 (30 Oct 01:14, the user's decisions) — overrides everything below
