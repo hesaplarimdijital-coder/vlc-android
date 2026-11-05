@@ -103,6 +103,7 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.animatedAccent
 import java.text.NumberFormat
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
@@ -417,7 +418,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         subtitle = if (artist.isNullOrBlank()) stringResource(R.string.nag_now_playing) else artist,
         isVideo = video,
         playing = playing,
-        lengthMs = media.length,
+        lengthMs = rememberPlayingLength(media, playing),
         format = tech?.mainAudio()?.let(::audioFormatLabel),
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
@@ -433,6 +434,35 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         live = media.length <= 0L && isStream(media.uri?.scheme),
     )
 }
+
+/**
+ * 1.0.3: what plays' length: the library's, or for a file it has none for (one played from its folder, which the
+ * library has not read) the player's, read at the progress's pace until it reads the same twice ([playing] starting
+ * reads it again). 0 while neither knows it (a stream on the air is not asked): a timeline then shows the time played
+ * alone. Before, such a file's times stayed at "0:00" while its seek bar moved.
+ */
+@Composable
+internal fun rememberPlayingLength(media: MediaWrapper?, playing: Boolean): Long {
+    val own = media?.length ?: 0L
+    val player by produceState(0L, media, own, playing) {
+        if (media == null || own > 0L || isStream(media.uri?.scheme)) return@produceState
+        var last = 0L
+        repeat(LENGTH_READINGS) {
+            val service = PlaybackService.instance
+            // the player's own media, not the one it is leaving
+            val length = if (service != null && service.currentMediaWrapper?.uri == media.uri) service.length else 0L
+            if (length > 0L) value = length
+            // read the same twice: the player has settled on it
+            if (length > 0L && length == last) return@produceState
+            last = length
+            delay(PROGRESS_READING_MS)
+        }
+    }
+    return if (own > 0L) own else player
+}
+
+/** How many times [rememberPlayingLength] asks the player (some ten seconds) before it leaves the length unknown. */
+private const val LENGTH_READINGS = 20
 
 /** An address played from the network (a station, a stream), not a file of this device. */
 internal fun isStream(scheme: String?): Boolean = scheme != null && scheme.lowercase() !in LocalSchemes

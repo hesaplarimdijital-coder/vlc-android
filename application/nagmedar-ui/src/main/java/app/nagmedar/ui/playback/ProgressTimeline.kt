@@ -183,7 +183,9 @@ fun ProgressTimeline(
 
     // the times change once a second, not on every frame
     val elapsedSeconds by remember(lengthMs, playing, rate) { derivedStateOf { if (lengthMs > 0L) (shown() * lengthMs / 1000f).toLong() else 0L } }
-    // 1.0.3: a length unknown, the time played alone, from [elapsed]: read once a second while it plays and is drawn
+    // 1.0.3: a length unknown, the time played alone, from [elapsed]: read once a second while it plays and is drawn, on
+    // the clock's second, so that every such timeline on the screen changes in the same moment (a screen reader, and
+    // the tools that wait for a still window, get one change a second, not one from each)
     val unknown = lengthMs <= 0L && elapsed != null
     val latestElapsed by rememberUpdatedState(elapsed)
     var unknownMs by remember { mutableLongStateOf(0L) }
@@ -192,7 +194,7 @@ fun ProgressTimeline(
             while (true) {
                 unknownMs = (latestElapsed?.invoke() ?: 0L).coerceAtLeast(0L)
                 if (!playing || !drawn) break
-                delay(UNKNOWN_READING_MS)
+                delay(UNKNOWN_READING_MS - System.currentTimeMillis() % UNKNOWN_READING_MS)
             }
         }
     }

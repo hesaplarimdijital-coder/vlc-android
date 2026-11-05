@@ -124,6 +124,7 @@ import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.playback.rememberPlayingChapters
+import app.nagmedar.ui.playback.rememberPlayingLength
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
@@ -791,7 +792,8 @@ fun PhonePlayerHost(
                 artist = media.artistName,
                 album = media.albumName,
                 format = path?.let { formatLine(it) },
-                lengthMs = media.length,
+                // 1.0.3: the player's length for a file the library has none for
+                lengthMs = rememberPlayingLength(media, nowPlaying.playing),
                 playing = nowPlaying.playing,
                 rating = key?.let { stats[it]?.rating ?: 0 },
                 chapters = rememberPlayingChapters(),
