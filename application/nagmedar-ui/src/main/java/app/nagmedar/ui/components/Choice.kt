@@ -283,9 +283,6 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val haptics = rememberNagHaptics()
-    // the thumb's spring stops half a pixel from its end (Desktop Kit 2.3): without a threshold it ran on unseen to a
-    // hundredth of a dp
-    val halfPixel = with(LocalDensity.current) { NagMotion.PIXEL.toDp() }
     Row(
         modifier = modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
@@ -293,6 +290,8 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
             .background(stateBackground(state), shape)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interaction, enabled)
+            // 1.0.3: a sheet or a page opened from here gives the keyboard focus back to it
+            .focusMemory()
             .toggleable(
                 value = checked,
                 interactionSource = interaction,
@@ -306,23 +305,36 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
             .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
-        val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(halfPixel), label = "switchThumb")
-        Box(
-            Modifier
-                .size(width = 38.dp, height = 24.dp)
-                .background(animateStateColor(if (checked) colors.accent else colors.borderStrong, "switchTrack"), RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            Box(
-                Modifier
-                    .offset { IntOffset(thumbStart.value.roundToPx(), 0) }
-                    .size(16.dp)
-                    .background(animateStateColor(if (checked) colors.onAccent else colors.textSecondary, "switchThumbColor"), CircleShape),
-            )
-        }
+        SwitchTrack(checked)
         Spacer(Modifier.width(10.dp))
         Text(label, style = NagTheme.type.body, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
+    }
+}
+
+/**
+ * The switch's track and thumb, drawn on their own: [NagSwitch] beside its label, and (1.0.3, Desktop Kit 2.3)
+ * at the end of a sheet's on/off row, which is the switch for a screen reader and flips it ([SheetActionRow]).
+ */
+@Composable
+internal fun SwitchTrack(checked: Boolean, modifier: Modifier = Modifier) {
+    val colors = NagTheme.colors
+    // the thumb's spring stops half a pixel from its end (Desktop Kit 2.3): without a threshold it ran on unseen to a
+    // hundredth of a dp
+    val halfPixel = with(LocalDensity.current) { NagMotion.PIXEL.toDp() }
+    // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
+    val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(halfPixel), label = "switchThumb")
+    Box(
+        modifier
+            .size(width = 38.dp, height = 24.dp)
+            .background(animateStateColor(if (checked) colors.accent else colors.borderStrong, "switchTrack"), RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Box(
+            Modifier
+                .offset { IntOffset(thumbStart.value.roundToPx(), 0) }
+                .size(16.dp)
+                .background(animateStateColor(if (checked) colors.onAccent else colors.textSecondary, "switchThumbColor"), CircleShape),
+        )
     }
 }
 
@@ -346,6 +358,7 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
             .background(stateBackground(state), shape)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interaction, enabled)
+            .focusMemory()
             .toggleable(
                 value = checked,
                 interactionSource = interaction,

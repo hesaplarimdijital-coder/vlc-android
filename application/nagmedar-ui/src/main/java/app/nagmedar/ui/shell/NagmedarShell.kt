@@ -1,12 +1,20 @@
 package app.nagmedar.ui.shell
 
+import androidx.activity.BackEventCompat
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -183,11 +192,22 @@ fun NagmedarShell(
         }
     }
     // 1.0.3: the predictive Back gesture seeks the same pops with the finger, as navigation 2.8 did; 2.10 would
-    // otherwise play its own (the page shrinking to 70 %). The swipe's edge does not change them
+    // otherwise play its own (the page shrinking to 70 %). Between the phone's tabs (Desktop Kit 2.3) its own:
+    // the tab left shrinks toward 90 % with the finger, leaning away from the edge the swipe came from, and
+    // Müzik rises behind it from 94 % ([tabBackEnter], [tabBackExit])
+    val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.() -> Boolean = remember(navigator) {
+        {
+            currentKind == NavKind.BottomBar && NavRules.tabBack(
+                Destination.fromRoute(initialState.destination.route),
+                Destination.fromRoute(targetState.destination.route),
+                currentKind,
+            )
+        }
+    }
     val predictivePopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> EnterTransition =
-        remember(popEnter) { { _ -> popEnter(this) } }
+        remember(popEnter, tabBack) { { _ -> if (tabBack(this)) tabBackEnter(currentMotion, currentTier) else popEnter(this) } }
     val predictivePopExit: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> ExitTransition =
-        remember(popExit) { { _ -> popExit(this) } }
+        remember(popExit, tabBack) { { edge -> if (tabBack(this)) tabBackExit(currentMotion, currentTier, edge) else popExit(this) } }
     // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
     // keyboard must also take room, as isImeVisible reads true until the first insets arrive
     val imeVisible = WindowInsets.isImeVisible
@@ -196,6 +216,13 @@ fun NagmedarShell(
     val view = LocalView.current
     val imeTakesRoom by remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
     val showBottomNav = !(imeVisible && imeTakesRoom)
+    // 1.0.3: gesture navigation, whose Back is a swipe from the window's side edges (the system keeps them for it);
+    // three-button navigation has no such edges
+    val gestures = WindowInsets.systemGestures
+    val edgeBack by remember(gestures, density) {
+        derivedStateOf { gestures.getLeft(density, LayoutDirection.Ltr) > 0 || gestures.getRight(density, LayoutDirection.Ltr) > 0 }
+    }
+    val currentEdgeBack by rememberUpdatedState(edgeBack)
     val scroll = remember { ShellScrollState() }
     val metrics = remember { ShellChromeMetrics() }
     val overlayHost = remember { ShellOverlayHost() }
@@ -367,9 +394,13 @@ fun NagmedarShell(
                                 composable(destination.route) {
                                     // another tab's first page: Back goes to Müzik as it was left. First in the page, so
                                     // what the page opens (a detail, a selection) takes Back before it; not while the
-                                    // phone's player, whose handler is older, is open over it
+                                    // phone's player, whose handler is older, is open over it. 1.0.3: nor on a phone with
+                                    // gesture navigation, whose Back gesture the navigation plays with the finger
                                     if (destination != Destination.Music) {
-                                        BackHandler(enabled = NavRules.backToStart(destination, currentKind) && !playerOverState.value) {
+                                        BackHandler(
+                                            enabled = NavRules.backToStart(destination, currentKind) && !playerOverState.value &&
+                                                !NavRules.tabBackFollowsFinger(currentKind, currentEdgeBack),
+                                        ) {
                                             navigator.backToStart()
                                         }
                                     }
@@ -450,3 +481,37 @@ private fun Modifier.underPlayer(covered: Boolean): Modifier =
 
 /** Where a new screen grows from in the fade-through: a phone's, a tablet's (no movement on a desktop). */
 private fun screenScale(kind: NavKind): Float = if (kind == NavKind.BottomBar) NagMotion.PHONE_SCALE else NagMotion.TABLET_SCALE
+
+/** How long the phone's Back gesture between tabs is seeked over (the finger's part and the way out once let go). */
+private const val TAB_BACK_MILLIS = 300
+
+/** Where the tab left by the Back gesture shrinks toward ([tabBackExit]) and where Müzik rises from behind it ([tabBackEnter]). */
+internal const val TAB_BACK_SHRINK = 0.9f
+internal const val TAB_BACK_BEHIND = 0.94f
+
+/**
+ * 1.0.3 (Desktop Kit 2.3): the phone's predictive Back gesture from another tab's first page, Müzik's side: it
+ * rises from [TAB_BACK_BEHIND] and brightens behind the tab being left. Navigation seeks it with the finger, plays
+ * the rest once let go and runs it back on a cancel; with reduced motion nothing moves.
+ */
+internal fun tabBackEnter(motion: NagMotion, tier: MotionTier): EnterTransition =
+    if (motion.reduced || tier == MotionTier.Reduced) {
+        EnterTransition.None
+    } else {
+        scaleIn(tween(TAB_BACK_MILLIS, easing = NagMotion.Standard), initialScale = TAB_BACK_BEHIND) +
+            fadeIn(tween(TAB_BACK_MILLIS, easing = NagMotion.Standard))
+    }
+
+/**
+ * The tab being left by that gesture: with the finger it shrinks toward [TAB_BACK_SHRINK] and leans a twentieth of
+ * its width away from the edge the swipe came from ([swipeEdge]), whole until the last tenth of the way, where it
+ * fades; as a detail does under the same gesture. With reduced motion nothing moves.
+ */
+internal fun tabBackExit(motion: NagMotion, tier: MotionTier, swipeEdge: Int): ExitTransition {
+    if (motion.reduced || tier == MotionTier.Reduced) return ExitTransition.None
+    val away = if (swipeEdge == BackEventCompat.EDGE_RIGHT) -1 else 1
+    val lastTenth = Easing { fraction -> ((fraction - 0.9f) / 0.1f).coerceIn(0f, 1f) }
+    return scaleOut(tween(TAB_BACK_MILLIS, easing = LinearEasing), targetScale = TAB_BACK_SHRINK) +
+        slideOutHorizontally(tween(TAB_BACK_MILLIS, easing = LinearEasing)) { width -> away * width / 20 } +
+        fadeOut(tween(TAB_BACK_MILLIS, easing = lastTenth))
+}
