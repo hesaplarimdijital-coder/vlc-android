@@ -80,7 +80,7 @@ on:
       - 'buildsystem/ci/emulator_smoke.py'
 
 concurrency:
-  group: emulator-${{ github.ref }}-${{ inputs.baseline_profile }}-${{ inputs.build }}-${{ inputs.api_levels }}-${{ inputs.passes }}
+  group: emulator-${{ github.ref }}-${{ inputs.ref }}-${{ inputs.baseline_profile }}-${{ inputs.build }}-${{ inputs.api_levels }}-${{ inputs.passes }}
   cancel-in-progress: true
 
 defaults:
@@ -158,9 +158,16 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      # the commit walked (inputs.ref may name another than the run's): the reports and evidence name it
+      # the commit walked (inputs.ref may name another than the run's): the reports and evidence name it; the walk's
+      # driver is always the run's own, so an older app can be walked with today's walk (1.0.3: the sheet trials)
       - name: Kaynak
-        run: echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+        run: |
+          echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]; then
+            git fetch -q --depth=1 origin "$GITHUB_SHA"
+            git show "$GITHUB_SHA:buildsystem/ci/emulator_smoke.py" > buildsystem/ci/emulator_smoke.py
+            echo "the app of $(git rev-parse --short HEAD), the walk of ${GITHUB_SHA::7}"
+          fi
 
       # the SDK, the system image, the Gradle build and the emulator want more than the runner has free
       - name: Disk alanı aç
