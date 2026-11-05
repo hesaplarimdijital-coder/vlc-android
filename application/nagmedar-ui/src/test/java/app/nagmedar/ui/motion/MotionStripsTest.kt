@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SamplePlayerBar
 import app.nagmedar.ui.TestShell
@@ -57,7 +58,9 @@ import app.nagmedar.ui.playback.QueuePage
 import app.nagmedar.ui.playback.QueuePanel
 import app.nagmedar.ui.sampleTracks
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
@@ -343,16 +346,20 @@ class MotionStripsTest {
     // ---------------------------------------------------------------- a sheet
 
     private fun sheetShell(open: () -> Boolean, close: () -> Unit) {
-        shell(overlay = {
-            GlassBottomSheet(visible = open(), onDismiss = close, label = "Sabaha Kadar") {
-                Text("Sabaha Kadar", style = NagTheme.type.title, color = NagTheme.colors.text, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-                sheetActions.forEach { group ->
-                    group.actions.forEach { action ->
-                        Text(action.label, style = NagTheme.type.body, color = NagTheme.colors.text, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp))
-                    }
+        shell(overlay = { SampleSheet(open, close) })
+    }
+
+    /** A track's sheet: its title and six actions. */
+    @Composable
+    private fun SampleSheet(open: () -> Boolean, close: () -> Unit) {
+        GlassBottomSheet(visible = open(), onDismiss = close, label = "Sabaha Kadar") {
+            Text("Sabaha Kadar", style = NagTheme.type.title, color = NagTheme.colors.text, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            sheetActions.forEach { group ->
+                group.actions.forEach { action ->
+                    Text(action.label, style = NagTheme.type.body, color = NagTheme.colors.text, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp))
                 }
             }
-        })
+        }
     }
 
     @Test
@@ -391,6 +398,52 @@ class MotionStripsTest {
         })
         strip("queue-fling", onUiThread = false) {
             compose.onNodeWithTag("queue-Fener").performTouchInput { swipe(center, center + Offset(0f, 200f), durationMillis = 60) }
+        }
+    }
+
+    // ---------------------------------------------------------------- over the bottom glass (the user's B, 6 Nov)
+
+    /**
+     * The phone's shell with its bottom chrome on one glass ([ChromeGlass.Bottom], the user's decision B): the mini
+     * player's card, the bottom bar and the band over a list of covers (Robolectric draws the glass's translucent
+     * form, not the blur); the sheets stay opaque over it.
+     */
+    private fun glassShell(overlay: @Composable () -> Unit) {
+        phoneContent {
+            NagmedarShell(
+                widthClass = WidthClass.Compact,
+                sidebarCollapsed = false,
+                onSidebarCollapsedChange = {},
+                badges = emptyMap(),
+                onSearch = {},
+                menus = {},
+                player = { kind -> SamplePlayerBar(kind) },
+                screen = { destination, nav ->
+                    navigator = nav
+                    if (destination == Destination.Music) TrackList("Müzik") else EpisodeList()
+                },
+                navController = rememberNavController(),
+                overlay = { overlay() },
+                chromeGlass = ChromeGlass.Bottom,
+            )
+        }
+    }
+
+    /** A sheet coming up over the bottom glass: its opaque surface and its scrim over the glass. */
+    @Test
+    fun sheetOpenOverBottomGlass() {
+        var open by mutableStateOf(false)
+        glassShell { SampleSheet({ open }) { open = false } }
+        strip("sheet-open-bottom-glass") { open = true }
+    }
+
+    /** The same sheet flung down over the bottom glass. */
+    @Test
+    fun sheetFlingOverBottomGlass() {
+        var open by mutableStateOf(true)
+        glassShell { SampleSheet({ open }) { open = false } }
+        strip("sheet-fling-bottom-glass", onUiThread = false) {
+            compose.onNodeWithText("Albüme git").performTouchInput { swipe(center, center + Offset(0f, 150f), durationMillis = 60) }
         }
     }
 
