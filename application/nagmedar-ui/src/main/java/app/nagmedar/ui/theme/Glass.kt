@@ -26,10 +26,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.HazeColorEffect
+import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 
 /**
@@ -218,18 +219,26 @@ fun Modifier.glass(
     rest: Color = Color.Transparent,
 ): Modifier = when {
     !enabled -> if (rest == Color.Transparent) this else background(rest, shape)
-    mode == GlassMode.Blur && source != null -> this
-        .clip(shape)
-        .hazeEffect(
-            state = source,
-            style = HazeStyle(
-                backgroundColor = material.solid,
-                tint = HazeTint(material.tint),
-                blurRadius = material.blurRadius,
-                noiseFactor = material.noise,
-                fallbackTint = HazeTint(material.translucent),
-            ),
-        )
+    mode == GlassMode.Blur && source != null -> {
+        // Desktop Kit 2: a Haze 2 style is a replayable program, made once per material, not per frame
+        val style = remember(material) { material.blurStyle() }
+        val input = remember(source) { HazeInput.Sources(source) }
+        this
+            .clip(shape)
+            .hazeBlur(input = input, style = style)
+    }
     mode == GlassMode.Translucent && source != null -> background(material.translucent, shape)
     else -> background(material.solid, shape)
+}
+
+/** The Haze blur of this material (Desktop Kit 2): its tint over the blurred content, the radius, a little noise. */
+internal fun GlassMaterial.blurStyle(): HazeBlurStyle {
+    val material = this
+    return HazeBlurStyle {
+        backgroundColor(material.solid)
+        colorEffects(listOf(HazeColorEffect.tint(material.tint)))
+        blurRadius(material.blurRadius)
+        noiseFactor(material.noise)
+        fallbackColorEffect(HazeColorEffect.tint(material.translucent))
+    }
 }

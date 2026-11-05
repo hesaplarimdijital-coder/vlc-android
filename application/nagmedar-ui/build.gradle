@@ -42,6 +42,8 @@ android {
             includeAndroidResources = true
             all {
                 maxHeapSize = '2g'
+                // Robolectric 4.17 reads FileDescriptor internals on Java 17+
+                jvmArgs '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED'
                 testLogging {
                     events 'failed'
                     exceptionFormat 'full'
@@ -68,9 +70,10 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     implementation "androidx.activity:activity-compose:$rootProject.ext.activityComposeVersion"
     implementation "androidx.navigation:navigation-compose:$rootProject.ext.navigationComposeVersion"
-    // Desktop Kit 1.0: the frosted glass of the phone's bars, sheets and menus (theme/Glass.kt)
+    // Desktop Kit: the frosted glass of the bars, sheets and menus (theme/Glass.kt): HazeState and the
+    // source, and Haze 2's blur with a style per material (haze-materials was never used)
     implementation "dev.chrisbanes.haze:haze:$rootProject.ext.hazeVersion"
-    implementation "dev.chrisbanes.haze:haze-materials:$rootProject.ext.hazeVersion"
+    implementation "dev.chrisbanes.haze:haze-blur:$rootProject.ext.hazeVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$rootProject.ext.lifecycleComposeVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"

@@ -167,6 +167,12 @@ fun NagmedarShell(
             else currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
         }
     }
+    // 1.0.3: the predictive Back gesture seeks the same pops with the finger, as navigation 2.8 did; 2.10 would
+    // otherwise play its own (the page shrinking to 70 %). The swipe's edge does not change them
+    val predictivePopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> EnterTransition =
+        remember(popEnter) { { _ -> popEnter(this) } }
+    val predictivePopExit: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> ExitTransition =
+        remember(popExit) { { _ -> popExit(this) } }
     // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
     // keyboard must also take room, as isImeVisible reads true until the first insets arrive
     val imeVisible = WindowInsets.isImeVisible
@@ -323,6 +329,8 @@ fun NagmedarShell(
                             exitTransition = exit,
                             popEnterTransition = popEnter,
                             popExitTransition = popExit,
+                            predictivePopEnterTransition = predictivePopEnter,
+                            predictivePopExitTransition = predictivePopExit,
                         ) {
                             Destination.entries.forEach { destination ->
                                 composable(destination.route) {

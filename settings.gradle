@@ -6,7 +6,8 @@ pluginManagement {
 }
 
 plugins {
-    id("com.android.settings") version '9.1.1'
+    // the root build.gradle's android_plugin_version
+    id("com.android.settings") version '9.4.1'
 }
 
 android {

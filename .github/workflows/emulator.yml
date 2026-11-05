@@ -159,7 +159,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            gradle-9.3.1
+            gradle-9.8.2
           key: gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle.properties', 'buildsystem/compile.sh') }}
           restore-keys: gradle-
 

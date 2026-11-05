@@ -23,6 +23,8 @@ android {
         unitTests {
             includeAndroidResources = true
             all {
+                // Robolectric 4.17 reads FileDescriptor internals on Java 17+
+                jvmArgs '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED'
                 testLogging {
                     events 'failed'
                     exceptionFormat 'full'

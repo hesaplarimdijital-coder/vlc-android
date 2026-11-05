@@ -262,12 +262,10 @@ dependencies {
 
 static def buildTime(project) {
     if (project.hasProperty('forceDeterministic')) {
-        def code = new ByteArrayOutputStream()
-        project.exec {
-            commandLine 'git', 'show', '--no-patch', '--format=%cd' , '--date=format-local:%Y-%m-%d'
-            standardOutput = code
-        }
-        return code.toString()
+        // through the providers, as build_revision above (Gradle 9 deprecates Project.exec for removal)
+        return project.providers.exec {
+            commandLine 'git', 'show', '--no-patch', '--format=%cd', '--date=format-local:%Y-%m-%d'
+        }.standardOutput.asText.get()
     }
     return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
 }

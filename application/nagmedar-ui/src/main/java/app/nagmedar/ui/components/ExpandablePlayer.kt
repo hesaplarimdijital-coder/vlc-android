@@ -5,14 +5,16 @@ import android.view.HapticFeedbackConstants
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -94,17 +96,14 @@ enum class PlayerValue { Collapsed, Expanded }
  * mini player's place ([PlayerValue.Collapsed]) and the top of the window ([PlayerValue.Expanded]).
  * [progress] runs from 0 to 1 with it; read it while drawing (`graphicsLayer { alpha = progress }`)
  * to fade things along. Survives configuration changes.
+ *
+ * 1.0.3 (Compose 1.12): how a release settles is the drag's own ([playerFlingBehavior]); [density] is
+ * kept for the saver's signature.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Stable
-class ExpandablePlayerState(initialValue: PlayerValue, density: Density) {
-    internal val draggable = AnchoredDraggableState(
-        initialValue = initialValue,
-        positionalThreshold = { distance -> distance * 0.5f },
-        velocityThreshold = { with(density) { 400.dp.toPx() } },
-        snapAnimationSpec = NagMotion.gesture(),
-        decayAnimationSpec = exponentialDecay(),
-    )
+class ExpandablePlayerState(initialValue: PlayerValue, @Suppress("unused") density: Density) {
+    internal val draggable = AnchoredDraggableState(initialValue)
 
     /** Distance from the window top to the mini player; the collapsed anchor. */
     internal var collapsedTop by mutableFloatStateOf(0f)
@@ -132,11 +131,11 @@ class ExpandablePlayerState(initialValue: PlayerValue, density: Density) {
     /** Opens the full player on the gesture spring (from a tap, the notification, a link). */
     suspend fun expand() {
         beforeExpand()
-        draggable.animateTo(PlayerValue.Expanded)
+        draggable.animateTo(PlayerValue.Expanded, NagMotion.gesture())
     }
 
     /** Back to the mini player. */
-    suspend fun collapse() = draggable.animateTo(PlayerValue.Collapsed)
+    suspend fun collapse() = draggable.animateTo(PlayerValue.Collapsed, NagMotion.gesture())
 
     /** Jumps to [value] without animation. */
     suspend fun snapTo(value: PlayerValue) = draggable.snapTo(value)
@@ -224,6 +223,7 @@ fun ExpandablePlayer(
     }
     val latestBeforeExpand by rememberUpdatedState(beforeExpand)
     SideEffect { state.beforeExpand = beforeExpand }
+    val fling = playerFlingBehavior(state)
     if (host != null) {
         val progressOf = remember(state, canExpand) { if (canExpand) ({ state.progress }) else ({ 0f }) }
         SideEffect {
@@ -250,7 +250,7 @@ fun ExpandablePlayer(
                     // a drag up brings the bars back first, so the sheet starts from where the strip rests; a press
                     // (Play, the start of a sideways swipe) leaves them where they are (a click expands through expand())
                     .pointerInput(Unit) { awaitVerticalDragStart { latestBeforeExpand() } }
-                    .anchoredDraggable(state.draggable, Orientation.Vertical, enabled = state.collapsedTop > 0f)
+                    .anchoredDraggable(state.draggable, Orientation.Vertical, enabled = state.collapsedTop > 0f, flingBehavior = fling)
                     .semantics {
                         customActions = listOf(CustomAccessibilityAction(expandLabel) { scope.launch { state.expand() }; true })
                     }
@@ -290,6 +290,9 @@ class PlayerSheetScope internal constructor(private val state: ExpandablePlayerS
     /** Where the sheet is, between its places: what a release settles. */
     private val between: Boolean get() = state.collapsedTop > 0f && state.sheetTop() > 0.5f
 
+    /** The sheet's release rules ([playerFlingBehavior]), set while the sheet is composed. */
+    internal var fling: FlingBehavior? = null
+
     val nestedScroll: NestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             // pushed back up while the sheet is pulled down: the sheet goes back first, then the list scrolls
@@ -306,8 +309,25 @@ class PlayerSheetScope internal constructor(private val state: ExpandablePlayerS
         override suspend fun onPreFling(available: Velocity): Velocity {
             // let go with the sheet pulled down: it settles with the finger's speed and the list does not fling
             if (!between) return Velocity.Zero
-            state.draggable.settle(available.y)
+            settle(available.y)
             return available
+        }
+    }
+
+    /** Settles the sheet as a drag on it that ends at [velocity] would (Compose 1.12: through its fling behaviour). */
+    private suspend fun settle(velocity: Float) {
+        val behavior = fling ?: return
+        val draggable = state.draggable
+        draggable.anchoredDrag {
+            val scroll = object : ScrollScope {
+                override fun scrollBy(pixels: Float): Float {
+                    val from = draggable.requireOffset()
+                    val to = (from + pixels).coerceIn(draggable.anchors.minPosition(), draggable.anchors.maxPosition())
+                    dragTo(to)
+                    return to - from
+                }
+            }
+            with(behavior) { scroll.performFling(velocity) }
         }
     }
 }
@@ -358,6 +378,8 @@ private fun PlayerSheet(
     val label = stringResource(R.string.nag_now_playing)
     val density = LocalDensity.current
     val shown = sheet.shown
+    val fling = playerFlingBehavior(state)
+    SideEffect { sheet.fling = fling }
     Box(
         Modifier
             .fillMaxSize()
@@ -390,7 +412,7 @@ private fun PlayerSheet(
                     clip = p < 1f || back > 0f
                 }
                 .background(colors.background)
-                .anchoredDraggable(state.draggable, Orientation.Vertical)
+                .anchoredDraggable(state.draggable, Orientation.Vertical, flingBehavior = fling)
                 .nestedScroll(sheet.nestedScroll)
                 .semantics { paneTitle = label },
         ) {
@@ -423,6 +445,18 @@ private fun PlayerSheet(
         }
     }
 }
+
+/**
+ * Letting go of the player (1.0.3, Compose 1.12's fling behaviour, as Desktop Kit 2's): past half way, or a fling
+ * towards the other place, it goes there, else it goes back; on the gesture spring, with the finger's speed.
+ */
+@Composable
+private fun playerFlingBehavior(state: ExpandablePlayerState): FlingBehavior =
+    AnchoredDraggableDefaults.flingBehavior(
+        state.draggable,
+        positionalThreshold = { distance -> distance * 0.5f },
+        animationSpec = NagMotion.gesture(),
+    )
 
 /** The sheet's corners for a radius of [dp] dp, rounded to a whole dp: made once each, not on every frame of a drag. */
 private fun sheetCorner(dp: Float): Shape = SHEET_CORNERS[dp.roundToInt().coerceIn(0, SHEET_CORNERS.lastIndex)]
