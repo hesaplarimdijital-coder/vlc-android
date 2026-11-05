@@ -104,6 +104,7 @@ import app.nagmedar.ui.theme.glass
 import app.nagmedar.ui.theme.rememberNagHaptics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.InputMode as ComposeInputMode
 
@@ -579,10 +580,13 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
 
     /**
      * Down and out at [velocity] px/s on the phone's gesture spring, closed ([onClose]) the moment it is out
-     * whatever the spring still does; a slow let-go past a third still leaves on the spring, from rest.
+     * (half a pixel left), whatever the spring still does; a slow let-go past a third still leaves on the
+     * spring, from rest. Once out the spring stops: its tail would only ask for frames nobody sees (the
+     * phone's Sıradaki keeps its drag after the page has gone).
      */
     private suspend fun carryOut(velocity: Float) {
         val end = height.toFloat()
+        val job = currentCoroutineContext()[Job]
         var gone = false
         fun out() {
             if (gone) return
@@ -592,7 +596,10 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
         }
         animate(offset, end, velocity.coerceAtLeast(0f), NagMotion.gesture(NagMotion.PIXEL)) { value, _ ->
             offset = value.coerceAtLeast(0f)
-            if (value >= end - NagMotion.PIXEL) out()
+            if (value >= end - NagMotion.PIXEL) {
+                out()
+                job?.cancel()
+            }
         }
         out()
     }
