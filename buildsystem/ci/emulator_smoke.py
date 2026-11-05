@@ -1861,11 +1861,13 @@ class Smoke:
 
     def cold_start(self, route=None):
         """1.0.3: the app ended and started again (into the page of [route], by the launcher shortcuts' extra), the screen
-        read as soon as its window has drawn; the path of that first-frames screenshot, or None."""
+        read as soon as its window has come in (within its first second); the path of that screenshot, or None."""
         self.sh("am force-stop " + self.pkg)
         time.sleep(1)
         extra = " --es nagmedar_destination %s" % route if route else ""
-        self.sh("am start -W -n %s%s ; screencap -p /sdcard/nag-cold.png" % (self.launcher, extra), timeout=90)
+        # the window drawn, its opening animation (on in the glass checks) over and the list's first rows arrived in turn
+        # (ListAppear, about 0.3 s): the app's first second
+        self.sh("am start -W -n %s%s ; sleep 1.0 ; screencap -p /sdcard/nag-cold.png" % (self.launcher, extra), timeout=90)
         rc, data = self.adb("exec-out", "cat /sdcard/nag-cold.png", timeout=60, binary=True)
         if rc != 0 or len(data) < 1000:
             return None
@@ -2088,12 +2090,13 @@ class Smoke:
 
     def glass_boxes(self, nodes):
         """1.0.3 (glass B): where the phone's bottom chrome shows its glass and draws nothing of its own: down the mini
-        player's card just inside its start edge (beside the artwork, clear of the times) and down the bottom bar between
-        its first two tabs (a quarter of the width, from above the icons to the labels' foot). {"card": box, "bar": box},
-        each None when not on screen."""
+        player's card just inside its start edge (beside the artwork, clear of the times), down the bottom bar between
+        its first two tabs (a quarter of the width, from above the icons to the labels' foot) and the band behind the
+        system's buttons left of Back (where a list's covers pass beneath it). {"card", "bar", "band"}: a box each, None
+        when not on screen."""
         s = self.strings[self.lang]
         w, h = self.screen_size(nodes)
-        boxes = {"card": None, "bar": None}
+        boxes = {"card": None, "bar": None, "band": None}
         mini = self.by_id(nodes, "mini-player")
         if mini:
             b = mini[0].b
@@ -2105,6 +2108,9 @@ class Smoke:
             tabs = [n for n in self.app_nodes(nodes) if n.clickable and self.inside(label, n.b) and n.b[1] > h * 0.75]
             b = min(tabs, key=lambda n: n.area).b if tabs else (label.b[0], label.b[1] - (label.b[3] - label.b[1]) * 2, label.b[2], label.b[3])
             boxes["bar"] = (w // 4 - 2, b[1] + 6, w // 4 + 3, b[3] - 6)
+            # three-button navigation: the band from the bar's foot to the window's, Back's icon at a fifth of the width
+            if h - b[3] > 40:
+                boxes["band"] = (int(w * 0.06), b[3] + 8, int(w * 0.15), h - 8)
         return boxes
 
     def glass_read(self, nodes, what):
@@ -2171,24 +2177,30 @@ class Smoke:
         time.sleep(1.2)
         nodes = self.step("Glass B: animations removed (opaque)", wait=0.8)
         solid = self.glass_read(nodes, "opaque")
-        self.check("glass B: with animations removed the bottom chrome is opaque, the card as the bar",
-                   solid["card"] is not None and solid["card"]["spread"] <= 2 and solid["bar"] is not None
-                   and not self.differs(solid["card"], solid["bar"], by=2.0), "card %s, bar %s" % (solid["card"], solid["bar"]))
+        opaque = [v for v in solid.values() if v is not None]
+        self.check("glass B: with animations removed the bottom chrome is opaque, one colour (card, bar, band)",
+                   solid["card"] is not None and solid["bar"] is not None and all(v["spread"] <= 2 for v in opaque)
+                   and not any(self.differs(v, solid["card"], by=2.0) for v in opaque),
+                   "; ".join("%s %s" % (k, v) for k, v in solid.items()))
         self.animations(True)
         try:
             time.sleep(2.0)
             nodes = self.step("Glass B: animations on over the still page", wait=0.8)
             on = self.glass_read(nodes, "switched on")
-            self.check("glass B: switched on at run time, the card's glass blurs what passes beneath it",
-                       self.blurred(on["card"]) and self.blurred(on["bar"]) and self.differs(on["card"], solid["card"]),
-                       "card %s, bar %s; opaque %s" % (on["card"], on["bar"], solid["card"] and solid["card"]["mean"]))
+            shown = [v for v in on.values() if v is not None]
+            self.check("glass B: switched on at run time, the glass blurs what passes beneath it (card, bar, band)",
+                       on["card"] is not None and all(self.blurred(v) for v in shown) and self.differs(on["card"], solid["card"]),
+                       "; ".join("%s %s" % (k, v) for k, v in on.items()) + "; opaque %s" % (solid["card"] and solid["card"]["mean"],))
             self.glass_drag(w // 2, int(h * 0.45), int(h * 0.50))
             time.sleep(1.2)
-            nodes = self.step("Glass B: the results moved under the card", wait=0.8)
+            nodes = self.step("Glass B: the results moved under the bars", wait=0.8)
             moved = self.glass_read(nodes, "moved")
-            self.check("glass B: the card's glass changes as the list moves under it",
-                       self.blurred(moved["card"]) and self.differs(moved["card"], on["card"], by=0.5),
-                       "before %s, after %s" % (on["card"] and on["card"]["mean"], moved["card"] and moved["card"]["mean"]))
+            # the covers pass right under the band; the card's edge is a little beside them, its glow fainter
+            self.check("glass B: the glass changes as the list moves under it",
+                       all(self.blurred(v) for v in moved.values() if v is not None)
+                       and any(self.differs(moved[k], on[k], by=0.5) for k in ("band", "card")),
+                       "band %s -> %s; card %s -> %s" % (on["band"] and on["band"]["mean"], moved["band"] and moved["band"]["mean"],
+                                                         on["card"] and on["card"]["mean"], moved["card"] and moved["card"]["mean"]))
             # a cold start with the glass on: its first frames, read as soon as the window has drawn
             rel = self.cold_start()
             nodes = self.step("Glass B: a cold start", wait=1.0)

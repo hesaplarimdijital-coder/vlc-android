@@ -13,8 +13,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * user's decision of 6 Nov ("B olsun", from screenshots of the three on the emulator): the mini
  * player's card, the bottom bar and the band behind the system's buttons lie on the shell's one
  * glass; the top bar stays opaque and never changes colour (1.0.1's decision); menus, sheets and
- * dialogs stay solid. Tablets and DeX are as they were. Where the device draws no glass (battery
- * saver, "Animasyonları kaldır", no hardware acceleration) the glass is the opaque chrome colour.
+ * dialogs stay solid. Tablets and DeX are as they were. Where the device draws no glass the
+ * system's fallbacks stay: battery saver and "Animasyonları kaldır" draw it in the opaque chrome
+ * colour, a window without hardware acceleration as a nearly opaque tint ([app.nagmedar.ui.theme.GlassMode]).
  * [Solid] and [Kit] stay for the emulator walk's comparisons: only a debuggable build switches to
  * them, by [EXTRA_CHROME_GLASS] on its launch intent ([DebugChrome]); no setting shows them.
  */
