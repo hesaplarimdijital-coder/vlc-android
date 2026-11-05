@@ -31,13 +31,12 @@ class ListenedEpisodes(context: Context) {
     /** The episodes, the one listened to last first. */
     fun order(): List<Long> = ListenedOrder.read(prefs.getString(KEY, null))
 
-    /** [episodeId] is being listened to: it goes first. */
-    fun heard(episodeId: Long) {
-        synchronized(LOCK) {
-            val order = order()
-            if (order.firstOrNull() == episodeId) return
-            prefs.edit().putString(KEY, ListenedOrder.write(ListenedOrder.heard(order, episodeId))).apply()
-        }
+    /** [episodeId] is being listened to: it goes first. Whether the order changed (it was not first already). */
+    fun heard(episodeId: Long): Boolean = synchronized(LOCK) {
+        val order = order()
+        if (order.firstOrNull() == episodeId) return false
+        prefs.edit().putString(KEY, ListenedOrder.write(ListenedOrder.heard(order, episodeId))).apply()
+        true
     }
 
     private companion object {

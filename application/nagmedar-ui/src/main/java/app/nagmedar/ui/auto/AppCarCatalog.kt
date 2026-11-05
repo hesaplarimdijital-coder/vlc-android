@@ -26,8 +26,10 @@ import app.nagmedar.ui.podcast.ChartGenre
 import app.nagmedar.ui.podcast.ChartShow
 import app.nagmedar.ui.podcast.DownloadFiles
 import app.nagmedar.ui.podcast.EpisodeMedia
+import app.nagmedar.ui.podcast.FeedFailure
 import app.nagmedar.ui.podcast.FeedFetch
 import app.nagmedar.ui.podcast.FeedUrl
+import app.nagmedar.ui.podcast.InvalidReason
 import app.nagmedar.ui.podcast.ListenedEpisodes
 import app.nagmedar.ui.podcast.OkHttpFeedSource
 import app.nagmedar.ui.podcast.ParsedFeed
@@ -158,8 +160,9 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
 
     /**
      * 1.0.3: subscribes to [show] through the app's own path ([app.nagmedar.ui.podcast.PodcastRepository.subscribe], with
-     * what the directory said of it): Auto is told that Programlarım changed and the refresh job is scheduled. The result
-     * says, in [context]'s language, that it worked or why not.
+     * what the directory said of it): Auto is told that Programlarım, the new episodes and the show's own page changed
+     * (it opens on its episodes now, without the row "Abone ol"), and the refresh job is scheduled. The result says, in
+     * [context]'s language, that it worked or why not.
      */
     private suspend fun subscribe(context: Context, show: PodcastHit): CarActionResult {
         val app = context.applicationContext
@@ -172,7 +175,7 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
         }
         if (result is SubscribeResult.Added) {
             PodcastCenter.schedule(app)
-            tellNow(listOf(CarIds.SHOWS, CarIds.NEW))
+            tellNow(listOf(CarIds.SHOWS, CarIds.NEW, CarIds.directoryShow(show.feedUrl, show.title, show.author, show.imageUrl)))
         }
         return CarActionResult(message)
     }
@@ -488,7 +491,8 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
     override suspend fun readFeed(url: String): ParsedFeed {
         val key = FeedUrl.key(url)
         read[key]?.takeIf { System.currentTimeMillis() - it.at < FEED_KEEP_MS }?.let { return it.value }
-        val fetch = feedSource.fetch(url) as FeedFetch.Fresh
+        // asked with no validators, a server has no 304 to give; one that does gives nothing to read
+        val fetch = feedSource.fetch(url) as? FeedFetch.Fresh ?: throw FeedFailure.Invalid(InvalidReason.Empty)
         return fetch.feed.also {
             if (read.size >= MAX_FEEDS_KEPT) read.clear()
             read[key] = Kept(it, System.currentTimeMillis())
@@ -676,7 +680,7 @@ class AppCarLook(private val context: Context, private val media: (Track) -> Med
         ApplePodcasts.TRUE_CRIME -> R.string.nag_auto_genre_true_crime
         ApplePodcasts.TV -> R.string.nag_auto_genre_tv
         else -> null
-    }?.let(res::getString) ?: genre.name
+    }?.let { res.getString(it) } ?: genre.name
 
     override fun cover(track: Track?): String =
         track?.let(media)?.let { ArtworkProvider.buildMediaUri(context, it).toString() } ?: icon(CarIcon.NoCover)

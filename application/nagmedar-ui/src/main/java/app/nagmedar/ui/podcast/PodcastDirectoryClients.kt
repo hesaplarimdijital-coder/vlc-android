@@ -186,7 +186,8 @@ class ITunesDirectory(
 
         /** 1.0.3: `?id=1,2,3&entity=podcast&country=TR`: the shows of a chart, their feeds. */
         fun lookupUrl(base: String, ids: List<Long>, country: String?): HttpUrl = base.toHttpUrl().newBuilder()
-            .addQueryParameter("id", ids.joinToString(","))
+            // digits and commas, as Apple's examples write them (an encoded comma is no list to every server)
+            .addEncodedQueryParameter("id", ids.joinToString(","))
             .addQueryParameter("entity", "podcast")
             .apply { country?.takeIf { it.length == 2 }?.let { addQueryParameter("country", it.uppercase(Locale.ROOT)) } }
             .build()

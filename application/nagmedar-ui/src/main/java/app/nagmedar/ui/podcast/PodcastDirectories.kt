@@ -178,7 +178,7 @@ object AppleChartJson {
     private fun genre(item: JSONObject): ChartGenre? {
         val id = item.opt("genreId")?.toString()?.trim()?.toIntOrNull() ?: return null
         if (id == ApplePodcasts.ROOT_GENRE) return null
-        val name = item.optString("name").trim().takeIf { it.isNotEmpty() } ?: return null
+        val name = HtmlText.line(item.optString("name")) ?: return null
         return ChartGenre(id, name)
     }
 
