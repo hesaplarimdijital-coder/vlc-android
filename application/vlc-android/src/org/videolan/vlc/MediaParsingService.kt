@@ -133,7 +133,7 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     /** 1.0.3: the medialibrary began that look (its reload or discovery started): an idle moment before it is not its end. */
     @Volatile private var looking = false
 
-    /** 1.0.3: the window saw the media index change while a look was under way: it is compared again once that look is over. */
+    /** 1.0.3: the window saw the media index change while the library worked: it is compared once the work is over. */
     @Volatile private var recheckAfter = false
 
     private val settings by lazy { Settings.getInstance(this) }
@@ -205,14 +205,9 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 if (!running) {
                     delay(1000L)
                     if (!medialibrary.isWorking) {
-                        // Nağmedar 1.0.3: the look and the parsing of what it found are over; a change seen meanwhile is compared now
+                        // Nağmedar 1.0.3: the look and the parsing of what it found are over
                         lookOver()
-                        if (recheckAfter) {
-                            recheckAfter = false
-                            actions.trySend(Recheck)
-                        } else {
-                            exitCommand()
-                        }
+                        exitCommand()
                         // Nağmedar: the library's scan strip ends with the work, whatever still holds the service
                         if (::notificationActor.isInitialized) notificationActor.trySend(Idle)
                     }
@@ -436,7 +431,7 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
      */
     private fun recheck() {
         // work under way (a look, a scan, the parsing of what one found) is let finish; the index is compared after it
-        if (reload > 0 || looking || medialibrary.isWorking) {
+        if (reload > 0 || medialibrary.isWorking) {
             recheckAfter = true
             return
         }
@@ -609,8 +604,13 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
     }
 
     private fun exitCommand() {
-        // Nağmedar 1.0.3: a comparison waiting for the work to end keeps the service until it is made
-        if (!medialibrary.isWorking && !serviceLock && !discoverTriggered && !recheckAfter) {
+        // Nağmedar 1.0.3: a comparison put off while the library worked is made before the service stops
+        if (recheckAfter && !medialibrary.isWorking && reload <= 0) {
+            recheckAfter = false
+            actions.trySend(Recheck)
+            return
+        }
+        if (!medialibrary.isWorking && !serviceLock && !discoverTriggered) {
             lastNotificationTime = 0L
             if (wakeLock.isHeld) try {
                 wakeLock.release()
@@ -657,6 +657,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
             }
             is DiscoverFolder -> {
                 addDeviceIfNeeded(action.path)
+                // Nağmedar 1.0.3: the library's first folders (the first run's): their scan is the first full look
+                if (fullLook == null && medialibrary.foldersList.isEmpty()) fullLook = MediaIndexStamp.read(this@MediaParsingService)
                 medialibrary.discover(action.path)
             }
             is Init -> {

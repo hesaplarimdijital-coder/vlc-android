@@ -1,10 +1,9 @@
 package app.nagmedar.ui.library
 
 import android.net.Uri
-import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.io.ByteArrayInputStream
@@ -31,11 +31,12 @@ import java.io.ByteArrayOutputStream
  * is scanned, with the strip above it instead of the loading state.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(qualifiers = "tr-w420dp-h900dp-mdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "tr-w390dp-h844dp-hdpi")
 class MusicSnapshotTest {
 
     @get:Rule
-    val compose = createAndroidComposeRule<ComponentActivity>()
+    val compose = createComposeRule()
 
     private fun track(id: Long, path: String, title: String, album: String?, artist: String? = "Cemre Kaya"): MediaWrapper =
         MLServiceLocator.getAbstractMediaWrapper(
