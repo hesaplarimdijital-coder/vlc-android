@@ -24,6 +24,15 @@ violations). The walk, in passes (a size and a language each):
                of Bu cihaz playing, the transport bar's "open the player" opens the big player over
                the window and Back closes it
   phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
+  sheet-trials (on demand) the phone's track sheet dragged down again and again by `input swipe`, by
+               drag() and by a stalled swipe, with the moves the system delivered (sheet-trials.md)
+
+1.0.3: the workflow runs the passes in two jobs (tablet-en, workstation and phone-tr; phone-en), so
+each pass brings what it needs: phone-en goes through a fresh app's first run, workstation and
+phone-tr push the walk's media and show the first run again when no phone-en came before them
+(ensure_library). The system's own ANRs and crashes (the emulator's System UI, launcher, setup
+apps) are recorded in the report, waited out (closed when the same process hangs again) and the
+step done once more when the dialog took its tap; the app's (any of its processes) fail the run.
 
 1.0.1 (the user's crash in Bu cihaz): phone-en, phone-tr and workstation also walk This device /
 Bu cihaz: the internal storage, its Music folder (the walk's files), a file played from it, back up
@@ -43,6 +52,9 @@ for arm64 only: on this x86_64 emulator they are missing, and the app must say s
 
 Exit status 1 when the app crashed, hung (ANR), a check failed or the driver itself failed; the
 report (report.md, report.json), annotations.txt and the evidence go to the --out directory.
+
+The offline checks of the dialog handling and of step()'s retry (no device) are in the 1.0.3 walk
+notes; drags whose distance matters use drag(), never `input swipe` (see drag()).
 """
 import argparse
 import collections
