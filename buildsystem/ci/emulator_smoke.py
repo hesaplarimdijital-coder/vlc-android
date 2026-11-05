@@ -793,13 +793,22 @@ class Smoke:
                 self.warnings.append("[%s] no '%s' control found in Settings" % (self.cur_pass, s[key]))
 
     def open_by_scrolling(self, label):
+        """Scrolls the page down from its top until [label] shows and taps it. 1.0.3: False once two swipes in a row left
+        the page as it was (its end): a control this build does not have (the equaliser, without the engine on an
+        x86_64 emulator) cost 30 swipes, three minutes of every Settings pass."""
         self.scroll_to_top()
         nodes = self.nodes(self.dump())
+        prev, still = None, 0
         for _ in range(30):
             n = self.find(nodes, label)
             if n:
                 self.tap(n)
                 return True
+            sig = self.app_signature(nodes)
+            still = still + 1 if sig == prev else 0
+            if still >= 2:
+                return False
+            prev = sig
             self.swipe_up(nodes)
             time.sleep(0.5)
             nodes = self.nodes(self.dump())
