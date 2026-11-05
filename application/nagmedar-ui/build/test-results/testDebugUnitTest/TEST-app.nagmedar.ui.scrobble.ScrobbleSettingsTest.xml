@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:43:09.841Z" hostname="runnervmwuk1x" time="0.092">
+  <properties/>
+  <testcase name="aSecretThatCannotBeOpenedIsNone" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.012"/>
+  <testcase name="signingOutForgetsEverythingOfTheService" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.014"/>
+  <testcase name="theSecretIsInThePreferencesOnlySealed" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.012"/>
+  <testcase name="aServiceIsOffUntilAnAccountIsSignedIn" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.011"/>
+  <testcase name="aHoldIsKeptWithItsReasonAndEndsWithANewSignIn" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.013"/>
+  <testcase name="aSecretThatCannotBeSealedIsNoSignIn" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.011"/>
+  <testcase name="aBackupOfTheSettingsLeavesTheAccountsOut" classname="app.nagmedar.ui.scrobble.ScrobbleSettingsTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

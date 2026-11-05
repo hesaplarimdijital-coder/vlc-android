@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.convert.ConvertViewsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:42:06.814Z" hostname="runnervmwuk1x" time="0.43">
+  <properties/>
+  <testcase name="theLineAboveTheLibrary" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.053"/>
+  <testcase name="aacKeepsTheRateAsked" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.098"/>
+  <testcase name="theSummary" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.047"/>
+  <testcase name="touchTargetsAndNames" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.046"/>
+  <testcase name="withoutTheEngineNothingStarts" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.055"/>
+  <testcase name="theChoicesGoToTheJob" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.08"/>
+  <testcase name="aFolderIsNeededFirst" classname="app.nagmedar.ui.convert.ConvertViewsTest" time="0.047"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

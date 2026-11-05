@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.device.DeviceScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T21:42:07.491Z" hostname="runnervmwuk1x" time="0.336">
+  <properties/>
+  <testcase name="aFolderOpensAndBackGoesUpToTheDriveAndThePlaces" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.111"/>
+  <testcase name="aClickSelectsARowBesideThePlaces" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.069"/>
+  <testcase name="theInternalStorageListsItsFoldersAndFiles" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.047"/>
+  <testcase name="aPickedFolderListsItsDocuments" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.047"/>
+  <testcase name="anOpenFolderKeepsItsStateWhenTheWindowSavesIt" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.059"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
