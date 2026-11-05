@@ -596,7 +596,8 @@ open class HeaderMediaListActivity : AudioPlayerContainerActivity(), IEventsHand
             }
             CTX_ADD_SHORTCUT -> lifecycleScope.launch { createShortcut(media) }
             CTX_GO_TO_ARTIST -> lifecycleScope.launch(Dispatchers.IO) {
-                val artist = if (media is Album) media.retrieveAlbumArtist() else (media as MediaWrapper).artist
+                // the list holds tracks only (Kotlin 2.4: an Album check here is always false)
+                val artist = media.artist
                 val i = Intent(this@HeaderMediaListActivity, SecondaryActivity::class.java)
                 i.putExtra(SecondaryActivity.KEY_FRAGMENT, SecondaryActivity.ALBUMS_SONGS)
                 i.putExtra(AudioBrowserFragment.TAG_ITEM, artist)

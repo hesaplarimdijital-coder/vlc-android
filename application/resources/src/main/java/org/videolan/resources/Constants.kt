@@ -104,7 +104,6 @@ const val ACTION_STOP_SERVER = "action_stop_server"
 const val ACTION_START_SERVER = "action_start_server"
 const val ACTION_DISABLE_SERVER = "action_disable_server"
 const val ACTION_RESTART_SERVER = "action_restart_server"
-const val ACTION_CONTENT_INDEXING = "action_content_indexing"
 
 // MRLPanelFragment
 const val KEY_MRL = "mrl"
@@ -174,9 +173,6 @@ const val CURRENT_BROWSER_MAP = "CURRENT_BROWSER_MAP"
 //Dummy items
 const val DUMMY_NEW_GROUP = 0L
 
-//Moviepedia
-const val MOVIEPEDIA_MEDIA: String = "moviepedia_media"
-
 // Database
 const val TYPE_NETWORK_FAV = 0
 const val TYPE_LOCAL_FAV = 1
@@ -191,11 +187,6 @@ fun String.buildPkgString() = "${BuildConfig.APP_ID}.$this"
 const val ACTION_VIEW_ARC = "org.chromium.arc.intent.action.VIEW"
 const val ACTION_SEARCH_GMS = "com.google.android.gms.actions.SEARCH_ACTION"
 
-const val CONTENT_PREFIX = "content_"
-const val CONTENT_RESUME = "${CONTENT_PREFIX}resume_"
-const val CONTENT_EPISODE = "${CONTENT_PREFIX}episode_"
-const val ACTION_OPEN_CONTENT = "action_open_content"
-const val EXTRA_CONTENT_ID = "extra_content_id"
 const val SCHEME_PACKAGE = "package"
 
 // Class names
@@ -203,15 +194,9 @@ const val START_ACTIVITY = "org.videolan.vlc.StartActivity"
 /** Compose interface of :application:nagmedar-ui, started by class name from the classic UI. */
 const val NAGMEDAR_SHELL_ACTIVITY = "app.nagmedar.ui.NagmedarActivity"
 const val COMPATERROR_ACTIVITY = "org.videolan.vlc.gui.CompatErrorActivity"
-const val TV_SEARCH_ACTIVITY = "org.videolan.television.ui.SearchActivity"
 const val MOBILE_SEARCH_ACTIVITY = "org.videolan.vlc.gui.SearchActivity"
-const val TV_MAIN_ACTIVITY = "org.videolan.television.ui.MainTvActivity"
-const val TV_CONFIRMATION_ACTIVITY = "org.videolan.television.ui.dialogs.ConfirmationTvActivity"
-const val TV_PREFERENCE_ACTIVITY = "org.videolan.television.ui.preferences.PreferencesActivity"
 const val MOBILE_MAIN_ACTIVITY = "org.videolan.vlc.gui.MainActivity"
-const val MOVIEPEDIA_ACTIVITY = "org.videolan.moviepedia.ui.MoviepediaActivity"
 const val MEDIAPARSING_SERVICE = "org.videolan.vlc.MediaParsingService"
-const val TV_ONBOARDING_ACTIVITY = "org.videolan.television.ui.OnboardingActivity"
 const val REMOTE_ACCESS_SERVICE = "org.videolan.vlc.remoteaccessserver.RemoteAccessService"
 const val REMOTE_ACCESS_ONBOARDING = "org.videolan.vlc.remoteaccessserver.gui.remoteaccess.onboarding.RemoteAccessOnboardingActivity"
 

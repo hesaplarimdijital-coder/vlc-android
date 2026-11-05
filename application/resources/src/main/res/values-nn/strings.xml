@@ -68,7 +68,6 @@
     <string name="invalid_equalizer_file">Ugyldig tonekontrollfil</string>
     <string name="confirm_delete_vlc_eq">Er du sikker på at du vil skjula denne førehandsinnstillinga?\nDu kan stilla tilbake dette i tonekontrollinnstillingane.</string>
     <string name="confirm_replace_playlist">Er du sikker på at du vil erstatta spelelista \'%1$s\'?</string>
-    <string name="invalid_settings_file">Ugyldig innstillingsfil</string>
     <string name="confirm_delete_message">Dette er endeleg og kan ikkje angrast.</string>
     <string name="confirm_delete_album">Slette albumet \'%1$s\'?</string>
     <string name="confirm_delete_several_media">Slette desse %1$d media?</string>
@@ -115,14 +114,6 @@
         <item quantity="one">1 video</item>
         <item quantity="other">%d videoar</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="other">%d filmar</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV-show</item>
-        <item quantity="other">%d TV-show</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 spor</item>
         <item quantity="other">%d spor</item>
@@ -157,7 +148,6 @@
     <string name="nohistory">Du har ingen avspelingshistorikk enno.</string>
     <string name="cant_ban_root">Du kan ikkje bannlysa ei rotmappe</string>
 
-    <string name="cover_art">Plateomslag</string>
     <string name="shuffle_all_title">Bland alle</string>
     <string name="shuffle_title">Blandemodus</string>
     <string name="shuffle">Blanding av</string>
@@ -208,7 +198,6 @@
     <string name="video_player_remote">Fjernkontroll for videospelar</string>
     <string name="remote_keyboard_navigation">Tastaturnavigering</string>
 
-    <string name="server_add_title">Legg til ein ny server i favorittar</string>
     <string name="server_domain_hint">Server-addresse (vertsnamn eller IP-addresse)</string>
     <string name="server_share_hint">Sever-addresse (vertsnamn eller IP-addresse)</string>
     <string name="server_folder_hint">Mappesti (valfritt)</string>
@@ -222,8 +211,6 @@
     <string name="favorites_add">Legg til i favorittar</string>
     <string name="favorites_remove">Fjern frå favorittar</string>
     <string name="favorites_edit">Rediger</string>
-    <string name="favorite_added">Lagra til favorittar</string>
-    <string name="favorite_removed">Fjerna frå favorittar</string>
 
     <string name="streams">Straumar</string>
     <string name="search">Søk</string>
@@ -306,8 +293,6 @@
     <string name="subtitle_decoration_none">Ingen</string>
     <string name="subtitle_decoration_shadow">Skugge</string>
     <string name="subtitle_decoration_outline">Omriss</string>
-    <string name="previous_color">Førre farge</string>
-    <string name="new_color">Ny farge</string>
 
     <string name="audio_prefs_category">Lyd</string>
     <string name="lockscreen_cover_title">Albumomslag på låseskjerm</string>
@@ -341,7 +326,6 @@
     <string name="remote_access_info">Info om fjerntilgang</string>
     <string name="remote_access_content">Innhald</string>
     <string name="remote_access_medialibrary_content">Innhald i mediebibliotek</string>
-    <string name="remote_access_medialibrary_content_summary">Aktivert: %1$s\nDeaktivert: %2$s</string>
     <string name="remote_access_logs">Del loggfiler</string>
     <string name="casting_audio_only">Berre lyd</string>
     <string name="casting_conversion_quality_summary">Vel konverteringskvalitet for kringkasting til ein ekstern skjerm </string>
@@ -367,8 +351,6 @@
     <string name="clear_history">Tøm historikk</string>
     <string name="set_locale">Endra språk</string>
     <string name="resume_playback_title">Fortset avspeling etter ein samtale</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Seinare</string>
     <string name="developer_prefs_category">Utviklar</string>
     <string name="enable_verbose_mode">Detaljerte loggdata</string>
     <string name="clear_log">Tøm logg</string>
@@ -378,11 +360,8 @@
     <string name="sending_log">Sender loggen…</string>
 
 
-    <string name="no_result">Fann ingen resultat</string>
-    <string name="no_internet_connection">Sjekk internettsambandet ditt</string>
     <string name="retry">Prøv på nytt</string>
     <string name="network_browsing">Lokalt nettverk</string>
-    <string name="browsing">Utforskar</string>
 
     <string name="file_size">Filstorleik</string>
 
@@ -438,7 +417,6 @@
     <string name="movies">filmar</string>
     <string name="videos">videoar</string>
     <string name="default_action_videos">Videoar</string>
-    <string name="videos_all">Alle videoar</string>
     <string name="clear_playback_history">Tøm avspelingshistorikk</string>
     <string name="ml_scanning">Skannar etter mediefiler</string>
     <string name="ml_parse_media">Les media</string>
@@ -498,7 +476,6 @@
     <string name="create">Lag</string>
     <string name="resume_card_message">Fortsetja avspeling av %1$s?</string>
     <string name="misc">Ymse</string>
-    <string name="device_default">Einingsstandard</string>
     <string name="show_video_thumbnails">Videominiatyrbilde</string>
     <string name="enable_equalizer">Slå på</string>
     <string name="preamp">Forforsterkar</string>
@@ -516,21 +493,6 @@
     <string name="share">Del</string>
     <string name="share_file">Del %s</string>
     <string name="share_message">Her er %s</string>
-    <string name="find_metadata">Finn metadata</string>
-    <string name="moviepedia_hint">Søk i metadata</string>
-    <string name="moviepedia_result">Videoresultat</string>
-    <string name="directed_by">Regissert av</string>
-    <string name="produced_by">Produsert av</string>
-    <string name="written_by">Skriven av</string>
-    <string name="music_by">Musikk av</string>
-    <string name="header_tvshows">TV-show</string>
-    <string name="header_movies">Filmar</string>
-    <string name="season_number">Sesong %s</string>
-    <string name="resume_episode">Fortset (%s)</string>
-    <string name="next_episode">Neste episode</string>
-    <string name="open_network_settings">Opna ettverksinnstillingar?</string>
-    <string name="recently_played">Nyleg spelt</string>
-    <string name="recently_added">Nyleg lagt til</string>
     <string name="clear_media_db_message">Du vil mista framstega dine, bokmerka og spelelister du har laga men du vil behalda innstillingane dine for VLC for Android.</string>
     <string name="clear_app_data_message">Du vil mista framstega dine, bokmerke, spelelister og alle VLC-innstillingane</string>
 
@@ -574,12 +536,7 @@
     <string name="bookmarks_title">Bokmerke</string>
     <string name="show">Vis</string>
     <string name="optional_features">Valfrie funksjonar</string>
-    <string name="start_vlc">Start VLC</string>
     <string name="jump_delay_summary">%s sekund</string>
-    <string name="move_up">Flytt opp</string>
-    <string name="move_down">Flytt ned</string>
-    <string name="remove_from_playlist">Fjern frå speleliste</string>
-    <string name="play_media">Spel %s</string>
     <string name="add_button">Legg til</string>
     <string name="add_all_button">Legg til alle</string>
     <string name="start">Start</string>
@@ -636,7 +593,6 @@
     <string name="downloading">Lastar ned</string>
     <string name="talkback_action_rewind">Gå tilbake %s sekund</string>
     <string name="talkback_action_forward">Søk framover %s sekund</string>
-    <string name="talkback_display_settings">Visingsinnstillingar</string>
     <string name="talkback_already_played">Allereie spela</string>
     <string name="show_only_favs">Vis berre favorittar</string>
     <string name="ra_log_file">Logfiler</string>

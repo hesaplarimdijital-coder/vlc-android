@@ -76,7 +76,6 @@
     <string name="directorynotfound">\'%1$s\' папкасы табылмады.</string>
     <string name="nohistory">Уйнату тарихы буш.</string>
 
-    <string name="cover_art">Тышлык</string>
     <string name="shuffle_title">Бутау режимы</string>
     <string name="shuffle">Бутау сүнд.</string>
     <string name="shuffle_on">Бутау каб.</string>
@@ -113,7 +112,6 @@
     <string name="sleep_title">Йокы таймеры</string>
     <string name="sleep_in">Йоклату</string>
     <string name="jump_to_time">Вакытка күчерү</string>
-    <string name="server_add_title">Сайланмаларга яңа сервер өстәү</string>
     <string name="server_domain_hint">Сервер адресы (домен исеме яисә IP)</string>
     <string name="server_share_hint">Челтәр ресурсының исеме (яисә IP адресы)</string>
     <string name="server_folder_hint">Папкага юл (өстәмә)</string>
@@ -126,8 +124,6 @@
     <string name="favorites_add">Сайланмаларга өстәү</string>
     <string name="favorites_remove">Сайланмалардан алу</string>
     <string name="favorites_edit">Үзгәртү</string>
-    <string name="favorite_added">Сайланмаларга сакланды</string>
-    <string name="favorite_removed">Сайланмалардан бетерелде</string>
 
     <string name="open_mrl_dialog_msg">Челтәр адресын кертегез: http://, mms:// яисә rtsp://</string>
     <string name="encountered_error_title">Уйнатуда хата</string>
@@ -214,7 +210,6 @@
     <string name="resume_playback_title">Шалтыратудан соң уйнатуны дәвам итү</string>
     <string name="resume_playback_summary">Яисә паузада калу</string>
     <string name="quit">Кушымтаны киредән кабызу</string>
-    <string name="restart_message_OK">ОК</string>
     <string name="developer_prefs_category">Әзерләүчеләр өчен</string>
     <string name="enable_verbose_mode">Җентекләү</string>
     <string name="enable_verbose_mode_summary">Хәбәрләр җентекләү дәрәҗәсе (logcat)</string>
@@ -236,7 +231,6 @@
     <string name="sending_log">Логны җибәрү…</string>
 
     <string name="network_browsing">Локаль челтәр</string>
-    <string name="browsing">Карау</string>
 
     <string name="file_size">Файл үлчәме</string>
 
@@ -287,8 +281,6 @@
     <string name="add_to_playlist">Уйнату битенә өстәү</string>
     <string name="popup_playback_title">Видеоны калкучы тәрәзәдә уйнату</string>
     <string name="browse_folder">Папканы карау</string>
-    <string name="listen">Тыңлау</string>
-    <string name="videos_all">Бөтен видеолар</string>
     <string name="clear_playback_history">Уйнату тарихын чистарту</string>
     <string name="ml_scanning">Медиафайлларны сканерлау</string>
     <string name="ml_parse_media">Медианы тәфсилләү</string>

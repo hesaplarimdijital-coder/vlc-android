@@ -21,11 +21,6 @@
       "license"  : "mit"
     },
     {
-      "title"    : "Color Picker",
-      "copyright": "Copyright © 2016 Jared Rummler",
-      "license"  : "apache2.0"
-    },
-    {
       "title"    : "FFmpeg",
       "copyright": "Copyright © 2000-2017 the FFmpeg developers",
       "license"  : "lgpl2.1"
@@ -284,11 +279,6 @@
       "title"    : "RemoteAccess",
       "copyright": "Copyright © 2015 VLC authors, VideoLAN, and VideoLabs",
       "license"  : "lgpl2.1"
-    },
-    {
-      "title"    : "Retrofit",
-      "copyright": "Copyright © 2013 Square, Inc.",
-      "license"  : "apache2.0"
     },
     {
       "title"    : "Speex, Speexdsp",

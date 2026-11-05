@@ -61,7 +61,6 @@
     <string name="directorynotfound">\'%1$s\' jildi topilmadi.</string>
     <string name="nohistory">Ijro tarixi bo‘m-bo‘sh.</string>
 
-    <string name="cover_art">Muqova</string>
     <string name="previous">Avvalgi</string>
     <string name="stop">To‘xtatish</string>
     <string name="unseekable_stream">Topilmaydigan oqim</string>

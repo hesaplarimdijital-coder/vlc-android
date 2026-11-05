@@ -87,14 +87,6 @@
         <item quantity="one">video 1</item>
         <item quantity="other">video %d</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">filamu 1</item>
-        <item quantity="other">filamu %d</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">Kipindi cha televisheni 1</item>
-        <item quantity="other">Vipindi vya televisheni %d</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">nakala 1</item>
         <item quantity="other">nakala %d</item>
@@ -118,7 +110,6 @@
     <string name="nosubfolder">Hakuna folda dogo</string>
     <string name="directorynotfound">Njia ya mwongolezo \'%1$s\'  haijapatikana.</string>
     <string name="nohistory">Hauna historia ya uchezaji.</string>
-    <string name="cover_art">Sanaa ya jalada</string>
     <string name="shuffle_all_title">Changanya zote</string>
     <string name="shuffle_title">Nui Changanyi</string>
     <string name="shuffle">Kuchanganya kumezimwa</string>
@@ -159,7 +150,6 @@
     <string name="sleep_in">Sinzia ndani</string>
     <string name="jump_to_time">Ruka hadi</string>
     <string name="wait_before_sleep">Subiri midia inayocheza sasa imalize</string>
-    <string name="server_add_title">Ongeza seva mpya kwenye vipendwa</string>
     <string name="server_folder_hint">Njia ya folda (sio lazima)</string>
     <string name="server_username_hint">Jina la mtumiaji</string>
     <string name="server_port">Diko:</string>
@@ -170,8 +160,6 @@
     <string name="favorites_add">Ongeza kwenye vipendwa</string>
     <string name="favorites_remove">Toa kutoka vipendwa</string>
     <string name="favorites_edit">Hariri</string>
-    <string name="favorite_added">Imeongezwa kwenye vipendwa</string>
-    <string name="favorite_removed">Imetolewa kutoka vipendwa</string>
 
     <string name="streams">Mitiririko</string>
     <string name="search">Tafuta</string>
@@ -264,8 +252,6 @@
     <string name="subtitle_decoration_none">Hakuna</string>
     <string name="subtitle_decoration_shadow">Kivuli</string>
     <string name="subtitle_decoration_outline">Sura</string>
-    <string name="previous_color">Rangi ya awali</string>
-    <string name="new_color">Rangi mpya</string>
 
     <string name="audio_prefs_category">Usikiko</string>
     <string name="lockscreen_cover_title">Onyesha jalada la midia katika skrini funge</string>
@@ -355,8 +341,6 @@
     <string name="network_caching_popup">Thamani hii lazima iwe kati ya 0 na 60000 ms</string>
     <string name="quit">Zima na uanzishe tena programu</string>
     <string name="restart_message">Mabadiliko yatafanywa programu itakapoanzishwa tena\n\nAnzisha tena sasa hivi?</string>
-    <string name="restart_message_OK">Sawa</string>
-    <string name="restart_message_Later">Baadaye</string>
     <string name="developer_prefs_category">Msanidi</string>
     <string name="enable_verbose_mode">Utondoti</string>
     <string name="enable_verbose_mode_summary">Ongeza kiwango cha maneno (kwenye logcat)</string>
@@ -381,11 +365,8 @@
     <string name="sending_log">Inatuma batli...</string>
 
 
-    <string name="no_result">Hakuna matokeo</string>
-    <string name="no_internet_connection">Angalia muunganisho wa wavuti</string>
     <string name="retry">Jaribu tena</string>
     <string name="network_browsing">Mtandao Janibu</string>
-    <string name="browsing">Kuvinjari</string>
 
     <string name="file_size">Ukubwa wa faili</string>
 
@@ -464,8 +445,6 @@
     <string name="add_to_playlist">Ongeza kwenye orodha chezeshi</string>
     <string name="popup_playback_title">Cheza video katika dirisha ibukizi</string>
     <string name="browse_folder">Vinjari folda</string>
-    <string name="listen">Sikiza</string>
-    <string name="videos_all">Video zote</string>
     <string name="clear_playback_history">Futa historia ya uchezai</string>
     <string name="ml_scanning">Inatafuta faili za midia</string>
     <string name="ml_parse_media">Inachanganua midia</string>
@@ -553,8 +532,6 @@
     <string name="onboarding_theme_title">Karibu</string>
     <string name="done">Imemaliza</string>
     <string name="onboarding_scan_title">Gundua midia kiotomatiki</string>
-    <string name="onboarding_all_set">VLC iko seti</string>
-    <string name="onboarding_permission_given">Sasa unaweza kugundua midia zako kiotomatiki, utumie manukuu ya nje na pia ucheze mitiririko au midia zilizo mtandaoni</string>
     <string name="daynight_system_explanation">VLC itajibadilisha kiotomatiki kuwa nui nyeusi kulingana na mipangilio ya mfumo</string>
     <string name="daynight_legacy_explanation">VLC itajibadilisha kiotomatiki kuwa nui usiku katika wakati ufaao</string>
     <string name="onboarding_scanning_enable">Ruhusu VLC iskani kifaa ikitafuta midia</string>
@@ -565,7 +542,6 @@
     <string name="add_to_new_playlist">Ongeza kwenye orodha chezeshi mpya</string>
     <string name="resume_card_message">Endelea kucheza %1$s?</string>
     <string name="misc">Mengineyo</string>
-    <string name="device_default">Chaguo-msingi za kifaa</string>
     <string name="track_number">nakala %d</string>
     <string name="jump_to">Ruka hadi</string>
     <string name="show_video_thumbnails">Vijipicha vya video</string>
@@ -582,12 +558,9 @@
         <item quantity="other">Nakala %d zimeambatishwa</item>
     </plurals>
     <string name="remove_current">Ondoa kilichopo</string>
-    <string name="validation_delete_playlist">Una uhakika unataka kufuta orodha chezeshi hii?</string>
-    <string name="validation_delete_playlist_text">Tendo hili haliwezi kutenduliwa</string>
     <string name="display_settings">Onyesha mipangilio</string>
     <string name="display_in_list">Onyesha kama orodha</string>
     <string name="display_in_grid">Onyesha kama gridi</string>
-    <string name="dump_db_succes">Kanzidata imembekwa katika mzizi wa hifadhi ya ndani</string>
     <string name="dump_db_failure">Haikuweza kumbeka kanzidata</string>
     <string name="send_crash_title">Kiwasilishi ripoti VLC inapoparaganya</string>
     <string name="send_crash_description">Unapotuma ripoti ya mparaganyo, unatusaidia kuboresha udhabiti wa VLC.</string>
@@ -615,25 +588,6 @@
     <string name="invalid_file">Faili batili. Haiwezi kushirikiwa.</string>
     <string name="share_file">Shiriki %s</string>
     <string name="share_message">%s ndio hii</string>
-    <string name="find_metadata">Tafuta datameta</string>
-    <string name="moviepedia_hint">Tafuta datameta</string>
-    <string name="moviepedia_result">Video zilizopatikana</string>
-    <string name="directed_by">Imeendeshwa na</string>
-    <string name="casting">Waigizaji</string>
-    <string name="produced_by">Imetolewa na</string>
-    <string name="written_by">Imeandikwa na</string>
-    <string name="music_by">Muziki kutoka</string>
-    <string name="posters">Picha za kutangaza</string>
-    <string name="backdrops">Mandhari</string>
-    <string name="header_tvshows">Vipindi vya TV</string>
-    <string name="header_movies">Filamu</string>
-    <string name="season_number">Msimu wa %s</string>
-    <string name="resume_episode">Endelea (%s)</string>
-    <string name="start_over">Anza kutoka mwanzo</string>
-    <string name="next_episode">Kipindi kifuatacho</string>
-    <string name="open_network_settings">Fungua mipangilio ya mtandao?</string>
-    <string name="recently_played">Kilichochezwa hivi karibuni</string>
-    <string name="recently_added">Kilichoongezwa hivi karibuni</string>
     <string name="playback_multiple_errors">Midia nyingi hazichezeki</string>
     <string name="clear_media_db_message">Utapoteza kinachocheza, vialamisho na orodha chezeshi ulizounda, lakini utabaki na mipangilio ya VLC ya Android</string>
     <string name="clear_app_data_message">Utapoteza kinachocheza, vialamisho, orodha chezeshi na mipangilio yote ya VLC</string>
@@ -680,7 +634,6 @@
     <string name="subscription_cancel">Unaweza kukatiza ufadhili katika Duka la Play</string>
     <string name="subscription_cancel_tv">Jinsi ya kukatiza ufadhili</string>
     <string name="donate_unsubscribe_tv">Ili ukatize, tafadhali fungua %s katika simu au tarakilishi au uskani msimbo:</string>
-    <string name="tip_jar">Saidia VLC</string>
     <string name="thank_you">Asante</string>
     <string name="thank_you_desc">Asante kwa ufadhili wako!\nUtatusaidia kuboresha VLC!</string>
     <string name="donate_again">Fadhili programu tena</string>
@@ -692,7 +645,6 @@
     <string name="allow_otg">Ruhusu OTG ifikie</string>
     <string name="allow_otg_description">Tafadhali chagua kifaa cha OTG ili ukiruhusu kifikie VLC.</string>
     <string name="video_hud_timeout">Vidhibiti vya kichezaji video vya kuficha kawizo</string>
-    <string name="remove_from_history">Ondoa kutoka historia</string>
     <string name="prefersmbv1">Pendelea SMB 1</string>
     <string name="prefersmbv1_summary">Usichague mpangilio huu ikiwa una matatizo unapovinjari seva yako ya SMB</string>
     <string name="audio_delay_global">Kawizo la usikiko limewekwa %sms kwa video zote</string>
@@ -716,14 +668,9 @@
     <string name="optional_features_warning">Kipengele hiki ni beta na kinaweza kufanya miparaganyo</string>
     <string name="network_indexing">Faharasa ya mtandao</string>
     <string name="network_indexing_warning">Faharasa ya mtandao ni beta kwa wakati huu.\nShida zinazojulikana:\nUtendakazi pole\n\nUkishuhudia shida zingine, tafadhali ziripoti katika jukwaa letu.</string>
-    <string name="start_vlc">Anza VLC</string>
     <string name="jump_delay">Kawizo la saa mbele/nyuma</string>
     <string name="long_jump_delay">Gusa kwa muda mrefu kawizo la saa mbele/nyuma</string>
     <string name="jump_delay_summary">Sekunde %s</string>
-    <string name="move_up">Nenda juu</string>
-    <string name="move_down">Nenda chini</string>
-    <string name="remove_from_playlist">Ondoa kutoka orodha chezeshi</string>
-    <string name="play_media">Cheza %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Ongeza vilivyorudiwa?</string>
     <string name="add_button">Ongeza</string>
@@ -811,7 +758,6 @@
     <string name="downloading">Inapakua</string>
     <string name="talkback_action_rewind">Rudi nyuma sekunde %s</string>
     <string name="talkback_action_forward">Tafuta mbele sekunde %s</string>
-    <string name="talkback_display_settings">Onyesha mipangilio</string>
     <string name="talkback_already_played">Tayari imechezwa</string>
     <string name="show_only_favs">Onyesha vipendwa pekee</string>
     </resources>

@@ -72,7 +72,6 @@
     <string name="confirm_delete_eq">Sei sicuro di voler eliminare questa preimpostazione?</string>
     <string name="confirm_delete_vlc_eq">Sei sicuro di voler nascondere questa tua preimpostazione?\nPuoi ripristinarla nelle impostazioni dell\'equalizzatore.</string>
     <string name="confirm_replace_playlist">Sei sicuro di voler sostituire la scaletta \'%1$s\'?</string>
-    <string name="invalid_settings_file">File delle impostazioni non valido </string>
     <string name="confirm_delete_message">Questa azione è definitiva e non può essere annullata.</string>
     <string name="confirm_delete_album">Vuoi eliminare l\'album \'%1$s\'?</string>
     <string name="confirm_delete_several_media">Vuoi eliminare questi %1$d media?</string>
@@ -125,16 +124,6 @@
         <item quantity="many">%d video</item>
         <item quantity="other">%d video</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="many">%d film</item>
-        <item quantity="other">%d film</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 programma televisivo</item>
-        <item quantity="many">%d programmi televisivi</item>
-        <item quantity="other">%d programmi televisivi</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 traccia</item>
         <item quantity="many">%d tracce</item>
@@ -170,7 +159,6 @@
     <string name="nohistory">Non hai ancora uno storico delle riproduzioni.</string>
     <string name="cant_ban_root">Non puoi vietare una cartella radice</string>
 
-    <string name="cover_art">Copertina</string>
     <string name="shuffle_all_title">Mescola tutti</string>
     <string name="shuffle_title">Mescola</string>
     <string name="shuffle">Non mescolare</string>
@@ -230,7 +218,6 @@
     <string name="video_player_remote">Telecomando del lettore video</string>
     <string name="remote_keyboard_navigation">Navigazione da tastiera</string>
 
-    <string name="server_add_title">Aggiungi un nuovo server ai preferiti</string>
     <string name="server_domain_hint">Indirizzo server (nome host o indirizzo IP)</string>
     <string name="server_share_hint">Indirizzo server (nome host o indirizzo IP)</string>
     <string name="server_folder_hint">Percorso cartella (opzionale)</string>
@@ -244,8 +231,6 @@
     <string name="favorites_add">Aggiungi ai preferiti</string>
     <string name="favorites_remove">Rimuovi dai preferiti</string>
     <string name="favorites_edit">Modifica</string>
-    <string name="favorite_added">Salvato nei preferiti</string>
-    <string name="favorite_removed">Rimosso dai preferiti</string>
 
     <string name="streams">Flussi</string>
     <string name="open_mrl_dialog_msg">Digita un indirizzo di rete, come http://, mms:// o rtsp://</string>
@@ -366,8 +351,6 @@
     <string name="subtitle_decoration_none">Nessuna</string>
     <string name="subtitle_decoration_shadow">Ombra</string>
     <string name="subtitle_decoration_outline">Bordatura</string>
-    <string name="previous_color">Colore precedente</string>
-    <string name="new_color">Nuovo colore</string>
 
     <string name="audio_prefs_category">Audio</string>
     <string name="lockscreen_cover_title">Copertina al blocco dello schermo</string>
@@ -421,7 +404,6 @@
     <string name="remote_access_info">Informazioni di accesso remoto</string>
     <string name="remote_access_content">Contenuti</string>
     <string name="remote_access_medialibrary_content">Contenuti della raccolta multimediale</string>
-    <string name="remote_access_medialibrary_content_summary">Abilitato: %1$s\nDisabilitato: %2$s</string>
     <string name="remote_access_file_browser_content">Navigatore di file</string>
     <string name="remote_access_network_browser_content">Navigatore di rete</string>
     <string name="remote_access_playback_control">Controlla la riproduzione</string>
@@ -484,8 +466,6 @@
     <string name="network_caching_popup">Questo valore deve essere compreso tra 0 e 60000 ms</string>
     <string name="quit">Esci e riavvia l\'applicazione</string>
     <string name="restart_message">Le modifiche avranno effetto solo dopo il riavvio dell\'applicazione.\n\nVuoi riavviare ora?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Più tardi</string>
     <string name="browser_show_all_title">Mostra solo i file multimediali</string>
 
     <string name="developer_prefs_category">Sviluppatore</string>
@@ -519,12 +499,9 @@
     <string name="sending_log">Invio del registro in corso…</string>
 
 
-    <string name="no_result">Nessun risultato trovato</string>
-    <string name="no_internet_connection">Controlla la tua connessione a Internet</string>
     <string name="retry">Riprova</string>
 
     <string name="network_browsing">Rete locale</string>
-    <string name="browsing">Navigazione</string>
 
     <string name="file_size">Dimensione file</string>
 
@@ -566,7 +543,6 @@
     <string name="open_in_browser">Apri nel browser</string>
     <string name="install">Installa</string>
     <string name="install_nightly">Installa la versione nightly</string>
-    <string name="install_nightly_alert">Le versioni nigthly sono versioni sperimentali aggiornate ogni giorno.\n\nAspettati nuove funzionalità, ma anche nuovi bug!</string>
     <string name="nightly_version">Versione trovata: %2$s - %1$s</string>
     <string name="update_nightly_alert">Stai eseguendo una versione notturna. Vuoi cercare periodicamente gli aggiornamenti?</string>
     <string name="update_nightly">Aggiornamento automatico</string>
@@ -634,12 +610,10 @@
     <string name="popup_playback_title">Riproduci video in una finestra a comparsa</string>
     <string name="open_subtitles_vip">Sei un utente VIP di OpenSubtitles</string>
     <string name="browse_folder">Sfoglia cartella</string>
-    <string name="listen">Ascolta</string>
     <string name="episodes">episodi</string>
     <string name="movies">film</string>
     <string name="videos">video</string>
     <string name="default_action_videos">Video</string>
-    <string name="videos_all">Tutti i video</string>
     <string name="clear_playback_history">Cancella cronologia di riproduzione</string>
     <string name="ml_scanning">Scansione file multimediali</string>
     <string name="ml_parse_media">Analisi media</string>
@@ -734,8 +708,6 @@
     <string name="onboarding_theme_title">Sentiti come a casa</string>
     <string name="done">Completato</string>
     <string name="onboarding_scan_title">Rilevamento automatico dei tuoi supporti</string>
-    <string name="onboarding_all_set">VLC è pronto!</string>
-    <string name="onboarding_permission_given">Ora puoi scoprire automaticamente i tuoi media, usare sottotitoli esterni e riprodurre flussi o media di rete</string>
     <string name="daynight_system_explanation">VLC passerà automaticamente alla modalità scura in base alle impostazioni di sistema</string>
     <string name="daynight_legacy_explanation">VLC passerà automaticamente alla modalità notturna all\'ora appropriata</string>
     <string name="onboarding_scanning_enable">Lascia che VLC analizzi il mio dispositivo alla ricerca di contenuti multimediali</string>
@@ -748,7 +720,6 @@
     <string name="create">Crea</string>
     <string name="resume_card_message">Vuoi riprendere la riproduzione di %1$s?</string>
     <string name="misc">Varie</string>
-    <string name="device_default">Predefinito del dispositivo</string>
     <string name="track_number">%d tracce</string>
     <string name="jump_to">Salta a</string>
     <string name="show_video_thumbnails">Miniature dei video</string>
@@ -767,15 +738,12 @@
         <item quantity="other">%d tracce accodate</item>
     </plurals>
     <string name="remove_current">Rimuovi attuale</string>
-    <string name="validation_delete_playlist">Sei sicuro di voler eliminare questa scaletta?</string>
-    <string name="validation_delete_playlist_text">Questa azione non può essere annullata.</string>
     <string name="display_settings">Impostazioni schermo</string>
     <string name="incognito_mode">Modalità incognito</string>
     <string name="persistent_incognito_mode">Modalità incognito persistente</string>
     <string name="persistent_incognito_mode_summary">Mantieni la modalità incognito abilitata anche se l\'applicazione viene riavviata</string>
     <string name="display_in_list">Visualizza in elenco</string>
     <string name="display_in_grid">Visualizza in griglia</string>
-    <string name="dump_db_succes">Database salvato nella radice dell\'archiviazione interna</string>
     <string name="dump_db_failure">Salvataggio del database non riuscito</string>
     <string name="send_crash_title">Strumento di segnalazione errori di VLC</string>
     <string name="send_crash_description">Inviando la tua chiusura inattesa, ci aiuterai a migliorare la stabilità di VLC.</string>
@@ -808,25 +776,6 @@
     <string name="share_message">Ecco %s</string>
     <string name="share_track_info">Condividi le informazioni della traccia</string>
     <string name="share_track">Attualmente sto ascoltando %s</string>
-    <string name="find_metadata">Trova metadati</string>
-    <string name="moviepedia_hint">Cerca metadati</string>
-    <string name="moviepedia_result">Risultati video</string>
-    <string name="directed_by">Diretto da</string>
-    <string name="casting">Cast</string>
-    <string name="produced_by">Prodotto da</string>
-    <string name="written_by">Scritto da</string>
-    <string name="music_by">Musica di</string>
-    <string name="posters">Locandine</string>
-    <string name="backdrops">Fondali</string>
-    <string name="header_tvshows">Programmi televisivi</string>
-    <string name="header_movies">Film</string>
-    <string name="season_number">Stagione %s</string>
-    <string name="resume_episode">Riprendi (%s)</string>
-    <string name="start_over">Ricomincia</string>
-    <string name="next_episode">Episodio successivo</string>
-    <string name="open_network_settings">Aprire le impostazioni di rete?</string>
-    <string name="recently_played">Riprodotti di recente</string>
-    <string name="recently_added">Aggiunti di recente</string>
     <string name="playback_multiple_errors">Più media non possono essere riprodotti</string>
     <string name="clear_media_db_message">Perderai i tuoi progressi, i segnalibri e le scalette che hai creato, ma manterrai le impostazioni di VLC per Android</string>
     <string name="clear_app_data_message">Perderai i tuoi progressi, i segnalibri, le scalette e tutte le impostazioni di VLC</string>
@@ -874,7 +823,6 @@
     <string name="subscription_cancel">Puoi annullare l\'iscrizione nel Play Store</string>
     <string name="subscription_cancel_tv">Come annullare l\'iscrizione</string>
     <string name="donate_unsubscribe_tv">Per annullare l\'iscrizione, apri %s su un telefono o un computer o esegui una scansione questo codice:</string>
-    <string name="tip_jar">Aiuta VLC</string>
     <string name="thank_you">Grazie</string>
     <string name="thank_you_desc">Grazie per la tua sponsorizzazione!\nCi aiuterà molto a migliorare VLC!</string>
     <string name="donate_again">Sponsorizza ancora l\'applicazione</string>
@@ -887,7 +835,6 @@
     <string name="allow_otg">Consenti accesso OTG</string>
     <string name="allow_otg_description">Seleziona il tuo drive OTG per consentire l\'accesso a VLC.</string>
     <string name="video_hud_timeout">Ritardo di occultamento dei controlli del lettore video</string>
-    <string name="remove_from_history">Rimuovi dalla cronologia</string>
     <string name="prefersmbv1">Preferisci SMB 1</string>
     <string name="prefersmbv1_summary">Deseleziona questa impostazione se hai difficoltà a sfogliare il tuo server SMB</string>
     <string name="audio_delay_global">Ritardo audio impostato a %s ms per tutti i video</string>
@@ -922,7 +869,6 @@
     <string name="unlock">Sblocca</string>
     <string name="lock_with_pin">Abilita nuovamente il blocco con PIN</string>
     <string name="unlock_with_pin">Disattiva la modalità sicura</string>
-    <string name="lock_with_pin_short">Blocco con PIN</string>
     <string name="restrict_settings">Limita le impostazioni di accesso</string>
     <string name="search_prefs">Impostazioni di ricerca</string>
     <string name="stop_unpaubale">Questo media non può essere sospeso. Vuoi invece fermarlo?</string>
@@ -942,14 +888,9 @@
     <string name="optional_features_warning">Questa funzionalità è in fase beta e potrebbe causare chiusure inattese e instabilità</string>
     <string name="network_indexing">Indicizzazione di rete</string>
     <string name="network_indexing_warning">L\'indicizzazione di rete è attualmente in beta.\n• Prestazioni ridotte\n\nSe riscontri altri problemi, segnalali sul nostro forum.</string>
-    <string name="start_vlc">Avvia VLC</string>
     <string name="jump_delay">Ritardo di tempo avanti/indietro</string>
     <string name="long_jump_delay">Ritardo di tempo avanti/indietro tocco lungo</string>
     <string name="jump_delay_summary">%s secondi</string>
-    <string name="move_up">Sposta su</string>
-    <string name="move_down">Sposta giù</string>
-    <string name="remove_from_playlist">Rimuovi dalla scaletta</string>
-    <string name="play_media">Riproduci %s</string>
     <string name="edit_eq_preset">Modifica preimpostazioni equalizzatore</string>
     <string name="edit_eq_name_not_allowed">Questa nome non è consentito</string>
     <string name="export_equalizer">Esporta equalizzatore</string>
@@ -1072,7 +1013,6 @@
     <string name="downloading">Scaricamento</string>
     <string name="talkback_action_rewind">Riavvolgi di %s secondi</string>
     <string name="talkback_action_forward">Posiziona in avanti di %s secondi</string>
-    <string name="talkback_display_settings">Impostazioni schermo</string>
     <string name="talkback_already_played">Già riprodotto</string>
     <string name="show_only_favs">Mostra solo i preferiti</string>
     <string name="ignore_headset_media_button_presses">Ignora le pressioni dei pulsanti multimediali delle cuffie</string>

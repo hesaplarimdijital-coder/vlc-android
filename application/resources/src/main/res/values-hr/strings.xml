@@ -88,16 +88,6 @@
         <item quantity="few">%d video snimke</item>
         <item quantity="other">%d video snimki</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="few">%d filma</item>
-        <item quantity="other">%d filmova</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 TV emisija</item>
-        <item quantity="few">%d TV emisije</item>
-        <item quantity="other">%d TV emisija</item>
-    </plurals>
     <string name="internal_memory">Unutarnja memorija</string>
     <string name="audio">Glazba</string>
     <string name="video">Video</string>
@@ -115,7 +105,6 @@
     <string name="nosubfolder">Nema podmapa</string>
     <string name="directorynotfound">Putanja direktorija \'%1$s\' nije pronađena.</string>
     <string name="nohistory">Još nemate povijest reprodukcije.</string>
-    <string name="cover_art">Omot slike</string>
     <string name="shuffle_all_title">Naizmjenično sve</string>
     <string name="shuffle_title">Naizmjenični način rada</string>
     <string name="shuffle">Naizmjenično isključeno</string>
@@ -154,7 +143,6 @@
     <string name="sleep_title">Zadano vrijeme spavanja</string>
     <string name="sleep_in">Spavaj</string>
     <string name="jump_to_time">Premotaj na vrijeme</string>
-    <string name="server_add_title">Dodaj novi poslužitelj u omiljene</string>
     <string name="server_domain_hint">Adresa poslužitelja (naziv domene ili IP adresa)</string>
     <string name="server_share_hint">Naziv mrežnog dijeljenja (ili IP adresa)</string>
     <string name="server_folder_hint">Putanja mape (neobavezno)</string>
@@ -167,8 +155,6 @@
     <string name="favorites_add">Dodaj u omiljene</string>
     <string name="favorites_remove">Ukloni iz omiljenih</string>
     <string name="favorites_edit">Uredi</string>
-    <string name="favorite_added">Spremljeno u omiljene</string>
-    <string name="favorite_removed">Uklonjeno iz omiljenih</string>
 
     <string name="streams">Strujanja</string>
     <string name="open_mrl_dialog_msg">Upišite mrežno strujanje: npr. http://, mms:// ili rtsp://</string>
@@ -285,8 +271,6 @@
     <string name="blurred_cover_background_summary">Zamućena  naslovna slika u pozadini zvučnog izvodjača</string>
     <string name="quit">Zatvori i ponovno pokreni aplikaciju</string>
     <string name="restart_message">Promjene će biti primjenjene nakon ponovnog pokretanja\n\nŽelite li to učiniti odmah?</string>
-    <string name="restart_message_OK">U redu</string>
-    <string name="restart_message_Later">Kasnije</string>
     <string name="developer_prefs_category">Razvoj</string>
     <string name="enable_verbose_mode">Opširnije</string>
     <string name="enable_verbose_mode_summary">Povećaj opširnost zapisa (LogCat)</string>
@@ -311,12 +295,9 @@
     <string name="sending_log">Slanje zapisa…</string>
 
 
-    <string name="no_result">Rezultati nisu pronađeni</string>
-    <string name="no_internet_connection">Provjerite inernetsku vezu</string>
     <string name="subs_download_error">Usluga nije dostupna. Pokušajte ponovno kasnije</string>
 
     <string name="network_browsing">Lokalna mreža</string>
-    <string name="browsing">Pregledaj</string>
 
     <string name="file_size">Veličina datoteke</string>
 
@@ -367,8 +348,6 @@
     <string name="add_to_playlist">Dodaj na popis izvođenja</string>
     <string name="popup_playback_title">Reproduciraj video snimke u skočnom prozoru</string>
     <string name="browse_folder">Pregledaj mapu</string>
-    <string name="listen">Osluškuj</string>
-    <string name="videos_all">Svi videozapisi</string>
     <string name="clear_playback_history">Obriši povijest reprodukcije</string>
     <string name="ml_scanning">Pretraživanje medijskih datoteka</string>
     <string name="ml_parse_media">Analiza medija</string>
@@ -445,7 +424,6 @@
     <string name="add_to_new_playlist">Dodaj na novi popis izvođenja</string>
     <string name="resume_card_message">Nastavi reprodukciju%1$s?</string>
     <string name="misc">Razno</string>
-    <string name="device_default">Standardna postavka uređaja</string>
     <string name="track_number">%d zapisa</string>
     <string name="jump_to">Skoči na</string>
     <string name="show_video_thumbnails">Sličice videa</string>
@@ -469,23 +447,6 @@
     <string name="share">Dijeli</string>
     <string name="invalid_file">Neispravna datoteka. Ne može se dijeliti.</string>
     <string name="share_file">Dijeli %s</string>
-    <string name="find_metadata">Pronađi metapodatke</string>
-    <string name="moviepedia_hint">Traži metapodatke</string>
-    <string name="moviepedia_result">Rezultati videa</string>
-    <string name="directed_by">Režija</string>
-    <string name="casting">Casting</string>
-    <string name="produced_by">Proizvodnja</string>
-    <string name="written_by">Tekst</string>
-    <string name="music_by">Glazba</string>
-    <string name="posters">Plakati</string>
-    <string name="header_tvshows">TV serije</string>
-    <string name="header_movies">Filmovi</string>
-    <string name="season_number">Sezona %s</string>
-    <string name="resume_episode">Nastavi (%s)</string>
-    <string name="start_over">Počni ponovo</string>
-    <string name="next_episode">Sljedeća epizoda</string>
-    <string name="recently_played">Nedavno reproducirano</string>
-    <string name="recently_added">Nedavno dodano</string>
 
     <string name="channels">Kanali</string>
     <string name="resolution">Razlučivost</string>
@@ -515,14 +476,8 @@
 
     <string name="donate">Pomogni VLC-u</string>
     <string name="donate_desc">Podrži volontere koji grade VLC</string>
-    <string name="tip_jar">Pomogni VLC-u</string>
     <string name="thank_you">Hvala</string>
-    <string name="remove_from_history">Ukloni iz povijesti</string>
-    <string name="start_vlc">Pokreni VLC</string>
     <string name="jump_delay_summary">%s s</string>
-    <string name="move_up">Pomakni prema gore</string>
-    <string name="move_down">Pomakni prema dolje</string>
-    <string name="play_media">Reproduciraj %s</string>
 
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Dodati duplikate?</string>
@@ -557,7 +512,6 @@
     <string name="downloading">Preuzimanje</string>
     <string name="talkback_action_rewind">Premotaj %s s natrag</string>
     <string name="talkback_action_forward">Premotaj %s s naprijed</string>
-    <string name="talkback_display_settings">Postavke prikaza</string>
     <string name="talkback_already_played">Već reproducirano</string>
     <string name="show_only_favs">Prikaži samo favorite</string>
     </resources>

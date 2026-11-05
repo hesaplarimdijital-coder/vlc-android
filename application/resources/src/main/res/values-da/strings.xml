@@ -71,7 +71,6 @@
     <string name="confirm_delete_eq">Er du sikker på, at du vil slette denne forudindstilling?</string>
     <string name="confirm_delete_vlc_eq">Er du sikker på, at du vil skjule denne forudindstilling?\nDu kan gendanne den i equalizerindstillingerne.</string>
     <string name="confirm_replace_playlist">Er du sikker på, du vil erstatte playlisten \'%1$s\'?</string>
-    <string name="invalid_settings_file">Ugyldig indstillingsfil</string>
     <string name="confirm_delete_message">Dette er permanent og kan ikke omgøres.</string>
     <string name="confirm_delete_album">Slet albummet \'%1$s\'?</string>
     <string name="confirm_delete_several_media">Slet disse %1$d medier?</string>
@@ -118,14 +117,6 @@
         <item quantity="one">1 video</item>
         <item quantity="other">%d videoer</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 film</item>
-        <item quantity="other">%d film</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 serie</item>
-        <item quantity="other">%d serier</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 spor</item>
         <item quantity="other">%d spor</item>
@@ -160,7 +151,6 @@
     <string name="nohistory">Du har endnu ikke en afspilningshistorik.</string>
     <string name="cant_ban_root">Du kan ikke bandlyse en rodmappe.</string>
 
-    <string name="cover_art">Billedillustrationer</string>
     <string name="shuffle_all_title">Bland alle</string>
     <string name="shuffle_title">Blandtilstand</string>
     <string name="shuffle">Bland fra</string>
@@ -219,7 +209,6 @@
     <string name="video_player_remote">Videoafspillerfjernbetjening</string>
     <string name="remote_keyboard_navigation">Tastaturnavigation</string>
 
-    <string name="server_add_title">Tilføj en ny server til favoritter</string>
     <string name="server_domain_hint">Serveradresse (værtsnavn eller IP-adresse)</string>
     <string name="server_share_hint">Serveradresse (værtsnavn eller IP-adresse)</string>
     <string name="server_folder_hint">Mappesti (valgfri)</string>
@@ -233,8 +222,6 @@
     <string name="favorites_add">Tilføj til favoritter</string>
     <string name="favorites_remove">Fjern fra farvoritter</string>
     <string name="favorites_edit">Redigér</string>
-    <string name="favorite_added">Gemt til farvoritter</string>
-    <string name="favorite_removed">Fjernet fra farvoritter</string>
 
     <string name="streams">Streams</string>
     <string name="open_mrl_dialog_msg"> Angiv en netværksadresse, f.eks. http://, mms:// eller rtsp://</string>
@@ -355,8 +342,6 @@
     <string name="subtitle_decoration_none">Ingen</string>
     <string name="subtitle_decoration_shadow">Skygge</string>
     <string name="subtitle_decoration_outline">Omrids</string>
-    <string name="previous_color">Forrige farve</string>
-    <string name="new_color">Ny farve</string>
 
     <string name="audio_prefs_category">Lyd</string>
     <string name="lockscreen_cover_title">Billedillustrationer på låseskærm</string>
@@ -410,7 +395,6 @@
     <string name="remote_access_info">Fjernadgang info</string>
     <string name="remote_access_content">Indhold</string>
     <string name="remote_access_medialibrary_content">Mediebiblioteksindhold</string>
-    <string name="remote_access_medialibrary_content_summary">Slået til: %1$s\nSlået fra: %2$s</string>
     <string name="remote_access_file_browser_content">Fil-browser</string>
     <string name="remote_access_network_browser_content">Netværksbrowser</string>
     <string name="remote_access_playback_control">Kontrollér afspilning</string>
@@ -473,8 +457,6 @@
     <string name="network_caching_popup">Værdien skal være mellem 0 og 60000 ms</string>
     <string name="quit">Afslut og genstart appen</string>
     <string name="restart_message">Ændringerne træder i kraft når programmet er blevet genstartet.\n\nGenstart nu?</string>
-    <string name="restart_message_OK">OK</string>
-    <string name="restart_message_Later">Senere</string>
     <string name="browser_show_all_title">Vis udelukkende multimediefiler</string>
 
     <string name="developer_prefs_category">Udvikler</string>
@@ -508,12 +490,9 @@
     <string name="sending_log">Sender loggen…</string>
 
 
-    <string name="no_result">Ingen resultater fundet</string>
-    <string name="no_internet_connection">Tjek din internetforbindelse</string>
     <string name="retry">Forsøg igen</string>
 
     <string name="network_browsing">Lokalt netværk</string>
-    <string name="browsing">Gennemsér</string>
 
     <string name="file_size">Filstørrelse</string>
 
@@ -555,7 +534,6 @@
     <string name="open_in_browser">Åbn i browser</string>
     <string name="install">Installér</string>
     <string name="install_nightly">Installér natlig version</string>
-    <string name="install_nightly_alert">Natlige versioner er eksperimentelle versioner opdateret hver eneste dag.\n\nForvent nye funktioner. Forvent nye fejl!</string>
     <string name="nightly_version">Fundet version: %2$s - %1$s</string>
     <string name="update_nightly_alert">Du bruger en natlig version. Vil du periodisk se efter opdateringer?</string>
     <string name="update_nightly">Automatisk opdatering</string>
@@ -623,12 +601,10 @@
     <string name="popup_playback_title">Afspil video i et pop op-vindue</string>
     <string name="open_subtitles_vip">Du er en VIP OpenSubtitles-bruger</string>
     <string name="browse_folder">Gennemsé mappe</string>
-    <string name="listen">Lyt</string>
     <string name="episodes">episoder</string>
     <string name="movies">film</string>
     <string name="videos">videoer</string>
     <string name="default_action_videos">Videoer</string>
-    <string name="videos_all">Alle videoer</string>
     <string name="clear_playback_history">Ryd afspilningshistorik</string>
     <string name="ml_scanning">Skanner efter mediefiler</string>
     <string name="ml_parse_media">Parser medie</string>
@@ -723,8 +699,6 @@
     <string name="onboarding_theme_title">Gør dig selv til rette</string>
     <string name="done">Færdig</string>
     <string name="onboarding_scan_title">Automatisk opdagelse af dine medier</string>
-    <string name="onboarding_all_set">VLC er klar!</string>
-    <string name="onboarding_permission_given">Du kan nu udføre automatisk opdagelse af dit medie, anvende eksterne undertekster samt afspille streams eller netværksmedier</string>
     <string name="daynight_system_explanation">VLC skifter automatisk til mørk tilstand i henhold til systemets indstilling</string>
     <string name="daynight_legacy_explanation">VLC skifter automatisk til nat-tilstand på rette tidspunkt</string>
     <string name="onboarding_scanning_enable">Lad VLC skanne din enhed for medieindhold</string>
@@ -737,7 +711,6 @@
     <string name="create">Opret</string>
     <string name="resume_card_message">Genoptag afspilning af %1$s?</string>
     <string name="misc">Diverse</string>
-    <string name="device_default">Standard for enhed</string>
     <string name="track_number">%d spor</string>
     <string name="jump_to">Hop til</string>
     <string name="show_video_thumbnails">Videominiaturer</string>
@@ -754,15 +727,12 @@
         <item quantity="other">%d spor tilføjet</item>
     </plurals>
     <string name="remove_current">Fjern nuværende</string>
-    <string name="validation_delete_playlist">Er du sikker på, at du vil slette playlisten?</string>
-    <string name="validation_delete_playlist_text">Handlingen kan ikke fortrydes.</string>
     <string name="display_settings">Skærmindstillinger</string>
     <string name="incognito_mode">Anonym tilstand</string>
     <string name="persistent_incognito_mode">Konstant anonymtilstand</string>
     <string name="persistent_incognito_mode_summary">Bevar anonymtilstand selvom app\'en genstartes</string>
     <string name="display_in_list">Vis som liste</string>
     <string name="display_in_grid">Vis som gitter</string>
-    <string name="dump_db_succes">Databasen blev lagt i roden af det interne lager</string>
     <string name="dump_db_failure">Kunne ikke lægge databasen</string>
     <string name="send_crash_title">VLC-nedbrudsrapport</string>
     <string name="send_crash_description">Ved at sende dit nedbrud, hjælper du med at forbedre VLCs stabilitet.</string>
@@ -795,25 +765,6 @@
     <string name="share_message">Her er %s</string>
     <string name="share_track_info">Del sporets info</string>
     <string name="share_track">Lytter nu til %s</string>
-    <string name="find_metadata">Find metadata</string>
-    <string name="moviepedia_hint">Søg efter metadata</string>
-    <string name="moviepedia_result">Videoresultater</string>
-    <string name="directed_by">Instrueret af</string>
-    <string name="casting">Casting</string>
-    <string name="produced_by">Produceret af</string>
-    <string name="written_by">Skrevet af</string>
-    <string name="music_by">Musik af</string>
-    <string name="posters">Plakater</string>
-    <string name="backdrops">Baggrunde</string>
-    <string name="header_tvshows">Serier</string>
-    <string name="header_movies">Film</string>
-    <string name="season_number">Sæson %s</string>
-    <string name="resume_episode">Genoptag (%s)</string>
-    <string name="start_over">Start forfra</string>
-    <string name="next_episode">Næste episode</string>
-    <string name="open_network_settings">Åbn netværksindstillinger?</string>
-    <string name="recently_played">Afspillet for nylig</string>
-    <string name="recently_added">Tilføjet for nylig</string>
     <string name="playback_multiple_errors">Flere medier kan ikke afspilles</string>
     <string name="clear_media_db_message">Du mister information om, hvor langt du er kommet, bogmærker og playlister, du har fremstillet, men du beholder VLC android-indstillinger</string>
     <string name="clear_app_data_message">Du mister information om, hvor langt du er kommet, bogmærker, playlister og alle VLC-indstillinger</string>
@@ -861,7 +812,6 @@
     <string name="subscription_cancel">Du kan afmelde dig i Play Store</string>
     <string name="subscription_cancel_tv">Hvordan man afmelder</string>
     <string name="donate_unsubscribe_tv">For at afmelde skal du åbne %s på en telefon eller en computer eller scanne denne kode:</string>
-    <string name="tip_jar">Hjælp VLC</string>
     <string name="thank_you">Tak</string>
     <string name="thank_you_desc">Tak for sponsoratet!\nDet vil hjælpe til forbedring af VLC!</string>
     <string name="donate_again">Sponsorér programmet igen</string>
@@ -874,7 +824,6 @@
     <string name="allow_otg">Tillad OTG-adgang</string>
     <string name="allow_otg_description">Vælg OTG-drev for at tillade adgang til VLC.</string>
     <string name="video_hud_timeout">Skjuleforsinkelse for videoafspillerkontroller</string>
-    <string name="remove_from_history">Fjern fra historik</string>
     <string name="prefersmbv1">Foretræk SMB 1</string>
     <string name="prefersmbv1_summary">Fjern dette flueben hvis du har problemer med at tilgå din SMB server</string>
     <string name="audio_delay_global">Lydforsinkelse sat til %s ms for alle videoer</string>
@@ -909,7 +858,6 @@
     <string name="unlock">Lås op</string>
     <string name="lock_with_pin">Slå PIN-kodelåsning til</string>
     <string name="unlock_with_pin">Lås sikker tilstand op</string>
-    <string name="lock_with_pin_short">PIN-kodelåsning</string>
     <string name="restrict_settings">Begræns adgang til indstillinger</string>
     <string name="search_prefs">Indstillinger for søgning</string>
     <string name="stop_unpaubale">Mediet kan ikke sættes på pause. Stop i stedet for?</string>
@@ -929,14 +877,9 @@
     <string name="optional_features_warning">Denne funktion er i beta, og den kan medføre crash og ustabilitet</string>
     <string name="network_indexing">Netværksindeksering</string>
     <string name="network_indexing_warning">Netværksindeksering er for tiden i beta.\nKendte fejl:\n• Dårlig performance\n\nHvis du støder på andre problemer, kan du rapportere om dem på vores forum.</string>
-    <string name="start_vlc">Start VLC</string>
     <string name="jump_delay">Frem/tilbage tidsforsinkelse</string>
     <string name="long_jump_delay">Langvarigt klik frem/tilbage tidsforsinkelse</string>
     <string name="jump_delay_summary">%s sekunder</string>
-    <string name="move_up">Flyt op</string>
-    <string name="move_down">Flyt ned</string>
-    <string name="remove_from_playlist">Fjern fra playliste</string>
-    <string name="play_media">Afspil %s</string>
     <string name="edit_eq_preset">Redigér equalizerforudindstilling</string>
     <string name="edit_eq_name_not_allowed">Dette navn er ikke tilladt.</string>
     <string name="export_equalizer">Eksportér equalizer</string>
@@ -1057,7 +1000,6 @@
     <string name="downloading">Henter</string>
     <string name="talkback_action_rewind">Spol %s sekunder tilbage</string>
     <string name="talkback_action_forward">Spol %s sekunder frem</string>
-    <string name="talkback_display_settings">Skærmindstillinger</string>
     <string name="talkback_already_played">Allerede afspillet</string>
     <string name="show_only_favs">Vis kun favoritter</string>
     <string name="ignore_headset_media_button_presses">Ignorér medieheadsettets trykknapper</string>

@@ -45,10 +45,6 @@ import org.videolan.libvlc.LibVLCFactory
 import org.videolan.libvlc.MediaFactory
 import org.videolan.libvlc.interfaces.ILibVLCFactory
 import org.videolan.libvlc.interfaces.IMediaFactory
-import org.videolan.mobile.app.delegates.IIndexersDelegate
-import org.videolan.mobile.app.delegates.IMediaContentDelegate
-import org.videolan.mobile.app.delegates.IndexersDelegate
-import org.videolan.mobile.app.delegates.MediaContentDelegate
 import org.videolan.resources.AppContextProvider
 import org.videolan.resources.VLCInstance
 import org.videolan.resources.util.startRemoteAccess
@@ -76,9 +72,7 @@ interface AppDelegate {
     fun Application.setupApplication()
 }
 
-class AppSetupDelegate : AppDelegate,
-        IMediaContentDelegate by MediaContentDelegate(),
-        IIndexersDelegate by IndexersDelegate() {
+class AppSetupDelegate : AppDelegate {
 
     // Store AppContextProvider to prevent GC
     override val appContextProvider = AppContextProvider
@@ -107,15 +101,6 @@ class AppSetupDelegate : AppDelegate,
 
         preferences.join()
         val settings = Settings.getInstance(this)
-        if (BuildConfig.DEBUG) {
-            if (Settings.showTvUi) {
-                // Register movipedia to resume tv shows/movies
-                setupContentResolvers()
-
-                // Setup Moviepedia indexing after Medialibrary scan
-                setupIndexers()
-            }
-        }
         //App restarted, leave the incognito mode
         if (!settings.getBoolean(KEY_PERSISTENT_INCOGNITO, true))
             settings.putSingle(KEY_INCOGNITO, false)

@@ -91,16 +91,6 @@
         <item quantity="two">%d ᱣᱤᱰᱤᱭᱚ ᱠᱚ</item>
         <item quantity="other">%d ᱣᱤᱰᱤᱭᱚ ᱠᱚ</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">᱑ ᱥᱤᱱᱮᱢᱟ</item>
-        <item quantity="two">%d ᱥᱤᱱᱮᱢᱟ ᱠᱚ</item>
-        <item quantity="other">%d ᱥᱤᱱᱮᱢᱟ ᱠᱚ</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">᱑ TV ᱥᱷᱚ</item>
-        <item quantity="two">%d TV ᱥᱷᱚ ᱠᱚ</item>
-        <item quantity="other">%d TV ᱥᱷᱚ ᱠᱚ</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 ᱴᱨᱮᱠ</item>
         <item quantity="two">%d ᱴᱨᱮᱠ ᱠᱚ</item>
@@ -124,7 +114,6 @@
     <string name="nosubfolder">ᱯᱚᱴᱼᱯᱚᱴᱚᱢ ᱵᱟᱹᱱᱩᱜᱼᱟ</string>
     <string name="directorynotfound">%1$s ᱩᱱᱩᱫᱩᱜ ᱡᱟᱭᱜᱟ ᱵᱟᱝ ᱧᱟᱢ ᱞᱮᱱᱟ ᱾</string>
     <string name="nohistory">ᱟᱢ ᱴᱷᱮᱱ ᱚᱠᱟ ᱯᱞᱮᱵᱮᱠ ᱱᱟᱜᱟᱢ ᱵᱟᱹᱱᱩᱜᱟ ᱾</string>
-    <string name="cover_art">ᱠᱚᱵᱷᱟᱹᱨ ᱟᱨᱴ</string>
     <string name="shuffle_all_title">ᱡᱷᱚᱛᱚ ᱯᱷᱮᱱᱴᱟᱣ ᱢᱮ</string>
     <string name="shuffle_title">ᱯᱷᱮᱱᱴᱟᱣ ᱢᱳᱰ</string>
     <string name="shuffle">ᱯᱷᱮᱱᱴᱟᱣ ᱵᱚᱸᱫ</string>
@@ -165,7 +154,6 @@
     <string name="sleep_title">ᱜᱤᱛᱤᱡᱽ ᱴᱟᱭᱢᱟᱹᱨ</string>
     <string name="sleep_in">ᱨᱮ ᱜᱤᱛᱤᱡᱽ</string>
     <string name="jump_to_time">ᱚᱠᱛᱚ ᱛᱮ ᱫᱚᱱ ᱢᱮ</string>
-    <string name="server_add_title">ᱱᱟᱶᱟ ᱥᱟᱹᱨᱣᱟᱹᱨ ᱠᱚ ᱠᱩᱥᱤᱠᱚ ᱥᱮᱫᱽ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="server_domain_hint">ᱥᱟᱹᱨᱣᱟᱹᱨ ᱴᱷᱤᱠᱬᱟᱹ (ᱰᱚᱢᱮᱱ ᱧᱩᱛᱩᱢ ᱟᱨ ᱵᱟᱝ IP)</string>
     <string name="server_share_hint">ᱱᱮᱴᱣᱟᱨᱠ ᱦᱟᱹᱴᱤᱧ ᱧᱩᱛᱩᱢ (ᱟᱨ ᱵᱟᱝ IP ᱴᱷᱤᱠᱬᱟᱹ)</string>
     <string name="server_folder_hint">ᱯᱚᱴᱟᱢ ᱡᱟᱭᱜᱟ(ᱚᱯᱥᱚᱱᱟᱞ)</string>
@@ -179,8 +167,6 @@
     <string name="favorites_add">ᱠᱩᱥᱤ ᱠᱚᱨᱮ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="favorites_remove">ᱠᱩᱥᱤᱠᱚ ᱠᱷᱚᱱ ᱚᱪᱚᱜᱽ ᱢᱮ</string>
     <string name="favorites_edit">ᱥᱟᱯᱲᱟᱣ</string>
-    <string name="favorite_added">ᱠᱩᱥᱤᱠᱚ ᱥᱮᱫᱽ ᱥᱟᱸᱪᱟᱣ ᱢᱮ</string>
-    <string name="favorite_removed">ᱠᱩᱥᱤᱠᱚ ᱠᱷᱚᱱ ᱚᱪᱚᱜᱽ ᱮᱱᱟ</string>
 
     <string name="streams">ᱥᱴᱨᱤᱢᱠᱚ</string>
     <string name="open_mrl_dialog_msg">ᱱᱮᱴᱣᱟᱨᱠ ᱴᱷᱤᱠᱬᱟᱹ ᱟᱫᱮᱨ ᱢᱮ: ᱡᱮᱢᱚᱱ http://, mms:// ᱟᱨ ᱵᱟᱝ rtsp://</string>
@@ -311,8 +297,6 @@
     <string name="blurred_cover_background_summary">ᱥᱟᱲᱮ ᱯᱞᱮᱭᱟᱹᱨ ᱵᱮᱠᱜᱨᱟᱩᱸᱰ ᱨᱮ ᱫᱷᱩᱸᱫ ᱠᱚᱣᱟᱹᱨ </string>
     <string name="quit">ᱵᱟᱹᱰ ᱟᱨ ᱮᱯᱞᱤᱠᱮᱥᱚᱱ ᱨᱤᱥᱴᱟᱴ ᱢᱮ</string>
     <string name="restart_message">ᱵᱚᱫᱚᱞ ᱠᱚ ᱫᱚ ᱮᱯᱞᱤᱠᱮᱥᱚᱱ ᱫᱩᱦᱲᱟᱹ ᱮᱦᱚᱵ ᱯᱚᱨᱮ ᱮᱢᱚᱜᱼᱚᱜ ᱟ ᱾\n\nᱱᱤᱛᱚᱜ ᱫᱩᱦᱲᱟᱹ ᱮᱦᱚᱵ ᱢᱮ?</string>
-    <string name="restart_message_OK">ᱴᱷᱤᱠ</string>
-    <string name="restart_message_Later">ᱛᱟᱭᱚᱢ ᱛᱮ</string>
     <string name="developer_prefs_category">ᱰᱮᱵᱷᱞᱚᱯᱟᱹᱨ</string>
     <string name="enable_verbose_mode">ᱵᱽᱷᱟᱹᱨᱵᱚᱡᱽ</string>
     <string name="enable_verbose_mode_summary">ᱵᱷᱟᱹᱨᱵᱚᱥᱤᱴᱭ ᱵᱚᱰᱷᱟᱣ ᱢᱮ (ᱞᱚᱜᱠᱮᱴ)</string>
@@ -336,10 +320,7 @@
     <string name="sending_log">ᱞᱚᱜ ᱠᱩᱞ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…</string>
 
 
-    <string name="no_result">ᱚᱠᱟ ᱰᱤᱜᱞᱟᱹᱨ ᱵᱟᱭ ᱧᱟᱢ ᱞᱮᱱᱟ</string>
-    <string name="no_internet_connection">ᱟᱢᱟᱜ ᱤᱱᱴᱚᱨᱱᱮᱴ ᱡᱩᱲᱟᱹᱣ ᱧᱮᱞ ᱛᱟᱢ</string>
     <string name="network_browsing">ᱞᱚᱠᱟᱞ ᱱᱮᱴᱣᱟᱨᱠ</string>
-    <string name="browsing">ᱵᱨᱟᱩᱡᱽᱤᱝ</string>
 
     <string name="file_size">ᱨᱮᱫ ᱢᱟᱯ</string>
 
@@ -394,8 +375,6 @@
     <string name="add_to_playlist">ᱯᱞᱮᱞᱤᱥᱴ ᱛᱮ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="popup_playback_title">ᱯᱚᱯᱟᱯ ᱣᱤᱱᱰᱳ ᱨᱮ ᱣᱤᱰᱤᱭᱚ ᱪᱟᱞᱟᱣ ᱢᱮ</string>
     <string name="browse_folder">ᱯᱚᱴᱚᱢ ᱵᱨᱟᱩᱡ ᱢᱮ</string>
-    <string name="listen">ᱟᱧᱡᱚᱢ ᱢᱮ</string>
-    <string name="videos_all">ᱡᱷᱚᱛᱚ ᱣᱤᱰᱤᱭᱚ ᱠᱚ</string>
     <string name="clear_playback_history">ᱯᱞᱮᱵᱮᱠ ᱱᱟᱜᱟᱢ ᱥᱟᱯᱷᱟ</string>
     <string name="ml_scanning">ᱢᱤᱰᱤᱭᱟ ᱨᱮᱫᱠᱚ ᱞᱟᱹᱜᱤᱫ ᱥᱠᱮᱱᱚᱜ ᱠᱟᱱᱟ</string>
     <string name="ml_parse_media">ᱯᱚᱨᱥᱤᱝ ᱢᱤᱰᱤᱭᱟ</string>
@@ -465,7 +444,6 @@
     <string name="add_to_new_playlist">ᱱᱟᱶ ᱯᱞᱮᱞᱤᱥᱴ ᱨᱮ ᱥᱮᱞᱮᱫ ᱢᱮ</string>
     <string name="resume_card_message">%1$s ᱨᱮᱱᱟᱜ ᱯᱞᱮᱵᱮᱠ ᱞᱟᱦᱟᱭ ᱢᱮ ?</string>
     <string name="misc">ᱥᱮᱥᱟᱥᱟᱱᱟ</string>
-    <string name="device_default">ᱥᱟᱫᱷᱚᱱ-ᱟ ᱢᱩᱞ ᱯᱷᱮᱲᱟᱛ</string>
     <string name="track_number">%dᱴᱨᱟᱠᱼᱠᱚ</string>
     <string name="jump_to">ᱨᱮ ᱫᱚᱱ ᱢᱮ</string>
     <string name="show_video_thumbnails">ᱣᱤᱰᱤᱭᱚ-ᱟ ᱪᱤᱛᱟᱹᱨ ᱪᱤᱱᱦᱟᱹ ᱠᱚ</string>
@@ -497,23 +475,6 @@
     <string name="share">ᱦᱟᱹᱴᱤᱧ ᱢᱮ</string>
     <string name="share_file">%s ᱦᱟᱹᱴᱤᱧ ᱢᱮ</string>
     <string name="share_message">%s ᱫᱚ ᱱᱚᱰᱮ ᱢᱮᱱᱟᱜᱼᱟ</string>
-    <string name="find_metadata">ᱢᱮᱴᱟᱰᱟᱴᱟ ᱧᱟᱢ ᱢᱮ</string>
-    <string name="moviepedia_hint">ᱢᱮᱴᱟᱰᱟᱴᱟ ᱥᱮᱸᱫᱽᱨᱟᱭ ᱢᱮ</string>
-    <string name="moviepedia_result">ᱣᱤᱰᱤᱭᱚ ᱛᱮᱞᱟ ᱠᱚ</string>
-    <string name="casting">ᱠᱟᱥᱴᱤᱝ</string>
-    <string name="written_by">ᱚᱱᱚᱞᱤᱡ</string>
-    <string name="music_by">ᱥᱮᱨᱮᱧᱤᱡ</string>
-    <string name="posters">ᱯᱳᱥᱴᱟᱨᱠᱚ</string>
-    <string name="backdrops">ᱯᱟᱨᱫᱟᱠᱚ</string>
-    <string name="header_tvshows">TV ᱥᱚ</string>
-    <string name="header_movies">ᱥᱤᱱᱮᱢᱟ ᱠᱚ</string>
-    <string name="season_number">ᱥᱤᱡᱚᱱ %s</string>
-    <string name="resume_episode">ᱞᱟᱦᱟ(%s)</string>
-    <string name="start_over">ᱮᱦᱚᱵᱽ ᱢᱮ</string>
-    <string name="next_episode">ᱤᱱᱟᱹᱛᱟᱭᱚᱢ ᱟᱜᱽ ᱮᱯᱤᱥᱚᱰ</string>
-    <string name="open_network_settings">ᱱᱮᱴᱣᱟᱨᱠ ᱥᱟᱡᱟᱣᱠᱚ ᱠᱷᱩᱞᱟᱹᱭ ᱢᱮ?</string>
-    <string name="recently_played">ᱱᱮᱛᱟᱨᱟᱜᱽ ᱯᱞᱮᱭᱟᱜᱽ</string>
-    <string name="recently_added">ᱱᱮᱛᱟᱨᱟᱜ ᱥᱮᱞᱮᱫᱟᱜ</string>
     <string name="playback_multiple_errors">ᱟᱭᱢᱟ ᱢᱮᱰᱤᱭᱟ ᱯᱞᱮ ᱵᱟᱭ ᱜᱟᱱᱚᱜᱼᱟ</string>
     <string name="clear">ᱯᱷᱟᱨᱪᱟ</string>
     <string name="abrepeat_add_first_marker">ᱮᱦᱚᱵ ᱴᱩᱲᱟᱹᱜᱽ ᱥᱮᱴ ᱢᱮ</string>
@@ -542,7 +503,6 @@
 
     <string name="swipe_unlock">ᱟᱱᱞᱚᱠ ᱞᱟᱹᱜᱤᱫᱛᱮ ᱥᱣᱟᱤᱯ ᱢᱮ</string>
     <string name="donate">VLC ᱜᱚᱲᱚᱟᱭ ᱢᱮ</string>
-    <string name="tip_jar">VLC ᱜᱚᱲᱚ ᱞᱮᱢ</string>
     <string name="thank_you">ᱟᱢ ᱥᱟᱨᱦᱟᱣ</string>
     <string name="thank_you_desc">ᱟᱢᱟᱜᱽ ᱥᱯᱚᱱᱥᱚᱨᱥᱤᱯᱷ ᱞᱟᱹᱜᱤᱫ ᱟᱢ ᱥᱟᱨᱦᱟᱣ!\nᱱᱚᱶᱟ VLC ᱟᱨᱦᱚᱸ ᱵᱮᱥ ᱪᱚᱨᱚᱠ ᱞᱟᱦᱟ ᱦᱚ ᱪᱷᱚᱭᱟᱭ!</string>
     <string name="donate_again">ᱮᱯ ᱟᱨᱦᱚᱸ ᱥᱯᱚᱱᱥᱚᱨ ᱢᱮ</string>
@@ -553,7 +513,6 @@
     <string name="allow_otg">OTG ᱟᱫᱮᱨ ᱪᱷᱚᱭ ᱢᱮ</string>
     <string name="allow_otg_description">VLC ᱛᱮ ᱟᱫᱮᱨ ᱪᱷᱚ ᱞᱟᱹᱜᱤᱫ ᱫᱚᱭᱟᱠᱟᱛᱮ OTG ᱰᱨᱟᱭᱤᱵᱷ ᱪᱚᱭᱚᱱ ᱢᱮ ᱾</string>
     <string name="video_hud_timeout">ᱣᱤᱰᱤᱭᱚ ᱯᱞᱮᱭᱟᱹᱨ ᱠᱟᱹᱱᱴᱨᱚᱞ ᱜᱷᱟᱲᱤᱡᱽ ᱩᱠᱩ</string>
-    <string name="remove_from_history">ᱦᱤᱛᱟᱹᱞ ᱠᱷᱚᱱ ᱚᱪᱚᱜ ᱢᱮ</string>
     <string name="prefersmbv1">SMB ᱑ ᱠᱩᱥᱤᱭᱟᱜ ᱢᱮ</string>
     <string name="prefersmbv1_summary">SMB ᱥᱟᱹᱨᱣᱟᱹᱨ ᱵᱨᱟᱩᱡᱽ ᱡᱷᱚᱜ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱦᱩᱭᱩᱜ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱥᱟᱡᱟᱣ ᱠᱚ ᱟᱹᱱᱪᱮᱠ ᱢᱮ</string>
     <string name="audio_delay_global">ᱡᱷᱚᱛᱚ ᱣᱤᱰᱤᱭᱚᱠᱚ ᱞᱟᱹᱫᱜᱤᱹᱫ %s ms ᱜᱷᱟᱹᱲᱤᱡ ᱥᱟᱰᱮ ᱮᱱᱟ </string>
@@ -561,7 +520,6 @@
     <string name="soundfont">MIDI ᱥᱟᱲᱮᱯᱷᱚᱸᱴ</string>
     <string name="soundfont_summary">midi ᱥᱟᱲᱮ ᱴᱨᱟᱠ ᱠᱚ ᱯᱞᱮ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱲᱮᱯᱷᱚᱸᱴ ᱨᱮᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ</string>
     <string name="search_prefs">ᱥᱮᱸᱫᱽᱨᱟᱣᱟ ᱥᱟᱡᱟᱣᱠᱚ</string>
-    <string name="start_vlc">VLC ᱮᱦᱚᱵᱽ ᱢᱮ</string>
     <string name="add_button">ᱥᱮᱞᱮᱫᱽ ᱢᱮ</string>
     <string name="add_all_button">ᱡᱚᱛᱚ ᱥᱮᱞᱮᱫᱽ ᱢᱮ</string>
     <string name="add_new_only_button">ᱱᱟᱶᱟᱱᱟᱜ ᱠᱷᱟᱹᱞᱤ ᱥᱮᱞᱮᱫ ᱢᱮ</string>

@@ -38,7 +38,8 @@ import kotlin.concurrent.thread
  * Nağmedar 1.0: what the removed features left on an install upgraded from 0.5 goes at the next start, once: TV Lab's
  * queued work, night alarm and folders, the dropped tables' permissions, and the video features' work, files and
  * folders, while what 1.0 still uses stays. 1.0.2: so do the podcast transcripts' Whisper jobs, models, files and
- * settings, while the podcasts' downloads and the feeds' own transcripts stay.
+ * settings, while the podcasts' downloads and the feeds' own transcripts stay. 1.0.3: so do the TV interface's film
+ * metadata database and its lists' sort, while VLC's own database stays.
  */
 @RunWith(AndroidJUnit4::class)
 class RetiredWorkTest {
@@ -197,6 +198,29 @@ class RetiredWorkTest {
         RetiredWork.TRANSCRIPTION_KEYS.forEach { assertFalse("$it goes", settings.contains(it)) }
         assertEquals(10, settings.getInt(PodcastSettingsStore.KEY_SKIP_BACK, 0))
         settings.edit().remove(PodcastSettingsStore.KEY_SKIP_BACK).commit()
+    }
+
+    @Test
+    fun theTvFilmMetadataGoesAndVlcsDatabaseStays() {
+        fun database(name: String) = app.getDatabasePath(name).apply { parentFile?.mkdirs(); writeBytes(ByteArray(4)) }
+        val metadata = listOf(database("moviepedia_database"), database("moviepedia_database-wal"), database("moviepedia_database-shm"))
+        // VLC's own database beside it (Nağmedar's is opened by the tables' step, so it is not faked here)
+        val kept = listOf(database("vlc_database"), database("vlc_database-wal"))
+        val settings = Settings.getInstance(app)
+        // as its film and series lists kept them: the sort, and whether it runs backwards
+        settings.edit()
+            .putInt("MediaScrapingMovieProvider", 1)
+            .putBoolean("MediaScrapingMovieProvider_desc", true)
+            .putInt(PodcastSettingsStore.KEY_SKIP_BACK, 10)
+            .commit()
+
+        start()
+        metadata.forEach { assertFalse("$it goes", it.exists()) }
+        kept.forEach { assertTrue("$it stays", it.exists()) }
+        RetiredWork.MOVIEPEDIA_KEYS.forEach { assertFalse("$it goes", settings.contains(it)) }
+        assertEquals(10, settings.getInt(PodcastSettingsStore.KEY_SKIP_BACK, 0))
+        settings.edit().remove(PodcastSettingsStore.KEY_SKIP_BACK).commit()
+        kept.forEach { it.delete() }
     }
 
     @Test

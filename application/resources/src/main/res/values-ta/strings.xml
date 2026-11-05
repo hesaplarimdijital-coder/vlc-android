@@ -87,7 +87,6 @@
     <string name="directorynotfound">\'%1$s\' அடைவுப் பாதைக் காணப்படவில்லை.</string>
     <string name="nohistory">வரலாறு ஏதுமில்லை.</string>
 
-    <string name="cover_art">அட்டைப் படம்</string>
     <string name="shuffle_title">கலக்கு இயக்க முறை</string>
     <string name="shuffle">கலக்கு இயக்க முறையை அணைக்க</string>
     <string name="shuffle_on">கலக்கு இயக்க முறையை ஏற்று</string>
@@ -125,7 +124,6 @@
     <string name="sleep_title">தூங்கு கடிகாரம்</string>
     <string name="sleep_in">தூங்க</string>
     <string name="jump_to_time">நேரத்திற்கு தாவு</string>
-    <string name="server_add_title">ஒரு புது தேக்கத்தை பிடித்தவையில் சேர்</string>
     <string name="server_domain_hint">தேக்க முகவரி (Domain பெயர் அ IP)</string>
     <string name="server_folder_hint">கோப்புறை பாதை (விரும்பினால்)</string>
     <string name="server_username_hint">பயனர்பெயர்</string>
@@ -137,8 +135,6 @@
     <string name="favorites_add">பிடித்தவையில் சேர்</string>
     <string name="favorites_remove">பிடித்தவையிலிருந்து நீக்கு</string>
     <string name="favorites_edit">தொகு</string>
-    <string name="favorite_added">பிடித்தவையில் சேமிக்கப்பட்டது</string>
-    <string name="favorite_removed">பிடித்தவையிலிருந்து நீக்கப்பட்டது</string>
 
     <string name="streams">ஓடைகள்</string>
     <string name="open_mrl_dialog_msg">பிணைய முகவரியை உள்ளிடு: எ.கா. http://, mms:// or rtsp://</string>
@@ -243,10 +239,7 @@
     <string name="sending_log">பதிவை அனுப்புகிறது…</string>
 
 
-    <string name="no_result">முடிவுகள் எதுவும் இல்லை</string>
-    <string name="no_internet_connection">உங்கள் இணைய இணைப்பைச் சரிபார்க்கவும்</string>
     <string name="network_browsing">அக பிணையம்</string>
-    <string name="browsing">கண்டெடுக்க</string>
 
     <string name="file_size">கோப்பின் அளவு</string>
 
@@ -275,7 +268,6 @@
     <string name="store_password">கடவுச்சொல்லை நினைவுகொள்</string>
     <string name="add_to_playlist">தொகுப்பு பட்டியலுடன் சேர்</string>
     <string name="browse_folder">கோப்புறையை உலாவ</string>
-    <string name="listen">கேளுங்கள்</string>
     <string name="ml_scanning">ஊடக கோப்புகளுக்காக வருடுகிறது</string>
     <string name="ml_parse_media">ஊடகத்தை பாகுபடுத்துதல்</string>
     <string name="ml_discovering">கண்டுபிடிக்கிறது</string>
@@ -316,7 +308,6 @@
     <string name="share">பகிர்</string>
     <string name="invalid_file">தவறான கோப்பு. பகிர முடியாது.</string>
     <string name="share_file">%s யை பகிர்</string>
-    <string name="recently_added">அண்மையில் சேர்ந்தவை</string>
 
     <string name="text">எழுத்து</string>
     <string name="unknown">தெரியாத</string>
@@ -330,7 +321,6 @@
     <string name="swipe_unlock">பூட்டவிழ்க்க தேய்</string>
     <string name="donate">VLC-ஐ உதவு</string>
     <string name="donate_desc">VLC-ஐ கட்டும் தன்னார்வலர்களை ஆதரி</string>
-    <string name="tip_jar">VLC-ஐ உதவு</string>
     <string name="video_hud_timeout">காணொளியியக்கி கட்டுப்பாடுகள் மறைய தாமதம்</string>
     <string name="bookmarks_title">நூற்குறிகள்</string>
     </resources>

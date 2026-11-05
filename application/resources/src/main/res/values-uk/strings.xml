@@ -121,18 +121,6 @@
         <item quantity="many">%d відео</item>
         <item quantity="other">%d відео</item>
     </plurals>
-    <plurals name="movies_quantity">
-        <item quantity="one">1 фільм</item>
-        <item quantity="few">%d фільми</item>
-        <item quantity="many">%d фільмів</item>
-        <item quantity="other">%d фільму</item>
-    </plurals>
-    <plurals name="tvshow_quantity">
-        <item quantity="one">1 серіал</item>
-        <item quantity="few">%d серіали</item>
-        <item quantity="many">%d серіалів</item>
-        <item quantity="other">%d серіала</item>
-    </plurals>
     <plurals name="track_quantity">
         <item quantity="one">1 доріжка</item>
         <item quantity="few">%d доріжки</item>
@@ -161,7 +149,6 @@
     <string name="nohistory">У вас ще немає історії відтворення.</string>
     <string name="cant_ban_root">Ви не можете заблокувати кореневу теку</string>
 
-    <string name="cover_art">Обкладинка</string>
     <string name="shuffle_all_title">Перемішати все</string>
     <string name="shuffle_title">Режим перемішування</string>
     <string name="shuffle">Перемішування вимк.</string>
@@ -221,7 +208,6 @@
     <string name="video_player_remote">Віддалено відеопрогравач</string>
     <string name="remote_keyboard_navigation">Навігація клавіатурою</string>
 
-    <string name="server_add_title">Додати новий сервер до обраного</string>
     <string name="server_folder_hint">Шлях до теки (необов\'язково)</string>
     <string name="server_username_hint">Ім’я користувача</string>
     <string name="server_port">Порт:</string>
@@ -232,8 +218,6 @@
     <string name="favorites_add">Додати до обраного</string>
     <string name="favorites_remove">Вилучити з обраного</string>
     <string name="favorites_edit">Редагувати</string>
-    <string name="favorite_added">Збережено в обраному</string>
-    <string name="favorite_removed">Вилучено з обраного</string>
 
     <string name="streams">Потоки</string>
     <string name="search">Пошук</string>
@@ -342,8 +326,6 @@
     <string name="subtitle_decoration_none">Нічого</string>
     <string name="subtitle_decoration_shadow">Тінь</string>
     <string name="subtitle_decoration_outline">Обведення</string>
-    <string name="previous_color">Попередній колір</string>
-    <string name="new_color">Новий колір</string>
 
     <string name="audio_prefs_category">Аудіо</string>
     <string name="lockscreen_cover_title">Обкладинка екрану блокування</string>
@@ -397,7 +379,6 @@
     <string name="remote_access_info">Інформація про віддалений доступ</string>
     <string name="remote_access_content">Вміст</string>
     <string name="remote_access_medialibrary_content">Вміст бібліотеки медіа</string>
-    <string name="remote_access_medialibrary_content_summary">Увімкнено: %1$s\nВимкнено: %2$s</string>
     <string name="remote_access_file_browser_content">Браузер файлів</string>
     <string name="remote_access_network_browser_content">Мережевий браузер</string>
     <string name="remote_access_playback_control">Управління відтворенням</string>
@@ -460,8 +441,6 @@
     <string name="network_caching_popup">Це значення повинно бути між 0 та 60000 мс</string>
     <string name="quit">Вийти і перезапустити програму</string>
     <string name="restart_message">Зміни набудуть сили після перезапуску програми.\n\nПерезапустити зараз?</string>
-    <string name="restart_message_OK">Гаразд</string>
-    <string name="restart_message_Later">Пізніше</string>
     <string name="browser_show_all_title">Показувати тільки мультимедійні файли</string>
 
     <string name="developer_prefs_category">Розробник</string>
@@ -489,11 +468,8 @@
     <string name="sending_log">Відправка журналу…</string>
 
 
-    <string name="no_result">Результатів не знайдено</string>
-    <string name="no_internet_connection">Перевірте ваше з\'єднання з інтернетом</string>
     <string name="retry">Повторити</string>
     <string name="network_browsing">Локальна мережа</string>
-    <string name="browsing">Огляд</string>
 
     <string name="file_size">Розмір файлу</string>
 
@@ -528,7 +504,6 @@
     <string name="open_in_browser">Відкрити у вебоглядачі</string>
     <string name="install">Встановити</string>
     <string name="install_nightly">Встановити нічну збірку</string>
-    <string name="install_nightly_alert">Нічні збірки - це експериментальні версії, які оновлюються щодня.\n\nОчікуйте нові можливості, а також нові вади!</string>
     <string name="nightly_version">Знайдена версія: %2$s - %1$s</string>
     <string name="update_nightly_alert">Ви запустили нічну збірку. Хочете періодично шукати оновлення?</string>
     <string name="update_nightly">Автооновлення</string>
@@ -596,12 +571,10 @@
     <string name="popup_playback_title">Відтворювати відео у спливному вікні</string>
     <string name="open_subtitles_vip">Ви - VIP користувач OpenSubtitles</string>
     <string name="browse_folder">Огляд теки</string>
-    <string name="listen">Прослухайте</string>
     <string name="episodes">епізоди</string>
     <string name="movies">фільми</string>
     <string name="videos">відео</string>
     <string name="default_action_videos">Відео</string>
-    <string name="videos_all">Усі відео</string>
     <string name="clear_playback_history">Очистити журнал відтворення</string>
     <string name="ml_scanning">Сканування на медіафайли</string>
     <string name="ml_parse_media">Аналіз медіа</string>
@@ -696,8 +669,6 @@
     <string name="onboarding_theme_title">Відчувайте себе як вдома</string>
     <string name="done">Готово</string>
     <string name="onboarding_scan_title">Автоматичне виявлення ваших медіа</string>
-    <string name="onboarding_all_set">VLC повністю налаштований!</string>
-    <string name="onboarding_permission_given">Ви можете зараз автоматично виявляти ваше медіа, використовувати зовнішні субтитри, а також відтворювати потоки або мережеві медіа</string>
     <string name="daynight_system_explanation">VLC буде автоматично перемикатися у темний режим відповідно до налаштувань системи. </string>
     <string name="daynight_legacy_explanation">VLC буде автоматично перемикатися у нічний режим у відповідний час</string>
     <string name="onboarding_scanning_enable">Нехай VLC сканує мій пристрій на медіаматеріал</string>
@@ -710,7 +681,6 @@
     <string name="create">Створити</string>
     <string name="resume_card_message">Відновити відтворення з %1$s?</string>
     <string name="misc">Різне</string>
-    <string name="device_default">Типовий пристрій</string>
     <string name="track_number">%dдоріжок</string>
     <string name="jump_to">Перейти до</string>
     <string name="show_video_thumbnails">Ескізи відео</string>
@@ -731,13 +701,10 @@
         <item quantity="other">%d доріжки додано</item>
     </plurals>
     <string name="remove_current">Вилучити поточне</string>
-    <string name="validation_delete_playlist">Ви справді хочете вилучити цей список відтворення?</string>
-    <string name="validation_delete_playlist_text">Цю дію не можна скасувати.</string>
     <string name="display_settings">Параметри дисплею</string>
     <string name="incognito_mode">Режим інкогніто</string>
     <string name="display_in_list">Показувати списком</string>
     <string name="display_in_grid">Показувати сіткою</string>
-    <string name="dump_db_succes">База даних викинута на корінь внутрішнього носія</string>
     <string name="dump_db_failure">Не вдалося викинути базу даних</string>
     <string name="send_crash_title">Складач звітів про збій VLC</string>
     <string name="send_crash_description">Надсиланням свого звіту ви допоможете нам покращити стабільність VLC.</string>
@@ -769,25 +736,6 @@
     <string name="share_message">Тут %s</string>
     <string name="share_track_info">Поділитися інформацією про доріжку</string>
     <string name="share_track">Наразі слухаємо %s</string>
-    <string name="find_metadata">Знайти метадані</string>
-    <string name="moviepedia_hint">Пошук метаданих</string>
-    <string name="moviepedia_result">Відео результати</string>
-    <string name="directed_by">Режисер</string>
-    <string name="casting">Трансляція</string>
-    <string name="produced_by">Знято</string>
-    <string name="written_by">Написано</string>
-    <string name="music_by">Музика</string>
-    <string name="posters">Плакати</string>
-    <string name="backdrops">Художнє оформлення</string>
-    <string name="header_tvshows">Серіали</string>
-    <string name="header_movies">Фільми</string>
-    <string name="season_number">Сезон %s</string>
-    <string name="resume_episode">Відновити (%s)</string>
-    <string name="start_over">Почати з початку</string>
-    <string name="next_episode">Наступний епізод</string>
-    <string name="open_network_settings">Відкрити налаштування мережі?</string>
-    <string name="recently_played">Нещодавно відтворені</string>
-    <string name="recently_added">Нещодавно додані</string>
     <string name="playback_multiple_errors">Кратні медіа не можуть бути відтворені </string>
     <string name="clear_media_db_message">Ви втратите свій поступ, закладки та списки відтворення, створені вами, але збережете свої налаштування VLC для Android</string>
     <string name="clear_app_data_message">Ви втратите свій поступ, закладки, списки відтворення та усі налаштування VLC</string>
@@ -835,7 +783,6 @@
     <string name="subscription_cancel">Ви можете відписатися у крамниці Play</string>
     <string name="subscription_cancel_tv">Як відписатися</string>
     <string name="donate_unsubscribe_tv">Щоб відписатися, будь ласка, відкрийте %s на телефоні або комп\'ютері чи відскайнуйте цей код:</string>
-    <string name="tip_jar">Довідка VLC</string>
     <string name="thank_you">Дякуємо вам</string>
     <string name="thank_you_desc">Дякуємо вам за вашу фінансову підтримку!\nВона допоможе нам покращувати VLC!</string>
     <string name="donate_again">Підтримати знову програму</string>
@@ -848,7 +795,6 @@
     <string name="allow_otg">Дозволити доступ через  OTG</string>
     <string name="allow_otg_description">Будь ласка, виберіть ваш носій OTG, щоб дозволити доступ для VLC.</string>
     <string name="video_hud_timeout">Відео програвач управляє затримкою</string>
-    <string name="remove_from_history">Вилучити з історії</string>
     <string name="prefersmbv1">Віддати перевагу SMB 1</string>
     <string name="prefersmbv1_summary">Вимкніть цей параметр, якщо у вас наявні труднощі при перегляді вашого сервера SMB.</string>
     <string name="audio_delay_global">Затримку аудіо задати на %s мс для всіх відео</string>
@@ -883,7 +829,6 @@
     <string name="unlock">Розблокувати</string>
     <string name="lock_with_pin">Повторно увімкнути блокування PIN-кодом</string>
     <string name="unlock_with_pin">Розблокувати безпечний режим</string>
-    <string name="lock_with_pin_short">Пін-код</string>
     <string name="restrict_settings">Обмежити доступ до налаштувань</string>
     <string name="search_prefs">Налаштування пошуку</string>
     <string name="stop_unpaubale">Цей медіа файл не можна покласти на паузу. Зупинити повністю його?</string>
@@ -903,14 +848,9 @@
     <string name="optional_features_warning">Ця функція перебуває у бета-тестуванні та може спричиняти збої та нестабільну роботу</string>
     <string name="network_indexing">Мережна індексація</string>
     <string name="network_indexing_warning">Мережна індексація наразі перебуває у беті.\nВідомі проблеми:\n• повільна робота\n\nЯкщо ви зіткнулися з іншими неполадками, то, будь ласка, повідомте про них на нашому форумі.</string>
-    <string name="start_vlc">Запустити VLC</string>
     <string name="jump_delay">Затримка у часі для відтворення вперед/назад</string>
     <string name="long_jump_delay">Затримка у часі для довгого натиску вперед/назад</string>
     <string name="jump_delay_summary">%s секунд</string>
-    <string name="move_up">Перемістити вгору</string>
-    <string name="move_down">Перемістити вниз</string>
-    <string name="remove_from_playlist">Вилучити зі списку відтворення</string>
-    <string name="play_media">Відтворити %s</string>
     <!-- Duplication Warning Dialog -->
     <string name="message_primary_default">Додати повторювані елемент(и)?</string>
     <string name="add_button">Додати</string>
@@ -1029,7 +969,6 @@
     <string name="downloading">Завантажується</string>
     <string name="talkback_action_rewind">Перемотати %s секунд</string>
     <string name="talkback_action_forward">Перейти вперед на %s секунд</string>
-    <string name="talkback_display_settings">Налаштування зображення</string>
     <string name="talkback_already_played">Вже відтворено</string>
     <string name="show_only_favs">Показувати лише обране</string>
     <string name="ignore_headset_media_button_presses">Нехтувати натисканням мультимедійних кнопок гарнітури</string>

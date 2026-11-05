@@ -29,7 +29,6 @@ android {
         resValue "string", "build_revision", build_revision
         resValue "string", "changelog", changelog()
         resValue "string", "dav1d_version", dav1dVersion()
-        resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.tv"
         buildConfigField 'String', 'LIBVLC_VERSION', "\"${rootProject.ext.libvlcVersion}\""
         buildConfigField 'String', 'ML_VERSION', "\"${rootProject.ext.medialibraryVersion}\""
         buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}\""
@@ -76,7 +75,6 @@ android {
             buildConfigField "boolean", "BETA", "false"
             resValue 'string', 'benchmark_package_name', 'org.videolan.vlcbenchmark.debug'
             buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.debug\""
-            resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.debug.tv"
             buildConfigField "boolean", "NO_TV", "false"
             multiDexEnabled = true
         }
@@ -93,15 +91,13 @@ android {
             initWith release
             matchingFallbacks = ['release']
             buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.benchmark\""
-            resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.benchmark.tv"
         }
         // Nağmedar 1.0: the personal release (app/build.gradle): release code under the debug
-        // build's identity, app.nagmedar.debug, whose authorities and shortcuts it keeps
+        // build's identity, app.nagmedar.debug, whose shortcuts it keeps
         personal {
             initWith release
             matchingFallbacks = ['release']
             buildConfigField "String", "APP_ID", "\"${rootProject.ext.appId}.debug\""
-            resValue 'string', 'tv_provider_authority', "${rootProject.ext.appId}.debug.tv"
         }
         dev {
             initWith debug
@@ -222,9 +218,8 @@ dependencies {
     api "androidx.paging:paging-runtime-ktx:$rootProject.ext.pagingVersion"
 
 
-    //TV
+    // the classic player's options panel (BrowseFrameLayout) and card views
     api "androidx.leanback:leanback:$rootProject.ext.androidxLeanbackVersion"
-    api "androidx.leanback:leanback-preference:$rootProject.ext.androidxLeanbackVersion"
 
     // Kotlin
     api "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
@@ -234,7 +229,6 @@ dependencies {
     implementation 'nl.dionsegijn:konfetti-xml:2.0.4'
     implementation 'com.google.zxing:core:3.4.0'
     implementation "androidx.palette:palette-ktx:1.0.0"
-    implementation 'com.jaredrummler:colorpicker:1.1.0'
 
     // Tests
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.espressoVersion"
@@ -268,12 +262,10 @@ dependencies {
 
 static def buildTime(project) {
     if (project.hasProperty('forceDeterministic')) {
-        def code = new ByteArrayOutputStream()
-        project.exec {
-            commandLine 'git', 'show', '--no-patch', '--format=%cd' , '--date=format-local:%Y-%m-%d'
-            standardOutput = code
-        }
-        return code.toString()
+        // through the providers, as build_revision above (Gradle 9 deprecates Project.exec for removal)
+        return project.providers.exec {
+            commandLine 'git', 'show', '--no-patch', '--format=%cd', '--date=format-local:%Y-%m-%d'
+        }.standardOutput.asText.get()
     }
     return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
 }

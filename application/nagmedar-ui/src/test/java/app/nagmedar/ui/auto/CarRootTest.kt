@@ -45,7 +45,7 @@ class CarRootTest {
 
     /**
      * No public constant of the modules the others compile against is built from the application id: a module without
-     * the build type (nagmedar-ui, television) would inline another build's value, as Auto's root once was.
+     * the build type (nagmedar-ui) would inline another build's value, as Auto's root once was.
      */
     @Test
     fun noSharedConstantCarriesTheBuildTypesApplicationId() {

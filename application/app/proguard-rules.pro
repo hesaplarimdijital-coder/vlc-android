@@ -85,18 +85,10 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
-# Retrofit
-# Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and
-# EnclosingMethod is required to use InnerClasses.
+# Moshi and Ktor read generic parameters (InnerClasses is required to use Signature and
+# EnclosingMethod is required to use InnerClasses), and method and parameter annotations
 -keepattributes Signature, InnerClasses, EnclosingMethod
-
-# Retrofit does reflection on method and parameter annotations.
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
-
-# Retain service method parameters when optimizing.
--keepclassmembers,allowshrinking,allowobfuscation interface * {
-    @retrofit2.http.* <methods>;
-}
 
 # Ignore annotation used for build tooling.
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
@@ -106,9 +98,6 @@
 
 # Guarded by a NoClassDefFoundError try/catch and only used when on the classpath.
 -dontwarn kotlin.Unit
-
-# Top-level functions that can only be used by Kotlin.
--dontwarn retrofit2.-KotlinExtensions
 
 -keep class com.google.android.material.** { *; }
 
@@ -161,7 +150,7 @@
 
 # Moshi 1.8 without code generation reads and writes fields by name: the settings backup and the
 # equalizers' export (files the debug build may have written), the remote access server's JSON
-# (the web page's, and its sessions in the preferences), the licences, the locales, Moviepedia's
+# (the web page's, and its sessions in the preferences), the licences, the locales
 -keepclassmembers class org.videolan.vlc.gui.preferences.search.SettingsBackup { <fields>; }
 -keepclassmembers class org.videolan.vlc.gui.preferences.search.SettingEntry { <fields>; }
 -keepclassmembers class org.videolan.vlc.util.EqualizerExport { <fields>; }
@@ -172,16 +161,8 @@
 -keepclassmembers class org.videolan.vlc.gui.Library { <fields>; }
 -keepclassmembers class org.videolan.vlc.gui.LibraryWithLicense { <fields>; }
 -keepclassmembers class org.videolan.vlc.remoteaccessserver.** { <fields>; }
--keepclassmembers class org.videolan.moviepedia.models.** { <fields>; }
 # its enum adapter looks each constant's field up by the constant's name
 -keepclassmembers enum org.videolan.** { <fields>; }
-
-# Retrofit (Moviepedia) under R8's full mode: the service interfaces' generic return types
--keep,allowobfuscation,allowshrinking interface retrofit2.Call
--keep,allowobfuscation,allowshrinking class retrofit2.Response
--keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
--if interface * { @retrofit2.http.* <methods>; }
--keep,allowobfuscation interface <1>
 
 # Ktor's Netty engine (the remote access server, S-1304) makes its channels from their classes and
 # reaches fields through Unsafe and field updaters by name

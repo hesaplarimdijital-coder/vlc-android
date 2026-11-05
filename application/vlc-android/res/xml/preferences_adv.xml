@@ -8,8 +8,7 @@
             android:title="@string/optional_features"
             android:summary="@string/optional_features_summary"
             app:isPreferenceVisible="false"
-            android:key="optional_features"
-            android:fragment="org.videolan.television.ui.preferences.PreferencesOptional"/>
+            android:key="optional_features"/>
 
     <EditTextPreference
             android:defaultValue="0"

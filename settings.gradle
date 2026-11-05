@@ -6,14 +6,16 @@ pluginManagement {
 }
 
 plugins {
-    id("com.android.settings") version '9.1.1'
+    // the root build.gradle's android_plugin_version
+    id("com.android.settings") version '9.4.1'
 }
 
-// Nağmedar builds against libVLC 4 by default; -PforceVlc3 selects the VLC 3 branch.
-def vlcMajorVersion = hasProperty('forceVlc3') ? 3 : 4
-
 android {
-    minSdk = vlcMajorVersion == 3 ? 17 : 23
+    // Nağmedar 1.0.3: Android 14, for libVLC 4 and the VLC 3 branch (-PforceVlc3) alike. The owner's
+    // devices run Android 16 and 17; AndroidX (navigation 2.10) needs 23 at least, and 34 is Desktop
+    // Kit 2.x's floor: the platform's predictive Back, caption bar insets and haptic constants are
+    // there without fallbacks
+    minSdk = 34
     // Nağmedar 1.0: Android 17's SDK, Android 16's behaviour (build.gradle, targetSdkVersion)
     targetSdk = 36
     compileSdk = 37
@@ -21,7 +23,7 @@ android {
 }
 
 include ':libvlcjni:libvlc', ':medialibrary'
-include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:television', ':application:donations', ':application:remote-access-server'
+include ':application:tools', ':application:resources', ':application:mediadb', ':application:app', ':application:live-plot-graph', ':application:donations', ':application:remote-access-server'
 include ':application:vlc-android'
 include ':application:nagmedar-ui'
 include ':application:nagmedar-data'
@@ -30,5 +32,4 @@ include ':application:nagmedar-lab'
 include ':application:nagmedar-audio'
 // S-1404: the macrobenchmarks, against the app's benchmark build
 include ':application:benchmark'
-include ':application:moviepedia'
 include ':application:remote-access-client'
