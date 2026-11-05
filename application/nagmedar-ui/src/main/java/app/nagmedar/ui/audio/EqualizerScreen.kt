@@ -81,6 +81,7 @@ import app.nagmedar.ui.components.gainText
 import app.nagmedar.ui.player.equalizer.EqualizerPreset
 import app.nagmedar.ui.components.DropButton
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.delay
 import org.videolan.tools.NAGMEDAR_DSP
@@ -173,7 +174,8 @@ fun EqualizerScreen(
     val dimens = NagTheme.dimens
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 1000.dp
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        // 1.0.3: under a phone's bars (UnderShellBars) the page scrolls beneath them and its end rests clear of them
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(LocalShellBottomPadding.current)) {
             PageHeader(title = stringResource(R.string.nag_eq_title), subtitle = stringResource(R.string.nag_eq_subtitle))
             Column(Modifier.padding(horizontal = dimens.pagePadding), verticalArrangement = Arrangement.spacedBy(dimens.gapM)) {
                 ChainBar(state, meter)
