@@ -1,18 +1,16 @@
 package app.nagmedar.ui.sleep
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -56,6 +54,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
 import app.nagmedar.ui.components.NagSwitch
+import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
 import app.nagmedar.ui.components.tabMovesFocus
@@ -207,17 +206,14 @@ private fun nextRing(at: Long, now: Long, locale: Locale): String {
     return stringResource(R.string.nag_alarm_next_in, day, time, within)
 }
 
-/** The hour or the minute of "07 : 30": typed (the digits come in from the right, as on a clock) or stepped with ↑ and ↓. */
+/**
+ * The hour or the minute of "07 : 30": typed (the digits come in from the right, as on a clock) or stepped with ↑ and ↓.
+ * 1.0.3: the app's text field ([NagTextField]) in the clock's large digits.
+ */
 @Composable
 internal fun TimePart(value: Int, max: Int, label: String, modifier: Modifier, onSet: (Int) -> Unit, onStep: (up: Boolean) -> Unit) {
-    val colors = NagTheme.colors
-    val dimens = NagTheme.dimens
-    val focusManager = LocalFocusManager.current
-    val interaction = remember { MutableInteractionSource() }
-    val focused by interaction.collectIsFocusedAsState()
     val text = String.format(Locale.ROOT, "%02d", value)
-    val shape = RoundedCornerShape(dimens.radiusControl)
-    BasicTextField(
+    NagTextField(
         value = TextFieldValue(text, TextRange(text.length)),
         onValueChange = { typed ->
             val digits = typed.text.filter { it in '0'..'9' }
@@ -226,17 +222,16 @@ internal fun TimePart(value: Int, max: Int, label: String, modifier: Modifier, o
             val chosen = if (two <= max) two else digits.takeLast(1).toIntOrNull() ?: 0
             if (chosen != value) onSet(chosen)
         },
-        singleLine = true,
-        textStyle = NagTheme.type.title.copy(color = colors.text, textAlign = TextAlign.Center),
-        cursorBrush = SolidColor(colors.accent),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-        interactionSource = interaction,
+        label = label,
+        showLabel = false,
+        fillWidth = false,
+        keyboardType = KeyboardType.Number,
+        imeAction = ImeAction.Next,
+        textStyle = NagTheme.type.title.copy(textAlign = TextAlign.Center),
+        contentPadding = PaddingValues(horizontal = 6.dp),
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .width(56.dp)
-            .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
-            .border(if (focused) 2.dp else 1.dp, if (focused) colors.accent else colors.borderStrong, shape)
-            .semantics { contentDescription = label }
-            .tabMovesFocus(focusManager)
             .onPreviewKeyEvent { event ->
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                 when (event.key) {
@@ -251,7 +246,6 @@ internal fun TimePart(value: Int, max: Int, label: String, modifier: Modifier, o
                     else -> false
                 }
             },
-        decorationBox = { inner -> Box(Modifier.padding(horizontal = 6.dp), contentAlignment = Alignment.Center) { inner() } },
     )
 }
 

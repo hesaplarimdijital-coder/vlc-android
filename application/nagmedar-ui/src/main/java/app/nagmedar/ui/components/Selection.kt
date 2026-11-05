@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -167,18 +168,73 @@ fun SelectionMark(selected: Boolean, modifier: Modifier = Modifier) {
 @Composable
 fun rememberMultiSelection(): MultiSelection = remember { MultiSelection() }
 
-/** The keys held when the pointer last pressed: what the next click means for a selection. */
+/**
+ * 1.0.3 (Desktop Kit 2.2): Back leaves a selection being made, as Android's action mode does: in
+ * the "Seç" mode or on a touch layout any selection, with a mouse several items (one item a mouse
+ * clicked is only selected, and Back goes on to the page). Composed with the list, after the
+ * screen's own handlers, so it comes before them.
+ */
+@Composable
+fun ClearSelectionOnBack(selection: MultiSelection, touchLayout: Boolean) {
+    BackHandler(enabled = SelectionRules.backClears(selection.count, selection.selecting, touchLayout)) { selection.clear() }
+}
+
+/** The selection rules of the lists, free of Compose for the tests. */
+internal object SelectionRules {
+    /** Whether Back clears a selection of [count] items ([selecting]: the "Seç" mode) rather than going back. */
+    fun backClears(count: Int, selecting: Boolean, touchLayout: Boolean): Boolean =
+        selecting || (count > 0 && touchLayout) || count > 1
+}
+
+/**
+ * The keys held when the pointer last pressed: what the next click means for a selection. 1.0.3
+ * (Desktop Kit 2.1): also whether that press was a finger's or a pen's ([finger]) or a mouse's: the
+ * press decides how a list's click acts, not the layout.
+ */
 class ClickModifiers {
     private var ctrl = false
     private var shift = false
+    private var finger: Boolean? = null
 
-    internal fun pressed(ctrl: Boolean, shift: Boolean) {
+    internal fun pressed(ctrl: Boolean, shift: Boolean, finger: Boolean? = null) {
         this.ctrl = ctrl
         this.shift = shift
+        this.finger = finger
     }
 
     /** Ctrl (or Meta) and Shift of the last press, then forgotten: Enter on a focused item has none. */
-    fun take(): Pair<Boolean, Boolean> = (ctrl to shift).also { pressed(ctrl = false, shift = false) }
+    fun take(): Pair<Boolean, Boolean> = (ctrl to shift).also { pressed(ctrl = false, shift = false, finger = finger) }
+
+    /**
+     * Whether the last press was a finger's or a pen's (true) or a mouse's (false), then forgotten;
+     * null when the click came without one (a key, TalkBack). Read it before [take].
+     */
+    fun takeFinger(): Boolean? = finger.also { finger = null }
+}
+
+/**
+ * What a click on an item of a list that selects does (1.0.3, Desktop Kit 2.1): a finger's or a
+ * pen's tap opens (plays) it, unless items are being picked (the "Seç" mode); a mouse's click selects
+ * it, Ctrl and Shift as on desktops, whatever the layout. [finger] is the press's (null without one:
+ * the layout's input decides, [touchLayout]).
+ */
+enum class ListClick {
+    /** Taken in or out of the selection being made. */
+    Toggle,
+
+    /** Selected as a desktop does (Ctrl, Shift). */
+    Select,
+
+    /** Opened: played. */
+    Open;
+
+    companion object {
+        fun of(selecting: Boolean, finger: Boolean?, touchLayout: Boolean): ListClick = when {
+            selecting -> Toggle
+            finger ?: touchLayout -> Open
+            else -> Select
+        }
+    }
 }
 
 /** The window's [ClickModifiers], recorded by [TrackClickModifiers]. */
@@ -196,7 +252,12 @@ fun TrackClickModifiers(modifier: Modifier = Modifier, content: @Composable () -
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.type == PointerEventType.Press) {
                             val keys = event.keyboardModifiers
-                            modifiers.pressed(ctrl = keys.isCtrlPressed || keys.isMetaPressed, shift = keys.isShiftPressed)
+                            val down = event.changes.firstOrNull { it.pressed }
+                            modifiers.pressed(
+                                ctrl = keys.isCtrlPressed || keys.isMetaPressed,
+                                shift = keys.isShiftPressed,
+                                finger = down?.let { it.type != PointerType.Mouse },
+                            )
                         }
                     }
                 }

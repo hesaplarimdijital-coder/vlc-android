@@ -64,6 +64,8 @@ import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.ClearSelectionOnBack
+import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MultiSelection
@@ -582,7 +584,8 @@ private fun PlaylistPane(
     LaunchedEffect(open.id) { selection.clear() }
     LaunchedEffect(keys) { selection.retain(keys) }
     SelectionCommands(selection, keys)
-    BackHandler(enabled = selection.selecting) { selection.clear() }
+    // 1.0.3 (Desktop Kit 2.2): Back clears a selection being made: any by touch or in "Seç", several with a mouse
+    ClearSelectionOnBack(selection, touchLayout = !pointer)
     val undoLabel = stringResource(R.string.nag_sc_undo)
     val remove = { taken: Set<Any> ->
         val playlist = state.openId
@@ -686,14 +689,15 @@ private fun PlaylistTable(
         reorder = reorder,
         handleLabel = { line -> res.getString(R.string.nag_queue_handle, line.track.title) },
         selectedKeys = selection.keys,
+        // 1.0.3 (Desktop Kit 2.1): the press decides, not the layout: a finger's tap plays, a mouse's click selects
         onRowClick = { line, index ->
-            when {
-                selection.selecting -> selection.toggle(line.key)
-                pointer -> {
+            when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
+                ListClick.Toggle -> selection.toggle(line.key)
+                ListClick.Select -> {
                     val (ctrl, shift) = modifiers.take()
                     selection.click(line.key, keys, ctrl, shift)
                 }
-                else -> actions.play(tracks, index)
+                ListClick.Open -> actions.play(tracks, index)
             }
         },
         onRowDoubleClick = if (pointer && !selection.selecting) ({ _, index -> actions.play(tracks, index) }) else null,
