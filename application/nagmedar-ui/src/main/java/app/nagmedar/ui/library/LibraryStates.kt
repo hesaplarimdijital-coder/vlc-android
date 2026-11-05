@@ -160,7 +160,8 @@ private fun scanTitle(scan: ScanState): String = stringResource(
  * What a library screen shows (S-308): the permission state when the app may read nothing
  * (S-309), placeholders while it loads or while a scan has found nothing yet, the empty state
  * with its next step, or [content], with a scan strip on top while the medialibrary is still
- * scanning.
+ * scanning. 1.0.3: a screen that has its list ([loading] false and not [empty]) always shows it,
+ * whatever the scan does; the start's quiet look over the folders posts no [scan] at all.
  */
 @Composable
 fun LibraryContent(

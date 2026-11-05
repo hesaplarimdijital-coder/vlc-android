@@ -2204,6 +2204,10 @@
     <string name="nag_lib_exclude">Leave out</string>
     <string name="nag_lib_folder_actions">Actions for %1$s</string>
     <string name="nag_lib_done">Done</string>
+    <!-- 1.0.3: Settings › Library: the whole library looked over again on demand -->
+    <string name="nag_lib_rescan">Rescan the library</string>
+    <string name="nag_lib_rescan_hint">The music is scanned once; afterwards only what changed is read again, in the background. Rescan when a track is missing.</string>
+    <string name="nag_lib_rescan_started">Scanning the library again; the list stays as it is meanwhile</string>
     <string name="nag_fr_sources_sections">The music\'s folders</string>
     <string name="nag_fr_sources_sections_desc">If you like, choose the folders the music shows; with none it shows all of the library. You can change them later under Settings › Library.</string>
     <!-- Sources › Streams: open a network stream, the streams played before -->

@@ -31,6 +31,8 @@ import app.nagmedar.ui.input.NAGMEDAR_DRAG
 import app.nagmedar.ui.input.PhysicalKeys
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.isMediaOrSubtitleType
+import app.nagmedar.ui.library.LibraryWatch
+import app.nagmedar.ui.library.MusicSnapshot
 import app.nagmedar.ui.library.NewDrives
 import app.nagmedar.ui.notify.RemovedChannels
 import app.nagmedar.ui.perf.StartupPerf
@@ -67,6 +69,9 @@ class NagmedarActivity : ComponentActivity() {
     /** What the window does with a key, before the views and after them (S-401, S-302, S-407). */
     private val keys = WindowKeys({ actions }, this::goBack)
 
+    /** 1.0.3: the media index's changes while the window is in front: the library looks again when its folders may have changed. */
+    private val libraryWatch by lazy { LibraryWatch(this) }
+
     /** Screen asked for by a launcher shortcut (S-309), until the shell has shown it. */
     private var destination by mutableStateOf<String?>(null)
 
@@ -77,6 +82,8 @@ class NagmedarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // 1.0.3: the Music's list kept from the last start is read while the window sets up, for its first frames
+        if (Build.FINGERPRINT != "robolectric") lifecycleScope.launch(Dispatchers.IO) { MusicSnapshot.preload(applicationContext) }
         if (savedInstanceState == null) {
             destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
             openPodcastOf(intent)
@@ -175,6 +182,7 @@ class NagmedarActivity : ComponentActivity() {
         super.onStart()
         PhysicalKeys.forget()
         getSystemService(InputManager::class.java)?.registerInputDeviceListener(keyboards, null)
+        if (Build.FINGERPRINT != "robolectric") libraryWatch.start()
         // S-1005: a tag write a dead process left half done: the file back from its copy, the copy gone
         lifecycleScope.launch(Dispatchers.IO) { recoverTagWrites() }
     }
@@ -199,6 +207,7 @@ class NagmedarActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         getSystemService(InputManager::class.java)?.unregisterInputDeviceListener(keyboards)
+        libraryWatch.stop()
         saveWindowBounds()
     }
 
