@@ -115,6 +115,7 @@ private class CoveredNode(private var covered: Boolean) : Modifier.Node(), Compo
     fun update(covered: Boolean) {
         if (covered == this.covered) return
         this.covered = covered
+        if (!isAttached) return
         if (covered) cover() else uncover()
     }
 
