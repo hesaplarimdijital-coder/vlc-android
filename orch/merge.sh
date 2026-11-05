@@ -4,7 +4,7 @@
 set -e
 ID=$1; SHA=$2; R=$REPO
 cd $R
-git fetch -q origin
+git fetch -q origin +refs/heads/master:refs/remotes/origin/master +refs/heads/story/$ID:refs/remotes/origin/story/$ID
 [ "$(git ls-remote origin refs/heads/story/$ID | cut -f1)" = "$(git rev-parse $SHA)" ] || { echo "remote head differs"; exit 1; }
 git merge-base --is-ancestor origin/master $SHA || { echo "NOT BASED ON MASTER"; exit 2; }
 s=$(sh $ORCH/ci.sh $SHA 2>&1 | grep -v notice | awk '/^[^ ]/{skip=($0 ~ /Emülatör/)} !skip')

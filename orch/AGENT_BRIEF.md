@@ -38,8 +38,10 @@ master yourself.
   are opaque (GlassMode Solid) until the user decides otherwise; keycaps/shortcut hints only while a hardware keyboard is
   connected; the phone's Sıradaki is a full-window page; sheets close when dragged down anywhere; on the tablet "open
   player" opens the big artwork player; the phone's mini player is the tablet's bar (artwork-tinted seek bar).
-- **Ask the orchestrator (in your final report, not by guessing) before:** raising minSdk, raising targetSdk, bringing back
-  any glass, removing a user-visible feature, adding a dependency.
+- **Decided 5 Nov 08:33:** minSdk is 34 (the platform story sets it; new code needs no checks below API 34). The user is a
+  pure-music-player user: no video features, ever. His priorities: the kit update, testing, smooth transitions.
+- **Ask the orchestrator (in your final report, not by guessing) before:** raising targetSdk, bringing back any glass,
+  removing a user-visible feature, adding a dependency.
 - Tests are on again (`NAGMEDAR_RUN_TESTS: '1'`): §0's "no new tests" is void. New logic gets tests; changed screenshots are
   looked at one by one and committed in a separate "Screenshots: …" commit (§4.5). The emulator walk must stay green on
   phone and tablet; it is close to its 50 min limit, so new walk steps must be few and fast.

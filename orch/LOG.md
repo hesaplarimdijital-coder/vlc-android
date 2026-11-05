@@ -388,3 +388,7 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
 - 08:40 launched story/platform (opus; prompts/platform.md: TV + moviepedia modules out first, versions, minSdk 24, forced
   code, screenshots reviewed, walks) and story/walk-robust (opus; prompts/walk-robust.md). Auto agent 4 (music piece) running
   (story/auto-browse at 4ec2e2c). Doc tab: Platform/CI rows "Çalışıyor", priorities line.
+- 08:33 the user: "Yeşil PR'ları birleştir. Sana GitHub'da tam yetki veriyorum. minSdk en uygunu neyse sen seç, benim
+  cihazlarım Android 17." → minSdk 34 (platform agent told; prompt and brief updated). 08:45 PR #96 landed: master bc333e2
+  (merge.sh now fetches only master + the story branch: a plain fetch failed on refspecs of branches not pushed yet).
+  Deleting diag/fix-1.0.1-podcast, ci/baseline-profile-diag, ci/apk refused by the classifier ("Git Destructive"): left.
