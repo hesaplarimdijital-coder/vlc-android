@@ -100,7 +100,8 @@ class SystemBandTest {
                 SystemBarsFollowTheme()
                 val density = LocalDensity.current
                 CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
-                    WindowRoot(shell = shell, belowCaption = false, modifier = Modifier.fillMaxSize().background(NagTheme.colors.background)) {
+                    // as NagmedarApp: the first run (no shell yet) pads the buttons, the shell draws behind them
+                    WindowRoot(shell = shell && shown, belowCaption = false, modifier = Modifier.fillMaxSize().background(NagTheme.colors.background)) {
                         if (shell && shown) {
                             TestShell(widthClass, screen = { d, n -> if (screen == null) app.nagmedar.ui.SampleScreen(d, n) else screen() })
                         } else {
@@ -209,10 +210,13 @@ class SystemBandTest {
     @Test
     @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun theShellSitsOnTheButtonsAtFirstLaunch() {
+        // the first run, in a window that already has its navigation bar: it ends above the buttons
         shown = false
         app()
         systemBars(status = 24.dp, navigation = 48.dp)
-        // the shell comes once the window already has its navigation bar, as on the app's first launch
+        val root0 = compose.onRoot().getBoundsInRoot()
+        near(root0.bottom - 48.dp, compose.onNodeWithTag("first-run").getBoundsInRoot().bottom, "first run bottom")
+        // the first run done, the shell comes: it sits on the buttons at once, without a bar-high gap (Desktop Kit 2.1)
         shown = true
         compose.waitForIdle()
         val first = compose.onNodeWithText("Radyo").getBoundsInRoot()
