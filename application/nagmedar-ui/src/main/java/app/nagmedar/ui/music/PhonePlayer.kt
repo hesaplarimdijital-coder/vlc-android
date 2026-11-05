@@ -132,6 +132,7 @@ import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.stats.statsKey
+import app.nagmedar.ui.shell.LocalWindowRootInsets
 import app.nagmedar.ui.theme.ArtworkAccent
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
@@ -226,7 +227,8 @@ fun PhonePlayer(
     // S-1007: the sleep timer's window, from the menu
     var sleepOpen by rememberSaveable { mutableStateOf(false) }
     val top = remember(colors, tint) { tint?.let { backdropTop(colors, it) } }
-    val insets = WindowInsets.safeDrawing
+    // what the window's root keeps clear (1.0.3: the system's buttons are the shell's, the player reaches behind them)
+    val insets = LocalWindowRootInsets.current?.padding ?: WindowInsets.safeDrawing
     val menu: () -> List<MenuEntry> = {
         listOfNotNull(
             // S-1004

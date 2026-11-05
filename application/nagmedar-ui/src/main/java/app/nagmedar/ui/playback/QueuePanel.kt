@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -396,7 +397,8 @@ fun rememberQueuePanelState(): QueuePanelState = rememberSaveable(saver = QueueP
  * up a screen reader reads only it. 1.0.2: dragged down while its list is at its top (or on its
  * title, what plays now, its hint) it follows the finger and closes past a third of the window or
  * on a fling down, as the sheets do; short of that it springs back. A row's handle still moves the
- * row and a row swiped toward the start still goes.
+ * row and a row swiped toward the start still goes. 1.0.3: its colour reaches behind the system's
+ * navigation bar (the three buttons), its rows end above it.
  */
 @Composable
 fun QueuePage(
@@ -432,7 +434,10 @@ fun QueuePage(
                 .blockInputBelow()
                 // a row's handle and its sideways swipe keep their drags; the list and the rest of the page pull it
                 .sheetDrag(drag)
-                .testTag("queue-page"),
+                .testTag("queue-page")
+                // 1.0.3: the page's colour behind the system's buttons, its rows above them
+                .background(NagTheme.colors.background)
+                .navigationBarsPadding(),
         )
         DetailBackHandler(enabled = open, state = back, onBack = onClose)
     }

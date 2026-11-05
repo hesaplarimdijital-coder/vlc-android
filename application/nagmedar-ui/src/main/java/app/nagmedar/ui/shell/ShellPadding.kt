@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
 
@@ -33,7 +34,9 @@ import kotlin.math.roundToInt
  * Sizes of the chrome lying over the content, measured by the shell (Desktop Kit 1.0). On a phone
  * the top bar, the player strip and the bottom bar cover the content's edges; on tablet and DeX
  * only a floating player does. 1.0.1: a phone's full page (Settings and its pages) has no bottom
- * bar and no player strip ([barsHidden] while one is on screen).
+ * bar and no player strip ([barsHidden] while one is on screen). 1.0.3 (Desktop Kit 2.0): on a
+ * phone the system's navigation bar at the window's bottom ([systemBottomPx]) covers the content
+ * too, full pages included: the shell draws behind it.
  */
 @Stable
 internal class ShellChromeMetrics {
@@ -54,14 +57,23 @@ internal class ShellChromeMetrics {
     var underFloatingPlayer by mutableStateOf(false)
     var floatingMarginPx by mutableIntStateOf(0)
 
+    /**
+     * 1.0.3: the system's navigation bar at the window's bottom (the three buttons or the gesture
+     * handle) the shell draws behind, in px; read while measuring.
+     */
+    var systemBottomPx: () -> Int by mutableStateOf({ 0 })
+
     val topPadPx: Int get() = if (underTop) topPx else 0
 
     /** What covers the bottom of the page on screen. */
     val bottomPadPx: Int get() = bottomPadPx(bars = !barsHidden)
 
-    /** What covers the bottom of a page that has the phone's bottom bar and player strip ([bars]) or not. */
+    /**
+     * What covers the bottom of a page that has the phone's bottom bar and player strip ([bars]) or not; on a phone the
+     * system's navigation bar as well (a tablet's content ends above it).
+     */
     fun bottomPadPx(bars: Boolean): Int = when {
-        underBottom -> if (bars) navPx + playerPx else 0
+        underBottom -> (if (bars) navPx + playerPx else 0) + systemBottomPx().coerceAtLeast(0)
         underFloatingPlayer && playerPx > 0 -> playerPx + 2 * floatingMarginPx
         else -> 0
     }
@@ -246,6 +258,12 @@ internal class ShellOverlayHost {
     /** 0 collapsed … 1 expanded; the shell slides the bottom bar away with it. Read while drawing. */
     var expandProgress: () -> Float by mutableStateOf({ 0f })
 
+    /**
+     * 1.0.3: the system's navigation bar the overlay reaches behind (px, read while measuring): what
+     * lies over the whole window keeps its controls above it.
+     */
+    var systemBottomPx: () -> Int by mutableStateOf({ 0 })
+
     /** Called when the player starts to expand: the shell brings the bars back first. */
     var onExpandStart: () -> Unit = {}
 
@@ -274,3 +292,15 @@ internal class ShellOverlayHost {
 }
 
 internal val LocalShellOverlayHost = staticCompositionLocalOf<ShellOverlayHost?> { null }
+
+/**
+ * 1.0.3 (Desktop Kit 2.0): pads the bottom by [px] pixels, read while measuring (a changing inset
+ * re-measures without recomposing): what lies over the whole window (a sheet, the expanded player)
+ * keeps its controls above the system's navigation bar while its surface reaches behind it.
+ */
+fun Modifier.bottomInsetPadding(px: () -> Int): Modifier = layout { measurable, constraints ->
+    val bottom = px().coerceAtLeast(0)
+    val placeable = measurable.measure(constraints.offset(vertical = -bottom))
+    val height = (placeable.height + bottom).coerceIn(constraints.minHeight, constraints.maxHeight)
+    layout(placeable.width, height) { placeable.place(0, 0) }
+}
