@@ -1,6 +1,7 @@
 package app.nagmedar.ui.music
 
 import android.content.Context
+import android.os.SystemClock
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -89,18 +90,20 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.fileDragSource
 import app.nagmedar.ui.input.onMiddleClick
 import app.nagmedar.ui.library.LibraryContent
-import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaFile
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MediaSharing
+import app.nagmedar.ui.library.MusicRead
+import app.nagmedar.ui.library.MusicSnapshot
+import app.nagmedar.ui.library.ScanState
 import app.nagmedar.ui.library.ShelfTitle
 import app.nagmedar.ui.library.TrackCard
 import app.nagmedar.ui.library.formatDuration
-import app.nagmedar.ui.library.loadWhileScanning
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.library.rememberScanState
+import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackActions
@@ -113,6 +116,7 @@ import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
+import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.NAGMEDAR_MUSIC_COLUMNS
 import org.videolan.tools.NAGMEDAR_MUSIC_VIEW
@@ -120,6 +124,7 @@ import org.videolan.tools.Settings
 import org.videolan.vlc.media.MediaUtils
 import org.videolan.tools.Notices
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
@@ -314,13 +319,14 @@ internal fun groupSource(view: MusicView, group: MusicGroup?): PlaySource? {
 fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector: MusicInspectorContent? = null) {
     val context = LocalContext.current
     val scan = rememberScanState()
-    val media = rememberMusicMedia(repository, scan.active)
+    val read = rememberMusicRead(repository)
+    val media = read?.media
     // 1.0: the tracks played last (the playback history, newest first): the shelf on a phone, the Recent view on a wide
     // window. Read on its own, off the main thread, again whenever the history changes while the screen is open; never
     // part of the library, which a new history would otherwise make again
     val access = LocalLibraryAccess.current
-    val recent = rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", scan.active, access?.media, access?.folders, access?.scopes) {
-        loadWhileScanning(scan.active) { repository.recentAudio() }
+    val recent = rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", access?.media, access?.folders, access?.scopes) {
+        value = repository.recentAudio()
         repository.historyChanges().collect { value = repository.recentAudio() }
     }
     val compact = currentWidthClass() == WidthClass.Compact
@@ -331,16 +337,16 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     val tech by TrackTechIndex.tech.collectAsState()
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
-    val library = remember(media, tech, locale) {
+    val library = remember(read, tech, locale) {
         // S-808: a CUE sheet's track has its file's technical side; made again only for new tracks or a new probe,
-        // not in the first frame of a screen that comes back
-        media?.let { list ->
-            repository.lastRead.derived("music", listOf(list, tech, locale)) {
-                MusicLibrary(list.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale)
+        // not in the first frame of a screen that comes back (1.0.3: compared by what the tracks show, their tags too)
+        read?.let { r ->
+            repository.lastRead.derived("music", listOf(r, tech, locale)) {
+                MusicLibrary(r.media.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) }, locale)
             }
         }
     }
-    val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
+    val byUri = remember(read) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
     // S-808: the ratings and counts
     val stats by TrackStatsIndex.stats.collectAsState()
     LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
@@ -374,25 +380,36 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
             onConverted = { converting = null },
             modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
         )
-        LibraryContent(
-            loading = library == null,
-            empty = library?.tracks?.isEmpty() == true,
-            scan = scan,
-            emptyTitle = stringResource(R.string.nag_state_no_music_title),
-            emptyDescription = stringResource(R.string.nag_state_no_music_desc),
-            onAddFolder = onAddFolder,
-        ) {
-            if (library != null) {
-                MusicBrowser(
-                    library, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
-                    stats = stats, recent = recentKeys, shelf = shelf,
-                )
-            }
+        MusicContent(library, scan, onAddFolder) { known ->
+            MusicBrowser(
+                known, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
+                stats = stats, recent = recentKeys, shelf = shelf,
+            )
         }
     }
     adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
     rating?.let { tracks ->
         RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+    }
+}
+
+/**
+ * The Music page under its header: the loading state while no list is known yet (the first start,
+ * before its first read), the empty state, or [browser] with the list. 1.0.3: a known list (this
+ * window's, or the one kept from the last start) is shown whatever the medialibrary does; a scan
+ * the user asked for adds its strip above it.
+ */
+@Composable
+internal fun MusicContent(library: MusicLibrary?, scan: ScanState, onAddFolder: () -> Unit, browser: @Composable (MusicLibrary) -> Unit) {
+    LibraryContent(
+        loading = library == null,
+        empty = library?.tracks?.isEmpty() == true,
+        scan = scan,
+        emptyTitle = stringResource(R.string.nag_state_no_music_title),
+        emptyDescription = stringResource(R.string.nag_state_no_music_desc),
+        onAddFolder = onAddFolder,
+    ) {
+        if (library != null) browser(library)
     }
 }
 
@@ -424,23 +441,56 @@ private fun RecentShelf(tracks: List<MediaWrapper>) {
 }
 
 /**
- * The medialibrary's music (or the picked folders'), read again while a scan finds more, the
- * engine's probe started on what is new: the music screen's, and the smart lists' (S-805).
+ * The medialibrary's music (or the picked folders'), the engine's probe started on what is new: the music screen's,
+ * and the smart lists' (S-805). 1.0.3: what was shown last is on screen from the first frame (this window's, else the
+ * list kept on the device from the last start: [MusicSnapshot]); the read behind it replaces it only when the music
+ * changed, and is kept for the next start. Read again whenever the medialibrary reports a change (a scan or the
+ * start's look found, changed or lost files) or a picked folder's listing changed, never every few seconds, and the
+ * tracks' probe runs only when the list changed.
  */
 @Composable
-fun rememberMusicMedia(repository: MediaRepository, scanning: Boolean): List<MediaWrapper>? {
+fun rememberMusicRead(repository: MediaRepository): MusicRead? {
     val context = LocalContext.current
     val access = LocalLibraryAccess.current
+    val scope = remember(access?.media, access?.folders, access?.scopes) { repository.musicScope() }
     // the music of the section's folders (Settings › Library)
-    val media by rememberRead<List<MediaWrapper>>(repository.lastRead, "music", scanning, access?.media, access?.folders, access?.scopes) {
-        loadWhileScanning(scanning) { repository.tracks(LibrarySection.Music) }
+    val read by rememberRead<MusicRead>(repository.lastRead, "music", scope, kept = { MusicSnapshot.cached(scope) }) {
+        if (value == null) repository.keptMusic(scope)?.let { value = it }
+        var keptAt = 0L
+        suspend fun load() {
+            val fresh = repository.musicRead()
+            if (fresh != value) value = fresh
+            // kept for the next start; while a scan adds files, twice a minute at most
+            val now = SystemClock.elapsedRealtime()
+            if (!Medialibrary.getInstance().isWorking || now - keptAt >= MUSIC_KEEP_WHILE_WORKING_MS) {
+                keptAt = now
+                repository.keepMusic(scope, fresh)
+            }
+        }
+        load()
+        repository.musicChanges().collect {
+            // a burst of reports while a scan parses is read once in a while, not for every file
+            delay(if (Medialibrary.getInstance().isWorking) MUSIC_CHANGE_WORKING_MS else MUSIC_CHANGE_SETTLE_MS)
+            load()
+        }
     }
-    LaunchedEffect(media) {
+    LaunchedEffect(read) {
+        // 1.0.3: when the list first stood on screen in this process, for the log (the walk's restart check reads it)
+        read?.let { StartupPerf.musicListShown(it.media.size, it.kept) }
         // S-808: a CUE sheet's tracks share their file, probed once
-        media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString()?.let(CueUri::file) }.distinct()) } }
+        read?.media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString()?.let(CueUri::file) }.distinct()) } }
     }
-    return media
+    return read
 }
+
+/** 1.0.3: how long the Music waits after a change the medialibrary reported before it reads its list again. */
+private const val MUSIC_CHANGE_SETTLE_MS = 1_000L
+
+/** 1.0.3: the same while the medialibrary still works (a scan adds files one after another): the list follows it at this pace. */
+private const val MUSIC_CHANGE_WORKING_MS = 4_000L
+
+/** 1.0.3: how often the list is kept for the next start while a scan still adds files (its end keeps it at once). */
+private const val MUSIC_KEEP_WHILE_WORKING_MS = 30_000L
 
 /** S-1006: an album's cover in its header; a click (a right click, a long press) opens its menu. */
 @Composable

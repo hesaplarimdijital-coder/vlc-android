@@ -2197,6 +2197,10 @@
     <string name="nag_lib_exclude">Hariç tut</string>
     <string name="nag_lib_folder_actions">%1$s için işlemler</string>
     <string name="nag_lib_done">Tamam</string>
+    <!-- 1.0.3: Settings › Library: the whole library looked over again on demand -->
+    <string name="nag_lib_rescan">Kütüphaneyi yeniden tara</string>
+    <string name="nag_lib_rescan_hint">Müzik bir kez taranır; sonra yalnızca değişenler arka planda alınır. Bir parça eksikse yeniden tarayın.</string>
+    <string name="nag_lib_rescan_started">Kütüphane yeniden taranıyor; liste bu arada olduğu gibi kalır</string>
     <string name="nag_fr_sources_sections">Müziğin klasörleri</string>
     <string name="nag_fr_sources_sections_desc">İsterseniz müziğin göstereceği klasörleri seçin; seçmezseniz kütüphanenin tümü görünür. Klasörleri sonra Ayarlar › Kütüphane\'den değiştirebilirsiniz.</string>
     <!-- Sources › Streams: open a network stream, the streams played before -->

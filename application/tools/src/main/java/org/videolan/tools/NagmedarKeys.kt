@@ -45,6 +45,12 @@ const val NAGMEDAR_ACTION_LIBRARY = "nagmedar.library"
 /** S-409: where Nağmedar's desktop window last was ("left top right bottom"), to open there again. */
 const val NAGMEDAR_WINDOW_BOUNDS = "nagmedar_window_bounds"
 
+/** 1.0.3: the media index's audio stamp (app.nagmedar.library.MediaStamp) when the library's folders were last looked over in full. */
+const val NAGMEDAR_LIBRARY_STAMP = "nagmedar_library_stamp"
+
+/** 1.0.3: when (the wall clock, ms) the library's folders were last looked over in full; 0 for never. */
+const val NAGMEDAR_LIBRARY_CHECKED_AT = "nagmedar_library_checked_at"
+
 
 /**
  * The volume the user set last, VLC's percent (0–200, 100 the samples as they are): from the bars'
