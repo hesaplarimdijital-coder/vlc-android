@@ -1698,6 +1698,77 @@ class Smoke:
         if self.combo(113, 55):  # Ctrl+, settings
             self.step("Settings (Ctrl+,)")
 
+    def pass_sheet_trials(self):
+        """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
+        1.0.2's `input swipe … 300` and by drag() in turn, each trial with the moves the system delivered (dumpsys
+        input) and whether the sheet went: the evidence for the flaky check of 1.0.2's personal walk on API 37."""
+        self.cur_pass, self.lang = "sheet-trials", "en"
+        s = self.strings["en"]
+        self.set_display("1080x2400", "420")
+        self.ensure_library()
+        nodes = self.open_music()
+        rx = self.fmt_regex(s["nag_more_actions_for"])
+        for i in range(int(os.environ.get("SHEET_TRIALS", "10")) * 2):
+            if self.over_time():
+                break
+            how = "swipe" if i % 2 == 0 else "drag"
+            nodes = self.nodes(self.dump())
+            w, h = self.screen_size(nodes)
+            buttons = [n for n in self.app_nodes(nodes) if rx.match(n.desc.strip()) and h * 0.2 < n.center[1] < h * 0.75]
+            if not buttons:
+                nodes = self.open_music()
+                continue
+            nodes = self.step("Trial %d: a track's ⋯" % (i + 1), lambda: self.tap(buttons[0]))
+            box = self.sheet_still(nodes)
+            if not box:
+                self.sheet_trials.append({"trial": i + 1, "how": how, "closed": None, "note": "no sheet"})
+                continue
+            x, y = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
+            self.sh("dumpsys input > /dev/null")
+            t = time.time()
+            if how == "swipe":
+                self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97)))
+            else:
+                self.drag(x, y, x, int(h * 0.97))
+            ms = int((time.time() - t) * 1000)
+            moves = self.delivered_moves()
+            time.sleep(1.5)
+            nodes = self.step("Trial %d: dragged by %s" % (i + 1, how), wait=0.3)
+            closed = not self.by_id(nodes, "sheet")
+            self.sheet_trials.append({"trial": i + 1, "how": how, "closed": closed, "ms": ms, "from": y, "height": box[3] - box[1],
+                                      "moves": moves})
+            self.log("sheet trial %d (%s): %s in %d ms; moves %s" % (i + 1, how, "closed" if closed else "STAYED", ms, moves))
+            if not closed:
+                self.key(4)
+                self.step("Trial %d: Back closes the sheet" % (i + 1))
+        for how in ("swipe", "drag"):
+            done = [t for t in self.sheet_trials if t["how"] == how and t["closed"] is not None]
+            self.warnings.append("[sheet-trials] %s: %d of %d closed the sheet" % (how, sum(1 for t in done if t["closed"]), len(done)))
+
+    def delivered_moves(self):
+        """The last touch gesture the input dispatcher sent (dumpsys input's recent events): each MotionEvent's action, y
+        and time, so a trial shows how many moves arrived between the finger's down and its lift."""
+        out = self.sh("dumpsys input", timeout=60)
+        # the raw lines, whatever this system's format, for the evidence (input-trials.txt)
+        lines = [l.strip() for l in out.splitlines() if "MotionEvent" in l and ("DOWN" in l or "MOVE" in l or "UP" in l)]
+        with open(os.path.join(self.out, "input-trials.txt"), "a", encoding="utf-8") as f:
+            f.write("==== trial at step %d\n%s\n" % (self.n, "\n".join(lines[-40:])))
+        seq = []
+        for l in lines:
+            t = re.search(r"eventTime=(\d+)", l)
+            a = re.search(r"action=(?:AMOTION_EVENT_ACTION_|ACTION_)?(DOWN|MOVE|UP)", l)
+            y = re.search(r"(?:y\[0\]|\by)=(-?[\d.]+)", l)
+            if t and a and y:
+                seq.append((int(t.group(1)), a.group(1), int(float(y.group(1)))))
+        # the last gesture: from its last DOWN
+        downs = [i for i, e in enumerate(seq) if e[1].startswith("DOWN")]
+        seq = seq[downs[-1]:] if downs else seq[-16:]
+        if not seq:
+            return "?"
+        t0 = seq[0][0]
+        scale = 1e6 if t0 > 10 ** 12 else 1  # nanoseconds or milliseconds, as the dump gives them
+        return " ".join("%s@%d+%dms" % (a, y, (t - t0) / scale) for t, a, y in seq[:20])
+
     def rotation_and_background(self):
         self.rotate(1)
         self.step("Rotated to landscape")
