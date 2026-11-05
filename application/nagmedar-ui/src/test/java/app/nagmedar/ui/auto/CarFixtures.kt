@@ -7,6 +7,13 @@ import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.PlaylistSummary
 import app.nagmedar.ui.music.SmartList
 import app.nagmedar.ui.music.Track
+import app.nagmedar.ui.podcast.ChartGenre
+import app.nagmedar.ui.podcast.ChartShow
+import app.nagmedar.ui.podcast.DirectoryFailure
+import app.nagmedar.ui.podcast.FeedFailure
+import app.nagmedar.ui.podcast.ParsedEpisode
+import app.nagmedar.ui.podcast.ParsedFeed
+import app.nagmedar.ui.podcast.PodcastHit
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioFailure
 import app.nagmedar.ui.radio.Station
@@ -26,6 +33,15 @@ class FakeCarData(
     var episodes: List<PodcastEpisode> = emptyList(),
     /** The episodes in the order they were last listened to, the latest first. */
     var listened: List<Long> = emptyList(),
+    /** 1.0.3: the episodes in the order the app noted them as they played, the latest first (ListenedEpisodes). */
+    var heard: List<Long> = emptyList(),
+    /** 1.0.3: Keşfet: the device's country, Apple's charts by country, the directory's shows, the feeds not followed by address. */
+    var country: String = "tr",
+    var charts: Map<String, List<ChartShow>> = emptyMap(),
+    var shows: List<PodcastHit> = emptyList(),
+    var feedsRead: Map<String, ParsedFeed> = emptyMap(),
+    /** 1.0.3: the podcast directory cannot be reached. */
+    var podcastsOffline: Boolean = false,
     var favourites: List<Station> = emptyList(),
     var recentStations: List<Station> = emptyList(),
     var tags: List<DirectoryTag> = emptyList(),
@@ -65,7 +81,31 @@ class FakeCarData(
 
     override suspend fun episode(id: Long) = episodes.firstOrNull { it.id == id }
 
-    override suspend fun continuing() = CarPodcasts.continuing(episodes) { listened.indexOf(it.id).takeIf { i -> i >= 0 } }
+    override suspend fun continuing() = CarPodcasts.continuing(episodes, heard) { listened.indexOf(it.id).takeIf { i -> i >= 0 } }
+
+    /** The countries whose chart was asked for, in order; the feeds read, in order. */
+    val chartsAsked = ArrayList<String>()
+    val feedsAsked = ArrayList<String>()
+
+    override fun country() = country
+
+    override suspend fun chart(country: String): List<ChartShow> {
+        chartsAsked += country
+        if (podcastsOffline) throw DirectoryFailure.Offline()
+        return charts[country].orEmpty()
+    }
+
+    /** As the directory's search: the title has the words, in any case. */
+    override suspend fun findShows(query: String): List<PodcastHit> {
+        if (podcastsOffline) throw DirectoryFailure.Offline()
+        return shows.filter { it.title.contains(query, ignoreCase = true) }
+    }
+
+    override suspend fun readFeed(url: String): ParsedFeed {
+        feedsAsked += url
+        if (podcastsOffline) throw FeedFailure.Offline()
+        return feedsRead[url] ?: throw FeedFailure.Server(404)
+    }
 
     override suspend fun fresh(): List<PodcastEpisode> {
         val subscribed = feeds.associate { it.id to it.subscribedAt }
@@ -118,6 +158,14 @@ object FakeCarLook : CarLook {
     override fun playlistCover(id: Long) = "playlist:$id"
 
     override fun webImage(url: String?) = url?.let { "web:$it" } ?: icon(CarIcon.NoCover)
+
+    override val locale: Locale = Locale.ROOT
+
+    /** "country:tr". */
+    override fun country(code: String) = "country:$code"
+
+    /** Apple's English name, as the app shows one it does not know. */
+    override fun category(genre: ChartGenre) = genre.name
 }
 
 /** A track of [album] by [artist], in [folder]. */
@@ -177,6 +225,27 @@ fun episode(
     addedAt = addedAt,
     downloadState = if (downloaded) DownloadState.DONE else DownloadState.NONE,
     downloadPath = if (downloaded) "/data/podcasts/$id.mp3" else null,
+)
+
+/** 1.0.3: a show of a directory, not followed: its feed at example.com. */
+fun hit(n: Int, title: String, author: String? = "Yapımcı $n") = PodcastHit(
+    feedUrl = "https://example.com/feed/$n.xml",
+    title = title,
+    author = author,
+    imageUrl = "https://example.com/art/$n.jpg",
+)
+
+/** 1.0.3: a show of Apple's chart in [genres] (id to name). */
+fun chartShow(hit: PodcastHit, vararg genres: Pair<Int, String>) = ChartShow(hit, genres.map { ChartGenre(it.first, it.second) })
+
+/** 1.0.3: a feed as it was read: [episodes] guids "g1", "g2"…, the newest first. */
+fun parsedFeed(title: String, episodes: Int = 2, image: String? = "https://example.com/feed-art.jpg") = ParsedFeed(
+    title = title,
+    author = "Yayıncı",
+    imageUrl = image,
+    episodes = (episodes downTo 1).map { n ->
+        ParsedEpisode(guid = "g$n", title = "$title $n", audioUrl = "https://example.com/audio/$n.mp3", durationMs = 1_800_000, publishedAt = n * 1_000_000L)
+    },
 )
 
 fun station(id: Long, name: String, uuid: String? = "uuid-$id", tags: List<String> = listOf("pop")) = Station(

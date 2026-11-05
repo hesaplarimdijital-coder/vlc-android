@@ -1,9 +1,13 @@
 package app.nagmedar.ui.podcast
 
+import app.nagmedar.data.PodcastFeed
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.Locale
 import java.util.regex.Pattern
+
+/** Every address key the feed answers to: the one it is stored under and the ones it was reached by before it moved. */
+internal fun PodcastFeed.addressKeys(): List<String> = listOf(FeedUrl.key(feedUrl)) + aliasKeys.split('\n').filter { it.isNotEmpty() }
 
 /** S-1101: the addresses of feeds: what is typed, what is stored, and what two spellings of one feed share. */
 object FeedUrl {

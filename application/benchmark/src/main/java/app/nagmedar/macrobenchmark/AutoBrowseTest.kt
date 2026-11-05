@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem
+import androidx.media.utils.MediaConstants
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
@@ -27,7 +28,8 @@ import java.util.concurrent.atomic.AtomicReference
  * list under them answers, the Music's albums hold the walk's "Profile track" files ("nagmedar.tracks" of them), the
  * Podcasts' shows the feed the walk followed ("nagmedar.feed"), and the search finds a track. The personal walk runs
  * it (buildsystem/ci/emulator_smoke.py): the personal APK once gave Auto a root its own catalog did not know, which
- * no debug build showed.
+ * no debug build showed. 1.0.3: it connects as an Auto that shows custom browse actions, and the root offers "Abone
+ * ol"; Keşfet's lists answer (Apple's shows, or the one line that says the directory cannot be reached).
  */
 @RunWith(AndroidJUnit4::class)
 class AutoBrowseTest {
@@ -55,7 +57,8 @@ class AutoBrowseTest {
                         done.countDown()
                     }
                 },
-                null,
+                // as Android Auto connects: it shows custom browse actions (androidx.media 1.7)
+                Bundle().apply { putInt(MediaConstants.BROWSER_ROOT_HINTS_KEY_CUSTOM_BROWSER_ACTION_LIMIT, BROWSE_ACTIONS) },
             )
             browser.connect()
         }
@@ -80,6 +83,7 @@ class AutoBrowseTest {
         )
         assertTrue("every tab opens: ${describe(tabs)}", tabs.all { it.isBrowsable && !it.isPlayable && !it.description.title.isNullOrBlank() })
 
+        browseActions()
         music("$root/music")
         podcasts("$root/podcasts")
         // the radio's lists: stations, or the one line that says the directory cannot be reached
@@ -122,9 +126,24 @@ class AutoBrowseTest {
         }
     }
 
-    /** The Podcasts' lists answer; with the walk's feed followed, its show is under the shows with playable episodes. */
+    /** 1.0.3: the root offers Auto its custom browse action "Abone ol" (with a label and an icon). */
+    @Suppress("DEPRECATION") // the typed getter needs API 33; the test runs on older ones too
+    private fun browseActions() {
+        val actions = browser.extras?.getParcelableArrayList<Bundle>(MediaConstants.BROWSER_SERVICE_EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ROOT_LIST).orEmpty()
+        val subscribe = actions.firstOrNull { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) == SUBSCRIBE }
+        assertNotNull("the root's browse actions: ${actions.map { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) }}", subscribe)
+        assertFalse("its label", subscribe!!.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_LABEL).isNullOrBlank())
+        assertTrue("its icon", subscribe.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ICON_URI).orEmpty().startsWith("android.resource://"))
+    }
+
+    /**
+     * The Podcasts' lists answer; with the walk's feed followed, its show is under the shows with playable episodes.
+     * 1.0.3: Keşfet's lists answer too: the popular shows and the categories (Apple's, or the line that it cannot be
+     * reached), the countries (no network needed).
+     */
     private fun podcasts(id: String) {
-        lists(id, 3).forEach { list -> assertAnswers(list) }
+        lists(id, 4).forEach { list -> assertAnswers(list) }
+        lists("$id/discover", 3).forEach { list -> assertAnswers(list) }
         if (arguments.getString("nagmedar.feed").isNullOrBlank()) return
         val shows = children("$id/shows").filter { it.isBrowsable }
         assertTrue("the followed podcast under the shows: ${describe(children("$id/shows"))}", shows.isNotEmpty())
@@ -217,6 +236,10 @@ class AutoBrowseTest {
 
     private companion object {
         const val SERVICE = "org.videolan.vlc.PlaybackService"
+
+        /** The custom browse actions a car shows on an entry, and Nağmedar's "Abone ol" (CarActions.SUBSCRIBE). */
+        const val BROWSE_ACTIONS = 4
+        const val SUBSCRIBE = "app.nagmedar.auto.SUBSCRIBE"
 
         /** The browser's root in every build (MediaSessionBrowser.ID_ROOT). */
         const val ROOT = "//app.nagmedar/r"

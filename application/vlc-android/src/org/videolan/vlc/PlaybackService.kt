@@ -1513,6 +1513,21 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
         mediaSession.setPlaybackState(playbackState)
     }
 
+    /**
+     * 1.0.3: a message for Android Auto that stops nothing (what "Abone ol" came to): with a media loaded, the session's
+     * state as it is, the message as a non-fatal error (the next state it publishes is without it); with none, the
+     * session's error state ([displayPlaybackError]).
+     */
+    fun displayCarMessage(message: String) {
+        if (!this@PlaybackService::mediaSession.isInitialized) initMediaSession()
+        val current = mediaSession.controller?.playbackState
+        if (!hasMedia() || current == null) {
+            displayPlaybackError(message)
+            return
+        }
+        mediaSession.setPlaybackState(PlaybackStateCompat.Builder(current).setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, message).build())
+    }
+
     fun displaySubtitleMessage(vararg messages: String?) {
         var endTime = System.currentTimeMillis()
         subtitleMessage.clear()
@@ -1769,6 +1784,11 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 val extras = MediaSessionBrowser.getContentStyle().apply {
                     putBoolean(BrowserRoot.EXTRA_SUGGESTED, true)
                     putBoolean(MediaConstants.BROWSER_SERVICE_EXTRAS_KEY_SEARCH_SUPPORTED, true)
+                    // 1.0.3: the custom browse actions ("Abone ol"), to an Auto that says it shows them
+                    if ((rootHints?.getInt(MediaConstants.BROWSER_ROOT_HINTS_KEY_CUSTOM_BROWSER_ACTION_LIMIT, 0) ?: 0) > 0) {
+                        val actions = MediaSessionBrowser.browseActions(this@PlaybackService)
+                        if (actions.isNotEmpty()) putParcelableArrayList(MediaConstants.BROWSER_SERVICE_EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ROOT_LIST, actions)
+                    }
                 }
                 BrowserRoot(rootId, extras)
             }
@@ -1788,6 +1808,51 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
                 emptyList()
             }
             result.sendResult(children)
+        }
+    }
+
+    /** 1.0.3: one entry read again (Auto asks for it after a browse action changed it), off the main thread. */
+    override fun onLoadItem(itemId: String?, result: Result<MediaBrowserCompat.MediaItem>) {
+        if (itemId == null) {
+            result.sendResult(null)
+            return
+        }
+        result.detach()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val item = try {
+                MediaSessionBrowser.item(this@PlaybackService, itemId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load item $itemId", e)
+                null
+            }
+            result.sendResult(item)
+        }
+    }
+
+    /**
+     * 1.0.3: Android Auto's custom browse action ("Abone ol" on a show): the catalog does it off the main thread and Auto
+     * shows what it came to (that it worked, or why not) and reads the entry again. An action that is none of the
+     * catalog's is the browser's own.
+     */
+    override fun onCustomAction(action: String, extras: Bundle?, result: Result<Bundle>) {
+        val mediaId = extras?.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_MEDIA_ITEM_ID)
+        if (mediaId == null || CarHook.catalog?.browseActions(this)?.none { it.id == action } != false) {
+            super.onCustomAction(action, extras, result)
+            return
+        }
+        result.detach()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val done = try {
+                MediaSessionBrowser.act(this@PlaybackService, action, mediaId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to do $action on $mediaId", e)
+                null
+            }
+            if (done != null) result.sendResult(done) else result.sendError(null)
         }
     }
 
