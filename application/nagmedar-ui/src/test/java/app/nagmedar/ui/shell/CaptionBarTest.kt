@@ -10,18 +10,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
@@ -55,14 +60,23 @@ class CaptionBarTest {
     /** Android 15's caption: 40 dp high, its three buttons in the last 144 dp. */
     private val caption = CaptionBar(height = 40.dp, right = 144.dp)
 
-    private fun shell(widthClass: WidthClass, theme: ThemeMode = ThemeMode.Dark, input: InputMode = InputMode.Pointer) {
+    /** DeX's caption (1.0.3): the system's app chip in the first 160 dp, its buttons in the last 144 dp. */
+    private val dexCaption = CaptionBar(height = 40.dp, left = 160.dp, right = 144.dp)
+
+    private fun shell(
+        widthClass: WidthClass,
+        theme: ThemeMode = ThemeMode.Dark,
+        input: InputMode = InputMode.Pointer,
+        caption: CaptionBar = this.caption,
+    ) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 view = LocalView.current
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
                     TestShell(widthClass, startDestination = Destination.Music, caption = caption)
-                    // where the system draws its buttons, for the eye
+                    // where the system draws its chip and its buttons, for the eye
+                    if (caption.left > 0.dp) SystemChip(Modifier.align(Alignment.TopStart).width(caption.left))
                     SystemButtons(Modifier.align(Alignment.TopEnd))
                 }
             }
@@ -85,6 +99,29 @@ class CaptionBarTest {
         val brand = compose.onNodeWithText("Nağmedar").fetchSemanticsNode().boundsInRoot
         assertFalse(excluded(brand.center.x, brand.center.y))
         assertFalse(excluded(field.left - 40f, field.center.y))
+    }
+
+    /** 1.0.3 (Desktop Kit 2.3): where the system's app chip names the app, the menu bar starts with its menus. */
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
+    fun theAppChipTakesTheBrandsPlace() {
+        shell(WidthClass.Large, caption = dexCaption)
+        compose.onAllNodesWithText("Nağmedar").assertCountEquals(0)
+        val menu = compose.onNodeWithText("Medya").fetchSemanticsNode().boundsInRoot
+        assertTrue("clear of the chip: ${menu.left}", menu.left >= 160f)
+        assertTrue("the menu takes its clicks", excluded(menu.center.x, menu.center.y))
+        // the chip and the space after the menus still move the window
+        assertFalse(excluded(80f, 20f))
+        val field = compose.onNode(hasText("Sanatçı, albüm, parça ya da komut") and hasClickAction()).fetchSemanticsNode().boundsInRoot
+        assertTrue(field.right <= view.width - 144f)
+    }
+
+    @Test
+    fun theChipIsAtTheBarsStart() {
+        assertTrue(dexCaption.showsAppChip(LayoutDirection.Ltr))
+        // right to left, the start is the right end, where the buttons are not
+        assertTrue(CaptionBar(40.dp, left = 144.dp, right = 160.dp).showsAppChip(LayoutDirection.Rtl))
+        assertFalse(caption.showsAppChip(LayoutDirection.Ltr))
+        assertFalse(CaptionBar(40.dp, left = 144.dp).showsAppChip(LayoutDirection.Rtl))
     }
 
     @Test @Config(qualifiers = "tr-w700dp-h800dp-mdpi")
@@ -112,10 +149,26 @@ class CaptionBarTest {
         capture("caption-dex-dark")
     }
 
+    @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
+    fun dexChipScreenshot() {
+        shell(WidthClass.Large, ThemeMode.Light, caption = dexCaption)
+        capture("caption-dex-chip-light")
+    }
+
     @Test @Config(qualifiers = "tr-w900dp-h700dp-mdpi")
     fun narrowWindowScreenshot() {
         shell(WidthClass.Expanded, ThemeMode.Light, InputMode.Pointer)
         capture("caption-window-light")
+    }
+}
+
+/** The system's app chip at the caption's start as DeX draws it, roughly: the app's mark and name. */
+@Composable
+private fun SystemChip(modifier: Modifier = Modifier) {
+    val colors = NagTheme.colors
+    Row(modifier.height(40.dp).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        BrandMark(Modifier.size(18.dp))
+        Text("Nağmedar ⌄", color = colors.textSecondary, modifier = Modifier.clearAndSetSemantics {})
     }
 }
 

@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -387,7 +388,7 @@ private fun SidebarColumn(
             ) {
                 if (!collapsed) {
                     Box(Modifier.weight(1f)) {
-                        SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = false, badge = null, open = open) {
+                        SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = false, badge = badges[Destination.Settings], open = open) {
                             onSelect(Destination.Settings)
                         }
                     }
@@ -401,7 +402,7 @@ private fun SidebarColumn(
             }
             if (collapsed) {
                 Box(Modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp)) {
-                    SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = true, badge = null, open = open) {
+                    SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = true, badge = badges[Destination.Settings], open = open) {
                         onSelect(Destination.Settings)
                     }
                 }
@@ -540,7 +541,9 @@ private val BACK_TARGET = 48.dp
 /**
  * Large and extra-large: brand, application menus and the search/command field (Ctrl+K). In a
  * desktop window's [caption] bar (S-306) it is the bar: the brand and the space between move the
- * window, the menus and the field take their clicks, the system's buttons keep their place.
+ * window, the menus and the field take their clicks, the system's buttons keep their place. Where
+ * the system shows its app chip at the bar's start (DeX, 1.0.3: Desktop Kit 2.3), the chip names
+ * the app and the bar starts with the menus.
  */
 @Composable
 fun MenuBarChrome(
@@ -551,6 +554,7 @@ fun MenuBarChrome(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val chip = caption?.showsAppChip(LocalLayoutDirection.current) == true
     Column(modifier.fillMaxWidth().background(colors.chrome)) {
         Row(
             modifier = Modifier
@@ -560,10 +564,12 @@ fun MenuBarChrome(
                 .padding(start = 14.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BrandMark(Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.nagmedar_shell_title), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.width(14.dp))
+            if (!chip) {
+                BrandMark(Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.nagmedar_shell_title), style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.width(14.dp))
+            }
             Row(Modifier.captionTarget(caption), verticalAlignment = Alignment.CenterVertically, content = menus)
             Spacer(Modifier.weight(1f))
             Box(Modifier.captionTarget(caption)) { search() }
