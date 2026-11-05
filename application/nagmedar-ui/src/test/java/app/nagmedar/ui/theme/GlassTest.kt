@@ -46,6 +46,28 @@ class GlassTest {
     }
 
     @Test
+    fun theBottomChromesWordsOverAnyCover() {
+        // 1.0.3, the user's glass B: the phone's mini player card and bottom bar lie on one thick glass. Their words
+        // of every tone (the title, the times, the grey artist line) keep 4.5:1 over the brightest and the darkest
+        // cover beneath, and the accent's (the time while seeking, "Canlı yayın") over the brightest
+        val failures = mutableListOf<String>()
+        for ((name, c) in palettes()) {
+            val material = NagGlass.chrome(c, GlassThickness.Thick)
+            val bright = listOf(Color.White, Color(0xFFFFFF00))
+            for (cover in bright + listOf(Color.Black, Color(0xFFE74C3C), Color(0xFF2E86C1))) {
+                val surface = NagGlass.composite(material, GlassMode.Blur, cover)
+                val words = listOf("text" to c.text, "secondary" to c.textSecondary, "tertiary" to c.textTertiary) +
+                    if (cover in bright) listOf("accent" to c.accentText) else emptyList()
+                for ((label, fg) in words) {
+                    val ratio = contrast(fg, surface)
+                    if (ratio < 4.5) failures += "%s %s over %s: %.2f:1".format(name, label, cover, ratio)
+                }
+            }
+        }
+        assertTrue(failures.joinToString("\n"), failures.isEmpty())
+    }
+
+    @Test
     fun solidIsTheOpaqueSurface() {
         val c = NagPalette.dark(Accent.Blue)
         assertEquals(c.chrome, NagGlass.composite(NagGlass.chrome(c), GlassMode.Solid, Color.White))

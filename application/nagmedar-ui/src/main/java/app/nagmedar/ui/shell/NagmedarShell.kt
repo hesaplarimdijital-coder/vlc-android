@@ -51,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
+import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalGlassMode
 import app.nagmedar.ui.theme.LocalGlassSource
@@ -109,8 +110,9 @@ val LocalFloatingPlayer = staticCompositionLocalOf { false }
  * bottom bar's colour continues behind the buttons and stays there, a rule over it, when the bars
  * slide away; on tablets and DeX the chrome colour lies there; with the keyboard up there is none.
  * The screens' bottom padding includes it on a phone, full pages too. Tab and TalkBack go top bar,
- * navigation, content, player, a phone's bottom bar last. [chromeGlass]: the phone's chrome for the
- * user's glass decision (off, [ChromeGlass.Solid], in the product).
+ * navigation, content, player, a phone's bottom bar last. [chromeGlass]: the phone's chrome, by the
+ * user's decision of 6 Nov the bottom one on one glass ([ChromeGlass.Bottom]), which is off while the
+ * expanded player or a page covers the window: nothing is blurred under their colour.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -133,8 +135,8 @@ fun NagmedarShell(
     contentOnly: Boolean = false,
     floatingPlayer: Boolean = false,
     glass: Boolean = false,
-    /** 1.0.3: the phone's chrome on glass, for the user's decision (a debuggable build's walk only); solid in the product. */
-    chromeGlass: ChromeGlass = ChromeGlass.Solid,
+    /** 1.0.3: the phone's chrome on glass, the user's decision of 6 Nov (B); a debuggable build's walk compares the others. */
+    chromeGlass: ChromeGlass = ChromeGlass.Product,
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
@@ -207,10 +209,17 @@ fun NagmedarShell(
     // 1.0.3: the system's navigation bar at the window's bottom, which the root leaves to the shell (read while measuring)
     val rootInsets = LocalWindowRootInsets.current
     val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
-    // the phone's one bottom glass, for the user's decision: behind the mini player, the bottom bar and the band
+    // the phone's one bottom glass, the user's decision (B): behind the mini player, the bottom bar and the band; thick, so
+    // that the card's grey artist line and times keep 4.5:1 over a white cover
     val colors = NagTheme.colors
     val onBottomGlass = chromeGlass != ChromeGlass.Solid && navKind == NavKind.BottomBar && !contentOnly
-    val glassSurface: @Composable () -> Modifier = { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
+    // not drawn while the expanded player or a page covers the window (as what it lies on): nothing is blurred under their
+    // colour. A layer's alpha, not the glass taken away: the blur keeps its source and is right again from the first frame
+    val glassSurface: @Composable () -> Modifier = {
+        Modifier
+            .graphicsLayer { alpha = if (overlayHost.expandProgress() >= 1f || overlayHost.windowCovered) 0f else 1f }
+            .glass(NagGlass.chrome(colors, GlassThickness.Thick), source = glassSource, mode = chromeMode)
+    }
     val bottomGlass: (@Composable () -> Modifier)? = if (onBottomGlass) glassSurface else null
     // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
     val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)

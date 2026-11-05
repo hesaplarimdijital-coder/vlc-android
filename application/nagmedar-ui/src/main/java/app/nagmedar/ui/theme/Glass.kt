@@ -36,9 +36,12 @@ import dev.chrisbanes.haze.hazeSource
 /**
  * How much of the content shows through a glass surface (Desktop Kit 1.0). Text sits on [Thin] and
  * [Regular]; they keep `text` readable (4.5:1) even over white (dark themes) or black (light theme)
- * content. [UltraThin] is for surfaces without small text.
+ * content. [UltraThin] is for surfaces without small text. 1.0.3: [Thick] carries small words of
+ * every tone, the secondary and tertiary ones too, and keeps them at 4.5:1 over the same content and
+ * the accent's over the brightest (the phone's bottom chrome, the user's glass B: the mini player's
+ * card with its artist line and times, the bottom bar).
  */
-enum class GlassThickness { UltraThin, Thin, Regular }
+enum class GlassThickness { UltraThin, Thin, Regular, Thick }
 
 /**
  * What glass looks like on this device right now:
@@ -71,6 +74,8 @@ data class GlassMaterial(
  * Only these surfaces are glass, because every blurred surface costs a GPU pass per frame: the
  * phone's bottom bar and the player strip above it, the phone's top bar once content is scrolled
  * under it, the sheets ([app.nagmedar.ui.components.GlassBottomSheet]), menus and context menus.
+ * 1.0.3 (the user's decision of 6 Nov, B): of these only the phone's bottom chrome is glass, one
+ * [GlassThickness.Thick] surface; the top bar, sheets and menus are solid.
  *
  * [app.nagmedar.ui.shell.NagmedarShell] records the content area as the glass source
  * ([LocalGlassSource]) and picks the [GlassMode] ([LocalGlassMode]); [glass] draws a surface with it.
@@ -97,7 +102,8 @@ object NagGlass {
             blurRadius = when (thickness) {
                 GlassThickness.UltraThin -> 16.dp
                 GlassThickness.Thin -> 22.dp
-                GlassThickness.Regular -> 28.dp
+                // the thick glass blurs as the regular one: only its tint is denser
+                GlassThickness.Regular, GlassThickness.Thick -> 28.dp
             },
             noise = 0.04f,
             translucent = tinted.copy(alpha = if (oled) 0.97f else 0.96f),
@@ -111,16 +117,19 @@ object NagGlass {
             GlassThickness.UltraThin -> 0.62f
             GlassThickness.Thin -> 0.76f
             GlassThickness.Regular -> 0.86f
+            GlassThickness.Thick -> 0.88f
         }
         dark -> when (thickness) {
             GlassThickness.UltraThin -> 0.55f
             GlassThickness.Thin -> 0.72f
             GlassThickness.Regular -> 0.82f
+            GlassThickness.Thick -> 0.88f
         }
         else -> when (thickness) {
             GlassThickness.UltraThin -> 0.50f
             GlassThickness.Thin -> 0.68f
             GlassThickness.Regular -> 0.80f
+            GlassThickness.Thick -> 0.90f
         }
     }
 

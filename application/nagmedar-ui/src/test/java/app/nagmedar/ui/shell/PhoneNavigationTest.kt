@@ -27,6 +27,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
@@ -41,6 +42,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +55,8 @@ import kotlin.math.abs
  * 1.0.1 on a phone: "⋯" is the "Daha fazla" page; Settings opens as a page of its own, without the
  * bottom bar and the mini player, with a back arrow; Back returns to the page that opened it; a page
  * lights the tab it was opened in; the top bar keeps its colour while a list scrolls beneath it.
+ * 1.0.3, the user's decision of 6 Nov (B): what passes under the mini player and the bottom bar shows
+ * through their one glass, while the top bar stays as it is.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -205,16 +209,49 @@ class PhoneNavigationTest {
         assertEquals(atRest, topBarPixel())
     }
 
+    @Test
+    fun theBottomChromeIsOneGlassOverTheList() {
+        phone(ThemeMode.Dark)
+        val tracks = compose.onNodeWithTag("tracks")
+        tracks.performScrollToIndex(1)
+        compose.waitForIdle()
+        val top = topBarPixel()
+        val bar = bottomBarPixel()
+        val card = cardPixel()
+        // one row further (56 dp): the rows under the chrome change colour, dark for light and light for dark
+        tracks.performScrollToIndex(2)
+        compose.waitForIdle()
+        assertNotEquals("the bottom bar shows the rows beneath it", Integer.toHexString(bar), Integer.toHexString(bottomBarPixel()))
+        assertNotEquals("the mini player's card shows them too", Integer.toHexString(card), Integer.toHexString(cardPixel()))
+        assertEquals("the top bar does not change", Integer.toHexString(top), Integer.toHexString(topBarPixel()))
+    }
+
     /** The colour of the top bar between its title and its search button, from the window drawn into a bitmap. */
     private fun topBarPixel(): Int {
         val title = compose.onNode(hasText("Müzik") and SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading)).getBoundsInRoot()
+        return windowPixel((title.right.value + 24f), (title.top + title.bottom).value / 2f)
+    }
+
+    /** The colour of the bottom bar between its first two tabs, at the height of their labels. */
+    private fun bottomBarPixel(): Int {
+        val label = tab("Müzik").getBoundsInRoot()
+        val root = compose.onRoot().getBoundsInRoot()
+        return windowPixel(root.right.value / 4f, (label.top + label.bottom).value / 2f)
+    }
+
+    /** The colour of the mini player's card just inside its start edge, beside the artwork. */
+    private fun cardPixel(): Int {
+        val card = compose.onNodeWithTag("mini-player").getBoundsInRoot()
+        return windowPixel(card.left.value + 5f, (card.top + card.bottom).value / 2f)
+    }
+
+    /** The colour at ([xDp], [yDp]) in the root, from the window drawn into a bitmap. */
+    private fun windowPixel(xDp: Float, yDp: Float): Int {
         val density = compose.activity.resources.displayMetrics.density
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }
         val content = IntArray(2).also { compose.activity.findViewById<android.view.View>(android.R.id.content).getLocationInWindow(it) }
-        val x = ((title.right.value + 24f) * density).toInt() + content[0]
-        val y = (((title.top + title.bottom).value / 2f) * density).toInt() + content[1]
-        return bitmap.getPixel(x, y)
+        return bitmap.getPixel((xDp * density).toInt() + content[0], (yDp * density).toInt() + content[1])
     }
 }
