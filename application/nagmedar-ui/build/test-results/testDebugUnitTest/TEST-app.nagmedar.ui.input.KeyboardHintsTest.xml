@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.KeyboardHintsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T11:36:14.916Z" hostname="runnervmwuk1x" time="0.224">
+  <properties/>
+  <testcase name="theUndoBarWithAKeyboardKeepsItsKeycap" classname="app.nagmedar.ui.input.KeyboardHintsTest" time="0.049"/>
+  <testcase name="theKeysShowWithAKeyboardOnly" classname="app.nagmedar.ui.input.KeyboardHintsTest" time="0.039"/>
+  <testcase name="aKeyboardIsOneThatIsQwertyAndNotHidden" classname="app.nagmedar.ui.input.KeyboardHintsTest" time="0.044"/>
+  <testcase name="theUndoBarOfATouchPhoneHasNoKeycap" classname="app.nagmedar.ui.input.KeyboardHintsTest" time="0.05"/>
+  <testcase name="theDexTestsHaveAKeyboard" classname="app.nagmedar.ui.input.KeyboardHintsTest" time="0.042"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

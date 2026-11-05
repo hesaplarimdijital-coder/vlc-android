@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.lab.NativeLabTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-05T11:33:12.840Z" hostname="runnervmwuk1x" time="0.011">
+  <properties/>
+  <testcase name="theFlagTellsWhatTheLoadFoundAndNeverLoads" classname="app.nagmedar.lab.NativeLabTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
