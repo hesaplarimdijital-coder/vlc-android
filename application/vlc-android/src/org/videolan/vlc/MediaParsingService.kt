@@ -290,7 +290,6 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         return START_NOT_STICKY
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
     private fun forceForeground() {
         // Nağmedar 1.0.3: without its pause button the system holds this notification back for its first seconds, so the
         // start's quick look at the library never shows one; a scan with progress shows it with the button
@@ -298,9 +297,7 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         try {
             startForegroundCompat(NotificationIds.MEDIA_PARSING, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } catch (e: Exception) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is ForegroundServiceStartNotAllowedException) {
-                Log.w("MediaParsingService", "ForegroundServiceStartNotAllowedException caught!")
-            }
+            if (e is ForegroundServiceStartNotAllowedException) Log.w("MediaParsingService", "ForegroundServiceStartNotAllowedException caught!")
         }
     }
 

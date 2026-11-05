@@ -2,7 +2,6 @@ package org.videolan.vlc.util
 
 import android.content.ContentResolver
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.annotation.WorkerThread
@@ -11,13 +10,12 @@ import app.nagmedar.library.MediaStamp
 /**
  * 1.0.3: the system's media index of audio as one [MediaStamp] (a query per volume, a few
  * milliseconds): what an ordinary start compares to decide whether the library's folders need a
- * look. Null when the index cannot be read (no media access, a volume that went while asked, a
- * system before Android 11, which has no generations).
+ * look. Null when the index cannot be read (no media access, a volume that went while asked).
  */
 object MediaIndexStamp {
 
     @WorkerThread
-    fun read(context: Context): String? = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) null else runCatching {
+    fun read(context: Context): String? = runCatching {
         val resolver = context.contentResolver
         val volumes = MediaStore.getExternalVolumeNames(context).sorted().map { volume ->
             val uri = MediaStore.Audio.Media.getContentUri(volume)
