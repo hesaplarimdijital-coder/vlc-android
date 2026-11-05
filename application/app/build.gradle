@@ -85,9 +85,6 @@ android {
         }
     }
     androidComponents {
-        beforeVariants(selector().withBuildType("vlcBundle")) { variantBuilder ->
-            variantBuilder.minSdk = 30
-        }
         // Nağmedar 1.0: the Baseline Profile and the startup profile that orders the dex files,
         // collected on the CI emulator (buildsystem/benchmark/README.md), in every build R8 makes
         def baselineProfiles = file('src/main/baselineProfiles')
