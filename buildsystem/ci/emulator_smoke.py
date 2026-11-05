@@ -76,6 +76,7 @@ DIALOG_RE = re.compile(r"^(.+?)\s+(isn.t responding|keeps stopping|has stopped|y
 DIALOG_HINT = re.compile(r"aerr_|permission_allow|isn.t responding|keeps stopping|has stopped|yanıt vermiyor|durmaya devam|durdu|Got it")
 # the app's label, as the system's dialogs name it
 APP_LABELS = ("Nağmedar", "Nagmedar")
+TIME_RE = re.compile(r"\d:\d\d")
 
 
 class Node:
@@ -320,6 +321,19 @@ class Smoke:
     # ---------------------------------------------------------------- ui
 
     def dump(self):
+        """The UI hierarchy as XML (None when it could not be read). 1.0.3: a system error or permission dialog in it is
+        dealt with first (system_dialogs) and the screen read again, so every reader of the screen sees the app."""
+        for _ in range(3):
+            xml = self.raw_dump()
+            if xml is None or not DIALOG_HINT.search(xml):
+                return xml
+            what = self.system_dialogs(self.nodes(xml))
+            if not what:
+                return xml
+            self.dialogs_seen.append(what)
+        return self.raw_dump()
+
+    def raw_dump(self):
         for _ in range(3):
             rc, out = self.adb("shell", "uiautomator dump /sdcard/ui.xml", timeout=60)
             if rc == 0 and "dumped" in out:
@@ -341,6 +355,10 @@ class Smoke:
     @staticmethod
     def signature(nodes):
         return hashlib.md5("|".join("%s~%s~%s" % (n.text, n.desc, n.b) for n in nodes).encode()).hexdigest()
+
+    def app_signature(self, nodes):
+        """The app's part of the screen, without the times that change by themselves (a player's 1:23)."""
+        return self.signature([n for n in nodes if n.pkg == self.pkg and not TIME_RE.search(n.text)])
 
     def settle(self, minimum=0.8):
         """Waits until two hierarchy dumps in a row agree (at most five tries); returns the last dump."""
@@ -391,28 +409,59 @@ class Smoke:
         self.sh("input swipe %d %d %d %d 250" % (w // 2, int(h * 0.25), w // 2, int(h * 0.80)))
 
     def system_dialogs(self, nodes):
-        """Permission and error dialogs: the permission ones are allowed, the error ones are findings."""
+        """Permission and error dialogs: the permission ones are allowed; an error dialog of the app (an ANR or a crash of
+        any of its processes) is a finding that fails the run, one of the system's (System UI, the launcher: the emulator's
+        own) is recorded and waited out ("Wait"), and the step it came in is tried once more (step()). Returns what it
+        dealt with ("permission", "notice", "app", "system") or None."""
         for n in nodes:
             if n.rid.endswith("permission_allow_button") or n.rid.endswith("permission_allow_foreground_only_button"):
                 self.warnings.append("[%s] a permission dialog was shown and allowed" % self.cur_pass)
                 self.tap(n)
                 time.sleep(1)
-                return True
+                return "permission"
         for n in nodes:
             if n.text == "Got it" and n.pkg in ("android", "com.android.systemui"):  # the full-screen notice of the player
                 self.tap(n)
                 time.sleep(1)
-                return True
-        text = " ".join(n.text for n in nodes if n.pkg in ("android", "com.android.systemui"))
-        if re.search(r"isn.t responding|keeps stopping|has stopped", text):
-            kind = "ANR dialog" if "responding" in text else "crash dialog"
-            self.add_crash(kind, "The system showed: " + text[:300], "dialog")
-            for n in nodes:
-                if n.rid == "android:id/aerr_close":
-                    self.tap(n)
+                return "notice"
+        sysnodes = [n for n in nodes if n.pkg in ("android", "com.android.systemui")]
+        texts = [n.text.strip() for n in sysnodes if n.text.strip()]
+        hit = next((m for m in (DIALOG_RE.match(t) for t in texts) if m), None)
+        if not hit and not any(n.rid.startswith("android:id/aerr_") for n in sysnodes):
+            return None
+        who = hit.group(1).strip() if hit else "?"
+        anr = (not hit) or ("respond" in hit.group(2) or "yanıt" in hit.group(2))
+        text = " ".join(texts)[:300]
+        ids = {n.rid: n for n in sysnodes}
+        if self.dialog_is_app(who):
+            kind = "ANR dialog" if anr else "crash dialog"
+            self.add_crash(kind, "The system showed: " + text, "dialog")
+            if "android:id/aerr_close" in ids:
+                self.tap(ids["android:id/aerr_close"])
+            else:
+                self.key(4)
+            time.sleep(1)
+            return "app"
+        # the system's own: recorded; an ANR is waited out (closing System UI or the launcher restarts it), a crash closed
+        button = ids.get("android:id/aerr_wait") if anr else None
+        button = button or ids.get("android:id/aerr_close")
+        self.system_events.append({"pass": self.cur_pass, "step": self.n + 1, "kind": "ANR" if anr else "crash",
+                                   "who": who, "seen": text, "how": "dialog, %s" % ("Wait" if button is ids.get("android:id/aerr_wait") and button else "Close" if button else "Back")})
+        self.log("system %s dialog (%s): %s" % ("ANR" if anr else "crash", who, text))
+        if button:
+            self.tap(button)
+        else:
             self.key(4)
-            return True
-        return False
+        time.sleep(1.5)
+        return "system"
+
+    def dialog_is_app(self, who):
+        """Whether an error dialog's [who] names the app (its label, its package or one of its processes)."""
+        w = who.strip().strip("\"'“”").lower()
+        if not w or w == "?":
+            return True  # unnamed: taken as the app's, to be safe
+        # the label (with whatever a build adds after it), the package, or one of its processes ("<package>:logger")
+        return any(w.startswith(l.lower()) for l in APP_LABELS) or w == self.pkg.lower() or w.startswith(self.pkg.lower() + ":")
 
     # ---------------------------------------------------------------- logcat
 
@@ -446,6 +495,9 @@ class Smoke:
                 text = "\n".join(block)
                 if "Process: %s" % pkg in text:
                     found.append(self.add_crash("FATAL EXCEPTION", text, "java"))
+                else:
+                    m = re.search(r"Process: (\S+?),", text)
+                    self.system_event("crash", m.group(1) if m else "?", block[1] if len(block) > 1 else text[:200])
                 i = j
                 continue
             if tag in ("DEBUG", "crash_dump64", "crash_dump32") and (">>> %s" % pkg) in msg:
@@ -457,13 +509,18 @@ class Smoke:
                 found.append(self.add_crash("native crash", "\n".join(block), "native"))
                 i = j
                 continue
-            if tag == "ActivityManager" and msg.startswith("ANR in %s" % pkg):
+            if tag == "ActivityManager" and msg.startswith("ANR in "):
                 block = [msg]
                 j = i + 1
                 while j < len(recs) and recs[j][3] == "ActivityManager" and len(block) < 25 and not recs[j][4].startswith("ANR in"):
                     block.append(recs[j][4])
                     j += 1
-                found.append(self.add_crash("ANR", "\n".join(block), "anr"))
+                if msg.startswith("ANR in %s" % pkg):
+                    found.append(self.add_crash("ANR", "\n".join(block), "anr"))
+                else:
+                    # 1.0.3: another process's (System UI, the launcher): the emulator's, recorded only
+                    reason = next((b for b in block if b.startswith("Reason:")), "")
+                    self.system_event("ANR", msg[len("ANR in "):].split()[0] if len(msg) > 7 else "?", reason[:200])
                 i = j
                 continue
             if tag == "StrictMode" and "StrictMode policy violation" in msg:
@@ -511,6 +568,12 @@ class Smoke:
             i += 1
         return [f for f in found if f]
 
+    def system_event(self, kind, who, detail):
+        """1.0.3: an ANR or crash of another process than the app's (the emulator's System UI, launcher …): recorded."""
+        self.system_events.append({"pass": self.cur_pass, "step": self.n, "kind": kind, "who": who,
+                                   "seen": " ".join(detail.split())[:200], "how": "log"})
+        self.log("system %s in the log (%s): %s" % (kind, who, detail[:160]))
+
     def add_crash(self, kind, text, family):
         key = hashlib.md5((kind + text[:600]).encode()).hexdigest()
         if key in self.seen:
@@ -529,20 +592,32 @@ class Smoke:
         name = "%03d-%s-%s" % (n, self.cur_pass, slug(title))
         t = time.time()
         note = []
-        try:
-            if action:
-                r = action()
-                if isinstance(r, str):
-                    note.append(r)
-        except Exception as e:  # a failing action is a driver problem, not the app's
-            note.append("action failed: %s" % e)
-            self.errors.append("[%s] %s: %s" % (self.cur_pass, title, e))
-        xml = self.settle(wait)
-        nodes = self.nodes(xml)
-        if self.system_dialogs(nodes):
-            xml = self.settle(0.5)
+        mark = len(self.dialogs_seen)
+        before = self.last_app_sig
+        for attempt in (1, 2):
+            try:
+                if action:
+                    r = action()
+                    if isinstance(r, str):
+                        note.append(r)
+            except Exception as e:  # a failing action is a driver problem, not the app's
+                note.append("action failed: %s" % e)
+                self.errors.append("[%s] %s: %s" % (self.cur_pass, title, e))
+            # dump() deals with the system's dialogs on the way (system_dialogs)
+            xml = self.settle(wait)
             nodes = self.nodes(xml)
+            came = [d for d in self.dialogs_seen[mark:] if d == "system"]
+            if not came or attempt == 2:
+                break
+            # 1.0.3: a dialog of the system's own (the emulator's) came during the step and was waited out: the step once
+            # more when it left the app's screen as it was (the dialog took the action)
+            mark = len(self.dialogs_seen)
+            if action is None or self.app_signature(nodes) != before:
+                note.append("a system dialog came and was waited out")
+                break
+            note.append("a system dialog came and was waited out: the step once more")
         sig = self.signature(nodes) if nodes else None
+        self.last_app_sig = self.app_signature(nodes) if nodes else None
         self.gone_words(nodes, name)
         if xml is None:
             note.append("no UI dump (the screen never went idle?)")
