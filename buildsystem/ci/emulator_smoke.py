@@ -1331,6 +1331,7 @@ class Smoke:
         s = self.strings["en"]
         self.set_display(None, None)
         self.rotate(0)
+        self.ensure_library()
         self.launch()
         nodes = self.open_music()
         nodes, _ = self.wait_for(lambda ns: self.by_id(ns, "inspector"), 6)
@@ -1594,6 +1595,7 @@ class Smoke:
             self.step("After the scan")
         else:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
+        self.library_ready = True
         self.visit_destinations("Reopen")
         self.phone_player()
         self.device_walk(wide=False)
@@ -1601,9 +1603,33 @@ class Smoke:
         self.palette()
         self.rotation_and_background()
 
+    def ensure_library(self):
+        """1.0.3: a pass that needs the walk's media (workstation, phone-tr) and runs without phone-en before it (the walk
+        is split in two jobs) pushes and grants it and goes through the first run with it, as phone-en does."""
+        if self.library_ready:
+            return
+        self.library_ready = True
+        self.prepare_media()
+        self.launch()
+        nodes = self.step("Launch (the walk's media pushed)")
+        s = self.strings[self.lang]
+        if any(x.text.strip() == s["nag_fr_skip"] for x in nodes):
+            self.first_run_walk("First run with the media")
+        elif self.open_label(s["nag_nav_settings"]) and self.open_by_scrolling(s["nag_settings_first_run_again"]):
+            self.step("Show the first run again")
+            self.first_run_walk("First run again")
+        else:
+            self.warnings.append("[%s] the first run could not be shown again: the scan is left to the app" % self.cur_pass)
+        time.sleep(8)
+        self.step("After the scan")
+        self.launch()
+
     def pass_phone_tr(self):
-        self.cur_pass, self.lang = "phone-tr", "tr"
+        # the media first (in English: the app is not Turkish yet), should no pass before have brought it
+        self.cur_pass, self.lang = "phone-tr", "en"
         self.set_display("1080x2400", "420")
+        self.ensure_library()
+        self.lang = "tr"
         if not self.set_locale("tr-TR"):
             self.warnings.append("[phone-tr] the Turkish interface could not be set; the pass was skipped")
             return
@@ -1771,10 +1797,11 @@ class Smoke:
         md.append("- installed: %s" % (getattr(self, "app_info", "") or "?"))
         md.append("- device: %s" % ", ".join("%s=%s" % kv for kv in getattr(self, "device", {}).items()))
         md.append("- source: %s" % (self.a.source or "?"))
+        md.append("- passes: %s" % self.a.passes)
         md.append("- %d steps in %d min %d s; %d crash/ANR finding(s), %d driver error(s), %d StrictMode violation(s), "
-                  "%d of %d 1.0 checks failed\n"
+                  "%d of %d 1.0 checks failed; %d ANR/crash of the system (the emulator's, not failures)\n"
                   % (len(self.steps), dur // 60, dur % 60, len(self.crashes), len(self.errors), self.strict_total,
-                     len(failed), len(self.checks)))
+                     len(failed), len(self.checks), len(self.system_events)))
         md.append("## 1.0 checks\n")
         md.append("| pass | step | check | result | seen |")
         md.append("|------|------|-------|--------|------|")
@@ -1800,6 +1827,16 @@ class Smoke:
             md.append("## Driver errors\n")
             md += ["- %s" % e for e in self.errors]
             md.append("")
+        md.append("## The system's ANRs and crashes (the emulator's own: recorded, the step tried once more)\n")
+        if self.system_events:
+            md.append("| pass | step | what | whose | seen | how |")
+            md.append("|------|------|------|-------|------|-----|")
+            for e in self.system_events:
+                md.append("| %s | %d | %s | %s | %s | %s |" % (e["pass"], e["step"], e["kind"], e["who"].replace("|", "/"),
+                                                        e["seen"].replace("|", "/")[:200], e["how"]))
+        else:
+            md.append("None.")
+        md.append("")
         md.append("## Steps\n")
         md.append("| # | pass | step | result | screenshot | note |")
         md.append("|---|------|------|--------|------------|------|")
@@ -1839,7 +1876,8 @@ class Smoke:
         with open(os.path.join(self.out, "report.json"), "w", encoding="utf-8") as f:
             json.dump({"verdict": verdict, "steps": self.steps, "crashes": self.crashes, "errors": self.errors,
                        "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
-                       "frames": self.jank, "seconds": dur}, f, indent=1)
+                       "frames": self.jank, "seconds": dur, "passes": self.a.passes, "source": self.a.source,
+                       "system": self.system_events, "sheet_trials": self.sheet_trials}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
@@ -1849,9 +1887,12 @@ class Smoke:
             ann.append("::error title=Emulator driver::%s" % enc(e[:600]))
         for c in failed:
             ann.append("::error title=Emulator check (%s, step %d)::%s %s" % (c["pass"], c["step"], c["name"], enc(c["detail"][:600])))
-        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d/%d checks failed, %d warnings, %d min. Evidence: branch %s, report.md" % (
-            verdict, len(self.steps), len(self.crashes), self.strict_total, len(failed), len(self.checks), len(self.warnings),
-            dur // 60, self.a.branch or "ci/emulator")
+        for e in self.system_events:
+            ann.append("::warning title=Emulator: the system's %s (%s, step %d)::%s %s" % (e["kind"], e["pass"], e["step"], enc(e["who"]),
+                                                                                       enc(e["seen"][:300])))
+        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d/%d checks failed, %d system ANR/crash, %d warnings, %d min. Evidence: branch %s, report.md" % (
+            verdict, len(self.steps), len(self.crashes), self.strict_total, len(failed), len(self.checks), len(self.system_events),
+            len(self.warnings), dur // 60, self.a.branch or "ci/emulator")
         ann.append("::notice title=Emulator Ekran görüntüleri ve rapor::%s" % enc(summary))
         with open(os.path.join(self.out, "annotations.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(ann) + "\n")
