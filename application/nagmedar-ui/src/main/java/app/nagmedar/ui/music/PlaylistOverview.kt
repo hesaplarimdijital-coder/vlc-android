@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -54,6 +54,8 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.rememberMenuState
 import app.nagmedar.ui.components.moreActionsLabel
+import app.nagmedar.ui.components.listAppear
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.input.ContextMenuArea
@@ -100,6 +102,8 @@ internal fun PlaylistOverview(
         PlaylistSort.entries.map { option -> MenuEntry.Item(sortNames.getValue(option), { onSort(option) }, checked = option == sort) }
     }
     val sortLabel = stringResource(R.string.nag_sort_by, sortNames.getValue(sort))
+    // 1.0.3: on a phone the first cards arrive in turn
+    val appear = rememberListAppear(layout)
     Column(modifier.fillMaxSize().testTag("playlists-overview")) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
@@ -133,8 +137,8 @@ internal fun PlaylistOverview(
                 verticalArrangement = Arrangement.spacedBy(dimens.gapM),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(cards, key = { it.key }) { card ->
-                    PlaylistGridCard(card, card.key == openKey, dates, onOpen, menu)
+                gridItemsIndexed(cards, key = { _, card -> card.key }) { index, card ->
+                    PlaylistGridCard(card, card.key == openKey, dates, onOpen, menu, Modifier.listAppear(appear, index))
                 }
             }
             else -> LazyColumn(
@@ -179,13 +183,14 @@ private fun PlaylistGridCard(
     dates: DateFormat,
     onOpen: (PlaylistCardData) -> Unit,
     menu: (PlaylistCardData) -> List<MenuEntry>,
+    modifier: Modifier = Modifier,
 ) {
     val colors = NagTheme.colors
     val moreActions = stringResource(R.string.nag_more_actions)
     val menuState = rememberMenuState()
     var within by remember { mutableStateOf(false) }
     val touch = NagTheme.inputMode == InputMode.Touch
-    ContextMenuArea(entries = { menu(card) }, modifier = Modifier.fillMaxWidth(), accessibilityLabel = moreActions, asSheet = true, sheetTitle = card.name) {
+    ContextMenuArea(entries = { menu(card) }, modifier = modifier.fillMaxWidth(), accessibilityLabel = moreActions, asSheet = true, sheetTitle = card.name) {
         NagCard(
             onClick = { onOpen(card) },
             selected = selected,

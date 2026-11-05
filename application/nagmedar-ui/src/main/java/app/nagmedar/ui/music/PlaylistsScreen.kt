@@ -86,6 +86,7 @@ import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.rememberReorderState
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.MediaRepository
@@ -96,6 +97,7 @@ import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
+import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
@@ -280,7 +282,9 @@ fun PlaylistsBrowser(
     }
     val shownCards = remember(cards, query, sort, locale) { PlaylistCards.sorted(PlaylistCards.matching(cards, query), sort, locale) }
     val showDetail = !twoPane && detail && (shownSmart != null || open != null)
-    BackHandler(enabled = showDetail) { detail = false }
+    // 1.0.3: a phone's list opens in depth over the overview, which stays where it was; Back is its transition's
+    val phone = width == WidthClass.Compact
+    BackHandler(enabled = showDetail && !phone) { detail = false }
     val undoLabel = stringResource(R.string.nag_sc_undo)
     val undoKeys = ShortcutRegistry.chordLabel(ShortcutId.Undo, res)
     val deleteSmart = { list: SmartList ->
@@ -385,56 +389,78 @@ fun PlaylistsBrowser(
             )
         }
     }
-    Column(modifier.fillMaxSize()) {
-        if (!showDetail) {
-            PageHeader(
-                title = stringResource(R.string.nag_nav_playlists),
-                subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
-            ) {
-                if (width == WidthClass.Compact) {
-                    // a phone's width has room for one word: the rest is in the menu
-                    NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus, modifier = Modifier.testTag("playlist-new"))
-                    ActionMenuButton(
-                        NagIcons.MoreHorizontal,
-                        stringResource(R.string.nag_more_actions),
-                        {
-                            listOfNotNull(
-                                MenuEntry.Item(res.getString(R.string.nag_sc_import), onImport, icon = NagIcons.Folder),
-                                if (smart != null) MenuEntry.Item(res.getString(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList) else null,
-                            )
-                        },
-                        sheetTitle = stringResource(R.string.nag_nav_playlists),
-                    )
-                } else {
-                    NagButton(stringResource(R.string.nag_sc_import), onImport, icon = NagIcons.Folder)
-                    if (smart != null) {
-                        Spacer(Modifier.width(NagTheme.dimens.gapS))
-                        NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
-                    }
+    val header: @Composable () -> Unit = {
+        PageHeader(
+            title = stringResource(R.string.nag_nav_playlists),
+            subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
+        ) {
+            if (width == WidthClass.Compact) {
+                // a phone's width has room for one word: the rest is in the menu
+                NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus, modifier = Modifier.testTag("playlist-new"))
+                ActionMenuButton(
+                    NagIcons.MoreHorizontal,
+                    stringResource(R.string.nag_more_actions),
+                    {
+                        listOfNotNull(
+                            MenuEntry.Item(res.getString(R.string.nag_sc_import), onImport, icon = NagIcons.Folder),
+                            if (smart != null) MenuEntry.Item(res.getString(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList) else null,
+                        )
+                    },
+                    sheetTitle = stringResource(R.string.nag_nav_playlists),
+                )
+            } else {
+                NagButton(stringResource(R.string.nag_sc_import), onImport, icon = NagIcons.Folder)
+                if (smart != null) {
                     Spacer(Modifier.width(NagTheme.dimens.gapS))
-                    NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
+                    NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
                 }
+                Spacer(Modifier.width(NagTheme.dimens.gapS))
+                NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
             }
         }
-        when {
-            playlists == null -> Unit
-            playlists.isEmpty() && smartLists.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                StatePanel(
-                    tone = StateTone.Neutral,
-                    icon = NagIcons.PlaylistAdd,
-                    title = stringResource(R.string.nag_pl_empty_title),
-                    description = stringResource(R.string.nag_pl_empty_desc),
-                    primary = StateAction(stringResource(R.string.nag_pl_new)) { naming = Naming.New },
-                    secondary = StateAction(stringResource(R.string.nag_sc_import), onImport),
-                )
+    }
+    val empty: @Composable () -> Unit = {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            StatePanel(
+                tone = StateTone.Neutral,
+                icon = NagIcons.PlaylistAdd,
+                title = stringResource(R.string.nag_pl_empty_title),
+                description = stringResource(R.string.nag_pl_empty_desc),
+                primary = StateAction(stringResource(R.string.nag_pl_new)) { naming = Naming.New },
+                secondary = StateAction(stringResource(R.string.nag_sc_import), onImport),
+            )
+        }
+    }
+    if (phone) {
+        DetailTransition(
+            detail = openKey.takeIf { showDetail },
+            onBack = { detail = false },
+            modifier = modifier,
+            list = {
+                Column(Modifier.fillMaxSize()) {
+                    header()
+                    when {
+                        playlists == null -> Unit
+                        playlists.isEmpty() && smartLists.isEmpty() -> empty()
+                        else -> overview(OverviewLayout.Grid, Modifier)
+                    }
+                }
+            },
+        ) { openList { detail = false } }
+    } else {
+        Column(modifier.fillMaxSize()) {
+            if (!showDetail) header()
+            when {
+                playlists == null -> Unit
+                playlists.isEmpty() && smartLists.isEmpty() -> empty()
+                twoPane -> Row(Modifier.fillMaxSize()) {
+                    overview(OverviewLayout.Rows, Modifier.width(LIST_PANE_WIDTH).fillMaxHeight())
+                    VerticalRule()
+                    Box(Modifier.weight(1f).fillMaxHeight()) { openList(null) }
+                }
+                showDetail -> openList { detail = false }
+                else -> overview(OverviewLayout.Grid, Modifier)
             }
-            twoPane -> Row(Modifier.fillMaxSize()) {
-                overview(OverviewLayout.Rows, Modifier.width(LIST_PANE_WIDTH).fillMaxHeight())
-                VerticalRule()
-                Box(Modifier.weight(1f).fillMaxHeight()) { openList(null) }
-            }
-            showDetail -> openList { detail = false }
-            else -> overview(OverviewLayout.Grid, Modifier)
         }
     }
     when (val asking = editing) {
@@ -662,6 +688,8 @@ private fun PlaylistTable(
     val lines = state.lines
     val tracks = remember(lines) { lines.map { it.track } }
     val keys = remember(lines) { lines.map { it.key } }
+    // 1.0.3: on a phone an opened list's first lines arrive in turn
+    val appear = rememberListAppear(state.openId)
     val musicColumns = rememberMusicColumns(
         if (compact) listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Duration)
         else listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Album, MusicColumn.Format, MusicColumn.Duration),
@@ -685,6 +713,7 @@ private fun PlaylistTable(
         rows = lines,
         key = { it.key },
         state = list,
+        rowAppear = appear,
         reorder = reorder,
         handleLabel = { line -> res.getString(R.string.nag_queue_handle, line.track.title) },
         selectedKeys = selection.keys,
