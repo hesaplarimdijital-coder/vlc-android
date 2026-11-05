@@ -1,5 +1,6 @@
 package app.nagmedar.ui.shell
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -183,6 +184,8 @@ fun <K : Any> ListDetailPanes(
     val opening = detail != null
     val listCovered by remember(side, phone, state, depth) { derivedStateOf { !side && (if (phone) depth.covered else state.covered) } }
     val shared = sharedElements && phone && animated
+    // on a phone the details are opaque: the list is behind them while the Back gesture shrinks them
+    val page = if (phone) Modifier.background(NagTheme.colors.background) else Modifier
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val dividerLabel = stringResource(R.string.nag_pane_divider)
     BoxWithConstraints(modifier.fillMaxSize().clipToBounds().then(if (side) Modifier else Modifier.detailShade(state))) {
@@ -202,6 +205,7 @@ fun <K : Any> ListDetailPanes(
                         Box(
                             Modifier
                                 .layoutId(DETAIL)
+                                .then(page)
                                 .onKeyEvent { event ->
                                     if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
                                         onCloseDetail()

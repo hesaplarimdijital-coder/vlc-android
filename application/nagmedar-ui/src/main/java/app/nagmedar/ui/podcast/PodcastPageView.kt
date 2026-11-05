@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -55,7 +55,9 @@ import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.listAppear
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.components.toneColors
@@ -68,6 +70,8 @@ import app.nagmedar.ui.playback.PlaybackRules
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.shell.detailSharedCard
+import app.nagmedar.ui.shell.detailSharedElement
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
 import java.text.DateFormat
@@ -93,6 +97,8 @@ internal fun PodcastPageView(
     val dimens = NagTheme.dimens
     val feed = page.summary.feed
     val dates = remember(res.configuration) { DateFormat.getDateInstance(DateFormat.MEDIUM, res.locale()) }
+    // 1.0.3: on a phone a show's episodes arrive in turn (again once they are read after the skeleton)
+    val appear = rememberListAppear(feed.id, page.episodes == null)
     LazyColumn(
         Modifier.fillMaxSize().background(NagTheme.colors.background).testTag("podcast-page"),
         contentPadding = PaddingValues(bottom = dimens.gapL) + LocalShellBottomPadding.current,
@@ -102,7 +108,9 @@ internal fun PodcastPageView(
         if (episodes == null) {
             item(key = "loading") { LoadingState(stringResource(R.string.nag_pod_episodes_loading), Modifier.padding(dimens.pagePadding), posters = 0) }
         } else {
-            items(episodes, key = { it.id }) { episode -> EpisodeRow(feed, episode, dates, actions, DownloadUi.of(episode, downloads[episode.id]), episode.id == selected) }
+            itemsIndexed(episodes, key = { _, episode -> episode.id }) { index, episode ->
+                EpisodeRow(feed, episode, dates, actions, DownloadUi.of(episode, downloads[episode.id]), episode.id == selected, Modifier.listAppear(appear, index))
+            }
         }
     }
 }
@@ -123,8 +131,9 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
             actions.onClosePage,
             modifier = Modifier.testTag("podcast-page-close"),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
-            CoverTile(cover, PAGE_COVER, corner = dimens.radiusControl, placeholder = NagIcons.Podcasts)
+        // 1.0.3: on a phone the show's tile grows into this header, its cover flies to this one
+        Row(Modifier.detailSharedCard(podcastCardKey(feed.id)), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
+            CoverTile(cover, PAGE_COVER, Modifier.detailSharedElement(podcastCoverKey(feed.id)), corner = dimens.radiusControl, placeholder = NagIcons.Podcasts)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(feed.title, style = NagTheme.type.title, color = colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 feed.author?.let { Text(it, style = NagTheme.type.body, color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis) }
@@ -180,7 +189,15 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
 }
 
 @Composable
-private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFormat, actions: PodcastActions, download: DownloadUi, selected: Boolean) {
+private fun EpisodeRow(
+    feed: PodcastFeed,
+    episode: PodcastEpisode,
+    dates: DateFormat,
+    actions: PodcastActions,
+    download: DownloadUi,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val res = context.resources
     val colors = NagTheme.colors
@@ -212,7 +229,7 @@ private fun EpisodeRow(feed: PodcastFeed, episode: PodcastEpisode, dates: DateFo
     ContextMenuArea(
         entries = menu,
         accessibilityLabel = res.getString(R.string.nag_pod_actions),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = dimens.gapS),
+        modifier = modifier.fillMaxWidth().padding(horizontal = dimens.gapS),
     ) {
         Row(
             Modifier

@@ -23,6 +23,7 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -842,6 +843,8 @@ fun <T : Any> DetailTransition(
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val covered by remember(state, depth, phone) { derivedStateOf { if (phone) depth.covered else state.covered } }
     val shared = sharedElements && phone && animated
+    // on a phone the detail is opaque: the list is behind it while the Back gesture shrinks it
+    val page = if (phone) Modifier.background(NagTheme.colors.background) else Modifier
     DepthHost(
         depth,
         open,
@@ -857,7 +860,7 @@ fun <T : Any> DetailTransition(
                     propagateMinConstraints = true,
                 ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
                 if (slot && shown != null) {
-                    Box(Modifier.layoutId(DETAIL), propagateMinConstraints = true) {
+                    Box(Modifier.layoutId(DETAIL).then(page), propagateMinConstraints = true) {
                         DepthSide(scopes, DetailSide.Detail, depth, shared) { detailContent(shown) }
                     }
                 }

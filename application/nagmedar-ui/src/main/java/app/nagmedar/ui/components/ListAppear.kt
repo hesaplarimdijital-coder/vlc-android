@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -69,8 +71,8 @@ fun rememberListAppear(vararg keys: Any?): ListAppear {
 /**
  * Marks the [index]th row of a list taken with [rememberListAppear]: one of the first [ListAppear.ROWS]
  * rows on screen when the list appears fades in and rises into place in its turn; any other row is
- * simply there. Put it first in the row's modifiers; it only draws differently (a layer), so the
- * list is laid out once, as at rest.
+ * simply there. Put it first in the row's modifiers; it only draws differently (a layer, gone once the
+ * row has arrived, so a row at rest is drawn as before), so the list is laid out once, as at rest.
  */
 @Composable
 fun Modifier.listAppear(appear: ListAppear, index: Int): Modifier {
@@ -83,6 +85,8 @@ fun Modifier.listAppear(appear: ListAppear, index: Int): Modifier {
             progress.animateTo(1f, tween(ListAppear.DURATION_MS, easing = NagMotion.StandardDecelerate))
         }
     }
+    val arrived by remember(progress) { derivedStateOf { progress.value >= 1f } }
+    if (arrived) return this
     return this.graphicsLayer {
         val value = progress.value
         alpha = value
