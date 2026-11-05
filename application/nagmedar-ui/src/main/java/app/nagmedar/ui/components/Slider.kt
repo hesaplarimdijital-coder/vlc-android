@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -55,7 +56,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
 
@@ -223,7 +226,8 @@ fun NagSlider(
         contentAlignment = Alignment.CenterStart,
     ) {
         val motion = NagTheme.motion
-        val trackHeight by animateDpAsState(if (emphasised) 5.dp else 3.dp, motion.fastSpatial(), label = "trackHeight")
+        // springs that stop once they look still (Part 2a): a height in dp, a scale as a fraction
+        val trackHeight by animateDpAsState(if (emphasised) 5.dp else 3.dp, motion.fastSpatial(Dp.VisibilityThreshold), label = "trackHeight")
         // the thumb springs in on hover, focus or touch and swells a little while dragged (Desktop Kit 0.2.0)
         val thumbScale = animateFloatAsState(
             when {
@@ -231,7 +235,7 @@ fun NagSlider(
                 dragging -> 1.25f
                 else -> 1f
             },
-            motion.fastSpatial(),
+            motion.fastSpatial(NagMotion.FRACTION),
             label = "thumbScale",
         )
         val thumb = 12.dp

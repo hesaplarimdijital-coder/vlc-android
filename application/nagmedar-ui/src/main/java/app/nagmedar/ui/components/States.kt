@@ -758,7 +758,7 @@ internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier 
                         // on its way at the finger's speed; gone the moment it has faded out at its own width
                         var gone = false
                         val out = if (swipe.value < 0f || (swipe.value == 0f && velocity < 0f)) -width.toFloat() else width.toFloat()
-                        swipe.animateTo(out, spring(dampingRatio = 0.92f, stiffness = 600f, visibilityThreshold = 0.5f), initialVelocity = velocity) {
+                        swipe.animateTo(out, NagMotion.gesture(NagMotion.PIXEL), initialVelocity = velocity) {
                             if (!gone && abs(value) >= width - 0.5f) {
                                 gone = true
                                 dismiss()
@@ -770,8 +770,8 @@ internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier 
                     SwipeDismissRules.Release.Back -> swipe.animateTo(
                         0f,
                         when (tier) {
-                            MotionTier.Gesture -> spring(dampingRatio = 0.92f, stiffness = 600f, visibilityThreshold = 0.5f)
-                            MotionTier.Timed -> spring(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = 0.5f)
+                            MotionTier.Gesture -> NagMotion.gesture(NagMotion.PIXEL)
+                            MotionTier.Timed -> spring(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = NagMotion.PIXEL)
                             MotionTier.Reduced -> snap<Float>()
                         },
                         initialVelocity = if (tier == MotionTier.Gesture) velocity else 0f,

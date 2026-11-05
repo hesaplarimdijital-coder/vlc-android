@@ -167,7 +167,8 @@ fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
         phone -> phonePressScale(scale)
         else -> scale
     }
-    val spec = if (phone && !pressed) PressRelease else NagTheme.motion.fastSpatial<Float>()
+    // a scale is a fraction: its spring stops a thousandth from the end (Part 2a's rule)
+    val spec = if (phone && !pressed) PressRelease else NagTheme.motion.fastSpatial(NagMotion.FRACTION)
     val value = animateFloatAsState(target, spec, label = "pressScale")
     // with a pointer nothing scales: no layer either
     if (!touch) return this
@@ -181,7 +182,7 @@ fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
 internal fun phonePressScale(scale: Float): Float = 1f - (1f - scale) * 0.75f
 
 /** A phone's press let go: back to the rest with a light bounce over it, settled within a thousandth. */
-private val PressRelease = spring(dampingRatio = 0.75f, stiffness = 1200f, visibilityThreshold = 0.001f)
+private val PressRelease = spring(dampingRatio = 0.75f, stiffness = 1200f, visibilityThreshold = NagMotion.FRACTION)
 
 /**
  * Click handling shared by all Nağmedar controls: hand cursor, hover tracking, no ripple

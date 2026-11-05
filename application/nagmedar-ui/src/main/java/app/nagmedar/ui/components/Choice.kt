@@ -1,8 +1,6 @@
 package app.nagmedar.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -41,9 +39,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.rememberNagHaptics
 
@@ -285,10 +283,9 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val haptics = rememberNagHaptics()
-    val motion = NagTheme.motion
     // the thumb's spring stops half a pixel from its end (Desktop Kit 2.3): without a threshold it ran on unseen to a
     // hundredth of a dp
-    val halfPixel = with(LocalDensity.current) { THUMB_THRESHOLD_PX.toDp() }
+    val halfPixel = with(LocalDensity.current) { NagMotion.PIXEL.toDp() }
     Row(
         modifier = modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
@@ -310,11 +307,7 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
-        val thumbStart = animateDpAsState(
-            if (checked) 18.dp else 4.dp,
-            if (motion.reduced) snap<Dp>() else spring(dampingRatio = 0.9f, stiffness = 1400f, visibilityThreshold = halfPixel),
-            label = "switchThumb",
-        )
+        val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(halfPixel), label = "switchThumb")
         Box(
             Modifier
                 .size(width = 38.dp, height = 24.dp)
@@ -379,6 +372,3 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
         Text(label, style = NagTheme.type.label, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
     }
 }
-
-/** Where the switch's thumb counts as arrived, in px (Desktop Kit 2.3): half a pixel. */
-private const val THUMB_THRESHOLD_PX = 0.5f

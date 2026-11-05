@@ -167,7 +167,8 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
 @Composable
 private fun NavIndicator(selected: Boolean, state: InteractionState, shape: RoundedCornerShape, modifier: Modifier, content: @Composable () -> Unit) {
     val colors = NagTheme.colors
-    val fraction = animateFloatAsState(if (selected) 1f else 0f, NagTheme.motion.spatial(), label = "navIndicator")
+    // a fraction: the pill's spring stops a thousandth from its end (Part 2a's rule)
+    val fraction = animateFloatAsState(if (selected) 1f else 0f, NagTheme.motion.spatial(NagMotion.FRACTION), label = "navIndicator")
     // with a mouse the hover and the press show at once, the selection still eases (Desktop Kit 0.2.1)
     val feedback by animateInteractionColor(
         when {
