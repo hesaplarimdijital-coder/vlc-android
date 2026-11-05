@@ -111,7 +111,7 @@ class BigPlayerWindow(private val widthClass: WidthClass, private val caption: C
                 caption = caption,
                 floatingPlayer = true,
                 overlay = {
-                    WindowPlayer(open, onClose = { open = false }) { modifier, drop ->
+                    WindowPlayer(open, onClose = { open = false }) { modifier ->
                         PhonePlayer(
                             info = bigPlayerInfo,
                             progress = { 0.42f },
@@ -128,7 +128,6 @@ class BigPlayerWindow(private val widthClass: WidthClass, private val caption: C
                             onAddToPlaylist = {},
                             onShare = {},
                             onEqualizer = {},
-                            drop = drop,
                             captionAbove = caption?.height ?: 0.dp,
                         )
                     }

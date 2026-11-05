@@ -505,7 +505,7 @@ private fun NagmedarMain(
                     val motion = NagTheme.motion
                     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
                     // 1.0.2: the big player of a tablet and a desktop window, from the bar; ← and → seek in it
-                    WindowPlayer(windowPlayerShown, onClose = { windowPlayer = false }, onKey = { event -> playerKey(event, actions) }) { playerModifier, drop ->
+                    WindowPlayer(windowPlayerShown, onClose = { windowPlayer = false }, onKey = { event -> playerKey(event, actions) }) { playerModifier ->
                         PhonePlayerHost(
                             onClose = { windowPlayer = false },
                             onQueue = queuePanel::toggle,
@@ -519,7 +519,6 @@ private fun NagmedarMain(
                             },
                             // as while it shows, also while it goes down
                             fullWindow = caption == null,
-                            drop = drop,
                             captionAbove = caption?.height ?: 0.dp,
                         )
                     }

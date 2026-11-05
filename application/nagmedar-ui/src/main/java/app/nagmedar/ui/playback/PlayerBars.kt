@@ -73,10 +73,14 @@ import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
+import app.nagmedar.ui.components.PlayerCard
+import app.nagmedar.ui.components.PlayerShared
 import app.nagmedar.ui.components.SliderMark
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.inPlayerSheetStrip
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.playerSharedElement
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.input.ShortcutId
@@ -90,6 +94,7 @@ import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.floatingPlayerCard
+import app.nagmedar.ui.shell.floatingPlayerCorner
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.ArtworkAccent
 import app.nagmedar.ui.theme.InputMode
@@ -98,6 +103,7 @@ import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.animatedAccent
 import java.text.NumberFormat
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.PlaybackService
 import org.videolan.vlc.media.PlaylistManager
@@ -113,7 +119,7 @@ fun Artwork(
     media: MediaWrapper?,
     size: Dp,
     modifier: Modifier = Modifier,
-    corner: Dp = 6.dp,
+    corner: Dp = BAR_ARTWORK_CORNER,
     video: Boolean = media?.type == MediaWrapper.TYPE_VIDEO,
     crossfade: Boolean = false,
 ) {
@@ -187,6 +193,9 @@ fun Artwork(
         }
     }
 }
+
+/** The bars' artwork's corners ([Artwork]'s own): the phone's flies into the full player with them (1.0.3). */
+internal val BAR_ARTWORK_CORNER = 6.dp
 
 /** The medialibrary's thumbnails last shown, by media and size, while there is room (a few megabytes). */
 private object ShownArtwork {
@@ -387,6 +396,8 @@ fun PlayerBar(
                 expandable = music,
                 onPrevious = if (music) actions::previous else null,
                 onNext = if (music) actions::next else null,
+                // 1.0.3: the full player grows out of the bar's card
+                card = compactPlayerCard(),
             )
             navKind == NavKind.BottomBar -> CompactTransportBar(info, { progress }, actions, artwork, modifier)
             else -> MiniPlayer(info, { progress }, actions, artwork, modifier, queueOpen = queueOpen, transparent = transparent)
@@ -407,7 +418,7 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         subtitle = if (artist.isNullOrBlank()) stringResource(R.string.nag_now_playing) else artist,
         isVideo = video,
         playing = playing,
-        lengthMs = media.length,
+        lengthMs = rememberPlayingLength(media, playing),
         format = tech?.mainAudio()?.let(::audioFormatLabel),
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
@@ -423,6 +434,35 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         live = media.length <= 0L && isStream(media.uri?.scheme),
     )
 }
+
+/**
+ * 1.0.3: what plays' length: the library's, or for a file it has none for (one played from its folder, which the
+ * library has not read) the player's, read at the progress's pace until it reads the same twice ([playing] starting
+ * reads it again). 0 while neither knows it (a stream on the air is not asked): a timeline then shows the time played
+ * alone. Before, such a file's times stayed at "0:00" while its seek bar moved.
+ */
+@Composable
+internal fun rememberPlayingLength(media: MediaWrapper?, playing: Boolean): Long {
+    val own = media?.length ?: 0L
+    val player by produceState(0L, media, own, playing) {
+        if (media == null || own > 0L || isStream(media.uri?.scheme)) return@produceState
+        var last = 0L
+        repeat(LENGTH_READINGS) {
+            val service = PlaybackService.instance
+            // the player's own media, not the one it is leaving
+            val length = if (service != null && service.currentMediaWrapper?.uri == media.uri) service.length else 0L
+            if (length > 0L) value = length
+            // read the same twice: the player has settled on it
+            if (length > 0L && length == last) return@produceState
+            last = length
+            delay(PROGRESS_READING_MS)
+        }
+    }
+    return if (own > 0L) own else player
+}
+
+/** How many times [rememberPlayingLength] asks the player (some ten seconds) before it leaves the length unknown. */
+private const val LENGTH_READINGS = 20
 
 /** An address played from the network (a station, a stream), not a file of this device. */
 internal fun isStream(scheme: String?): Boolean = scheme != null && scheme.lowercase() !in LocalSchemes
@@ -560,6 +600,8 @@ private fun SeekRow(
         rate = info.rate,
         marks = marks,
         style = TimelineStyle.Bar,
+        // 1.0.3: a file of an unknown length shows the time played alone
+        elapsed = ::playbackPositionMs,
     )
 }
 
@@ -668,10 +710,14 @@ fun CompactTransportBar(
     modifier: Modifier = Modifier,
 ) {
     val dimens = NagTheme.dimens
-    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = 6.dp)) {
+    // 1.0.3: the copy of the bar in the phone player's sheet lies on the sheet, which is its card and grows into the page;
+    // it is told apart from the bar itself (composed with the full player, it is in the tree while the bar rests)
+    val inSheet = inPlayerSheetStrip
+    val card = if (inSheet) Modifier.clip(RoundedCornerShape(floatingPlayerCorner)) else Modifier.floatingPlayerCard()
+    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = COMPACT_MARGIN_Y)) {
         val button = TransportSize.Compact.button.coerceAtLeast(dimens.minTarget)
         val modes = showsModes(maxWidth, button, dimens.gapM)
-        Column(Modifier.fillMaxWidth().floatingPlayerCard().testTag("mini-player")) {
+        Column(Modifier.fillMaxWidth().then(card).testTag(if (inSheet) "mini-player-sheet" else "mini-player")) {
             Row(
                 Modifier.fillMaxWidth().padding(start = COMPACT_INSET - 4.dp, end = 4.dp, top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -702,8 +748,16 @@ fun CompactTransportBar(
 internal fun showsModes(width: Dp, button: Dp, gap: Dp): Boolean =
     width - COMPACT_INSET - 4.dp - 8.dp - COMPACT_ARTWORK - gap - button * 5 >= WORDS_MIN
 
-/** The phone's bar: its margin to the window's edges, the room inside its card, the artwork. */
+/**
+ * 1.0.3: the phone's bar's card as the player's sheet starts from it ([ExpandablePlayer]): its margins in the strip and
+ * its corners ([floatingPlayerCard]'s).
+ */
+@Composable
+internal fun compactPlayerCard(): PlayerCard = PlayerCard(COMPACT_MARGIN, COMPACT_MARGIN_Y, floatingPlayerCorner)
+
+/** The phone's bar: its margin to the window's edges (above and below the card: [COMPACT_MARGIN_Y]), the room inside its card, the artwork. */
 private val COMPACT_MARGIN = 8.dp
+private val COMPACT_MARGIN_Y = 6.dp
 private val COMPACT_INSET = 12.dp
 private val COMPACT_ARTWORK = 40.dp
 
@@ -738,10 +792,18 @@ private fun NowPlayingWords(
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        artwork(artSize)
+        // 1.0.3: on a phone the artwork and the title fly into the full player as it opens, and back
+        Box(Modifier.playerSharedElement(PlayerShared.Artwork, RoundedCornerShape(BAR_ARTWORK_CORNER))) { artwork(artSize) }
         Spacer(Modifier.width(dimens.gapM))
         Column(Modifier.weight(1f)) {
-            Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                info.title,
+                style = NagTheme.type.bodyStrong,
+                color = colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.playerSharedElement(PlayerShared.Title),
+            )
             if (info.casting != null) {
                 CastingLine(info.casting)
             } else {

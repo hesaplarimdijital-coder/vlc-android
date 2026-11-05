@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -246,7 +247,6 @@ fun NagmedarShell(
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         metrics.systemBottomPx = systemBottom
         overlayHost.systemBottomPx = systemBottom
-        overlayHost.onExpandStart = { scroll.showBars() }
         overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset() else 0f }
         overlayHost.rootView = view.rootView
     }
@@ -338,7 +338,11 @@ fun NagmedarShell(
                         // a solid card with its border, whatever passes beneath (1.0.1)
                         .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
                 ) {
-                    CompositionLocalProvider(LocalFloatingPlayer provides floating, LocalOnBottomGlass provides onBottomGlass) { player(navKind) }
+                    CompositionLocalProvider(
+                        LocalFloatingPlayer provides floating,
+                        LocalOnBottomGlass provides onBottomGlass,
+                        LocalBottomGlassSurface provides bottomGlass,
+                    ) { player(navKind) }
                 }
             },
             content = {
@@ -433,10 +437,14 @@ fun NagmedarShell(
 @Composable
 fun Modifier.floatingPlayerCard(): Modifier {
     val colors = NagTheme.colors
-    val shape = RoundedCornerShape(NagTheme.dimens.radiusCard.coerceAtLeast(12.dp))
+    val shape = RoundedCornerShape(floatingPlayerCorner)
     val fill = if (LocalOnBottomGlass.current) this.clip(shape) else this.clip(shape).background(colors.surfaceRaised, shape)
     return fill.border(1.dp, colors.borderStrong, shape)
 }
+
+/** The floating player card's corners ([floatingPlayerCard]); 1.0.3: the phone's full player grows out of this card. */
+internal val floatingPlayerCorner: Dp
+    @Composable get() = NagTheme.dimens.radiusCard.coerceAtLeast(12.dp)
 
 /**
  * What the phone's expanded player covers (1.0), while [covered]: not drawn (no overdraw, no blur

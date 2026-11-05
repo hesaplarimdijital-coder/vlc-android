@@ -3,10 +3,12 @@ package app.nagmedar.ui.shell
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 
 /**
  * 1.0.3: how a phone's chrome is drawn, for the user's decision on glass (Desktop Kit 2.3). The
@@ -60,3 +62,11 @@ object DebugChrome {
  * glass ([ChromeGlass.Bottom], [ChromeGlass.Kit]): it draws no opaque surface of its own.
  */
 val LocalOnBottomGlass = staticCompositionLocalOf { false }
+
+/**
+ * 1.0.3: the shell's one bottom glass as a surface, for what grows out of the chrome lying on it: the
+ * phone's full player starts as the mini player's card on this glass and keeps it under the page's
+ * colour until it stands (Desktop Kit 2.3.0's one surface). Null where the chrome is solid
+ * ([LocalOnBottomGlass] false).
+ */
+val LocalBottomGlassSurface = staticCompositionLocalOf<(@Composable () -> Modifier)?> { null }
