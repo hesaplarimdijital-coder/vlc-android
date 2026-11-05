@@ -680,12 +680,14 @@ fun CompactTransportBar(
     modifier: Modifier = Modifier,
 ) {
     val dimens = NagTheme.dimens
-    // 1.0.3: the copy of the bar in the phone player's sheet lies on the sheet, which is its card and grows into the page
-    val card = if (inPlayerSheetStrip) Modifier.clip(RoundedCornerShape(floatingPlayerCorner)) else Modifier.floatingPlayerCard()
+    // 1.0.3: the copy of the bar in the phone player's sheet lies on the sheet, which is its card and grows into the page;
+    // it is told apart from the bar itself (composed with the full player, it is in the tree while the bar rests)
+    val inSheet = inPlayerSheetStrip
+    val card = if (inSheet) Modifier.clip(RoundedCornerShape(floatingPlayerCorner)) else Modifier.floatingPlayerCard()
     BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = COMPACT_MARGIN_Y)) {
         val button = TransportSize.Compact.button.coerceAtLeast(dimens.minTarget)
         val modes = showsModes(maxWidth, button, dimens.gapM)
-        Column(Modifier.fillMaxWidth().then(card).testTag("mini-player")) {
+        Column(Modifier.fillMaxWidth().then(card).testTag(if (inSheet) "mini-player-sheet" else "mini-player")) {
             Row(
                 Modifier.fillMaxWidth().padding(start = COMPACT_INSET - 4.dp, end = 4.dp, top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,

@@ -567,10 +567,11 @@ private fun PlayerSheet(
                     scaleX = scale
                     scaleY = scale
                     translationY = BACK_DROP.toPx() * back
-                    // the card growing into the page; rounder under the Back finger
+                    // the card growing into the page; rounder under the Back finger. At rest over the window it is not
+                    // cut: the full player's backdrop goes on under the system's bars
                     val bounds = PlayerSurface.bounds(p, state.collapsedTop, miniHeight.toFloat(), size.width, size.height, insetX, insetY)
                     shape = SurfaceShape(bounds, PlayerSurface.radius(p, cardRadius, travel) + backCorner * back)
-                    clip = true
+                    clip = p < 1f || back > 0f
                 }
                 .drawBehind {
                     val p = state.progress
