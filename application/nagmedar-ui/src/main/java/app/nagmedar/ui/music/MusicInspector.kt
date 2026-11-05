@@ -340,7 +340,7 @@ private fun PlayingTags(stats: Map<String, TrackStats>) {
     val tech by TrackTechIndex.tech.collectAsState()
     val gains by TrackTechIndex.gains.collectAsState()
     val file = remember(media) { media.uri?.toString()?.let(CueUri::file) }
-    if (file != null) LaunchedEffect(file) { TrackTechIndex.readGains(context, file) }
+    LaunchedEffect(file) { if (file != null) TrackTechIndex.readGains(context, file) }
     val track = remember(media, tech) { media.toTrack(file?.let { tech[it] }) }
     Spacer(Modifier.height(NagTheme.dimens.gapS))
     HorizontalRule()

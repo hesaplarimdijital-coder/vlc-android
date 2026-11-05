@@ -11,9 +11,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /** 1.0.3 (Desktop Kit 2.3): the sidebar's footer entry shows its badge, as the entries above it do. */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
 class SidebarBadgeTest {
 

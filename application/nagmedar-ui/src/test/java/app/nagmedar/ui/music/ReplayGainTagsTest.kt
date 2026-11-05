@@ -19,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.util.Locale
 
 /**
@@ -27,6 +28,7 @@ import java.util.Locale
  * has not read them, and the rows wait for the file to be read again.
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ReplayGainTagsTest {
 
     @get:Rule
