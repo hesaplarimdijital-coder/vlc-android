@@ -1,10 +1,16 @@
 package app.nagmedar.ui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -39,10 +45,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,7 +64,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
@@ -74,11 +85,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import app.nagmedar.ui.input.keyHint
+import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.mixSrgb
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 /*
  * S-308 state components: empty, permission, loading, no results, error, warning, success and
@@ -611,6 +627,11 @@ fun UndoBarHost(state: UndoBarState, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * One undo bar. It leaves after [UndoBarState.VISIBLE_MILLIS], longer when TalkBack asks for more
+ * time (the system's recommended timeout, Desktop Kit 2.0); by touch a sideways swipe takes it away
+ * ([swipeToDismiss]). Neither takes back the change.
+ */
 @Composable
 fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, modifier: Modifier = Modifier, older: Boolean = false) {
     val colors = NagTheme.colors
@@ -618,7 +639,8 @@ fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, mod
     val hovered by interaction.collectIsHoveredAsState()
     var focused by remember { mutableStateOf(false) }
     val paused = hovered || focused
-    var remaining by remember(message.id) { mutableLongStateOf(UndoBarState.VISIBLE_MILLIS) }
+    val visible = recommendedTimeout(UndoBarState.VISIBLE_MILLIS, controls = true)
+    var remaining by remember(message.id) { mutableLongStateOf(visible) }
     val timeout by rememberUpdatedState(onTimeout)
     LaunchedEffect(message.id, paused) {
         while (!paused && remaining > 0) {
@@ -630,6 +652,7 @@ fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, mod
     val shape = RoundedCornerShape(9.dp)
     Row(
         modifier = modifier
+            .swipeToDismiss(message.id) { timeout() }
             .alpha(if (older) 0.75f else 1f)
             .shadow(10.dp, shape)
             .background(colors.inverseSurface, shape)
@@ -690,5 +713,96 @@ private fun InverseTextButton(label: String, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(label, style = NagTheme.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * How long something that leaves by itself stays: [millis], or what the system recommends when the
+ * user asked for more time to read and act (TalkBack's "Time to take action", Desktop Kit 2.0).
+ * [controls]: it holds a button to press in that time.
+ */
+@Composable
+internal fun recommendedTimeout(millis: Long, controls: Boolean): Long {
+    val accessibility = LocalAccessibilityManager.current ?: return millis
+    return accessibility.calculateRecommendedTimeoutMillis(millis, containsIcons = false, containsText = true, containsControls = controls)
+        .coerceAtLeast(millis)
+}
+
+/**
+ * A notice or an undo bar a finger swipes sideways off the screen (Desktop Kit 2.0; 2.3: at the
+ * finger's speed). Let go past [NOTICE_DISMISS] of its width or flung, it carries on the way it was
+ * going at the finger's speed and [onDismiss] runs once it is out (on a phone on the gesture spring;
+ * wider windows and reduced motion let it go where it is); short of that it springs back. Only by
+ * touch: a mouse does not swipe, it has its button. [key] is what it shows: a new one starts still.
+ */
+@Composable
+internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier {
+    if (NagTheme.inputMode != InputMode.Touch) return this
+    val swipe = remember(key) { Animatable(0f) }
+    var width by remember { mutableIntStateOf(1) }
+    val scope = rememberCoroutineScope()
+    val tier = LocalMotionTier.current
+    val dismiss by rememberUpdatedState(onDismiss)
+    return this
+        .onSizeChanged { width = it.width.coerceAtLeast(1) }
+        .graphicsLayer {
+            translationX = swipe.value
+            alpha = 1f - (abs(swipe.value) / width).coerceIn(0f, 1f)
+        }
+        .draggable(
+            orientation = Orientation.Horizontal,
+            state = rememberDraggableState { delta -> scope.launch { swipe.snapTo(swipe.value + delta) } },
+            onDragStopped = { velocity ->
+                when (SwipeDismissRules.release(swipe.value, velocity, width, tier)) {
+                    SwipeDismissRules.Release.CarryOut -> {
+                        // on its way at the finger's speed; gone the moment it has faded out at its own width
+                        var gone = false
+                        val out = if (swipe.value < 0f || (swipe.value == 0f && velocity < 0f)) -width.toFloat() else width.toFloat()
+                        swipe.animateTo(out, NagMotion.gesture(NagMotion.PIXEL), initialVelocity = velocity) {
+                            if (!gone && abs(value) >= width - 0.5f) {
+                                gone = true
+                                dismiss()
+                            }
+                        }
+                        if (!gone) dismiss()
+                    }
+                    SwipeDismissRules.Release.Dismiss -> dismiss()
+                    SwipeDismissRules.Release.Back -> swipe.animateTo(
+                        0f,
+                        when (tier) {
+                            MotionTier.Gesture -> NagMotion.gesture(NagMotion.PIXEL)
+                            MotionTier.Timed -> spring(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = NagMotion.PIXEL)
+                            MotionTier.Reduced -> snap<Float>()
+                        },
+                        initialVelocity = if (tier == MotionTier.Gesture) velocity else 0f,
+                    )
+                }
+            },
+        )
+}
+
+/** How far across a notice must be swiped, as a part of its width, to leave when let go. */
+internal const val NOTICE_DISMISS = 0.3f
+
+/** A sideways fling this fast (px/s) takes a notice away however short it was. */
+internal const val NOTICE_FLING = 1200f
+
+/** What letting a swiped notice go does (Desktop Kit 2.3), free of Compose for the tests. */
+internal object SwipeDismissRules {
+    enum class Release {
+        /** It carries on out at the finger's speed and is dismissed once out (a phone). */
+        CarryOut,
+
+        /** It is dismissed where it is (tablet, DeX, reduced motion). */
+        Dismiss,
+
+        /** It springs back. */
+        Back,
+    }
+
+    fun release(offset: Float, velocity: Float, width: Int, tier: MotionTier): Release = when {
+        abs(offset) <= width * NOTICE_DISMISS && abs(velocity) <= NOTICE_FLING -> Release.Back
+        tier == MotionTier.Gesture -> Release.CarryOut
+        else -> Release.Dismiss
     }
 }
