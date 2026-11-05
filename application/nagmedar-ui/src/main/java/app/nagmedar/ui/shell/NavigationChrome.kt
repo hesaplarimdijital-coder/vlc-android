@@ -1,15 +1,18 @@
 package app.nagmedar.ui.shell
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -75,8 +78,11 @@ import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.keyHint
+import app.nagmedar.ui.theme.GlassMode
+import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.glass
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
 typealias NavBadges = Map<Destination, String>
@@ -95,18 +101,20 @@ fun BrandMark(modifier: Modifier = Modifier) {
 /**
  * The phone's bottom bar: Müzik · Podcast · Radyo · ⋯, a solid surface with a hairline over it
  * (1.0.1: it never takes the colour of what passes beneath). [selected] is the tab lit: the one
- * whose pages are on screen, none on the search page.
+ * whose pages are on screen, none on the search page. 1.0.3 (Desktop Kit 2.0): at least its height,
+ * taller with large text so the labels keep their line (at 200 % a label too long ends in "…");
+ * [onGlass]: it lies on the shell's bottom glass (the user's glass decision) and draws no surface.
  */
 @Composable
-fun BottomNavBar(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
+fun BottomNavBar(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier, onGlass: Boolean = false) {
     val colors = NagTheme.colors
     val label = stringResource(R.string.nag_main_navigation)
-    Column(modifier.fillMaxWidth().background(colors.chrome)) {
+    Column(modifier.fillMaxWidth().then(if (onGlass) Modifier else Modifier.background(colors.chrome))) {
         HorizontalRule()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NagTheme.dimens.bottomBarHeight)
+                .height(IntrinsicSize.Min)
                 .semantics { paneTitle = label }
                 .selectableGroup(),
             verticalAlignment = Alignment.CenterVertically,
@@ -128,6 +136,7 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
     Column(
         modifier = Modifier
             .weight(1f)
+            .heightIn(min = dimens.bottomBarHeight)
             .fillMaxHeight()
             .semantics { this.selected = selected }
             .nagClickable(interaction, onClick, role = Role.Tab),
@@ -481,6 +490,10 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
  * window's [caption] bar (S-306) it is the bar: the title moves the window, the buttons take their
  * clicks, the system's buttons keep their place. The bar is at least its height, so larger text
  * is not cut.
+ *
+ * [glass] (1.0.3, C of the user's glass decision; null in the product): Desktop Kit 2.3's phone top
+ * bar, glass of that mode once content has [scrolled] beneath it, with a rule along its foot; the way
+ * there and back fades the page colour's opacity alone, and the glass stays until the colour is back.
  */
 @Composable
 fun PageTopBar(
@@ -489,13 +502,15 @@ fun PageTopBar(
     modifier: Modifier = Modifier,
     caption: CaptionBar? = null,
     onBack: (() -> Unit)? = null,
+    glass: GlassMode? = null,
+    scrolled: () -> Boolean = { false },
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
     val latestBack by rememberUpdatedState(onBack)
     val latestSearch by rememberUpdatedState(onSearch)
-    Box(modifier.fillMaxWidth().background(colors.background)) {
+    Box(modifier.fillMaxWidth().then(if (glass == null) Modifier.background(colors.background) else Modifier.topBarGlass(glass, scrolled()))) {
         AnimatedContent(
             targetState = TopBarContent(title, back = onBack != null, search = onSearch != null),
             transitionSpec = { motion.topBarChange() },
@@ -528,6 +543,29 @@ fun PageTopBar(
             }
         }
     }
+}
+
+/** Desktop Kit 2.3's top bar over content scrolled beneath it: glass of [mode], a rule along its foot, faded in and out. */
+@Composable
+private fun Modifier.topBarGlass(mode: GlassMode, scrolled: Boolean): Modifier {
+    val colors = NagTheme.colors
+    val motion = NagTheme.motion
+    val background by animateColorAsState(
+        if (scrolled) colors.background.copy(alpha = 0f) else colors.background,
+        motion.color(),
+        label = "topBarGlass",
+    )
+    val ruleAlpha by animateFloatAsState(if (scrolled) 1f else 0f, if (motion.reduced) tween(0) else tween(NagMotion.MEDIUM), label = "topBarRule")
+    val rule = colors.border
+    return this
+        .glass(NagGlass.chrome(colors), mode = mode, enabled = scrolled || background.alpha < 0.999f, rest = colors.background)
+        .background(background)
+        .drawBehind {
+            if (ruleAlpha > 0f) {
+                val line = 1.dp.toPx()
+                drawRect(rule.copy(alpha = rule.alpha * ruleAlpha), topLeft = Offset(0f, size.height - line), size = Size(size.width, line))
+            }
+        }
 }
 
 /** What the top bar shows: it fades through to another when this changes. */

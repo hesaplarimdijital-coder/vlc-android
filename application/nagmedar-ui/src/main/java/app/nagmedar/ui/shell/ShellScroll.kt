@@ -47,9 +47,21 @@ class ShellScrollState {
     /** How a bar left half way settles: the gesture spring on a phone, nothing with reduced motion. */
     var tier: MotionTier = MotionTier.Gesture
 
+    /**
+     * 1.0.3: the content has scrolled away from its top; only the glass chrome of the user's decision
+     * (Desktop Kit 2.3's top bar, [ChromeGlass.Kit]) reads it. Written only when it changes.
+     */
+    var scrolled by mutableStateOf(false)
+        private set
+
     val connection: NestedScrollConnection = object : NestedScrollConnection {
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
             onScrolled(consumed.y)
+            if (enabled) {
+                if (consumed.y < 0f) scrolled = true
+                // a pull down that the content could not take: it is at its top
+                if (available.y > 0f) scrolled = false
+            }
             return Offset.Zero
         }
 
@@ -87,9 +99,10 @@ class ShellScrollState {
         offsetPx = 0f
     }
 
-    /** A new screen starts with the bars shown. */
+    /** A new screen starts with the bars shown (and at its top). */
     fun reset() {
         offsetPx = 0f
+        scrolled = false
     }
 
     companion object {
