@@ -429,3 +429,27 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   nav), story/components (3: #8 #10 #22 #26 #27 #33 #37 #38 #39 #53 #55 #56 #64 #65 + DeX Ctrl+A / Tab focus behind layers).
   Next after 2a + 2b-1: 2b-2 (player single surface #52 #48 #35, sheet carry-out #49 #50, detail depth #51, listAppear #54,
   tab predictive Back #59, WindowPlayer drag + lyrics, "0:00"), then 3's #31/#63, Part 4, Android 17.
+- 17:00 Radio piece done (agent 6): story/auto-radio 8a928f22 (master 6d8c86e merged), PR #102, CI green: Radyo tab =
+  Favoriler, Son dinlenenler, Ülkeler (counts, device's first), Diller, Kategoriler, En çok dinlenenler, En çok beğenilenler;
+  100 per page + "Daha fazla radyo"; Favorilere ekle/çıkar custom action; CarRadioTest 17; AutoBrowseTest reads Radio.
+  Its personal walk was on 3b05165 (pre-platform merge): dispatched a personal walk on 8a928f22 (run 42048820107) before landing.
+  Auto's §2 is complete with this PR.
+- 17:35 PR #102 landed (Auto Radio tab, the last Auto piece). Personal walk of 8a928f22 (merged platform): phone 126 steps 0
+  failed, tablet ok, AutoBrowseTest OK 44 s. Android Auto request complete.
+- 18:10 library-fast done (agent): PR #101 40030b63 green (270 screenshots, walks tablet 0/67 phone 0/55 incl. a restart
+  step): start compares the system media index (one query per volume) with the last full look, looks again only on change or
+  after a day, quietly (no strip, no notification); the Music list kept in no-backup files and drawn in the first frames;
+  SAF listings kept, refreshed once per start; Settings › Kütüphane › "Kütüphaneyi yeniden tara"; scan-service stop race
+  fixed. Cold start → kept list 4.1 s on the emulator (before: "Scanning the library" covered it). Merged master 8a928f22 →
+  2a859324, pushed; personal walk dispatched; land when green. Leftover remote branch measure/library-fast-before.
+- 18:50 PR #101 landed: master 2a859324 (library-fast). CI green; debug PR walk and personal walk (tablet + phone, API 35) green.
+
+## 5 Nov 20:17 — the user asks for status, percentage, the APK's date
+- Landed today: #96 key, #97 #100 #102 Auto (all of §2), #98 walk, #99 platform, #101 library-fast. Running: #104 motion-base
+  (CI running on 1e187630), #103 components (CI running on ef05640e), shell-chrome (one WIP push 9b3a1fcc, no PR yet).
+- 20:25 launched (opus): story/detail-lists (2b-2a: #51 detail depth + SeekableTransitionState Back, #19/#32 shared cover,
+  #61 lookahead on demand, #54 listAppear), story/tablet-dex (4: #20 touchpad, #16 hold-to-drag + count card, #17 caption
+  chip, #67 footer badge, inspector ReplayGain/peak), story/android17 (targetSdk 37 prep: local network permission,
+  background audio, widget bitmap; proven on a 37 commit then reverted to 36). Remaining after these: 2b-2b (player single
+  surface #52 #48 #35, sheet carry-out #49 #50, tab predictive Back #59, WindowPlayer drag + lyrics, "0:00"), 3's #31/#63,
+  release 1.0.3. Estimate told to the user: ~%55, APK 7–8 Nov.

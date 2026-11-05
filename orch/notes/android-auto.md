@@ -60,7 +60,7 @@
   gösteriyor  - [ ] Devam eden bölümler en son dinlenen başta
 - Next: radio piece (Ülkeler, Diller, top lists, Favorilere ekle as a browse action: reuse CarCatalog.act/CarActions).
 
-## auto-radio, Radio piece (agent 6, 5 Nov 17:55) — story/auto-radio, PR #102 (draft), HEAD 8a928f22
+## auto-radio, Radio piece (agent 6, 5 Nov 17:55) — story/auto-radio, PR #102 (draft), HEAD 8a928f22, CI green on it (master 6d8c86e merged)
 - Radyo tab = Favoriler (Grid) · Son dinlenenler (Grid, string nag_auto_recent_stations) · Ülkeler (CarIds.RADIO_COUNTRIES) ·
   Diller (LANGUAGES) · Kategoriler (TAGS, now rows) · En çok dinlenenler (MOST_LISTENED, clickcount) · En çok beğenilenler
   (MOST_LIKED, votes). Country → CarIds.radioCountry(ISO) (CarKind.Country), language → CarIds.language(directory name).
