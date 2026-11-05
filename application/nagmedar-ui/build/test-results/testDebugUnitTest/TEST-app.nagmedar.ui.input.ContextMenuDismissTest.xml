@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.ContextMenuDismissTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:39:02.291Z" hostname="runnervmwuk1x" time="0.441">
+  <properties/>
+  <testcase name="aClickOutsideClosesTheMenuWhereItIsAndDoesNothingElse" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.089"/>
+  <testcase name="escapeClosesTheMenu" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.061"/>
+  <testcase name="aLongPressStillOpensTheMenu" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.056"/>
+  <testcase name="aRightClickOutsideOpensOneMenuThereAndTheOldOneNeverMovesThere" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.09"/>
+  <testcase name="aRightClickElsewhereOnTheSameRowOpensItThere" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.077"/>
+  <testcase name="choosingAnItemClosesTheMenu" classname="app.nagmedar.ui.input.ContextMenuDismissTest" time="0.065"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

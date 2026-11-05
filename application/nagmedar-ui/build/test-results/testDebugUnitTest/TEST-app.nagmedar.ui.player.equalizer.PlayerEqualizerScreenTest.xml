@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.player.equalizer.PlayerEqualizerScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:39:17.742Z" hostname="runnervmwuk1x" time="0.207">
+  <properties/>
+  <testcase name="aBandTakesTheArrowKeys" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerScreenTest" time="0.067"/>
+  <testcase name="offTheSoundPlaysAsItIs" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerScreenTest" time="0.05"/>
+  <testcase name="aPresetIsCopiedThenItsBandsMove" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerScreenTest" time="0.045"/>
+  <testcase name="aFilmWithItsOwnEqualizerSaysSoWithTheWayBack" classname="app.nagmedar.ui.player.equalizer.PlayerEqualizerScreenTest" time="0.042"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

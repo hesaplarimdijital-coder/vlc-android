@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.PhoneNavigationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:40:02.182Z" hostname="runnervmwuk1x" time="0.392">
+  <properties/>
+  <testcase name="theTopBarKeepsItsColourWhileTheListScrolls" classname="app.nagmedar.ui.shell.PhoneNavigationTest" time="0.08"/>
+  <testcase name="settingsIsAPageOfItsOwnAndBackReturnsToMore" classname="app.nagmedar.ui.shell.PhoneNavigationTest" time="0.1"/>
+  <testcase name="aPageLightsTheTabItWasOpenedIn" classname="app.nagmedar.ui.shell.PhoneNavigationTest" time="0.076"/>
+  <testcase name="theTabChosenAgainGoesToItsFirstPage" classname="app.nagmedar.ui.shell.PhoneNavigationTest" time="0.089"/>
+  <testcase name="theMoreTabIsAPage" classname="app.nagmedar.ui.shell.PhoneNavigationTest" time="0.044"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

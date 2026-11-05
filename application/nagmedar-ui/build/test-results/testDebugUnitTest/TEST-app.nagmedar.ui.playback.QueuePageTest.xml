@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.QueuePageTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:39:16.837Z" hostname="runnervmwuk1x" time="0.595">
+  <properties/>
+  <testcase name="theClearButtonsRule" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.019"/>
+  <testcase name="theListBehindScrollsOnceThePageHasGone" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.107"/>
+  <testcase name="aDragOnTheEmptyPageDoesNotScrollTheListBehind" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.06"/>
+  <testcase name="somethingToComeCanBeCleared" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.07"/>
+  <testcase name="theHandleMovesARowAndLeavesThePage" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.072"/>
+  <testcase name="theEmptyPageCoversTheWholeWindow" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.051"/>
+  <testcase name="backClosesIt" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.063"/>
+  <testcase name="aPullDownFromTheListsTopClosesIt" classname="app.nagmedar.ui.playback.QueuePageTest" time="0.151"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.StatesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:38:56.933Z" hostname="runnervmwuk1x" time="0.427">
+  <properties/>
+  <testcase name="undoBarWaitsWhileThePointerRestsOnIt" classname="app.nagmedar.ui.components.StatesTest" time="0.05"/>
+  <testcase name="atMostTwoBarsStay" classname="app.nagmedar.ui.components.StatesTest" time="0.033"/>
+  <testcase name="undoBarIsALiveRegion" classname="app.nagmedar.ui.components.StatesTest" time="0.04"/>
+  <testcase name="boardTargetsAreLargeEnoughAndNamed" classname="app.nagmedar.ui.components.StatesTest" time="0.1"/>
+  <testcase name="everyStateNamesTheNextStepAndIsAnnounced" classname="app.nagmedar.ui.components.StatesTest" time="0.088"/>
+  <testcase name="undoBarLeavesAfterEightSeconds" classname="app.nagmedar.ui.components.StatesTest" time="0.043"/>
+  <testcase name="touchStateTargets" classname="app.nagmedar.ui.components.StatesTest" time="0.04"/>
+  <testcase name="undoLatestTakesBackTheNewest" classname="app.nagmedar.ui.components.StatesTest" time="0.029"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

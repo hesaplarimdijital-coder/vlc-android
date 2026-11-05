@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:39:50.695Z" hostname="runnervmwuk1x" time="2.773">
+  <properties/>
+  <testcase name="settingsTablet" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.072"/>
+  <testcase name="tabletAtLimitEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.141"/>
+  <testcase name="phoneEmpty" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.132"/>
+  <testcase name="tabletRecordingTwoStations" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.123"/>
+  <testcase name="dexEmptyEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.104"/>
+  <testcase name="phoneFolderDenied" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.129"/>
+  <testcase name="tabletFolderMissing" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.101"/>
+  <testcase name="tabletScheduled" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.099"/>
+  <testcase name="settingsTabletEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.086"/>
+  <testcase name="phoneDone" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.136"/>
+  <testcase name="phoneScheduled" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.134"/>
+  <testcase name="phoneRecordingEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.139"/>
+  <testcase name="settingsPhone" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.078"/>
+  <testcase name="phoneEditorEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.177"/>
+  <testcase name="dexRecording" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.127"/>
+  <testcase name="settingsDex" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.083"/>
+  <testcase name="phoneLowSpace" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.132"/>
+  <testcase name="phoneRecording" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.144"/>
+  <testcase name="dexEditorMeetingAnother" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.143"/>
+  <testcase name="dexNearLimit" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.121"/>
+  <testcase name="dexDone" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.133"/>
+  <testcase name="tabletEditor" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.12"/>
+  <testcase name="tabletDoneEnglish" classname="app.nagmedar.ui.screenshots.RecordingsScreenshotTest" time="0.114"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

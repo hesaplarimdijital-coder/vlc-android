@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.cast.CastPickerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:38:50.808Z" hostname="runnervmwuk1x" time="0.382">
+  <properties/>
+  <testcase name="theDeviceCastToIsMarked" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.068"/>
+  <testcase name="whatCannotBeCastIsSaid" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.062"/>
+  <testcase name="nothingFoundSaysWhatToCheck" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.061"/>
+  <testcase name="theKeyboardChoosesWithEnter" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.068"/>
+  <testcase name="aDeviceIsChosenAndThisDeviceTakesItBack" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.068"/>
+  <testcase name="searching" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.05"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

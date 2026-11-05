@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.radio.RadioServersTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:39:25.634Z" hostname="runnervmwuk1x" time="0.608">
+  <properties/>
+  <testcase name="theyAreLookedForAgainAfterAWhile" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.016"/>
+  <testcase name="withoutDnsTheListIsRead" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.012"/>
+  <testcase name="anOldListAnswersAtOnceEvenWhenTheNameServiceHangs" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.013"/>
+  <testcase name="theServerListIsRead" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.011"/>
+  <testcase name="aForwardLookupThatHangsFallsBackToTheList" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.112"/>
+  <testcase name="theNamesAreTheReverseOfEachAddress" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.01"/>
+  <testcase name="theOrderIsShuffledAndKeptUntilTheyAreLookedForAgain" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.017"/>
+  <testcase name="withNeitherDnsNorListTheBuiltInServersAreTheLastResort" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.012"/>
+  <testcase name="aReverseLookupThatHangsDoesNotHoldTheRequest" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.16"/>
+  <testcase name="aBadServerIsLastUntilItsTimeIsUp" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.012"/>
+  <testcase name="serverNamesStayInTheDirectorysDomain" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.009"/>
+  <testcase name="withNeitherNothingIsFound" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.012"/>
+  <testcase name="aServerThatAnsweredIsForgiven" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.012"/>
+  <testcase name="forgettingLooksForThemAgain" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.013"/>
+  <testcase name="theReverseLookupsRunTogether" classname="app.nagmedar.ui.radio.RadioServersTest" time="0.183"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

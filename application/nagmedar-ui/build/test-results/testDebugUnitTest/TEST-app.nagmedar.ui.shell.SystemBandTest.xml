@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.SystemBandTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-05T22:40:03.107Z" hostname="runnervmwuk1x" time="0.696">
+  <properties/>
+  <testcase name="lightButtonsOnTheDarkTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.048"/>
+  <testcase name="aScreenUnderTheBarsIsPaddedForTheButtonsToo" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.047"/>
+  <testcase name="theShellSitsOnTheButtonsAtFirstLaunch" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.038"/>
+  <testcase name="theKeyboardLeavesNoBand" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.036"/>
+  <testcase name="buttonsFollowTheLightTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.035"/>
+  <testcase name="tabletThreeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.069"/>
+  <testcase name="aScreenThatDoesNotAskEndsAboveTheBars" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.028"/>
+  <testcase name="threeButtonLargeText" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.092"/>
+  <testcase name="threeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.096"/>
+  <testcase name="tabletChromeFillsTheNavigationBar" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.038"/>
+  <testcase name="phoneBarReachesBehindTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.039"/>
+  <testcase name="talkBackReadsTheBottomBarLast" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.032"/>
+  <testcase name="threeButtonLight" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.076"/>
+  <testcase name="theFirstRunStaysAboveTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
