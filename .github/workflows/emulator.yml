@@ -355,55 +355,54 @@ jobs:
           echo "::error title=Emulator::the ${{ inputs.baseline_profile && 'Baseline Profile generation' || 'smoke test' }} failed (a crash or ANR of the app, the generator, or the setup); see the annotations above and the evidence branch"
           exit 1
 
-  # 1.0.3: one line per job of the walk (its verdict, checks, steps and minutes, its evidence branch), from the reports the
-  # jobs pushed: in the run's summary and as the notice ci.sh and the pull request show
+  # 1.0.3: one line per job of the walk (the job's result and the walk's own summary: verdict, steps, checks, the system's
+  # ANRs, minutes, evidence branch), read from the jobs' notices (an evidence branch may hold a later run's report):
+  # in the run's summary and as the notice ci.sh and the pull request show
   summary:
     name: Emülatör · özet
     needs: [plan, smoke]
     if: always() && !inputs.baseline_profile && needs.plan.result == 'success'
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      checks: read
     steps:
       - name: Özet
         env:
+          GH_TOKEN: ${{ github.token }}
           RUNS: ${{ needs.plan.outputs.runs }}
-          SMOKE: ${{ needs.smoke.result }}
         run: |
           python3 - <<'PY'
-          import json, os, subprocess
-          runs = json.loads(os.environ["RUNS"])
-          repo = "https://github.com/%s.git" % os.environ["GITHUB_REPOSITORY"]
-          rows, bad = [], 0
-          for r in runs:
-              b = r["evidence"]
-              ok = subprocess.run(["git", "fetch", "-q", "--depth=1", repo, "+refs/heads/%s:refs/remotes/e/%s" % (b, b)],
-                                  capture_output=True).returncode == 0
-              rep = {}
-              if ok:
-                  out = subprocess.run(["git", "show", "refs/remotes/e/%s:report.json" % b], capture_output=True, text=True)
-                  try:
-                      rep = json.loads(out.stdout)
-                  except ValueError:
-                      rep = {}
-              # a branch left by another run: the run id is in its source line
-              mine = os.environ["GITHUB_RUN_ID"] in rep.get("source", "")
-              if not mine:
-                  rows.append("| %s | %s | no report of this run | | | | %s |" % (r["api"], r["group"], b))
-                  bad += 1
-                  continue
-              failed = [c for c in rep.get("checks", []) if not c["ok"]]
-              verdict = rep.get("verdict", "?")
-              bad += verdict != "passed"
-              rows.append("| %s | %s | %s | %d of %d failed | %d steps, %d min | %d | %s |" % (
-                  r["api"], r["group"], verdict, len(failed), len(rep.get("checks", [])), len(rep.get("steps", [])),
-                  rep.get("seconds", 0) // 60, len(rep.get("system", [])), b))
-          md = ["## Emülatör yürüyüşü", "", "| API | group | verdict | 1.0 checks | walk | system ANR/crash | evidence |",
-                "|-----|-------|---------|------------|------|------------------|----------|"] + rows
+          import json, os, re, subprocess
+
+          def api(path):
+              out = subprocess.run(["gh", "api", path], capture_output=True, text=True)
+              return json.loads(out.stdout) if out.returncode == 0 and out.stdout.strip() else {}
+
+          repo, run, attempt = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_RUN_ID"], os.environ["GITHUB_RUN_ATTEMPT"]
+          jobs = api("repos/%s/actions/runs/%s/attempts/%s/jobs?per_page=100" % (repo, run, attempt)).get("jobs", [])
+          rows = []
+          for r in json.loads(os.environ["RUNS"]):
+              name = "(API %s, %s)" % (r["api"], r["group"])
+              job = next((j for j in jobs if j["name"].endswith(name)), None)
+              result = (job or {}).get("conclusion") or "missing"
+              walk = "no summary (the walk did not finish)"
+              if job:
+                  check = (job.get("check_run_url") or "").rsplit("/", 1)[-1] or job["id"]
+                  for a in api("repos/%s/check-runs/%s/annotations?per_page=100" % (repo, check)) or []:
+                      if (a.get("title") or "").startswith("Emulator Ekran görüntüleri"):
+                          walk = re.sub(r"\s*Evidence: .*$", "", a.get("message", "")).strip()
+              rows.append((r["api"], r["group"], result, walk.replace("|", "/"), r["evidence"]))
+          md = ["## Emülatör yürüyüşü", "", "| API | group | job | walk | evidence |", "|-----|-------|-----|------|----------|"]
+          md += ["| %s | %s | %s | %s | %s |" % row for row in rows]
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
               f.write("\n".join(md) + "\n")
           print("\n".join(md))
-          line = "; ".join(x.strip("| ").replace(" | ", " ") for x in rows)
+          line = " · ".join("API %s %s: %s" % (api_level, group, walk) for api_level, group, _, walk, _ in rows)
           print("::notice title=Emulator Ekran özeti::%s" % line.replace("%", "%25"))
-          if bad or os.environ["SMOKE"] != "success":
-              print("::error title=Emulator::%d of %d walk jobs did not pass (%s)" % (max(bad, 1), len(runs), os.environ["SMOKE"]))
+          bad = [row for row in rows if row[2] != "success"]
+          if bad:
+              print("::error title=Emulator::%d of %d walk jobs did not pass: %s" % (
+                  len(bad), len(rows), ", ".join("API %s %s (%s)" % (b[0], b[1], b[2]) for b in bad)))
               raise SystemExit(1)
           PY
