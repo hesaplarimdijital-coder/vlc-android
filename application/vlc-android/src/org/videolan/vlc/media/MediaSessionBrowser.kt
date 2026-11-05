@@ -100,12 +100,45 @@ class MediaSessionBrowser {
             return catalog.children(context, id)?.map(::toMediaItem).orEmpty()
         }
 
+        /** 1.0.3: the entry [mediaId] alone (Auto reads one again after a browse action changed it); null when unknown. */
+        @WorkerThread
+        suspend fun item(context: Context, mediaId: String): MediaBrowserCompat.MediaItem? =
+            CarHook.catalog?.item(context, canonical(mediaId))?.let(::toMediaItem)
+
+        /**
+         * 1.0.3: the custom browse actions as the root's extras give them to Auto (androidx.media 1.7): one bundle each, its
+         * id, label and icon; none when the catalog offers none.
+         */
+        fun browseActions(context: Context): ArrayList<Bundle> = CarHook.catalog?.browseActions(context).orEmpty().mapTo(ArrayList()) { action ->
+            Bundle().apply {
+                putString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID, action.id)
+                putString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_LABEL, action.label)
+                putString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ICON_URI, action.iconUri)
+            }
+        }
+
+        /**
+         * 1.0.3: Auto's custom browse action [action] on the entry [mediaId], done by the catalog: the result's bundle (the
+         * message Auto shows, the entry it reads again), or null when the action is none of the catalog's.
+         */
+        @WorkerThread
+        suspend fun act(context: Context, action: String, mediaId: String): Bundle? {
+            val done = CarHook.catalog?.act(context, action, canonical(mediaId)) ?: return null
+            return Bundle().apply {
+                putString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_RESULT_MESSAGE, done.message)
+                done.refresh?.let { putString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_RESULT_REFRESH_ITEM, it) }
+            }
+        }
+
         /** Android Auto's search: the catalog's results, grouped under their headings. */
         @WorkerThread
         suspend fun search(context: Context, query: String): List<MediaBrowserCompat.MediaItem> =
             CarHook.catalog?.search(context, query)?.map(::toMediaItem).orEmpty()
 
-        /** [item] as the browser's: its flags, its artwork, how its own entries are drawn, its search heading, an episode's progress. */
+        /**
+         * [item] as the browser's: its flags, its artwork, how its own entries are drawn, its search heading, an episode's
+         * progress, the browse actions it offers.
+         */
         fun toMediaItem(item: CarItem): MediaBrowserCompat.MediaItem {
             val extras = Bundle()
             item.children?.let { style ->
@@ -130,6 +163,8 @@ class MediaSessionBrowser {
                 }
             }
             if (item.downloaded) extras.putLong(MediaDescriptionCompat.EXTRA_DOWNLOAD_STATUS, MediaDescriptionCompat.STATUS_DOWNLOADED)
+            // 1.0.3: the custom browse actions Auto offers on it ("Abone ol" on a show not followed)
+            if (item.actions.isNotEmpty()) extras.putStringArrayList(MediaConstants.DESCRIPTION_EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID_LIST, ArrayList(item.actions))
             val description = MediaDescriptionCompat.Builder()
                 .setMediaId(item.id)
                 .setTitle(item.title)
