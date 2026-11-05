@@ -89,6 +89,7 @@ import app.nagmedar.ui.components.SliderMark
 import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.inPlayerSheetStrip
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.nearest
 import app.nagmedar.ui.components.playingAt
@@ -102,6 +103,7 @@ import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.animatedAccent
 import kotlinx.coroutines.delay
+import org.videolan.vlc.PlaybackService
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -128,6 +130,10 @@ enum class TimelineStyle {
  * seeks where it is let go, with a light tick of the phone each time it crosses a chapter's start. Left and Right
  * step five seconds, Home and End go to the ends; screen readers read and set it as a seek bar. [marks] are the
  * chapters' starts (S-1104), drawn as ticks and named under the pointer, in the bubble and with the focus.
+ *
+ * 1.0.3: a file whose length is unknown ([lengthMs] 0) has nothing to seek: given [elapsed] (where it is, in ms), the
+ * timeline shows the time played alone, read once a second while it plays, over a plain track without a thumb; screen
+ * readers read that time. Without [elapsed] it stays as it was.
  */
 @Composable
 fun ProgressTimeline(
@@ -141,6 +147,7 @@ fun ProgressTimeline(
     marks: List<SliderMark> = emptyList(),
     style: TimelineStyle = TimelineStyle.Panel,
     label: String = stringResource(R.string.nag_position),
+    elapsed: (() -> Long)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -153,8 +160,9 @@ fun ProgressTimeline(
     val latestLength by rememberUpdatedState(lengthMs)
     var widthPx by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(smooth) { snapshotFlow { latestProgress.value() }.collect { smooth.report(it.coerceIn(0f, 1f), latestLength) } }
-    // in the phone's player while it waits under the mini player (composed, not drawn): no frames for a glide (1.0)
-    val drawn = LocalPlayerSheet.current?.shown != false
+    // in the phone's player while it waits under the mini player (composed, not drawn): no frames for a glide (1.0); nor
+    // in the strip's copy in the player's sheet, which shows for the first part of the way only (1.0.3)
+    val drawn = LocalPlayerSheet.current?.shown != false && !inPlayerSheetStrip
     LaunchedEffect(playing, lengthMs, rate, widthPx, motion.reduced, drawn) {
         if (playing && drawn && !motion.reduced) smooth.glide(lengthMs, rate, widthPx)
     }
@@ -175,13 +183,27 @@ fun ProgressTimeline(
 
     // the times change once a second, not on every frame
     val elapsedSeconds by remember(lengthMs, playing, rate) { derivedStateOf { if (lengthMs > 0L) (shown() * lengthMs / 1000f).toLong() else 0L } }
-    val elapsedMs = elapsedSeconds * 1000L
-    val position = stringResource(R.string.nag_music_position, clock(elapsedMs), clock(lengthMs))
+    // 1.0.3: a length unknown, the time played alone, from [elapsed]: read once a second while it plays and is drawn
+    val unknown = lengthMs <= 0L && elapsed != null
+    val latestElapsed by rememberUpdatedState(elapsed)
+    var unknownMs by remember { mutableLongStateOf(0L) }
+    if (unknown) {
+        LaunchedEffect(playing, drawn) {
+            while (true) {
+                unknownMs = (latestElapsed?.invoke() ?: 0L).coerceAtLeast(0L)
+                if (!playing || !drawn) break
+                delay(UNKNOWN_READING_MS)
+            }
+        }
+    }
+    val elapsedMs = if (unknown) unknownMs / 1000L * 1000L else elapsedSeconds * 1000L
+    val position = if (unknown) clock(elapsedMs) else stringResource(R.string.nag_music_position, clock(elapsedMs), clock(lengthMs))
     val playingMark = if (marks.isEmpty() || lengthMs <= 0L) null else marks.playingAt(elapsedMs.toFloat() / lengthMs)
 
     val active = dragging || state.hovered || state.focused
     val bar = style == TimelineStyle.Bar
     val thumbTarget = when {
+        unknown -> 0.dp
         dragging -> if (pointer) 7.dp else 10.dp
         active -> if (pointer) 6.dp else 8.dp
         pointer -> 0.dp
@@ -233,11 +255,15 @@ fun ProgressTimeline(
                     .semantics(mergeDescendants = true) {
                         contentDescription = label
                         stateDescription = playingMark?.let { "$position · ${it.label}" } ?: position
-                        progressBarRangeInfo = ProgressBarRangeInfo(if (lengthMs > 0L) (elapsedMs.toFloat() / lengthMs).coerceIn(0f, 1f) else 0f, 0f..1f)
-                        setProgress { target -> latestSeekTo(target); true }
+                        if (unknown) {
+                            progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
+                        } else {
+                            progressBarRangeInfo = ProgressBarRangeInfo(if (lengthMs > 0L) (elapsedMs.toFloat() / lengthMs).coerceIn(0f, 1f) else 0f, 0f..1f)
+                            setProgress { target -> latestSeekTo(target); true }
+                        }
                     }
                     .onKeyEvent { event ->
-                        if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                        if (event.type != KeyEventType.KeyDown || unknown) return@onKeyEvent false
                         val now = shown()
                         val target = when (event.key) {
                             Key.DirectionLeft -> now - step
@@ -249,7 +275,9 @@ fun ProgressTimeline(
                         latestSeekTo(target)
                         true
                     }
-                    .pointerInput(Unit) {
+                    // nothing to seek in what has no length
+                    .pointerInput(unknown) {
+                        if (unknown) return@pointerInput
                         awaitPointerEventScope {
                             var last = 0f
                             while (true) {
@@ -291,7 +319,7 @@ fun ProgressTimeline(
                         }
                     },
             ) {
-                val fraction = shown()
+                val fraction = if (unknown) 0f else shown()
                 val played = accent.value
                 val wavePlayed = played.copy(alpha = 0.34f)
                 val waveAhead = played.copy(alpha = 0.18f)
@@ -408,6 +436,12 @@ private val TIME_WIDTH = 44.dp
 
 /** A key step of the timeline. */
 private const val SEEK_STEP_MS = 5_000L
+
+/** How often the time played is read while the length is unknown: its figures change once a second. */
+private const val UNKNOWN_READING_MS = 1_000L
+
+/** 1.0.3: where the playback service's media is, in ms (0 without a service): a timeline's time when the length is unknown. */
+internal fun playbackPositionMs(): Long = PlaybackService.instance?.preciseTime() ?: 0L
 
 /** "0:00", "1:42", "1:02:03". */
 private fun clock(millis: Long): String = if (millis <= 0L) "0:00" else formatDuration(millis)

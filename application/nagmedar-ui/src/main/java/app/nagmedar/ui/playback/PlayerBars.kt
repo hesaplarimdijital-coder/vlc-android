@@ -73,10 +73,14 @@ import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagSlider
+import app.nagmedar.ui.components.PlayerCard
+import app.nagmedar.ui.components.PlayerShared
 import app.nagmedar.ui.components.SliderMark
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
+import app.nagmedar.ui.components.inPlayerSheetStrip
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.playerSharedElement
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.input.ShortcutId
@@ -90,6 +94,7 @@ import app.nagmedar.ui.podcast.ChapterSteps
 import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.floatingPlayerCard
+import app.nagmedar.ui.shell.floatingPlayerCorner
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.theme.ArtworkAccent
 import app.nagmedar.ui.theme.InputMode
@@ -113,7 +118,7 @@ fun Artwork(
     media: MediaWrapper?,
     size: Dp,
     modifier: Modifier = Modifier,
-    corner: Dp = 6.dp,
+    corner: Dp = BAR_ARTWORK_CORNER,
     video: Boolean = media?.type == MediaWrapper.TYPE_VIDEO,
     crossfade: Boolean = false,
 ) {
@@ -187,6 +192,9 @@ fun Artwork(
         }
     }
 }
+
+/** The bars' artwork's corners ([Artwork]'s own): the phone's flies into the full player with them (1.0.3). */
+internal val BAR_ARTWORK_CORNER = 6.dp
 
 /** The medialibrary's thumbnails last shown, by media and size, while there is room (a few megabytes). */
 private object ShownArtwork {
@@ -387,6 +395,8 @@ fun PlayerBar(
                 expandable = music,
                 onPrevious = if (music) actions::previous else null,
                 onNext = if (music) actions::next else null,
+                // 1.0.3: the full player grows out of the bar's card
+                card = compactPlayerCard(),
             )
             navKind == NavKind.BottomBar -> CompactTransportBar(info, { progress }, actions, artwork, modifier)
             else -> MiniPlayer(info, { progress }, actions, artwork, modifier, queueOpen = queueOpen, transparent = transparent)
@@ -560,6 +570,8 @@ private fun SeekRow(
         rate = info.rate,
         marks = marks,
         style = TimelineStyle.Bar,
+        // 1.0.3: a file of an unknown length shows the time played alone
+        elapsed = ::playbackPositionMs,
     )
 }
 
@@ -668,10 +680,12 @@ fun CompactTransportBar(
     modifier: Modifier = Modifier,
 ) {
     val dimens = NagTheme.dimens
-    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = 6.dp)) {
+    // 1.0.3: the copy of the bar in the phone player's sheet lies on the sheet, which is its card and grows into the page
+    val card = if (inPlayerSheetStrip) Modifier.clip(RoundedCornerShape(floatingPlayerCorner)) else Modifier.floatingPlayerCard()
+    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = COMPACT_MARGIN_Y)) {
         val button = TransportSize.Compact.button.coerceAtLeast(dimens.minTarget)
         val modes = showsModes(maxWidth, button, dimens.gapM)
-        Column(Modifier.fillMaxWidth().floatingPlayerCard().testTag("mini-player")) {
+        Column(Modifier.fillMaxWidth().then(card).testTag("mini-player")) {
             Row(
                 Modifier.fillMaxWidth().padding(start = COMPACT_INSET - 4.dp, end = 4.dp, top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -702,8 +716,16 @@ fun CompactTransportBar(
 internal fun showsModes(width: Dp, button: Dp, gap: Dp): Boolean =
     width - COMPACT_INSET - 4.dp - 8.dp - COMPACT_ARTWORK - gap - button * 5 >= WORDS_MIN
 
-/** The phone's bar: its margin to the window's edges, the room inside its card, the artwork. */
+/**
+ * 1.0.3: the phone's bar's card as the player's sheet starts from it ([ExpandablePlayer]): its margins in the strip and
+ * its corners ([floatingPlayerCard]'s).
+ */
+@Composable
+internal fun compactPlayerCard(): PlayerCard = PlayerCard(COMPACT_MARGIN, COMPACT_MARGIN_Y, floatingPlayerCorner)
+
+/** The phone's bar: its margin to the window's edges (above and below the card: [COMPACT_MARGIN_Y]), the room inside its card, the artwork. */
 private val COMPACT_MARGIN = 8.dp
+private val COMPACT_MARGIN_Y = 6.dp
 private val COMPACT_INSET = 12.dp
 private val COMPACT_ARTWORK = 40.dp
 
@@ -738,10 +760,18 @@ private fun NowPlayingWords(
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        artwork(artSize)
+        // 1.0.3: on a phone the artwork and the title fly into the full player as it opens, and back
+        Box(Modifier.playerSharedElement(PlayerShared.Artwork, RoundedCornerShape(BAR_ARTWORK_CORNER))) { artwork(artSize) }
         Spacer(Modifier.width(dimens.gapM))
         Column(Modifier.weight(1f)) {
-            Text(info.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                info.title,
+                style = NagTheme.type.bodyStrong,
+                color = colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.playerSharedElement(PlayerShared.Title),
+            )
             if (info.casting != null) {
                 CastingLine(info.casting)
             } else {

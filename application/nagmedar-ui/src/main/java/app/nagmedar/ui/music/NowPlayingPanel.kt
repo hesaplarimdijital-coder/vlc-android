@@ -66,6 +66,7 @@ import app.nagmedar.ui.playback.ChapterStrip
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.QueueEntry
+import app.nagmedar.ui.playback.playbackPositionMs
 import app.nagmedar.ui.playback.playbackRate
 import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
@@ -181,6 +182,7 @@ fun NowPlayingPanel(
                     progress, info.lengthMs, onSeek,
                     playing = info.playing, rate = info.rate, waveform = waveform,
                     marks = rememberChapterMarks(info.chapters, info.lengthMs), label = stringResource(R.string.nag_music_waveform),
+                    elapsed = ::playbackPositionMs,
                 )
                 ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
             }
@@ -261,6 +263,8 @@ private fun Playing(
             progress, info.lengthMs, onSeek,
             playing = info.playing, rate = info.rate, waveform = waveform,
             marks = rememberChapterMarks(info.chapters, info.lengthMs), label = stringResource(R.string.nag_music_waveform),
+            // 1.0.3: a file of an unknown length shows the time played alone
+            elapsed = ::playbackPositionMs,
         )
         ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
         if (upNext.isNotEmpty()) {
