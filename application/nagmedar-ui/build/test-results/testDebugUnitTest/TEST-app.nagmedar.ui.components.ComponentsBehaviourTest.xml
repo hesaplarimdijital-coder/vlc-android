@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.ComponentsBehaviourTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-05T23:06:03.502Z" hostname="runnervmwuk1x" time="0.709">
+  <properties/>
+  <testcase name="withAMouseNothingVibrates" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.06"/>
+  <testcase name="withAMouseASelectionStillEasesAndFadesOnlyItsOpacity" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.058"/>
+  <testcase name="aTabletsPressIsAsBefore" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.063"/>
+  <testcase name="onAPhoneASwipedUndoBarCarriesOnBeforeItGoes" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.071"/>
+  <testcase name="aFieldSaysItsErrorAndClears" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.128"/>
+  <testcase name="aShortSwipeLeavesTheBar" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.044"/>
+  <testcase name="byTouchAPressEasesInWithoutADarkFrame" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.037"/>
+  <testcase name="withAMouseHoverAndPressChangeAtOnce" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.047"/>
+  <testcase name="theSliderSaysItsNameAndValue" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.033"/>
+  <testcase name="byTouchTheTogglesAndTheSegmentsVibrate" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.095"/>
+  <testcase name="aPhonesPressIsLighterAndBouncesBack" classname="app.nagmedar.ui.components.ComponentsBehaviourTest" time="0.069"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

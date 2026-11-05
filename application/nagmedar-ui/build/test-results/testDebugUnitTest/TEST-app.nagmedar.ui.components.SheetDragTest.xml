@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.SheetDragTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-05T23:06:06.466Z" hostname="runnervmwuk1x" time="0.519">
+  <properties/>
+  <testcase name="aDragDownOnARowClosesItPastAThird" classname="app.nagmedar.ui.components.SheetDragTest" time="0.093"/>
+  <testcase name="aFlingDownClosesIt" classname="app.nagmedar.ui.components.SheetDragTest" time="0.064"/>
+  <testcase name="aScrolledSheetScrollsBackFirst" classname="app.nagmedar.ui.components.SheetDragTest" time="0.15"/>
+  <testcase name="aShortDragSpringsBack" classname="app.nagmedar.ui.components.SheetDragTest" time="0.073"/>
+  <testcase name="aTapStillRunsTheRow" classname="app.nagmedar.ui.components.SheetDragTest" time="0.054"/>
+  <testcase name="letGoRules" classname="app.nagmedar.ui.components.SheetDragTest" time="0.027"/>
+  <testcase name="aSidewaysDragStaysWithWhatItBeganOn" classname="app.nagmedar.ui.components.SheetDragTest" time="0.055"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
