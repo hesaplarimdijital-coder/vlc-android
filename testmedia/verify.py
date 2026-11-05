@@ -4,8 +4,7 @@
 Usage: verify.py <media-dir> [--allow-missing id,id]
 
 For every generated sample: the files exist, streams, durations, tags,
-side data (HDR10, HDR10+, Dolby Vision), chapters, subtitle flags, text
-encodings and ID3 frames are what the manifest promises. Writes
+chapters, text encodings and ID3 frames are what the manifest promises. Writes
 index.json (sha256 and size of every file, the result of every check) and
 index.md (a table for the job summary and the README). Exits 1 when a
 generated sample does not match.
@@ -14,10 +13,8 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,15 +27,6 @@ def probe(path):
         raise RuntimeError(out.stderr.strip()[:300])
     return json.loads(out.stdout)
 
-
-def frame_side_data(path):
-    out = subprocess.run(['ffprobe', '-v', 'error', '-read_intervals', '%+#2', '-select_streams', 'v:0', '-show_frames',
-                          '-show_entries', 'frame=side_data_list', '-print_format', 'json', path], capture_output=True, text=True)
-    kinds = set()
-    for frame in json.loads(out.stdout or '{}').get('frames', []):
-        for side in frame.get('side_data_list', []):
-            kinds.add(side.get('side_data_type'))
-    return kinds
 
 
 def lookup(obj, dotted):
@@ -107,37 +95,6 @@ def check_text(root, spec, problems):
         problems.append(f'{spec["file"]}: expected CRLF line ends')
 
 
-def check_dovi(path, profile, problems):
-    tool = shutil.which('dovi_tool')
-    if not tool:
-        problems.append('dovi_tool not on PATH')
-        return
-    with tempfile.TemporaryDirectory() as tmp:
-        rpu = os.path.join(tmp, 'rpu.bin')
-        r = subprocess.run([tool, 'extract-rpu', '-i', path, '-o', rpu], capture_output=True, text=True)
-        if r.returncode != 0:
-            problems.append('dovi_tool extract-rpu failed: ' + r.stderr.strip()[:200])
-            return
-        info = subprocess.run([tool, 'info', '-s', '-i', rpu], capture_output=True, text=True).stdout
-        if f'Profile: {profile}' not in info:
-            problems.append(f'RPU is not profile {profile}: ' + ' '.join(info.split())[:200])
-
-
-def check_hdr10plus(path, frames, problems):
-    tool = shutil.which('hdr10plus_tool')
-    if not tool:
-        problems.append('hdr10plus_tool not on PATH')
-        return
-    with tempfile.TemporaryDirectory() as tmp:
-        out = os.path.join(tmp, 'meta.json')
-        r = subprocess.run([tool, 'extract', '-i', path, '-o', out], capture_output=True, text=True)
-        if r.returncode != 0 or not os.path.exists(out):
-            problems.append('hdr10plus_tool extract failed: ' + (r.stderr or r.stdout).strip()[:200])
-            return
-        count = len(json.load(open(out)).get('SceneInfo', []))
-        if count != frames:
-            problems.append(f'HDR10+ metadata for {count} frames, expected {frames}')
-
 
 def sha256(path):
     h = hashlib.sha256()
@@ -199,23 +156,6 @@ def verify_sample(root, sample):
             actual = lookup(info, 'format.tags.' + key)
             if actual is None or value not in actual:
                 problems.append(f'{expect["tags_file"]}: tag {key} does not contain {value!r}')
-    main = os.path.join(root, files[0])
-    if 'stream_side_data' in expect and files[0] in probed:
-        for want in expect['stream_side_data']:
-            found = any(all(same(v, side.get(k)) for k, v in want.items())
-                        for s in probed[files[0]].get('streams', []) for side in s.get('side_data_list', []))
-            if not found:
-                have = [s.get('side_data_list') for s in probed[files[0]].get('streams', [])]
-                problems.append(f'no stream side data like {want}; have {have}')
-    if 'frame_side_data' in expect:
-        kinds = frame_side_data(main)
-        for kind in expect['frame_side_data']:
-            if kind not in kinds:
-                problems.append(f'frame side data "{kind}" missing; have {sorted(k for k in kinds if k)}')
-    if 'dovi_profile' in expect:
-        check_dovi(main, expect['dovi_profile'], problems)
-    if 'hdr10plus_frames' in expect:
-        check_hdr10plus(main, expect['hdr10plus_frames'], problems)
     for spec in expect.get('text', []):
         check_text(root, spec, problems)
     if 'xml' in expect:
@@ -234,7 +174,7 @@ def verify_sample(root, sample):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('root')
-    ap.add_argument('--allow-missing', default='', help='sample ids that may be absent (skipped heavy samples)')
+    ap.add_argument('--allow-missing', default='', help='sample ids that may be absent')
     args = ap.parse_args()
     manifest = json.load(open(os.path.join(HERE, 'manifest.json'), encoding='utf-8'))
     allowed = set(filter(None, args.allow_missing.split(',')))

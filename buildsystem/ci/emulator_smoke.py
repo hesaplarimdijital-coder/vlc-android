@@ -24,6 +24,15 @@ violations). The walk, in passes (a size and a language each):
                of Bu cihaz playing, the transport bar's "open the player" opens the big player over
                the window and Back closes it
   phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
+  sheet-trials (on demand) the phone's track sheet dragged down again and again by `input swipe`, by
+               drag() and by a stalled swipe, with the moves the system delivered (sheet-trials.md)
+
+1.0.3: the workflow runs the passes in two jobs (tablet-en, workstation and phone-tr; phone-en), so
+each pass brings what it needs: phone-en goes through a fresh app's first run, workstation and
+phone-tr push the walk's media and show the first run again when no phone-en came before them
+(ensure_library). The system's own ANRs and crashes (the emulator's System UI, launcher, setup
+apps) are recorded in the report, waited out (closed when the same process hangs again) and the
+step done once more when the dialog took its tap; the app's (any of its processes) fail the run.
 
 1.0.1 (the user's crash in Bu cihaz): phone-en, phone-tr and workstation also walk This device /
 Bu cihaz: the internal storage, its Music folder (the walk's files), a file played from it, back up
@@ -43,6 +52,9 @@ for arm64 only: on this x86_64 emulator they are missing, and the app must say s
 
 Exit status 1 when the app crashed, hung (ANR), a check failed or the driver itself failed; the
 report (report.md, report.json), annotations.txt and the evidence go to the --out directory.
+
+The offline checks of the dialog handling and of step()'s retry (no device) are in the 1.0.3 walk
+notes; drags whose distance matters use drag(), never `input swipe` (see drag()).
 """
 import argparse
 import collections
@@ -71,6 +83,14 @@ BOUNDS_RE = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
 # what 1.0 deleted (films, series, videos, the Home page, TV Lab) and 1.0.2 (Whisper's transcripts, the Lab's SP-05)
 # must not be named on the app's screens
 GONE_RE = re.compile(r"(?<!\w)(Filmler|Diziler|Videolar|Ana sayfa|TV Lab|Films|Movies|TV shows|Videos|Whisper|SP-05)(?!\w)")
+# 1.0.3: the system's error dialogs, "<who> isn't responding" (an ANR) and "<who> keeps stopping" / "<who> has stopped"
+# (a crash), in English or, when the system's language is Turkish, in Turkish; <who> is an app's label
+DIALOG_RE = re.compile(r"^(.+?)\s+(isn.t responding|keeps stopping|has stopped|yanıt vermiyor|durmaya devam ediyor|durdu)\b", re.S)
+# a hierarchy that may hold one of the dialogs system_dialogs() deals with (a cheap test before parsing it)
+DIALOG_HINT = re.compile(r"aerr_|permission_allow|isn.t responding|keeps stopping|has stopped|yanıt vermiyor|durmaya devam|durdu|Got it")
+# the app's label, as the system's dialogs name it
+APP_LABELS = ("Nağmedar", "Nagmedar")
+TIME_RE = re.compile(r"\d:\d\d")
 
 
 class Node:
@@ -143,6 +163,15 @@ class Smoke:
         self.checks = []  # 1.0's checks: pass, name, ok, detail, step
         self.jank = []  # dumpsys gfxinfo around a gesture
         self.gone = collections.OrderedDict()  # a deleted feature's word -> where it was first seen
+        # 1.0.3: the system's own ANRs and crashes (System UI, the launcher: the emulator's), recorded, not failures
+        self.system_events = []
+        self.dialogs_seen = []  # what dump() dealt with: "permission", "notice", "app" or "system", in order
+        self.step_mark = 0  # len(dialogs_seen) when the last step began
+        self.system_waited = set()  # the system processes whose "not responding" was waited for once
+        self.last_input = None  # (function, argument, len(dialogs_seen), the step before it): remember_input()
+        self.last_app_sig = None  # the app's part of the screen at the end of the last step
+        self.library_ready = False  # the walk's media pushed and granted, and scanned (the first run with them)
+        self.sheet_trials = []  # the sheet-drag pass's trials
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
@@ -195,7 +224,7 @@ class Smoke:
             self.sh("settings put global %s 0" % k)
         self.sh("settings put global stay_on_while_plugged_in 7")
         self.sh("svc power stayon true")
-        self.sh("input keyevent 82")
+        self.unlock()
         self.sh("settings put system accelerometer_rotation 0")
         self.sh("settings put system user_rotation 0")
         info = {k: self.sh("getprop " + p) for k, p in (("model", "ro.product.model"), ("sdk", "ro.build.version.sdk"),
@@ -253,7 +282,15 @@ class Smoke:
             self.warnings.append("[%s] the app was not in front after it was started (attempt %d): am start said %s; resumed: %s"
                                  % (self.cur_pass, attempt + 1, " ".join(out.split())[:300], " / ".join(top)[:300]))
             self.wait_boot(timeout=180)
-            self.sh("input keyevent 82")
+            self.unlock()
+            # 1.0.3: a system dialog in front (the launcher's ANR) is dealt with by reading the screen
+            self.dump()
+
+    def unlock(self):
+        """The screen on and the keyguard away. 1.0.3: without the menu key the walk used to send for it, which an
+        emulator's focused app without a window (the SDK setup app) never handled: its ANR came back all walk long."""
+        self.sh("input keyevent KEYCODE_WAKEUP")
+        self.sh("wm dismiss-keyguard")
 
     def set_display(self, size=None, density=None):
         self.sh("wm size %s" % (size or "reset"))
@@ -270,10 +307,18 @@ class Smoke:
         if rc != 0 or "rror" in out or "nknown" in out:
             self.warnings.append("input keycombination %s failed: %s" % (codes, out.strip()[:200]))
             return False
+        self.remember_input(lambda c: self.combo(*c), codes)
         return True
 
-    def key(self, code):
+    def key(self, code, record=True):
         self.sh("input keyevent %s" % code)
+        if record:
+            self.remember_input(self.key, code)
+
+    def remember_input(self, fn, arg):
+        """1.0.3: the walk's last tap or key, made for the next step: step() sends it once more when a system dialog came
+        after it and the app's screen stayed as it was (the dialog took it)."""
+        self.last_input = (fn, arg, len(self.dialogs_seen), self.n)
 
     def set_locale(self, tag):
         """tr-TR for the app (Android 13+ per-app language); the system's as a rooted fallback."""
@@ -290,7 +335,7 @@ class Smoke:
         if not self.wait_boot(first_sleep=15):
             self.errors.append("the emulator did not come back after the system locale change")
             return False
-        self.sh("input keyevent 82")
+        self.unlock()
         self.launch()
         return self.ui_in_language("tr" if tag.startswith("tr") else "en")
 
@@ -309,6 +354,19 @@ class Smoke:
     # ---------------------------------------------------------------- ui
 
     def dump(self):
+        """The UI hierarchy as XML (None when it could not be read). 1.0.3: a system error or permission dialog in it is
+        dealt with first (system_dialogs) and the screen read again, so every reader of the screen sees the app."""
+        for _ in range(3):
+            xml = self.raw_dump()
+            if xml is None or not DIALOG_HINT.search(xml):
+                return xml
+            what = self.system_dialogs(self.nodes(xml))
+            if not what:
+                return xml
+            self.dialogs_seen.append(what)
+        return self.raw_dump()
+
+    def raw_dump(self):
         for _ in range(3):
             rc, out = self.adb("shell", "uiautomator dump /sdcard/ui.xml", timeout=60)
             if rc == 0 and "dumped" in out:
@@ -330,6 +388,10 @@ class Smoke:
     @staticmethod
     def signature(nodes):
         return hashlib.md5("|".join("%s~%s~%s" % (n.text, n.desc, n.b) for n in nodes).encode()).hexdigest()
+
+    def app_signature(self, nodes):
+        """The app's part of the screen, without the times that change by themselves (a player's 1:23)."""
+        return self.signature([n for n in nodes if n.pkg == self.pkg and not TIME_RE.search(n.text)])
 
     def settle(self, minimum=0.8):
         """Waits until two hierarchy dumps in a row agree (at most five tries); returns the last dump."""
@@ -362,9 +424,11 @@ class Smoke:
                 best, best_score = n, score
         return best
 
-    def tap(self, node):
+    def tap(self, node, record=True):
         x, y = node.center
         self.sh("input tap %d %d" % (x, y))
+        if record:
+            self.remember_input(self.tap, node)
 
     def screen_size(self, nodes):
         w = max((n.b[2] for n in nodes), default=1080)
@@ -380,28 +444,66 @@ class Smoke:
         self.sh("input swipe %d %d %d %d 250" % (w // 2, int(h * 0.25), w // 2, int(h * 0.80)))
 
     def system_dialogs(self, nodes):
-        """Permission and error dialogs: the permission ones are allowed, the error ones are findings."""
+        """Permission and error dialogs: the permission ones are allowed; an error dialog of the app (an ANR or a crash of
+        any of its processes) is a finding that fails the run, one of the system's (System UI, the launcher: the emulator's
+        own) is recorded and waited out ("Wait"), and the step it came in is tried once more (step()). Returns what it
+        dealt with ("permission", "notice", "app", "system") or None."""
         for n in nodes:
             if n.rid.endswith("permission_allow_button") or n.rid.endswith("permission_allow_foreground_only_button"):
                 self.warnings.append("[%s] a permission dialog was shown and allowed" % self.cur_pass)
-                self.tap(n)
+                self.tap(n, record=False)
                 time.sleep(1)
-                return True
+                return "permission"
         for n in nodes:
             if n.text == "Got it" and n.pkg in ("android", "com.android.systemui"):  # the full-screen notice of the player
-                self.tap(n)
+                self.tap(n, record=False)
                 time.sleep(1)
-                return True
-        text = " ".join(n.text for n in nodes if n.pkg in ("android", "com.android.systemui"))
-        if re.search(r"isn.t responding|keeps stopping|has stopped", text):
-            kind = "ANR dialog" if "responding" in text else "crash dialog"
-            self.add_crash(kind, "The system showed: " + text[:300], "dialog")
-            for n in nodes:
-                if n.rid == "android:id/aerr_close":
-                    self.tap(n)
-            self.key(4)
-            return True
-        return False
+                return "notice"
+        sysnodes = [n for n in nodes if n.pkg in ("android", "com.android.systemui")]
+        texts = [n.text.strip() for n in sysnodes if n.text.strip()]
+        hit = next((m for m in (DIALOG_RE.match(t) for t in texts) if m), None)
+        if not hit and not any(n.rid.startswith("android:id/aerr_") for n in sysnodes):
+            return None
+        who = hit.group(1).strip() if hit else "?"
+        anr = (not hit) or ("respond" in hit.group(2) or "yanıt" in hit.group(2))
+        text = " ".join(texts)[:300]
+        ids = {n.rid: n for n in sysnodes}
+        if self.dialog_is_app(who):
+            kind = "ANR dialog" if anr else "crash dialog"
+            self.add_crash(kind, "The system showed: " + text, "dialog")
+            if "android:id/aerr_close" in ids:
+                self.tap(ids["android:id/aerr_close"], record=False)
+            else:
+                self.key(4, record=False)
+            time.sleep(1)
+            return "app"
+        # the system's own: recorded; an ANR is waited out the first time (closing System UI or the launcher restarts it),
+        # closed when the same process is not responding again (1.0.3's phone job: the emulator's SDK setup app, without
+        # a window, said so every few seconds however often it was waited for); a crash is closed
+        again = who in self.system_waited
+        wait = ids.get("android:id/aerr_wait") if anr and not again else None
+        button = wait or ids.get("android:id/aerr_close")
+        how = "Wait" if wait else ("Close app" + (" (not responding again)" if anr else "")) if button else "Back"
+        self.system_events.append({"pass": self.cur_pass, "step": self.n + 1, "kind": "ANR" if anr else "crash",
+                                   "who": who, "seen": text, "how": "dialog, " + how})
+        self.log("system %s dialog (%s): %s; %s" % ("ANR" if anr else "crash", who, text, how))
+        if wait:
+            self.system_waited.add(who)
+        if button:
+            self.tap(button, record=False)
+        else:
+            self.key(4, record=False)
+        time.sleep(1.5)
+        return "system"
+
+    def dialog_is_app(self, who):
+        """Whether an error dialog's [who] names the app (its label, its package or one of its processes)."""
+        w = who.strip().strip("\"'“”").lower()
+        if not w or w == "?":
+            return True  # unnamed: taken as the app's, to be safe
+        # the label, the package or one of its processes, also as "Process app.nagmedar.debug:logger" (a process
+        # without a label of its own)
+        return any(l.lower() in w for l in APP_LABELS) or self.pkg.lower() in w
 
     # ---------------------------------------------------------------- logcat
 
@@ -435,6 +537,9 @@ class Smoke:
                 text = "\n".join(block)
                 if "Process: %s" % pkg in text:
                     found.append(self.add_crash("FATAL EXCEPTION", text, "java"))
+                else:
+                    m = re.search(r"Process: (\S+?),", text)
+                    self.system_event("crash", m.group(1) if m else "?", " ".join(block[1:3]) or text[:200])
                 i = j
                 continue
             if tag in ("DEBUG", "crash_dump64", "crash_dump32") and (">>> %s" % pkg) in msg:
@@ -446,13 +551,18 @@ class Smoke:
                 found.append(self.add_crash("native crash", "\n".join(block), "native"))
                 i = j
                 continue
-            if tag == "ActivityManager" and msg.startswith("ANR in %s" % pkg):
+            if tag == "ActivityManager" and msg.startswith("ANR in "):
                 block = [msg]
                 j = i + 1
                 while j < len(recs) and recs[j][3] == "ActivityManager" and len(block) < 25 and not recs[j][4].startswith("ANR in"):
                     block.append(recs[j][4])
                     j += 1
-                found.append(self.add_crash("ANR", "\n".join(block), "anr"))
+                if msg.startswith("ANR in %s" % pkg):
+                    found.append(self.add_crash("ANR", "\n".join(block), "anr"))
+                else:
+                    # 1.0.3: another process's (System UI, the launcher): the emulator's, recorded only
+                    reason = next((b for b in block if b.startswith("Reason:")), "")
+                    self.system_event("ANR", msg[len("ANR in "):].split()[0] if len(msg) > 7 else "?", reason[:200])
                 i = j
                 continue
             if tag == "StrictMode" and "StrictMode policy violation" in msg:
@@ -500,6 +610,12 @@ class Smoke:
             i += 1
         return [f for f in found if f]
 
+    def system_event(self, kind, who, detail):
+        """1.0.3: an ANR or crash of another process than the app's (the emulator's System UI, launcher …): recorded."""
+        self.system_events.append({"pass": self.cur_pass, "step": self.n, "kind": kind, "who": who,
+                                   "seen": " ".join(detail.split())[:200], "how": "log"})
+        self.log("system %s in the log (%s): %s" % (kind, who, detail[:160]))
+
     def add_crash(self, kind, text, family):
         key = hashlib.md5((kind + text[:600]).encode()).hexdigest()
         if key in self.seen:
@@ -518,20 +634,38 @@ class Smoke:
         name = "%03d-%s-%s" % (n, self.cur_pass, slug(title))
         t = time.time()
         note = []
-        try:
-            if action:
-                r = action()
-                if isinstance(r, str):
-                    note.append(r)
-        except Exception as e:  # a failing action is a driver problem, not the app's
-            note.append("action failed: %s" % e)
-            self.errors.append("[%s] %s: %s" % (self.cur_pass, title, e))
-        xml = self.settle(wait)
-        nodes = self.nodes(xml)
-        if self.system_dialogs(nodes):
-            xml = self.settle(0.5)
+        before = self.last_app_sig
+        # the tap or key the walk made for this step before calling it (open_label() then step("Music")), if any
+        pending = self.last_input if self.last_input and self.last_input[3] == n - 1 else None
+        mark = self.step_mark = min(len(self.dialogs_seen), pending[2]) if pending else len(self.dialogs_seen)
+        for attempt in (1, 2):
+            try:
+                if action:
+                    r = action()
+                    if isinstance(r, str):
+                        note.append(r)
+            except Exception as e:  # a failing action is a driver problem, not the app's
+                note.append("action failed: %s" % e)
+                self.errors.append("[%s] %s: %s" % (self.cur_pass, title, e))
+            # dump() deals with the system's dialogs on the way (system_dialogs)
+            xml = self.settle(wait)
             nodes = self.nodes(xml)
+            came = [d for d in self.dialogs_seen[mark:] if d == "system"]
+            if not came or attempt == 2:
+                break
+            # 1.0.3: a dialog of the system's own (the emulator's) came during the step and was dealt with: the step once
+            # more when it left the app's screen as it was (the dialog took the step's tap, or the one made for it)
+            mark = len(self.dialogs_seen)
+            redo = action if action is not None else (pending and (lambda p=pending: p[0](p[1])))
+            if not redo or self.app_signature(nodes) != before:
+                note.append("a system dialog came and was dealt with")
+                break
+            note.append("a system dialog came and was dealt with: the step once more")
+            if action is None:
+                redo()
+        self.last_input = None
         sig = self.signature(nodes) if nodes else None
+        self.last_app_sig = self.app_signature(nodes) if nodes else None
         self.gone_words(nodes, name)
         if xml is None:
             note.append("no UI dump (the screen never went idle?)")
@@ -701,13 +835,22 @@ class Smoke:
                 self.warnings.append("[%s] no '%s' control found in Settings" % (self.cur_pass, s[key]))
 
     def open_by_scrolling(self, label):
+        """Scrolls the page down from its top until [label] shows and taps it. 1.0.3: False once two swipes in a row left
+        the page as it was (its end): a control this build does not have (the equaliser, without the engine on an
+        x86_64 emulator) cost 30 swipes, three minutes of every Settings pass."""
         self.scroll_to_top()
         nodes = self.nodes(self.dump())
+        prev, still = None, 0
         for _ in range(30):
             n = self.find(nodes, label)
             if n:
                 self.tap(n)
                 return True
+            sig = self.app_signature(nodes)
+            still = still + 1 if sig == prev else 0
+            if still >= 2:
+                return False
+            prev = sig
             self.swipe_up(nodes)
             time.sleep(0.5)
             nodes = self.nodes(self.dump())
@@ -750,6 +893,8 @@ class Smoke:
 
     def check(self, name, ok, detail=""):
         """One of 1.0's checks, with the step it was read at; a failed one fails the run."""
+        if not ok and "system" in self.dialogs_seen[self.step_mark:]:
+            detail = (detail + "; " if detail else "") + "a system dialog came meanwhile"
         self.checks.append({"pass": self.cur_pass, "name": name, "ok": bool(ok), "detail": detail, "step": self.n})
         self.log("check [%s] %s: %s %s" % (self.cur_pass, name, "ok" if ok else "FAILED", detail))
         if self.steps and not ok:
@@ -960,19 +1105,49 @@ class Smoke:
             self.sheet_drag(b)
 
     def sheet_drag(self, button):
-        """1.0.2: the track's sheet again, dragged down from its middle (over its rows, not its handle): it goes."""
+        """1.0.2: the track's sheet again, dragged down from its middle (over its rows, not its handle): it goes.
+        1.0.3: dragged once it stands still, by drag() (every point a move of its own), and read until it has gone."""
         s = self.strings[self.lang]
         nodes = self.step("A track's ⋯ again", lambda: self.tap(button))
         rows = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_add_to_queue"]]
         if not self.check("the track's sheet opens again", bool(rows)):
             return
         w, h = self.screen_size(nodes)
-        sheet = self.by_id(nodes, "sheet")
-        box = sheet[0].b if sheet else (0, rows[0].b[1], w, h)
+        box = self.sheet_still(nodes) or (0, rows[0].b[1], w, h)
         x, y = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
-        nodes = self.step("Drag the sheet down from its middle", lambda: self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97))), wait=1.5)
-        self.check("a drag down from the sheet's middle closes it",
-                   s["nag_add_to_queue"] not in self.texts(nodes) and not self.by_id(nodes, "sheet"), "from y=%d of %d" % (y, h))
+        how = {}
+        nodes = self.step("Drag the sheet down from its middle", lambda: how.update(self.drag(x, y, x, int(h * 0.97))), wait=0.5)
+        gone = lambda ns: s["nag_add_to_queue"] not in self.texts(ns) and not self.by_id(ns, "sheet")
+        if not gone(nodes):
+            nodes, _ = self.wait_for(gone, 4)
+        self.check("a drag down from the sheet's middle closes it", gone(nodes),
+                   "from y=%d of %d, %d moves in %d ms" % (y, h, how.get("moves", 0), how.get("ms", 0)))
+
+    def sheet_still(self, nodes, seconds=3.0):
+        """The sheet's bounds once two readings agree (it has finished sliding up), or None without a sheet."""
+        prev = self.by_id(nodes, "sheet")
+        end = time.time() + seconds
+        while prev and time.time() < end:
+            cur = self.by_id(self.nodes(self.dump()), "sheet")
+            if cur and cur[0].b == prev[0].b:
+                return cur[0].b
+            prev = cur
+        return prev[0].b if prev else None
+
+    def drag(self, x0, y0, x1, y1, moves=12):
+        """1.0.3: a finger's drag from (x0, y0) to (x1, y1): down, [moves] moves, up where the last move ended.
+        `input swipe x0 y0 x1 y1 300` waits for each move to be handled and sends no more once its 300 ms are up, then
+        lifts the finger at (x1, y1): when the app or the emulator stalls on an early move, the finger jumps from there
+        to the end as it lifts. That jump is not part of a drag (Compose drags by the moves; the lift is no move), and
+        the pause before it leaves no fling: 1.0.2's sheet sprang back and stayed (the evidence: the sheet-trials pass,
+        "stalled", 0 of 10 closed on API 37 with the app of master and with a changed one alike; drag 10 of 10). Here
+        every point is a move of its own and the lift comes where the last move ended. Returns {"moves", "ms"}."""
+        pts = [(x0 + (x1 - x0) * i // moves, y0 + (y1 - y0) * i // moves) for i in range(1, moves + 1)]
+        cmds = ["input motionevent DOWN %d %d" % (x0, y0)] + ["input motionevent MOVE %d %d" % p for p in pts] \
+            + ["input motionevent UP %d %d" % (x1, y1)]
+        t = time.time()
+        self.sh(" ; ".join(cmds), timeout=90)
+        return {"moves": moves, "ms": int((time.time() - t) * 1000)}
 
     def music_list(self, nodes):
         """The Music's scrolling list (its biggest scrollable view) or None."""
@@ -1217,6 +1392,7 @@ class Smoke:
         s = self.strings["en"]
         self.set_display(None, None)
         self.rotate(0)
+        self.ensure_library()
         self.launch()
         nodes = self.open_music()
         nodes, _ = self.wait_for(lambda ns: self.by_id(ns, "inspector"), 6)
@@ -1468,6 +1644,11 @@ class Smoke:
         self.prepare_media()
         self.launch()
         nodes = self.step("Launch (phone)")
+        if any(x.text.strip() == s["nag_fr_skip"] for x in self.app_nodes(nodes)):
+            # 1.0.3: the phone's job of the split walk starts on a fresh app: its first run, with the media granted
+            self.first_run_walk()
+            time.sleep(8)
+            nodes = self.step("After the first run (phone)")
         self.check_bottom_bar(nodes)
         self.visit_destinations()
         self.settings_pass(full=True)
@@ -1480,6 +1661,7 @@ class Smoke:
             self.step("After the scan")
         else:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
+        self.library_ready = True
         self.visit_destinations("Reopen")
         self.phone_player()
         self.auto_tree()
@@ -1488,9 +1670,33 @@ class Smoke:
         self.palette()
         self.rotation_and_background()
 
+    def ensure_library(self):
+        """1.0.3: a pass that needs the walk's media (workstation, phone-tr) and runs without phone-en before it (the walk
+        is split in two jobs) pushes and grants it and goes through the first run with it, as phone-en does."""
+        if self.library_ready:
+            return
+        self.library_ready = True
+        self.prepare_media()
+        self.launch()
+        nodes = self.step("Launch (the walk's media pushed)")
+        s = self.strings[self.lang]
+        if any(x.text.strip() == s["nag_fr_skip"] for x in nodes):
+            self.first_run_walk("First run with the media")
+        elif self.open_label(s["nag_nav_settings"]) and self.open_by_scrolling(s["nag_settings_first_run_again"]):
+            self.step("Show the first run again")
+            self.first_run_walk("First run again")
+        else:
+            self.warnings.append("[%s] the first run could not be shown again: the scan is left to the app" % self.cur_pass)
+        time.sleep(8)
+        self.step("After the scan")
+        self.launch()
+
     def pass_phone_tr(self):
-        self.cur_pass, self.lang = "phone-tr", "tr"
+        # the media first (in English: the app is not Turkish yet), should no pass before have brought it
+        self.cur_pass, self.lang = "phone-tr", "en"
         self.set_display("1080x2400", "420")
+        self.ensure_library()
+        self.lang = "tr"
         if not self.set_locale("tr-TR"):
             self.warnings.append("[phone-tr] the Turkish interface could not be set; the pass was skipped")
             return
@@ -1596,6 +1802,91 @@ class Smoke:
         if self.combo(113, 55):  # Ctrl+, settings
             self.step("Settings (Ctrl+,)")
 
+    def pass_sheet_trials(self):
+        """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
+        1.0.2's `input swipe … 300` and by drag() in turn, each trial with the moves the system delivered (dumpsys
+        input) and whether the sheet went: the evidence for the flaky check of 1.0.2's personal walk on API 37."""
+        self.cur_pass, self.lang = "sheet-trials", "en"
+        s = self.strings["en"]
+        self.set_display("1080x2400", "420")
+        self.ensure_library()
+        nodes = self.open_music()
+        rx = self.fmt_regex(s["nag_more_actions_for"])
+        kinds = ("swipe", "drag", "stalled")
+        for i in range(int(os.environ.get("SHEET_TRIALS", "10")) * len(kinds)):
+            if self.over_time():
+                break
+            how = kinds[i % len(kinds)]
+            nodes = self.nodes(self.dump())
+            w, h = self.screen_size(nodes)
+            buttons = [n for n in self.app_nodes(nodes) if rx.match(n.desc.strip()) and h * 0.2 < n.center[1] < h * 0.75]
+            if not buttons:
+                nodes = self.open_music()
+                continue
+            nodes = self.step("Trial %d: a track's ⋯" % (i + 1), lambda: self.tap(buttons[0]))
+            box = self.sheet_still(nodes)
+            if not box:
+                self.sheet_trials.append({"trial": i + 1, "how": how, "closed": None, "note": "no sheet"})
+                continue
+            x, y = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
+            self.sh("dumpsys input > /dev/null")
+            t = time.time()
+            if how == "swipe":
+                self.sh("input swipe %d %d %d %d 300" % (x, y, x, int(h * 0.97)))
+            elif how == "drag":
+                self.drag(x, y, x, int(h * 0.97))
+            else:
+                # what `input swipe` sends when the app stalls on an early move past the swipe's 300 ms: a few
+                # short moves, then the lift at the far end (the lift's jump is no drag, and a pause makes no fling)
+                self.sh(" ; ".join(["input motionevent DOWN %d %d" % (x, y)] + ["input motionevent MOVE %d %d" % (x, y + d)
+                                                                               for d in (40, 80, 120)]
+                                   + ["sleep 0.1", "input motionevent UP %d %d" % (x, int(h * 0.97))]), timeout=60)
+            ms = int((time.time() - t) * 1000)
+            moves = self.delivered_moves()
+            time.sleep(1.5)
+            nodes = self.step("Trial %d: dragged by %s" % (i + 1, how), wait=0.3)
+            closed = not self.by_id(nodes, "sheet")
+            self.sheet_trials.append({"trial": i + 1, "how": how, "closed": closed, "ms": ms, "from": y, "height": box[3] - box[1],
+                                      "moves": moves})
+            self.log("sheet trial %d (%s): %s in %d ms; moves %s" % (i + 1, how, "closed" if closed else "STAYED", ms, moves))
+            if not closed:
+                self.key(4)
+                self.step("Trial %d: Back closes the sheet" % (i + 1))
+        for how in kinds:
+            done = [t for t in self.sheet_trials if t["how"] == how and t["closed"] is not None]
+            self.warnings.append("[sheet-trials] %s: %d of %d closed the sheet" % (how, sum(1 for t in done if t["closed"]), len(done)))
+        with open(os.path.join(self.out, "sheet-trials.md"), "w", encoding="utf-8") as f:
+            f.write("| trial | how | closed | ms | from y | sheet height | events (action@y+ms, the display's own pixels) |\n"
+                    "|---|---|---|---|---|---|---|\n")
+            for t in self.sheet_trials:
+                f.write("| %s | %s | %s | %s | %s | %s | %s |\n" % (t["trial"], t["how"], t["closed"], t.get("ms", ""), t.get("from", ""),
+                                                                t.get("height", ""), t.get("moves", t.get("note", ""))))
+
+    def delivered_moves(self):
+        """The last touch gesture the input dispatcher sent (dumpsys input's recent events): each MotionEvent's action, y
+        and time, so a trial shows how many moves arrived between the finger's down and its lift."""
+        out = self.sh("dumpsys input", timeout=60)
+        # the raw lines, whatever this system's format, for the evidence (input-trials.txt)
+        lines = [l.strip() for l in out.splitlines() if "MotionEvent" in l and ("DOWN" in l or "MOVE" in l or "UP" in l)]
+        with open(os.path.join(self.out, "input-trials.txt"), "a", encoding="utf-8") as f:
+            f.write("==== trial at step %d\n%s\n" % (self.n, "\n".join(lines[-40:])))
+        seq = []
+        for l in lines:
+            # API 35/37: "MotionEvent(…, eventTime=318172000000ns, …, action=MOVE, …, pointers=[0: (1280.0, 976.8)]), …"
+            t = re.search(r"eventTime=(\d+)(ns)?", l)
+            a = re.search(r"action=(?:AMOTION_EVENT_ACTION_|ACTION_)?(DOWN|MOVE|UP)\b", l)
+            y = re.search(r"pointers=\[0: \(-?[\d.]+, (-?[\d.]+)\)", l) or re.search(r"(?:y\[0\]|\by)=(-?[\d.]+)", l)
+            if t and a and y:
+                ms = int(t.group(1)) // (1000000 if t.group(2) else 1)
+                seq.append((ms, a.group(1), int(float(y.group(1)))))
+        # the last gesture: from its last DOWN (the queue keeps the last few events only: a long gesture loses its start)
+        downs = [i for i, e in enumerate(seq) if e[1] == "DOWN"]
+        seq = seq[downs[-1]:] if downs else seq[-16:]
+        if not seq:
+            return "?"
+        t0 = seq[0][0]
+        return " ".join("%s@%d+%dms" % (a, y, t - t0) for t, a, y in seq[:20])
+
     def rotation_and_background(self):
         self.rotate(1)
         self.step("Rotated to landscape")
@@ -1695,10 +1986,11 @@ class Smoke:
         md.append("- installed: %s" % (getattr(self, "app_info", "") or "?"))
         md.append("- device: %s" % ", ".join("%s=%s" % kv for kv in getattr(self, "device", {}).items()))
         md.append("- source: %s" % (self.a.source or "?"))
+        md.append("- passes: %s" % self.a.passes)
         md.append("- %d steps in %d min %d s; %d crash/ANR finding(s), %d driver error(s), %d StrictMode violation(s), "
-                  "%d of %d 1.0 checks failed\n"
+                  "%d of %d 1.0 checks failed; %d ANR/crash of the system (the emulator's, not failures)\n"
                   % (len(self.steps), dur // 60, dur % 60, len(self.crashes), len(self.errors), self.strict_total,
-                     len(failed), len(self.checks)))
+                     len(failed), len(self.checks), len(self.system_events)))
         md.append("## 1.0 checks\n")
         md.append("| pass | step | check | result | seen |")
         md.append("|------|------|-------|--------|------|")
@@ -1724,6 +2016,16 @@ class Smoke:
             md.append("## Driver errors\n")
             md += ["- %s" % e for e in self.errors]
             md.append("")
+        md.append("## The system's ANRs and crashes (the emulator's own: recorded, the step tried once more)\n")
+        if self.system_events:
+            md.append("| pass | step | what | whose | seen | how |")
+            md.append("|------|------|------|-------|------|-----|")
+            for e in self.system_events:
+                md.append("| %s | %d | %s | %s | %s | %s |" % (e["pass"], e["step"], e["kind"], e["who"].replace("|", "/"),
+                                                        e["seen"].replace("|", "/")[:200], e["how"]))
+        else:
+            md.append("None.")
+        md.append("")
         md.append("## Steps\n")
         md.append("| # | pass | step | result | screenshot | note |")
         md.append("|---|------|------|--------|------------|------|")
@@ -1763,7 +2065,8 @@ class Smoke:
         with open(os.path.join(self.out, "report.json"), "w", encoding="utf-8") as f:
             json.dump({"verdict": verdict, "steps": self.steps, "crashes": self.crashes, "errors": self.errors,
                        "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
-                       "frames": self.jank, "seconds": dur}, f, indent=1)
+                       "frames": self.jank, "seconds": dur, "passes": self.a.passes, "source": self.a.source,
+                       "system": self.system_events, "sheet_trials": self.sheet_trials}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
@@ -1773,9 +2076,12 @@ class Smoke:
             ann.append("::error title=Emulator driver::%s" % enc(e[:600]))
         for c in failed:
             ann.append("::error title=Emulator check (%s, step %d)::%s %s" % (c["pass"], c["step"], c["name"], enc(c["detail"][:600])))
-        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d/%d checks failed, %d warnings, %d min. Evidence: branch %s, report.md" % (
-            verdict, len(self.steps), len(self.crashes), self.strict_total, len(failed), len(self.checks), len(self.warnings),
-            dur // 60, self.a.branch or "ci/emulator")
+        for e in self.system_events:
+            ann.append("::warning title=Emulator: the system's %s (%s, step %d)::%s %s" % (e["kind"], e["pass"], e["step"], enc(e["who"]),
+                                                                                       enc(e["seen"][:300])))
+        summary = "%s: %d steps, %d crash/ANR, %d StrictMode, %d/%d checks failed, %d system ANR/crash, %d warnings, %d min. Evidence: branch %s, report.md" % (
+            verdict, len(self.steps), len(self.crashes), self.strict_total, len(failed), len(self.checks), len(self.system_events),
+            len(self.warnings), dur // 60, self.a.branch or "ci/emulator")
         ann.append("::notice title=Emulator Ekran görüntüleri ve rapor::%s" % enc(summary))
         with open(os.path.join(self.out, "annotations.txt"), "w", encoding="utf-8") as f:
             f.write("\n".join(ann) + "\n")
