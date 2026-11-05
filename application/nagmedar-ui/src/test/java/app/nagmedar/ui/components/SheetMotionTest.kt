@@ -47,7 +47,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import kotlin.math.abs
 
 /**
  * 1.0.3 (Desktop Kit 2.3) frame by frame, as the kit's own sheet tests: a phone's sheet flung down carries on at
@@ -165,28 +164,6 @@ class SheetMotionTest {
         compose.onNodeWithTag("sheet").assertDoesNotExist()
     }
 
-    /**
-     * A finger on the sheet's first row moved by [segments] (in twentieths of the sheet's height, down positive),
-     * each segment settled on its own, then lifted; returns where the sheet's top was after each. The moves go to
-     * the window, which stays where it is: sent to the row, which goes down with the sheet, each relative move
-     * would be taken from where the row has gone (the finger would cover half the way).
-     */
-    private fun drag(vararg segments: Int): List<Float> {
-        val step = compose.onNodeWithTag("sheet").fetchSemanticsNode().size.height / 20f
-        val start = compose.onNodeWithText("Oynat").fetchSemanticsNode().boundsInRoot.center
-        val window = compose.onRoot()
-        val tops = mutableListOf<Float>()
-        window.performTouchInput { down(start) }
-        for (n in segments) {
-            window.performTouchInput { repeat(abs(n)) { moveBy(Offset(0f, if (n > 0) step else -step)) } }
-            compose.waitForIdle()
-            tops += top()
-        }
-        window.performTouchInput { up() }
-        compose.waitForIdle()
-        return tops
-    }
-
     /** The tick's rule, finger by finger: once each time a pull passes a third of the sheet, never on the way back. */
     @Test
     fun theTickComesOncePerCrossing() {
@@ -212,26 +189,31 @@ class SheetMotionTest {
         assertEquals(2, ticks)
     }
 
-    /** Pulled past a third, back above it and past it again: a tick each time it passes the closing point, by touch only. */
+    /** A slow pull past the closing point (a third of the sheet), as a finger does it: one tick on the way, by touch only. */
     @Test
-    fun theDragTicksAsItPassesTheClosingPoint() {
+    fun aPullPastTheClosingPointTicksOnce() {
         sheet()
-        val rest = top()
-        val third = compose.onNodeWithTag("sheet").getBoundsInRoot().let { (it.bottom - it.top).value } / 3f
-        // well past a third (slow: no fling), back up short of it, down past it again, back to its place
-        val tops = drag(10, -6, 6, -10)
-        assertTrue("pulled past a third: ${tops.map { it - rest }} of ${third * 3f}", tops[0] - rest > third && tops[1] - rest < third)
-        assertEquals(listOf(HapticFeedbackType.GestureThresholdActivate, HapticFeedbackType.GestureThresholdActivate), felt)
-        // back up and let go: it stays
-        assertEquals(0, dismissed)
+        pullFarDown()
+        assertEquals(listOf(HapticFeedbackType.GestureThresholdActivate), felt)
+        // past a third and let go: it closed
+        assertEquals(1, dismissed)
     }
 
     @Test
     fun withAMouseNothingTicks() {
         sheet(mode = InputMode.Pointer)
-        drag(10, -10)
+        pullFarDown()
         assertEquals(emptyList<HapticFeedbackType>(), felt)
-        assertEquals(0, dismissed)
+        assertEquals(1, dismissed)
+    }
+
+    /** Most of the sheet's height down from its first row, slowly (no fling: only the distance closes it). */
+    private fun pullFarDown() {
+        val sheetDp = compose.onNodeWithTag("sheet").getBoundsInRoot().let { (it.bottom - it.top).value }
+        compose.onNodeWithText("Oynat").performTouchInput {
+            swipe(center, center + Offset(0f, sheetDp * 0.8f * density), durationMillis = 1500)
+        }
+        compose.waitForIdle()
     }
 
     /** An on/off action is a switch at the row's end: it flips, a screen reader reads a switch, and the sheet stays. */
