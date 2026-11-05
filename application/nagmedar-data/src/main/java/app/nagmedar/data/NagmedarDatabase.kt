@@ -362,7 +362,7 @@ abstract class NagmedarDatabase : RoomDatabase() {
             if (counter != null) {
                 val now = query("SELECT seq FROM sqlite_sequence WHERE name = ?", arrayOf(table)).use { if (it.moveToFirst()) it.getLong(0) else 0L }
                 execSQL("DELETE FROM sqlite_sequence WHERE name = ?", arrayOf(table))
-                execSQL("INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)", arrayOf(table, maxOf(counter, now)))
+                execSQL("INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)", arrayOf<Any>(table, maxOf(counter, now)))
             }
         }
 
