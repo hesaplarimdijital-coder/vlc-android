@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -82,6 +81,8 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toActionGroups
+import app.nagmedar.ui.components.listAppear
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.convert.ConvertHost
 import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
@@ -114,6 +115,7 @@ import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
+import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
@@ -745,7 +747,8 @@ fun MusicBrowser(
     val wide = width >= WidthClass.Expanded && !(workstation && !inspectorState.collapsed && width < WidthClass.Large)
     // a wide window always shows a group; a narrow one shows the list until one is opened
     val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide }
-    if (!wide && grouped && state.group != null) BackHandler { state.group = null }
+    // (a phone's group closes with its transition's Back)
+    if (!wide && grouped && state.group != null && width != WidthClass.Compact) BackHandler { state.group = null }
     // the toolbar's Play and Shuffle take the open group's tracks as the table shows them
     val locale = LocalContext.current.resources.locale()
     val sort = effectiveSort(state)
@@ -774,6 +777,8 @@ fun MusicBrowser(
     val openActions = remember(actions, state.view, open?.title) { actions.playingFrom(groupSource(state.view, open)) }
     // the table's selection, which the inspector follows (S-405, Desktop Kit 1.0)
     val selection = rememberMultiSelection()
+    // a phone's group closing keeps the order its tracks were shown in
+    val closing = remember { ClosingOrder() }
     if (workstation) InspectorCommands(inspectorState::toggle)
     val panes: @Composable () -> Unit = {
         when {
@@ -811,6 +816,18 @@ fun MusicBrowser(
                 GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
                 VerticalRule()
                 Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
+            }
+            // 1.0.3 (Desktop Kit 2.3.0): a phone opens a group's tracks in depth over the groups, which stay where they
+            // were; Back is the predictive gesture
+            width == WidthClass.Compact && grouped -> DetailTransition(
+                detail = open,
+                onBack = { state.group = null },
+                detailKey = { it.key },
+                list = { GroupList(groups, state, actions, null, Modifier.fillMaxSize(), rowPadding = dimens.pagePadding - 12.dp, leading = phoneShelf) },
+            ) { group ->
+                val tracks = closing.of(group.key, if (group.key == open?.key) shown else null) ?: group.tracks
+                val groupActions = remember(actions, state.view, group.title) { actions.playingFrom(groupSource(state.view, group)) }
+                TrackPane(group, tracks, state, groupActions, showBack = true, stats, selection)
             }
             !grouped || open != null -> if (open != null) {
                 TrackPane(open, shown, state, openActions, showBack = grouped, stats, selection, leading = phoneShelf.takeIf { !grouped })
@@ -904,6 +921,8 @@ private fun GroupList(
     val res = LocalContext.current.resources
     val reduced = NagTheme.motion.reduced
     val compact = currentWidthClass() == WidthClass.Compact
+    // 1.0.3: on a phone the first groups arrive in turn, again for another way in, not when a group's tracks close
+    val appear = rememberListAppear(state.view)
     LaunchedEffect(state.reveal, groups) {
         val key = state.reveal ?: return@LaunchedEffect
         val index = groups.indexOfFirst { it.key == key }
@@ -915,15 +934,35 @@ private fun GroupList(
     }
     LazyColumn(modifier, state = listState, contentPadding = PaddingValues(vertical = 4.dp) + LocalShellBottomPadding.current) {
         if (leading != null) item(key = LEADING_ITEM, contentType = LEADING_ITEM) { leading() }
-        items(groups, key = { it.key }) { group ->
+        itemsIndexed(groups, key = { _, group -> group.key }) { index, group ->
             // the group shown beside, the first one on a wide window until another is opened
             // the menu plays the group's tracks, as the table's rows do one track
             val menu = { groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) }
-            ContextMenuArea(entries = menu, modifier = Modifier.padding(horizontal = rowPadding), accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+            ContextMenuArea(
+                entries = menu,
+                modifier = Modifier.listAppear(appear, index).padding(horizontal = rowPadding),
+                accessibilityLabel = stringResource(R.string.nag_more_actions),
+            ) {
                 // a phone's album, artist or folder ends with "⋯": the same menu (Desktop Kit 1.0)
                 GroupRow(group, state.view, selected = group.key == openKey, menu = menu.takeIf { compact }) { state.group = group.key }
             }
         }
+    }
+}
+
+/** The order a phone's open group showed its tracks in, kept while it closes; plain, so keeping it never redraws anything. */
+private class ClosingOrder {
+    private var key: String? = null
+    private var tracks: List<Track>? = null
+
+    /** [shown] kept as [key]'s when there is one; else what was kept for [key], if anything. */
+    fun of(key: String, shown: List<Track>?): List<Track>? {
+        if (shown != null) {
+            this.key = key
+            tracks = shown
+            return shown
+        }
+        return tracks.takeIf { this.key == key }
     }
 }
 
@@ -1027,6 +1066,8 @@ private fun TrackPane(
     val keys = remember(shown) { shown.map { it.uri } }
     LaunchedEffect(keys) { selection.retain(keys) }
     SelectionCommands(selection, keys)
+    // 1.0.3 (Desktop Kit 2.3.0): on a phone the first rows arrive in turn: a newly opened group's, another way in's
+    val appear = rememberListAppear(state.view, group.key)
     // 1.0.3 (Desktop Kit 2.2): Back clears a selection being made: any by touch or in "Seç", several with a mouse
     ClearSelectionOnBack(selection, touchLayout = !pointer)
     Column(Modifier.fillMaxSize()) {
@@ -1115,6 +1156,7 @@ private fun TrackPane(
             glassHeader = !compact,
             onExtendSelection = if (compact) null else ({ track, delta -> selection.extend(track.uri, keys, delta) }),
             leading = leading,
+            rowAppear = appear,
         )
     }
 }

@@ -173,6 +173,8 @@ fun <T> DenseTable(
      * column titles come under it and then stay at the top. Not with [reorder] or [glassHeader].
      */
     leading: (@Composable () -> Unit)? = null,
+    /** 1.0.3 (Desktop Kit 2.3.0): the first rows arrive in turn on a phone ([rememberListAppear]); null: they are there. */
+    rowAppear: ListAppear? = null,
 ) {
     val lead = leading.takeIf { reorder == null && !glassHeader }
     val more = rowMoreButton && rowMenu != null
@@ -232,7 +234,8 @@ fun <T> DenseTable(
                 // the reorder state finds its rows among the list's items: by the list's keys
                 val itemKey = itemKeys[index]
                 // the dragged row rises over the others: its outermost layout carries it
-                val place = if (reorder != null) Modifier.reorderItem(reorder, itemKey, index) else Modifier
+                val placed = if (reorder != null) Modifier.reorderItem(reorder, itemKey, index) else Modifier
+                val place = if (rowAppear != null) Modifier.listAppear(rowAppear, index).then(placed) else placed
                 val tracked = if (onExtendSelection == null) Modifier else Modifier.onFocusChanged { focus ->
                     if (focus.isFocused) focused.item = item else if (focused.item == item) focused.item = null
                 }

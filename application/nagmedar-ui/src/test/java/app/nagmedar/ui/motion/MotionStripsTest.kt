@@ -56,6 +56,16 @@ import app.nagmedar.ui.components.rememberExpandablePlayerState
 import app.nagmedar.ui.playback.FakeQueue
 import app.nagmedar.ui.playback.QueuePage
 import app.nagmedar.ui.playback.QueuePanel
+import app.nagmedar.ui.music.MusicActions
+import app.nagmedar.ui.music.MusicBrowser
+import app.nagmedar.ui.music.MusicBrowserState
+import app.nagmedar.ui.music.MusicLibrary
+import app.nagmedar.ui.music.MusicSamples
+import app.nagmedar.ui.music.MusicView
+import app.nagmedar.ui.music.Track
+import app.nagmedar.ui.podcast.PodcastActions
+import app.nagmedar.ui.podcast.PodcastSamples
+import app.nagmedar.ui.podcast.PodcastsContent
 import app.nagmedar.ui.sampleTracks
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.ChromeGlass
@@ -78,6 +88,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -92,6 +103,11 @@ import kotlin.math.roundToInt
  * those of the frame clock (16 ms apart); each frame lists the milliseconds since the change, with a "•"
  * while something still waits for the next frame (a spring that has not arrived), and the strip's last
  * label says when the window went still ("durdu").
+ *
+ * 1.0.3 (Desktop Kit 2.3.0's detail strips): a podcast's page opening on a phone (the row's cover flying to
+ * the page's header, the page coming in from 12 % over the sinking list), the predictive Back gesture on it
+ * (followed by the finger, then let go) and given up, an album opened and turned around by Back on its way,
+ * an album's tracks and the albums of another way in arriving in turn.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -445,6 +461,120 @@ class MotionStripsTest {
         strip("sheet-fling-bottom-glass", onUiThread = false) {
             compose.onNodeWithText("Albüme git").performTouchInput { swipe(center, center + Offset(0f, 150f), durationMillis = 60) }
         }
+    }
+
+    // ---------------------------------------------------------------- list → detail (1.0.3)
+
+    private var podcasts by mutableStateOf(PodcastSamples.model())
+
+    private val podcastActions = PodcastActions(
+        onOpen = { podcasts = podcasts.copy(page = PodcastSamples.page) },
+        onClosePage = { podcasts = podcasts.copy(page = null) },
+    )
+
+    /** The Podcast page in the phone's shell, as the app has it: its subscriptions, and a show's page over them. */
+    private fun podcastShell() {
+        phoneContent {
+            TestShell(WidthClass.Compact, startDestination = Destination.Podcasts) { _, _ -> PodcastsContent(podcasts, podcastActions) }
+        }
+    }
+
+    /** A show opened from its row: the cover flies to the page's header, the page comes in from 12 % over the sinking list. */
+    @Test
+    fun detailOpen() {
+        podcastShell()
+        strip("detail-open") { podcasts = podcasts.copy(page = PodcastSamples.page) }
+    }
+
+    /** Frames of the predictive Back gesture on the open show's page: the finger at 25, 50 and 80 %, then let go or given up. */
+    private fun backStrip(name: String, letGo: Boolean) {
+        podcasts = podcasts.copy(page = PodcastSamples.page)
+        podcastShell()
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        fun back(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
+        compose.mainClock.autoAdvance = false
+        val frames = mutableListOf("önce" to shot())
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f)) }
+        for (progress in listOf(0.25f, 0.5f, 0.8f)) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(progress)) }
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+            frames += "parmak $progress" to shot()
+        }
+        stillAt = null
+        compose.runOnUiThread { if (letGo) dispatcher.onBackPressed() else dispatcher.dispatchOnBackCancelled() }
+        var now = 0L
+        for (t in listOf(16L, 64L, 144L, 224L, 304L)) {
+            now = advanceTo(t, now)
+            frames += (if (letGo) "bırakınca +" else "vazgeçince +") + label(now) to shot()
+        }
+        while (stillAt == null && now < STILL_LIMIT_MS) now = advanceTo(now + FRAME_MS, now)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        saveStrip(name, frames, stillAt?.let { "durdu: $it ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
+    }
+
+    /** Back with the finger: the list is really behind the shrinking page; let go, the page leaves from where it was. */
+    @Test
+    fun detailBack() = backStrip("detail-back", letGo = true)
+
+    /** The same gesture given up half way: everything runs back the way it came. */
+    @Test
+    fun detailBackCancelled() = backStrip("detail-back-cancelled", letGo = false)
+
+    private val library by lazy { MusicLibrary(MusicSamples.tracks, Locale.forLanguageTag("tr")) }
+
+    private val musicActions = object : MusicActions {
+        override fun play(tracks: List<Track>, index: Int) = Unit
+
+        override fun queue(tracks: List<Track>) = Unit
+    }
+
+    /** The Music page's browser in the phone's shell. */
+    private fun musicShell(state: MusicBrowserState) {
+        phoneContent {
+            TestShell(WidthClass.Compact) { _, _ -> MusicBrowser(library, state, musicActions, Modifier.fillMaxSize()) }
+        }
+    }
+
+    private val albumKey by lazy { library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key }
+
+    /** An album opened from the albums: its tracks come in from 12 % over the sinking albums and arrive in turn. */
+    @Test
+    fun albumOpen() {
+        val state = MusicBrowserState(view = MusicView.Albums)
+        musicShell(state)
+        strip("album-open") { state.group = albumKey }
+    }
+
+    /** Back right after the tap: the way is run back from where it was, the albums rise again. */
+    @Test
+    fun albumTurnAround() {
+        val state = MusicBrowserState(view = MusicView.Albums)
+        musicShell(state)
+        compose.mainClock.autoAdvance = false
+        val frames = mutableListOf("önce" to shot())
+        compose.runOnIdle { state.group = albumKey }
+        var now = advanceTo(96, 0)
+        frames += "açılırken $now ms" to shot()
+        stillAt = null
+        compose.runOnIdle { state.group = null }
+        for (t in listOf(16L, 48L, 96L, 160L, 240L, 320L)) {
+            now = advanceTo(96 + t, now)
+            frames += "geri +" + label(now - 96) to shot()
+        }
+        while (stillAt == null && now < STILL_LIMIT_MS) now = advanceTo(now + FRAME_MS, now)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        saveStrip("album-turn-around", frames, stillAt?.let { "durdu: ${it - 96} ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
+    }
+
+    /** Another way into the library (Parçalar → Albümler): the first albums arrive in turn, 15 ms apart. */
+    @Test
+    fun listAppear() {
+        val state = MusicBrowserState(view = MusicView.Tracks)
+        musicShell(state)
+        strip("list-appear", at = listOf(16L, 48L, 80L, 112L, 160L, 208L, 256L, 320L)) { state.open(MusicView.Albums) }
     }
 
     // ---------------------------------------------------------------- the pieces

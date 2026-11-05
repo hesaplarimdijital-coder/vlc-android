@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Desktop Kit 0.2.0's list → detail transition (the shared axis), frame by frame. */
+/** Desktop Kit 0.2.0's list → detail transition (the shared axis), frame by frame; 1.0.3: the phone's Back gesture in depth. */
 class DetailMotionTest {
 
     private fun assertFrame(expected: DetailFrame, actual: DetailFrame) {
@@ -59,5 +59,48 @@ class DetailMotionTest {
         assertEquals(0.9f, DetailMotion.BACK_SCALE, 0.0001f)
         assertEquals(28, DetailMotion.BACK_CORNER_DP)
         assertEquals(24, DetailMotion.BACK_LEAN_DP)
+    }
+
+    @Test
+    fun aPhonesBackGestureHasTheListBehindAndTheDetailWholeUntilLetGo() {
+        // the finger's first touch: the detail as it was, the list behind it at 94 %, still hidden
+        val start = DetailDepth.gestureFrame(0f)
+        assertEquals(1f, start.detailScale, 0.0001f)
+        assertEquals(1f, start.detailAlpha, 0.0001f)
+        assertEquals(DetailDepth.GESTURE_LIST_SCALE, start.listScale, 0.0001f)
+        assertEquals(0f, start.listAlpha, 0.0001f)
+        // as far as the finger seeks: shrunk to 90 %, leaning and rounded the whole way, not yet on its way out
+        val held = DetailDepth.gestureFrame(DetailDepth.GESTURE_END)
+        assertEquals(DetailMotion.BACK_SCALE, held.detailScale, 0.0001f)
+        assertEquals(1f, held.lean, 0.0001f)
+        assertEquals(0f, held.out, 0.0001f)
+        assertEquals(1f, held.detailAlpha, 0.0001f)
+        // the end of the way out: gone, the list in place
+        val end = DetailDepth.gestureFrame(1f)
+        assertEquals(1f, end.out, 0.0001f)
+        assertEquals(0f, end.detailAlpha, 0.0001f)
+        assertEquals(1f, end.listScale, 0.0001f)
+        assertEquals(1f, end.listAlpha, 0.0001f)
+    }
+
+    @Test
+    fun aPhonesBackGestureMovesOneWayOnly() {
+        var last = DetailDepth.gestureFrame(0f)
+        for (step in 1..40) {
+            val frame = DetailDepth.gestureFrame(step / 40f)
+            assertTrue("the detail shrinks", frame.detailScale <= last.detailScale)
+            assertTrue("the detail leans on", frame.lean >= last.lean)
+            assertTrue("the detail goes on its way out", frame.out >= last.out)
+            assertTrue("the list rises", frame.listScale >= last.listScale && frame.listAlpha >= last.listAlpha)
+            last = frame
+        }
+    }
+
+    @Test
+    fun aPhonesDetailComesFromTwelvePercentOverAListSunkToNinetyFive() {
+        assertEquals(0.12f, DetailDepth.SHIFT, 0.0001f)
+        assertEquals(0.95f, DetailDepth.LIST_SCALE, 0.0001f)
+        assertEquals(0.85f, DetailDepth.GESTURE_END, 0.0001f)
+        assertEquals(220, DetailDepth.COMMIT_MS)
     }
 }
