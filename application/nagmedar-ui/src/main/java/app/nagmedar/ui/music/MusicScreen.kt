@@ -96,6 +96,7 @@ import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MediaSharing
 import app.nagmedar.ui.library.MusicRead
 import app.nagmedar.ui.library.MusicSnapshot
+import app.nagmedar.ui.library.ScanState
 import app.nagmedar.ui.library.ShelfTitle
 import app.nagmedar.ui.library.TrackCard
 import app.nagmedar.ui.library.formatDuration
@@ -379,25 +380,36 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
             onConverted = { converting = null },
             modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
         )
-        LibraryContent(
-            loading = library == null,
-            empty = library?.tracks?.isEmpty() == true,
-            scan = scan,
-            emptyTitle = stringResource(R.string.nag_state_no_music_title),
-            emptyDescription = stringResource(R.string.nag_state_no_music_desc),
-            onAddFolder = onAddFolder,
-        ) {
-            if (library != null) {
-                MusicBrowser(
-                    library, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
-                    stats = stats, recent = recentKeys, shelf = shelf,
-                )
-            }
+        MusicContent(library, scan, onAddFolder) { known ->
+            MusicBrowser(
+                known, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
+                stats = stats, recent = recentKeys, shelf = shelf,
+            )
         }
     }
     adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
     rating?.let { tracks ->
         RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+    }
+}
+
+/**
+ * The Music page under its header: the loading state while no list is known yet (the first start,
+ * before its first read), the empty state, or [browser] with the list. 1.0.3: a known list (this
+ * window's, or the one kept from the last start) is shown whatever the medialibrary does; a scan
+ * the user asked for adds its strip above it.
+ */
+@Composable
+internal fun MusicContent(library: MusicLibrary?, scan: ScanState, onAddFolder: () -> Unit, browser: @Composable (MusicLibrary) -> Unit) {
+    LibraryContent(
+        loading = library == null,
+        empty = library?.tracks?.isEmpty() == true,
+        scan = scan,
+        emptyTitle = stringResource(R.string.nag_state_no_music_title),
+        emptyDescription = stringResource(R.string.nag_state_no_music_desc),
+        onAddFolder = onAddFolder,
+    ) {
+        if (library != null) browser(library)
     }
 }
 
