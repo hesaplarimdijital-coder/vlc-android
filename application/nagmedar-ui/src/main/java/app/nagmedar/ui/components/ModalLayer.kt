@@ -49,7 +49,7 @@ fun Modifier.blockInputBelow(paneTitle: String? = null): Modifier {
             if (paneTitle != null) this.paneTitle = paneTitle
         }
         // the focus does not leave it ...
-        .focusProperties { exit = { FocusRequester.Cancel } }
+        .focusProperties { onExit = { cancelFocusChange() } }
         .focusGroup()
         // ... and starts on it: Tab goes on to what is in it
         .focusRequester(focus)

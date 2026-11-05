@@ -1,5 +1,7 @@
 package app.nagmedar.ui.lab
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -23,13 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
@@ -41,7 +41,6 @@ import app.nagmedar.ui.theme.NagTheme
 @Composable
 fun ReportDialog(title: String, report: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard)
@@ -74,7 +73,9 @@ fun ReportDialog(title: String, report: String, onDismiss: () -> Unit) {
             HorizontalRule()
             Spacer(Modifier.height(dimens.gapM))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimens.gapS, androidx.compose.ui.Alignment.End)) {
-                NagButton(stringResource(R.string.nag_lab_copy), { clipboard.setText(AnnotatedString(report)) })
+                NagButton(stringResource(R.string.nag_lab_copy), {
+                    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(title, report))
+                })
                 NagButton(stringResource(R.string.nag_lab_share), { context.shareText(title, report) })
                 NagButton(stringResource(R.string.nag_lab_close), onDismiss, primary = true)
             }
