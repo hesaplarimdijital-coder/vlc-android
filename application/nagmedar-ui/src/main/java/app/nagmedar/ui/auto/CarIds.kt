@@ -8,6 +8,7 @@ import java.net.URLEncoder
  * 1.0: the ids of Android Auto's entries: under the browser's root ([MediaSessionBrowser.ID_ROOT]) a path, a key in it
  * encoded (an album's, a folder's path, a tag) and parameters after "?": "p" the page of a long list, "i" the track a
  * list plays from, "n", "u", "l" a directory station's name, address and logo, "t" why a list is empty ([nothing]).
+ * 1.0.3: the Music tab's genres, smart lists, every track and its shuffle.
  */
 object CarIds {
     const val ROOT = MediaSessionBrowser.ID_ROOT
@@ -18,12 +19,19 @@ object CarIds {
     const val PLAYLISTS = "$MUSIC/playlists"
     const val YEARS = "$MUSIC/years"
     const val FOLDERS = "$MUSIC/folders"
+
+    /** 1.0.3: the genres (only when the library has some), every track (A–Z), and the whole library shuffled. */
+    const val GENRES = "$MUSIC/genres"
+    const val TRACKS = "$MUSIC/tracks"
+    const val SHUFFLE = "$MUSIC/shuffle"
     private const val ALBUM = "$MUSIC/album/"
     private const val ARTIST = "$MUSIC/artist/"
     private const val PLAYLIST = "$MUSIC/playlist/"
     private const val DECADE = "$MUSIC/decade/"
     private const val YEAR = "$MUSIC/year/"
     private const val FOLDER = "$MUSIC/folder/"
+    private const val GENRE = "$MUSIC/genre/"
+    private const val SMART = "$MUSIC/smart/"
 
     const val PODCASTS = MediaSessionBrowser.ID_PODCASTS
     const val CONTINUE = "$PODCASTS/continue"
@@ -58,6 +66,12 @@ object CarIds {
     /** A year's tracks; 0 for those of no year. */
     fun year(year: Int?) = "$YEAR${year ?: 0}"
     fun folder(path: String) = FOLDER + encode(path)
+
+    /** 1.0.3: a genre's tracks, by its group's key ("" for the tracks of none). */
+    fun genre(key: String) = GENRE + encode(key)
+
+    /** 1.0.3: a smart list's tracks, by its id. */
+    fun smart(id: Long) = "$SMART$id"
     fun show(feedId: Long) = "$SHOW$feedId"
     fun episode(id: Long) = "$EPISODE$id"
     fun tag(name: String) = TAG + encode(name)
@@ -76,19 +90,23 @@ object CarIds {
     /** The [page]th part of the long list [listId]. */
     fun page(listId: String, page: Int) = "$listId?p=$page"
 
-    /** [id] read: its path, the key after a known prefix, its parameters; null for an id that is not under the root. */
+    /**
+     * [id] read: its path, the key after a known prefix, its parameters; null for an id that is not under the root.
+     * 1.0.3: the key may be empty (the group of the tracks with no artist, genre or folder): every keyed prefix ends with
+     * "/", which no list's own path does.
+     */
     fun parse(id: String): CarRef? {
         if (!id.startsWith(ROOT)) return null
         val path = id.substringBefore('?')
         val params = id.substringAfter('?', "").split('&').filter { it.contains('=') }
             .associate { it.substringBefore('=') to decode(it.substringAfter('=')) }
-        val kind = KINDS.firstOrNull { path.startsWith(it.first) && path.length > it.first.length }
+        val kind = KINDS.firstOrNull { path.startsWith(it.first) }
         return CarRef(path, kind?.second, kind?.let { decode(path.removePrefix(it.first)) }, params)
     }
 
     private val KINDS = listOf(
         ALBUM to CarKind.Album, ARTIST to CarKind.Artist, PLAYLIST to CarKind.Playlist, DECADE to CarKind.Decade, YEAR to CarKind.Year,
-        FOLDER to CarKind.Folder, SHOW to CarKind.Show, EPISODE to CarKind.Episode, TAG to CarKind.Tag, STATION to CarKind.Station,
+        FOLDER to CarKind.Folder, GENRE to CarKind.Genre, SMART to CarKind.Smart, SHOW to CarKind.Show, EPISODE to CarKind.Episode, TAG to CarKind.Tag, STATION to CarKind.Station,
         DIRECTORY to CarKind.DirectoryStation, SEARCH to CarKind.Search,
     )
 
@@ -102,7 +120,7 @@ object CarIds {
 }
 
 /** The entries with a key in their id. */
-enum class CarKind { Album, Artist, Playlist, Decade, Year, Folder, Show, Episode, Tag, Station, DirectoryStation, Search }
+enum class CarKind { Album, Artist, Playlist, Decade, Year, Folder, Genre, Smart, Show, Episode, Tag, Station, DirectoryStation, Search }
 
 /** An id read ([CarIds.parse]): [path] without the parameters, the [kind] and [key] of an entry with one. */
 data class CarRef(val path: String, val kind: CarKind?, val key: String?, val params: Map<String, String>) {
