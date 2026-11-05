@@ -338,7 +338,11 @@ fun NagmedarShell(
                         // a solid card with its border, whatever passes beneath (1.0.1)
                         .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
                 ) {
-                    CompositionLocalProvider(LocalFloatingPlayer provides floating, LocalOnBottomGlass provides onBottomGlass) { player(navKind) }
+                    CompositionLocalProvider(
+                        LocalFloatingPlayer provides floating,
+                        LocalOnBottomGlass provides onBottomGlass,
+                        LocalBottomGlassSurface provides bottomGlass,
+                    ) { player(navKind) }
                 }
             },
             content = {

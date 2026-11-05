@@ -106,7 +106,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.util.lerp
 import app.nagmedar.ui.R
-import app.nagmedar.ui.shell.LocalOnBottomGlass
+import app.nagmedar.ui.shell.LocalBottomGlassSurface
 import app.nagmedar.ui.shell.ShellOverlayHost
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
@@ -277,8 +277,8 @@ fun ExpandablePlayer(
     SideEffect { state.tier = tier }
     val expandLabel = stringResource(R.string.nag_open_player)
     val canExpand = expandable && host != null
-    // the strip lies on the phone's bottom glass (the user's glass decision): its card has no colour of its own
-    val onGlass = LocalOnBottomGlass.current
+    // the strip lies on the phone's bottom glass (the user's decision, glass B): its card is that glass
+    val glass = LocalBottomGlassSurface.current
     var miniCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var miniHeight by remember { mutableIntStateOf(0) }
     val sheet = remember(state) { PlayerSheetScope(state) }
@@ -353,7 +353,7 @@ fun ExpandablePlayer(
         // first frame; while the mini player rests it is neither drawn, read out, focused nor touched. The collapse
         // runs in this scope: the Back handler's own one ends once the player is no longer expanded
         OverlayLayer(host, ShellOverlayHost.PLAYER) {
-            PlayerSheet(state, sheet, miniHeight, card, onGlass, mini, full, collapse = { scope.launch { state.collapse() } })
+            PlayerSheet(state, sheet, miniHeight, card, glass, mini, full, collapse = { scope.launch { state.collapse() } })
         }
     }
 }
@@ -502,7 +502,9 @@ private class SurfaceShape(private val rect: Rect, private val radius: Float) : 
  *
  * 1.0.3 (Desktop Kit 2.3.0): one surface that starts as the strip's [card] (a full-width strip
  * without one) and grows into the page ([PlayerSurface]); on it the strip's copy, the full player and,
- * above both, the shared elements on their way ([PlayerFlight]).
+ * above both, the shared elements on their way ([PlayerFlight]). With the strip on the shell's bottom
+ * [glass] the card is that glass: the surface keeps it under the page's colour, which comes over it
+ * as the player rises, and drops it once the player stands (no blur under the opaque page).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -511,7 +513,7 @@ private fun PlayerSheet(
     sheet: PlayerSheetScope,
     miniHeight: Int,
     card: PlayerCard?,
-    onGlass: Boolean,
+    glass: (@Composable () -> Modifier)?,
     mini: @Composable () -> Unit,
     full: @Composable () -> Unit,
     collapse: () -> Unit,
@@ -529,14 +531,16 @@ private fun PlayerSheet(
     // the strip's controls are placed in the first part of the way, and until they have drawn once (a player that starts
     // open records them for its first way down); decided by a derived state, not on every frame of the way
     val miniPlaced by remember(state, flight) { derivedStateOf { state.progress < MINI_GONE || !flight.miniDrawn } }
+    // the card's glass under the page's colour while the player rises; none once it stands
+    val glassOn by remember(state) { derivedStateOf { state.progress < 1f } }
     val insetX = with(density) { (card?.horizontal ?: 0.dp).toPx() }
     val insetY = with(density) { (card?.vertical ?: 0.dp).toPx() }
     val cardRadius = with(density) { (card?.corner ?: 0.dp).toPx() }
     val travel = with(density) { TRAVEL_CORNER.toPx() }
     val backCorner = with(density) { BACK_CORNER.toPx() }
     val rule = with(density) { 1.dp.toPx() }
-    // under the bottom glass the card is the glass: only the page's colour comes over it
-    val cardColor = if (onGlass) colors.background.copy(alpha = 0f) else colors.surfaceRaised
+    // on the bottom glass the card is the glass: only the page's colour comes over it
+    val cardColor = if (glass != null) colors.background.copy(alpha = 0f) else colors.surfaceRaised
     val pageColor = colors.background
     val ruleColor = colors.borderStrong
     Box(
@@ -573,6 +577,7 @@ private fun PlayerSheet(
                     shape = SurfaceShape(bounds, PlayerSurface.radius(p, cardRadius, travel) + backCorner * back)
                     clip = p < 1f || back > 0f
                 }
+                .then(if (glass != null && glassOn) glass() else Modifier)
                 .drawBehind {
                     val p = state.progress
                     drawRect(PlayerSurface.fill(p, cardColor, pageColor))

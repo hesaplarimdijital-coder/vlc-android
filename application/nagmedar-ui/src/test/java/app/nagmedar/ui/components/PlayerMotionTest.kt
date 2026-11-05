@@ -44,6 +44,7 @@ import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.TimelineStyle
 import app.nagmedar.ui.playback.rememberSmoothProgress
+import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -66,9 +67,10 @@ import kotlin.math.roundToInt
  * the strip's card into the page, the surface where [PlayerSurface] has it on every frame, its colour going from the
  * card's to the page's, its corners round on the way; the artwork marked with [playerSharedElement] flies from the
  * strip to the full player and back, and the strip's copy in the sheet is not placed once it has faded; with the bars
- * hidden by a scroll the player opens from where the strip is drawn, the bars stay, and it lands there again. A
- * timeline composed while a track plays starts at the latest reading (the sheet's first frame showed "0:00 / −4:18"),
- * and a file of an unknown length shows the time played alone.
+ * hidden by a scroll the player opens from where the strip is drawn, the bars stay, and it lands there again. On the
+ * shell's bottom glass (the user's glass B) the card is the glass, the page's colour coming over it. A timeline
+ * composed while a track plays starts at the latest reading (the sheet's first frame showed "0:00 / −4:18"), and a
+ * file of an unknown length shows the time played alone.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -88,7 +90,7 @@ class PlayerMotionTest {
     /** The screen behind the player, in a colour neither the card nor the page has. */
     private val screenColor = Color(0xFF2E6F95)
 
-    private fun phone(screen: @Composable () -> Unit = { Box(Modifier.fillMaxSize().background(screenColor)) }) {
+    private fun phone(glass: ChromeGlass = ChromeGlass.Solid, screen: @Composable () -> Unit = { Box(Modifier.fillMaxSize().background(screenColor)) }) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
@@ -97,6 +99,7 @@ class PlayerMotionTest {
                 player = rememberExpandablePlayerState()
                 TestShell(
                     WidthClass.Compact,
+                    chromeGlass = glass,
                     player = { kind ->
                         if (kind == NavKind.BottomBar) {
                             ExpandablePlayer(
@@ -243,6 +246,45 @@ class PlayerMotionTest {
         val open = shot()
         assertTrue("the page's colour at the window's edge", near(open.at(2f, overlayTop + window.height / 2f), pageColor))
         assertTrue("a square corner", near(open.at(1f, overlayTop + 1f), pageColor))
+    }
+
+    /**
+     * On the shell's bottom glass (the user's glass B, the product's chrome) the card is that glass: the surface keeps it
+     * under the page's colour while the player rises, a region of its own over the screen; open, it is the page.
+     */
+    @Test
+    fun onTheBottomGlassTheCardGrowsIntoThePage() {
+        phone(glass = ChromeGlass.Bottom)
+        val density = compose.activity.resources.displayMetrics.density
+        val window = compose.onRoot().fetchSemanticsNode().size
+        val rest = strip()
+        val overlayTop = rest.top - player.collapsedTop
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithTag("mini").performClick()
+        var checked = 0
+        repeat(90) { frame ->
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+            val p = player.progress
+            if (p <= 0f || p >= 1f) return@repeat
+            val surface = PlayerSurface.bounds(p, player.collapsedTop, rest.height, window.width.toFloat(), window.height.toFloat(), CARD_X * density, CARD_Y * density)
+                .translate(rest.left, overlayTop + player.collapsedTop * (1f - p))
+            if (surface.right + 4f >= window.width - 1) return@repeat
+            val bitmap = shot()
+            val middle = surface.top + surface.height / 2f
+            val beside = bitmap.at(surface.right + 4f, middle)
+            assertFalse(
+                "frame $frame (p=$p): the glass under the page's colour stands out from the screen beside it, at $surface",
+                near(bitmap.at(surface.right - 4f, middle), Color(beside)),
+            )
+            checked++
+        }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertTrue("the surface was checked in $checked frames", checked >= 4)
+        assertTrue(player.isExpanded)
+        // open, its glass is gone under the page: the page's colour from edge to edge
+        assertTrue("the page's colour at the window's edge", near(shot().at(2f, overlayTop + window.height / 2f), pageColor))
     }
 
     @Test

@@ -49,6 +49,7 @@ import app.nagmedar.ui.components.rememberExpandablePlayerState
 import app.nagmedar.ui.playback.compactPlayerCard
 import app.nagmedar.ui.sampleTracks
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
@@ -154,12 +155,13 @@ class MotionStripsTest {
     private var navigator: ShellNavigator? = null
 
     /** The phone's shell with a list under the bars on Müzik and Podcast, the sample pages elsewhere. */
-    private fun shell(player: (@Composable (NavKind) -> Unit)? = null, overlay: @Composable () -> Unit = {}) {
+    private fun shell(player: (@Composable (NavKind) -> Unit)? = null, glass: ChromeGlass = ChromeGlass.Solid, overlay: @Composable () -> Unit = {}) {
         phoneContent {
             TestShell(
                 WidthClass.Compact,
                 player = player,
                 overlay = { overlay() },
+                chromeGlass = glass,
             ) { destination, nav ->
                 navigator = nav
                 when (destination) {
@@ -205,9 +207,9 @@ class MotionStripsTest {
 
     private var playerScope: CoroutineScope? = null
 
-    private fun playerShell(): ExpandablePlayerState {
+    private fun playerShell(glass: ChromeGlass = ChromeGlass.Solid): ExpandablePlayerState {
         var player: ExpandablePlayerState? = null
-        shell(player = { kind ->
+        shell(glass = glass, player = { kind ->
             if (kind == NavKind.BottomBar) {
                 val state = rememberExpandablePlayerState()
                 player = state
@@ -276,6 +278,31 @@ class MotionStripsTest {
         hideBars()
         openPlayer(player)
         strip("player-collapse-bars-hidden", at = times + 640L) { playerScope?.launch { player.collapse() } }
+    }
+
+    // ---------------------------------------------------------------- the player on the bottom glass (the user's glass B)
+
+    /** The bar's card on the shell's one bottom glass: the player grows out of it, the page's colour coming over the glass. */
+    @Test
+    fun playerExpandGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        strip("player-expand-glass", at = times + 640L) { playerScope?.launch { player.expand() } }
+    }
+
+    /** Back on the full player over the glass: down onto the card on the glass. */
+    @Test
+    fun playerBackGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        openPlayer(player)
+        strip("player-back-glass", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
+    }
+
+    /** A tap with the bars hidden by a scroll, on the glass. */
+    @Test
+    fun playerTapBarsHiddenGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        hideBars()
+        strip("player-tap-bars-hidden-glass", at = times + 640L) { playerScope?.launch { player.expand() } }
     }
 
     // ---------------------------------------------------------------- a sheet
