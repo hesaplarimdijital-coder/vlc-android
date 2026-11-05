@@ -359,7 +359,14 @@ private fun SoundRows(settings: SharedPreferences) {
     var balance by remember { mutableStateOf((settings.getFloat(NAGMEDAR_AUDIO_BALANCE, 0f) * 10).roundToInt().coerceIn(-10, 10)) }
     var mono by remember { mutableStateOf(settings.getBoolean(NAGMEDAR_AUDIO_MONO, false)) }
     val colors = NagTheme.colors
-    SettingRow(stringResource(R.string.nag_settings_pitch), subtitle = stringResource(R.string.nag_settings_pitch_hint)) {
+    val signed = when {
+        pitch > 0 -> "+$pitch"
+        pitch < 0 -> "−${-pitch}"
+        else -> "0"
+    }
+    val pitchText = pluralStringResource(R.plurals.nag_pitch_semitones, abs(pitch), signed)
+    val pitchTitle = stringResource(R.string.nag_settings_pitch)
+    SettingRow(pitchTitle, subtitle = stringResource(R.string.nag_settings_pitch_hint)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             NagSlider(
                 value = (pitch + PITCH_RANGE) / (2f * PITCH_RANGE),
@@ -374,15 +381,13 @@ private fun SoundRows(settings: SharedPreferences) {
                 wheelStep = 1f / (2 * PITCH_RANGE),
                 // 1.0.1: narrower where the window is (320 dp, the largest font), the value keeps its one line
                 modifier = Modifier.weight(1f, fill = false).widthIn(max = 200.dp),
+                // TalkBack reads the setting's name and the value beside it (Desktop Kit 2.0)
+                label = pitchTitle,
+                valueText = { pitchText },
             )
             Spacer(Modifier.width(NagTheme.dimens.gapS))
-            val signed = when {
-                pitch > 0 -> "+$pitch"
-                pitch < 0 -> "−${-pitch}"
-                else -> "0"
-            }
             Text(
-                pluralStringResource(R.plurals.nag_pitch_semitones, abs(pitch), signed),
+                pitchText,
                 style = NagTheme.type.mono,
                 color = colors.textSecondary,
                 maxLines = 1,
@@ -391,7 +396,13 @@ private fun SoundRows(settings: SharedPreferences) {
             )
         }
     }
-    SettingRow(stringResource(R.string.nag_settings_balance)) {
+    val balanceText = when {
+        balance < 0 -> stringResource(R.string.nag_balance_left, -balance * 10)
+        balance > 0 -> stringResource(R.string.nag_balance_right, balance * 10)
+        else -> stringResource(R.string.nag_balance_centre)
+    }
+    val balanceTitle = stringResource(R.string.nag_settings_balance)
+    SettingRow(balanceTitle) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             NagSlider(
                 value = (balance + 10) / 20f,
@@ -405,14 +416,12 @@ private fun SoundRows(settings: SharedPreferences) {
                 keyStep = 1f / 20,
                 wheelStep = 1f / 20,
                 modifier = Modifier.weight(1f, fill = false).widthIn(max = 200.dp),
+                label = balanceTitle,
+                valueText = { balanceText },
             )
             Spacer(Modifier.width(NagTheme.dimens.gapS))
             Text(
-                when {
-                    balance < 0 -> stringResource(R.string.nag_balance_left, -balance * 10)
-                    balance > 0 -> stringResource(R.string.nag_balance_right, balance * 10)
-                    else -> stringResource(R.string.nag_balance_centre)
-                },
+                balanceText,
                 style = NagTheme.type.mono,
                 color = colors.textSecondary,
                 maxLines = 1,

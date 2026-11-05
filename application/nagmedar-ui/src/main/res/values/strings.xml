@@ -731,6 +731,7 @@
     <!-- Search page (S-311) -->
     <string name="nag_search_placeholder">Search tracks, artists or albums</string>
     <string name="nag_search_clear">Clear the search</string>
+    <string name="nag_field_clear">Clear the text</string>
     <plurals name="nag_search_count">
         <item quantity="one">%2$d result for “%1$s”</item>
         <item quantity="other">%2$d results for “%1$s”</item>

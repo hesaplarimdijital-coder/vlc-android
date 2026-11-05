@@ -2,8 +2,12 @@ package app.nagmedar.ui.components
 
 import android.os.SystemClock
 import android.view.ViewConfiguration
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.VectorConverter
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -15,8 +19,11 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusDirection
@@ -48,6 +55,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.input.consumePointerUntilAllUp
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 
 /** Visual state of an interactive element: hover, press and keyboard focus. */
@@ -62,9 +72,12 @@ fun InteractionSource.collectState(): InteractionState {
 }
 
 /**
- * Background for a desktop-style control: pressed > selected > hovered > [rest]. It eases from
- * one state to the next over [app.nagmedar.ui.theme.NagMotion.COLOR] instead of jumping (Desktop
- * Kit 0.2.0); with "Remove animations" it changes at once.
+ * Background for a desktop-style control: pressed > selected > hovered > [rest]. By touch it eases
+ * from one state to the next over [app.nagmedar.ui.theme.NagMotion.COLOR] instead of jumping
+ * (Desktop Kit 0.2.0). With a mouse (Desktop Kit 0.2.1) hover and press change it in the frame they
+ * happen, as on a desktop: only what is under the pointer is lit, nothing trails behind it; a change
+ * of [selected] (a click, a key) still eases. A fade to or from a clear colour changes only the
+ * opacity, never passing through grey. With "Remove animations" it changes at once.
  */
 @Composable
 fun stateBackground(state: InteractionState, selected: Boolean = false, rest: Color = Color.Transparent): Color {
@@ -73,27 +86,90 @@ fun stateBackground(state: InteractionState, selected: Boolean = false, rest: Co
         state.pressed -> colors.pressed
         selected -> colors.selection
         state.hovered -> colors.hover
-        // a clear rest fades the state's own tint out, not through black
-        rest.alpha == 0f -> colors.hover.copy(alpha = 0f)
         else -> rest
     }
-    return animateStateColor(target, "stateBackground")
+    return animateInteractionColor(target, selected, label = "stateBackground").value
 }
 
-/** A control's [target] colour (its fill, text or icon) easing like [stateBackground]. */
+/** A control's [target] colour (its fill, text or icon) easing like [stateBackground] does by touch. */
 @Composable
 fun animateStateColor(target: Color, label: String = "stateColor"): Color =
-    animateColorAsState(target, NagTheme.motion.color(), label = label).value
+    animateInteractionColor(target, instant = false, label = label).value
 
 /**
- * Touch feedback in place of a ripple: the element shrinks to [scale] while a finger holds it and
- * springs back on release (Desktop Kit 0.2.0). By touch only: with a mouse nothing moves, as on a
- * desktop. Drawn in the layer, so the press does not recompose what it scales.
+ * The colour of a control's hover and press feedback that computes its own [target] (a button's
+ * fill, the navigation's pill), as [stateBackground] moves (Desktop Kit 0.2.1): at once with a mouse
+ * unless [selected] changed, easing in [spec] otherwise; a fade to or from a clear colour changes
+ * only the opacity (an Oklab fade toward clear black would pass through grey). [instant] says
+ * whether the window's pointer changes it at once; false eases every change, as for a colour that
+ * follows a state rather than the pointer.
+ */
+@Composable
+fun animateInteractionColor(
+    target: Color,
+    selected: Boolean = false,
+    spec: FiniteAnimationSpec<Color> = NagTheme.motion.color(),
+    instant: Boolean = NagTheme.inputMode == InputMode.Pointer,
+    label: String = "interactionColor",
+): State<Color> {
+    val fade = remember { InteractionFade(target, selected, label) }
+    fade.retarget(target, selected, instant)
+    val current = rememberUpdatedState(target)
+    val tier = LocalMotionTier.current
+    LaunchedEffect(fade, target) { fade.run(target, NagMotion.fade(tier, spec)) }
+    return if (fade.easing) fade.color.asState() else current
+}
+
+/** The colour of [animateInteractionColor]: where it is and whether its latest change eases. */
+private class InteractionFade(initial: Color, private var selected: Boolean, label: String) {
+    val color = Animatable(initial, Color.VectorConverter(initial.colorSpace), label = label)
+    private var target = initial
+
+    /** Whether the latest change eases; when false the caller gets the target itself, with no frame in between. */
+    var easing = false
+        private set
+
+    fun retarget(newTarget: Color, newSelected: Boolean, instant: Boolean) {
+        if (newTarget == target && newSelected == selected) return
+        easing = !instant || newSelected != selected
+        target = newTarget
+        selected = newSelected
+    }
+
+    suspend fun run(to: Color, spec: AnimationSpec<Color>) {
+        if (!easing) {
+            color.snapTo(to)
+            return
+        }
+        val from = color.value
+        // from or to a clear colour only the opacity changes: the hue stays the visible one's
+        if (from.alpha == 0f && to.alpha > 0f) color.snapTo(to.copy(alpha = 0f))
+        color.animateTo(if (to.alpha == 0f) from.copy(alpha = 0f) else to, spec)
+        color.snapTo(to)
+    }
+}
+
+/**
+ * Touch feedback in place of a ripple: the element shrinks while a finger holds it and springs back
+ * on release (Desktop Kit 0.2.0). By touch only: with a mouse nothing moves, as on a desktop. On a
+ * phone (Desktop Kit 2.3) the press goes three quarters as deep as [scale] (the finger covers the
+ * control: the shrink is felt more than seen) and letting go bounces back a touch over the rest;
+ * wider windows keep [scale] and a plain spring both ways. Drawn in the layer, so the press does not
+ * recompose what it scales.
  */
 @Composable
 fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
     val touch = NagTheme.inputMode == InputMode.Touch
-    val value = animateFloatAsState(if (pressed && touch) scale else 1f, NagTheme.motion.fastSpatial(), label = "pressScale")
+    val tier = LocalMotionTier.current
+    val phone = tier == MotionTier.Gesture && !NagTheme.motion.reduced
+    val target = when {
+        !pressed || !touch -> 1f
+        phone -> phonePressScale(scale)
+        else -> scale
+    }
+    // a scale is a fraction: its spring stops a thousandth from the end (Part 2a's rule)
+    val spec = if (phone && !pressed) PressRelease else NagTheme.motion.fastSpatial(NagMotion.FRACTION)
+    val value = animateFloatAsState(target, spec, label = "pressScale")
     // with a pointer nothing scales: no layer either
     if (!touch) return this
     return graphicsLayer {
@@ -101,6 +177,12 @@ fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
         scaleY = value.value
     }
 }
+
+/** How deep a phone's press goes for a control asking for [scale]: three quarters of the way (0.96 → 0.97). */
+internal fun phonePressScale(scale: Float): Float = 1f - (1f - scale) * 0.75f
+
+/** A phone's press let go: back to the rest with a light bounce over it, settled within a thousandth. */
+private val PressRelease = spring(dampingRatio = 0.75f, stiffness = 1200f, visibilityThreshold = NagMotion.FRACTION)
 
 /**
  * Click handling shared by all Nağmedar controls: hand cursor, hover tracking, no ripple

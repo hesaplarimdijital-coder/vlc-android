@@ -1,5 +1,6 @@
 package app.nagmedar.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -33,6 +34,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
@@ -167,36 +171,107 @@ fun SelectionMark(selected: Boolean, modifier: Modifier = Modifier) {
 @Composable
 fun rememberMultiSelection(): MultiSelection = remember { MultiSelection() }
 
-/** The keys held when the pointer last pressed: what the next click means for a selection. */
+/**
+ * 1.0.3 (Desktop Kit 2.2): Back leaves a selection being made, as Android's action mode does: in
+ * the "Seç" mode or on a touch layout any selection, with a mouse several items (one item a mouse
+ * clicked is only selected, and Back goes on to the page). Composed with the list, after the
+ * screen's own handlers, so it comes before them.
+ */
+@Composable
+fun ClearSelectionOnBack(selection: MultiSelection, touchLayout: Boolean) {
+    BackHandler(enabled = SelectionRules.backClears(selection.count, selection.selecting, touchLayout)) { selection.clear() }
+}
+
+/** The selection rules of the lists, free of Compose for the tests. */
+internal object SelectionRules {
+    /** Whether Back clears a selection of [count] items ([selecting]: the "Seç" mode) rather than going back. */
+    fun backClears(count: Int, selecting: Boolean, touchLayout: Boolean): Boolean =
+        selecting || (count > 0 && touchLayout) || count > 1
+}
+
+/**
+ * The keys held when the pointer last pressed: what the next click means for a selection. 1.0.3
+ * (Desktop Kit 2.1): also whether that press was a finger's or a pen's ([finger]) or a mouse's: the
+ * press decides how a list's click acts, not the layout.
+ */
 class ClickModifiers {
     private var ctrl = false
     private var shift = false
+    private var finger: Boolean? = null
 
-    internal fun pressed(ctrl: Boolean, shift: Boolean) {
+    internal fun pressed(ctrl: Boolean, shift: Boolean, finger: Boolean? = null) {
         this.ctrl = ctrl
         this.shift = shift
+        this.finger = finger
     }
 
     /** Ctrl (or Meta) and Shift of the last press, then forgotten: Enter on a focused item has none. */
-    fun take(): Pair<Boolean, Boolean> = (ctrl to shift).also { pressed(ctrl = false, shift = false) }
+    fun take(): Pair<Boolean, Boolean> = (ctrl to shift).also { pressed(ctrl = false, shift = false, finger = finger) }
+
+    /**
+     * Whether the last press was a finger's or a pen's (true) or a mouse's (false), then forgotten;
+     * null when the click came without one (a key, TalkBack). Read it before [take].
+     */
+    fun takeFinger(): Boolean? = finger.also { finger = null }
+
+    /** A key went down: the click it may make (Enter, Space) has no press of a pointer behind it. */
+    internal fun keyPressed() {
+        finger = null
+    }
+}
+
+/**
+ * What a click on an item of a list that selects does (1.0.3, Desktop Kit 2.1): a finger's or a
+ * pen's tap opens (plays) it, unless items are being picked (the "Seç" mode); a mouse's click selects
+ * it, Ctrl and Shift as on desktops, whatever the layout. [finger] is the press's (null without one:
+ * the layout's input decides, [touchLayout]).
+ */
+enum class ListClick {
+    /** Taken in or out of the selection being made. */
+    Toggle,
+
+    /** Selected as a desktop does (Ctrl, Shift). */
+    Select,
+
+    /** Opened: played. */
+    Open;
+
+    companion object {
+        fun of(selecting: Boolean, finger: Boolean?, touchLayout: Boolean): ListClick = when {
+            selecting -> Toggle
+            finger ?: touchLayout -> Open
+            else -> Select
+        }
+    }
 }
 
 /** The window's [ClickModifiers], recorded by [TrackClickModifiers]. */
 val LocalClickModifiers = staticCompositionLocalOf { ClickModifiers() }
 
-/** Records, before any child sees a press, the keys held with it (S-405). */
+/**
+ * Records, before any child sees a press, the keys held with it (S-405) and, 1.0.3, the pointer
+ * that pressed; a key going down forgets the pointer, so the click a key makes is a key's.
+ */
 @Composable
 fun TrackClickModifiers(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val modifiers = remember { ClickModifiers() }
     CompositionLocalProvider(LocalClickModifiers provides modifiers) {
         Box(
-            modifier.pointerInput(modifiers) {
+            modifier.onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown) modifiers.keyPressed()
+                false
+            }.pointerInput(modifiers) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.type == PointerEventType.Press) {
                             val keys = event.keyboardModifiers
-                            modifiers.pressed(ctrl = keys.isCtrlPressed || keys.isMetaPressed, shift = keys.isShiftPressed)
+                            val down = event.changes.firstOrNull { it.pressed }
+                            modifiers.pressed(
+                                ctrl = keys.isCtrlPressed || keys.isMetaPressed,
+                                shift = keys.isShiftPressed,
+                                finger = down?.let { it.type != PointerType.Mouse },
+                            )
                         }
                     }
                 }
@@ -208,9 +283,24 @@ fun TrackClickModifiers(modifier: Modifier = Modifier, content: @Composable () -
 /**
  * Ctrl+A and Esc go to the screen in front (S-405): it says what all is and what Esc lets go of.
  * The menu bar's "Tümünü seç", the palette and Ctrl+A run [selectAll]; an Esc nothing else used
- * runs [escape].
+ * runs [escape]. 1.0.3: while a layer over the whole window hides the screen ([covered]: the big
+ * player, Sıradaki, the lyrics) none of them reaches it.
  */
 class ScreenCommands {
+    /** The layers over the whole window that hide the screen now; plain, nothing redraws from it. */
+    private val covers = mutableSetOf<Any>()
+
+    /** A layer over the whole window hides the screen ([app.nagmedar.ui.components.blockInputBelow], [coveredByLayer]). */
+    val covered: Boolean get() = covers.isNotEmpty()
+
+    internal fun cover(by: Any) {
+        covers += by
+    }
+
+    internal fun uncover(by: Any) {
+        covers -= by
+    }
+
     internal var selectAllHandler: (() -> Boolean)? = null
     internal var escapeHandler: (() -> Boolean)? = null
 
@@ -221,15 +311,15 @@ class ScreenCommands {
     /** Desktop Kit 1.0: the music view's inspector shown or hidden (Ctrl+I), while the view has one. */
     internal var inspectorHandler: (() -> Boolean)? = null
 
-    fun selectAll(): Boolean = selectAllHandler?.invoke() ?: false
+    fun selectAll(): Boolean = !covered && selectAllHandler?.invoke() == true
 
-    fun escape(): Boolean = escapeHandler?.invoke() ?: false
+    fun escape(): Boolean = !covered && escapeHandler?.invoke() == true
 
-    fun up(): Boolean = upHandler?.invoke() ?: false
+    fun up(): Boolean = !covered && upHandler?.invoke() == true
 
-    fun refresh(): Boolean = refreshHandler?.invoke() ?: false
+    fun refresh(): Boolean = !covered && refreshHandler?.invoke() == true
 
-    fun toggleInspector(): Boolean = inspectorHandler?.invoke() ?: false
+    fun toggleInspector(): Boolean = !covered && inspectorHandler?.invoke() == true
 }
 
 val LocalScreenCommands = staticCompositionLocalOf { ScreenCommands() }
