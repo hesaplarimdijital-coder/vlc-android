@@ -1859,6 +1859,19 @@ class Smoke:
                 f.write("| %s | %s | %s | %s |\n" % (name, letter, theme, what))
         self.check("the glass screenshots were taken (A, B, C in dark and light)", len(shots) >= 12, "%d screenshots" % len(shots))
 
+    def more_page(self):
+        """The phone's More page (its tab, and again when the tab showed a page opened from it: the tab keeps its pages,
+        and chosen again it goes to its first page); the nodes, or None."""
+        s = self.strings[self.lang]
+        for _ in range(2):
+            if not self.open_label(s["nag_nav_more"], via_more=False):
+                return None
+            time.sleep(1.2)
+            nodes = self.nodes(self.settle(0.8))
+            if self.page_title(nodes, s["nag_nav_more"]):
+                return nodes
+        return None
+
     def cold_start(self, route=None):
         """1.0.3: the app ended and started again (into the page of [route], by the launcher shortcuts' extra), the screen
         read as soon as its window has come in (within its first second); the path of that screenshot, or None."""
@@ -1978,10 +1991,16 @@ class Smoke:
                 elif route == "music":
                     nodes = self.open_music()
                 else:
-                    if not self.open_label(label, via_more=route not in ("podcasts", "radio", "more")):
+                    # Playlists and Settings from the More page itself (the More tab may still show a page of its own)
+                    via = self.more_page() if route in ("playlists", "settings", "more") else self.nodes(self.dump())
+                    target = self.find(via, label) if via is not None and route != "more" else None
+                    if route == "more" and via is not None:
+                        nodes = self.step("Glass B: %s (%s)" % (route, theme), wait=0.5)
+                    elif target is not None:
+                        nodes = self.step("Glass B: %s (%s)" % (route, theme), lambda t=target: self.tap(t), wait=1.2)
+                    else:
                         self.warnings.append("[glass-b] %s not found" % route)
                         continue
-                    nodes = self.step("Glass B: %s (%s)" % (route, theme), wait=1.2)
                 glass_ok(nodes, "%s with the mini player (%s)" % (route, theme))
                 keep(self.steps[-1]["shot"], "%s-%s-2-player.png" % (theme, route), "%s, the mini player showing" % route)
                 moved(nodes)
@@ -1993,9 +2012,9 @@ class Smoke:
                     self.step("Back from the search page")
             # Sıradaki, a page over the whole window (from More), and the full player: the glass off under their colour
             self.back_to_tabs()
-            if self.open_label(s["nag_nav_more"], via_more=False):
-                time.sleep(1.2)
-                queue = self.find(self.nodes(self.settle(0.8)), s["nag_queue_title"])
+            more = self.more_page()
+            if more is not None:
+                queue = self.find(more, s["nag_queue_title"])
                 if queue:
                     nodes = self.step("Glass B: Sıradaki (%s)" % theme, lambda: self.tap(queue), wait=1.5)
                     self.check("glass B: Sıradaki opens over the window (%s)" % theme, bool(self.by_id(nodes, "queue-page")))
