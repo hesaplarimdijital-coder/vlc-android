@@ -517,7 +517,12 @@ internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boo
             events.collectLatest { event ->
                 depth.swipeEdge = event.swipeEdge
                 if (animated && depth.seekable.currentState) {
-                    depth.gestureClose = true
+                    if (!depth.gestureClose) {
+                        // the first touch: the list comes behind and the shared elements find each other in a frame
+                        // in which nothing moves yet (looks as at rest); the seek that moves them is the next frame's
+                        depth.gestureClose = true
+                        withFrameNanos { }
+                    }
                     depth.seekable.seekTo(event.progress * DetailDepth.GESTURE_END, false)
                 }
             }
@@ -556,7 +561,7 @@ private suspend fun <S> SeekableTransitionState<S>.runBack(spec: FiniteAnimation
 /** The fraction run on to [to] over [millis], the target held: a Back gesture let go of early finishes the finger's part. */
 private suspend fun <S> SeekableTransitionState<S>.seekOn(to: Float, millis: Int) {
     val held = targetState
-    if (fraction >= to || millis <= 0) return
+    if (held == currentState || fraction >= to || millis <= 0) return
     val way = TargetBasedAnimation(tween<Float>(millis, easing = NagMotion.StandardAccelerate), Float.VectorConverter, fraction, to)
     val start = withFrameNanos { it }
     while (true) {
