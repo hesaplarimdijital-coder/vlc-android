@@ -32,10 +32,18 @@ violations). The walk, in passes (a size and a language each):
                solid, B the bottom on one glass, C the kit's: and the top bar fading to glass), the
                app relaunched in each by the debug-only extra app.nagmedar.debug.CHROME_GLASS
                (glass/README.md names each screenshot)
+  glass-b      (on demand, either build) the product's glass B (the user's decision of 6 Nov): a cold
+               start into each phone page with a list under the bottom chrome, its first frames read,
+               then each page with the mini player and its list under the bars, Sıradaki and the full
+               player, dark and light; the bar's and the card's glass must blur wherever they show
+               (glass-b/README.md names each screenshot)
 
 1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
 bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band)
-and Back is pressed as he presses it.
+and Back is pressed as he presses it. The product draws the phone's bottom chrome on one glass
+(glass B); with the system's animations removed, as the walk runs, the app draws it opaque, so
+phone-en's glass_b_check turns them on to see it blur: switched on at run time over the search
+page's covers, moved, and from a cold start (the walk's folder has a cover.jpg for that).
 
 1.0.3: the workflow runs the passes in two jobs (tablet-en, workstation and phone-tr; phone-en), so
 each pass brings what it needs: phone-en goes through a fresh app's first run, workstation and
@@ -1713,6 +1721,7 @@ class Smoke:
         self.library_ready = True
         self.visit_destinations("Reopen")
         self.phone_player()
+        self.glass_b_check()
         self.auto_tree()
         self.device_walk(wide=False)
         self.playback()
@@ -1850,6 +1859,169 @@ class Smoke:
                 f.write("| %s | %s | %s | %s |\n" % (name, letter, theme, what))
         self.check("the glass screenshots were taken (A, B, C in dark and light)", len(shots) >= 12, "%d screenshots" % len(shots))
 
+    def cold_start(self, route=None):
+        """1.0.3: the app ended and started again (into the page of [route], by the launcher shortcuts' extra), the screen
+        read as soon as its window has drawn; the path of that first-frames screenshot, or None."""
+        self.sh("am force-stop " + self.pkg)
+        time.sleep(1)
+        extra = " --es nagmedar_destination %s" % route if route else ""
+        self.sh("am start -W -n %s%s ; screencap -p /sdcard/nag-cold.png" % (self.launcher, extra), timeout=90)
+        rc, data = self.adb("exec-out", "cat /sdcard/nag-cold.png", timeout=60, binary=True)
+        if rc != 0 or len(data) < 1000:
+            return None
+        rel = "shots/%03d-%s-first-frames-%s.png" % (self.n + 1, self.cur_pass, route or "start")
+        with open(os.path.join(self.out, rel), "wb") as f:
+            f.write(data)
+        return rel
+
+    def pass_glass_b(self):
+        """1.0.3, on demand (passes=glass-b, either build): the product's glass B, the phone in three-button navigation,
+        dark then light, the system's animations on (the glass drawn), the walk's albums with covers (glass_media). First
+        a cold start into each page with a list under the bottom chrome (Music, Podcasts, Radio, Playlists, the search
+        page, Settings and its About page, the More page; the launcher shortcuts' extra), its first frames read as soon as
+        the window has drawn: the bar's glass must blur the rows beneath it (no rows sharp under it). Then, a track played
+        and paused so the mini player shows, each page again with its list moved under the bars, Sıradaki (a page over the
+        window: the glass off under it) and the full player: the card's and the bar's glass blur wherever they show.
+        glass-b/README.md lists the screenshots."""
+        self.cur_pass, self.lang = "glass-b", "en"
+        s = self.strings["en"]
+        self.sh("am force-stop " + self.pkg)
+        self.set_display("1080x2400", "420")
+        self.three_button_navigation()
+        self.glass_media()
+        self.launch()
+        nodes = self.step("Launch (glass B)")
+        if any(x.text.strip() == s["nag_fr_skip"] for x in self.app_nodes(nodes)):
+            self.first_run_walk("First run (glass B)")
+            time.sleep(10)
+            self.step("After the scan (glass B)")
+        self.animations(True)
+        folder = os.path.join(self.out, "glass-b")
+        os.makedirs(folder, exist_ok=True)
+        shots = []
+
+        def keep(rel, name, what):
+            if rel:
+                shutil.copyfile(os.path.join(self.out, rel), os.path.join(folder, name))
+                shots.append((name, what))
+
+        def glass_ok(nodes, what, rel=None):
+            """The bar's and the card's glass, where they show, blur what passes beneath (from [rel] or the last shot)."""
+            w, h = self.screen_size(nodes)
+            boxes = self.glass_boxes(nodes)
+            shot = rel or (self.steps[-1]["shot"] if self.steps else None)
+            got = {k: self.region(shot, b, w) for k, b in boxes.items() if b}
+            self.log("glass [glass-b] %s: %s" % (what, got))
+            if got:
+                self.check("glass B: %s: the glass blurs, nothing sharp beneath it" % what, all(self.blurred(v) for v in got.values()),
+                           "; ".join("%s %s" % (k, v) for k, v in got.items()))
+
+        def moved(nodes):
+            """The page's list down (the bars slide away), then a little back up: the bars return over it."""
+            w, h = self.screen_size(nodes)
+            for _ in range(2):
+                self.glass_drag(w // 2, int(h * 0.66), int(h * 0.40))
+                time.sleep(0.4)
+            self.glass_drag(w // 2, int(h * 0.45), int(h * 0.53))
+            time.sleep(1.2)
+
+        def words(word="track"):
+            """The search page's words typed, the keyboard away so the bars show."""
+            clear = [n for n in self.app_nodes(self.nodes(self.dump())) if n.desc.strip() == s["nag_search_clear"]]
+            if clear:
+                self.tap(clear[0], record=False)
+                time.sleep(0.8)
+            self.sh("input text %s" % word)
+            time.sleep(2.0)
+            if self.keyboard_shown():
+                self.key(4, record=False)
+                time.sleep(1.0)
+
+        routes = ["music", "podcasts", "radio", "playlists", "search", "settings", "about", "more"]
+        for theme in ("dark", "light"):
+            if self.over_time():
+                break
+            self.sh("cmd uimode night %s" % ("yes" if theme == "dark" else "no"))
+            time.sleep(2)
+            # a cold start into each page: its first frames, then the page settled
+            for route in routes:
+                if self.over_time():
+                    break
+                first = self.cold_start(route)
+                nodes = self.step("Glass B cold start: %s (%s)" % (route, theme), wait=1.0)
+                if route == "search":
+                    words()
+                    nodes = self.step("Glass B cold start: search words (%s)" % theme, wait=1.0)
+                glass_ok(nodes, "%s, cold start's first frames (%s)" % (route, theme), rel=first)
+                glass_ok(nodes, "%s, cold start (%s)" % (route, theme))
+                keep(first, "%s-%s-0-first-frames.png" % (theme, route), "%s, the first frames of a cold start into it" % route)
+                keep(self.steps[-1]["shot"], "%s-%s-1-cold-start.png" % (theme, route), "%s, a cold start into it, settled" % route)
+            # a track played and paused: the mini player's card on the glass
+            nodes = self.open_music()
+            nodes, _ = self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 20)
+            self.play_track(nodes)
+            time.sleep(2)
+            self.key(85)
+            for route, label in (("music", s["nag_nav_music"]), ("podcasts", s["nag_nav_podcasts_short"]), ("radio", s["nag_nav_radio"]),
+                                 ("playlists", s["nag_nav_playlists"]), ("search", None), ("settings", s["nag_nav_settings"]),
+                                 ("more", s["nag_nav_more"])):
+                if self.over_time():
+                    break
+                self.back_to_tabs()
+                if route == "search":
+                    nodes = self.search_results()
+                    if nodes is None:
+                        continue
+                elif route == "music":
+                    nodes = self.open_music()
+                else:
+                    if not self.open_label(label, via_more=route not in ("podcasts", "radio", "more")):
+                        self.warnings.append("[glass-b] %s not found" % route)
+                        continue
+                    nodes = self.step("Glass B: %s (%s)" % (route, theme), wait=1.2)
+                glass_ok(nodes, "%s with the mini player (%s)" % (route, theme))
+                keep(self.steps[-1]["shot"], "%s-%s-2-player.png" % (theme, route), "%s, the mini player showing" % route)
+                moved(nodes)
+                nodes = self.step("Glass B: %s, its list under the bars (%s)" % (route, theme), wait=0.8)
+                glass_ok(nodes, "%s, its list under the bars (%s)" % (route, theme))
+                keep(self.steps[-1]["shot"], "%s-%s-3-moved.png" % (theme, route), "%s, its list moved under the bars" % route)
+                if route == "search":
+                    self.key(4, record=False)
+                    self.step("Back from the search page")
+            # Sıradaki, a page over the whole window (from More), and the full player: the glass off under their colour
+            self.back_to_tabs()
+            if self.open_label(s["nag_nav_more"], via_more=False):
+                time.sleep(1.2)
+                queue = self.find(self.nodes(self.settle(0.8)), s["nag_queue_title"])
+                if queue:
+                    nodes = self.step("Glass B: Sıradaki (%s)" % theme, lambda: self.tap(queue), wait=1.5)
+                    self.check("glass B: Sıradaki opens over the window (%s)" % theme, bool(self.by_id(nodes, "queue-page")))
+                    keep(self.steps[-1]["shot"], "%s-queue.png" % theme, "Sıradaki, a page over the window (no glass under it)")
+                    self.key(4)
+                    self.step("Back from Sıradaki")
+            nodes = self.open_music()
+            mini = self.by_id(nodes, "mini-player")
+            if mini:
+                b = mini[0].b
+                nodes = self.step("Glass B: the full player (%s)" % theme, lambda: self.sh("input tap %d %d" % ((b[0] + b[2]) // 2, self.first_row(b))), wait=2.0)
+                if self.by_id(nodes, "phone-player"):
+                    keep(self.steps[-1]["shot"], "%s-full-player.png" % theme, "the full player (no glass drawn under its colour)")
+                    self.key(4)
+                    self.step("Back from the full player")
+        self.sh("cmd uimode night no")
+        self.animations(False)
+        with open(os.path.join(folder, "README.md"), "w", encoding="utf-8") as f:
+            f.write("# Glass B, the product: the phone's bottom chrome on one glass\n\n"
+                    "Real emulator screenshots (API %s, %s, 1080x2400 at 420 dpi, three-button navigation, the %s build), the system's "
+                    "animations on (with them removed the app draws the glass opaque). \"0-first-frames\": read as soon as the window "
+                    "of a cold start into the page had drawn; \"1-cold-start\": that page settled; \"2-player\": the page again with a "
+                    "track paused in the mini player; \"3-moved\": its list moved under the bars. The walk read the bar's and the "
+                    "card's glass on each (the run's checks): it blurs, nothing sharp beneath it.\n\n| file | what |\n|---|---|\n"
+                    % (getattr(self, "device", {}).get("sdk", "?"), getattr(self, "device", {}).get("model", "?"), self.a.build))
+            for name, what in shots:
+                f.write("| %s | %s |\n" % (name, what))
+        self.check("the glass B screenshots were taken", len(shots) >= 16, "%d screenshots" % len(shots))
+
     def glass_media(self):
         """The walk's tracks in a folder per album, each with a cover of its own (cover.jpg) and a playlist of the album
         (an M3U the library reads as a playlist): covers for the lists and the Playlists' grid to pass under the bars."""
@@ -1874,20 +2046,160 @@ class Smoke:
             self.adb("push", *mine, folder + "/", timeout=300)
             local = os.path.join(work, "album%d" % album)
             os.makedirs(local, exist_ok=True)
-            if Image is not None:
-                a, b = palette[album - 1]
-                im = Image.new("RGB", (600, 600), a)
-                from PIL import ImageDraw
-                d = ImageDraw.Draw(im)
-                for i in range(0, 1200, 120):
-                    d.polygon([(i, 0), (i + 60, 0), (i - 540, 600), (i - 600, 600)], fill=b)
-                d.ellipse((180, 180, 420, 420), fill=(250, 250, 250))
-                d.ellipse((270, 270, 330, 330), fill=a)
-                im.save(os.path.join(local, "cover.jpg"), "JPEG", quality=90)
+            if self.cover_image(os.path.join(local, "cover.jpg"), *palette[album - 1]):
                 self.adb("push", os.path.join(local, "cover.jpg"), folder + "/cover.jpg", timeout=60)
             with open(os.path.join(local, "list.m3u"), "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n" + "".join(os.path.basename(t) + "\n" for t in mine))
             self.adb("push", os.path.join(local, "list.m3u"), "%s/Profile album %d.m3u" % (folder, album), timeout=60)
+
+    @staticmethod
+    def cover_image(path, a, b):
+        """A bright album cover (stripes of [a] and [b], a white disc) saved as a JPEG at [path]; False without Pillow."""
+        if Image is None:
+            return False
+        from PIL import ImageDraw
+        im = Image.new("RGB", (600, 600), a)
+        d = ImageDraw.Draw(im)
+        for i in range(0, 1200, 120):
+            d.polygon([(i, 0), (i + 60, 0), (i - 540, 600), (i - 600, 600)], fill=b)
+        d.ellipse((180, 180, 420, 420), fill=(250, 250, 250))
+        d.ellipse((270, 270, 330, 330), fill=a)
+        im.save(path, "JPEG", quality=90)
+        return True
+
+    def region(self, rel, box, width):
+        """The colours inside [box] (x0, y0, x1, y1 on a screen [width] px wide) of the screenshot [rel]: their lowest,
+        highest and mean values per channel and their spread (the largest high - low); None without Pillow or the shot."""
+        if Image is None or not rel:
+            return None
+        try:
+            im = Image.open(os.path.join(self.out, rel)).convert("RGB")
+        except Exception:
+            return None
+        k = im.width / float(width)
+        x0, y0, x1, y1 = [int(round(v * k)) for v in box]
+        px = list(im.crop((x0, y0, max(x1, x0 + 1), max(y1, y0 + 1))).getdata())
+        if not px:
+            return None
+        lo = tuple(min(q[i] for q in px) for i in range(3))
+        hi = tuple(max(q[i] for q in px) for i in range(3))
+        mean = tuple(round(sum(q[i] for q in px) / float(len(px)), 1) for i in range(3))
+        return {"lo": lo, "hi": hi, "mean": mean, "spread": max(hi[i] - lo[i] for i in range(3))}
+
+    def glass_boxes(self, nodes):
+        """1.0.3 (glass B): where the phone's bottom chrome shows its glass and draws nothing of its own: down the mini
+        player's card just inside its start edge (beside the artwork, clear of the times) and down the bottom bar between
+        its first two tabs (a quarter of the width, from above the icons to the labels' foot). {"card": box, "bar": box},
+        each None when not on screen."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        boxes = {"card": None, "bar": None}
+        mini = self.by_id(nodes, "mini-player")
+        if mini:
+            b = mini[0].b
+            boxes["card"] = (b[0] + 4, b[1] + (b[3] - b[1]) // 4, b[0] + 18, b[3] - (b[3] - b[1]) // 4)
+        music = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_music"] and n.center[1] > h * 0.85]
+        if music:
+            label = max(music, key=lambda n: n.center[1])
+            # the tab around the label (its icon and the selection pill above it): the bar's height
+            tabs = [n for n in self.app_nodes(nodes) if n.clickable and self.inside(label, n.b) and n.b[1] > h * 0.75]
+            b = min(tabs, key=lambda n: n.area).b if tabs else (label.b[0], label.b[1] - (label.b[3] - label.b[1]) * 2, label.b[2], label.b[3])
+            boxes["bar"] = (w // 4 - 2, b[1] + 6, w // 4 + 3, b[3] - 6)
+        return boxes
+
+    def glass_read(self, nodes, what):
+        """The colours of the bottom chrome's glass (glass_boxes) in the last step's screenshot, logged: {"card", "bar"}."""
+        w, h = self.screen_size(nodes)
+        rel = self.steps[-1]["shot"] if self.steps else None
+        got = {k: (self.region(rel, b, w) if b else None) for k, b in self.glass_boxes(nodes).items()}
+        self.log("glass [%s] %s: %s" % (self.cur_pass, what, got))
+        return got
+
+    @staticmethod
+    def blurred(stats):
+        """The glass is drawn and blurs: what passes beneath shows only through its tint (at most 12 % of it in the app's
+        thick glass), so no sharp row or cover edge spans the region's colours (spread up to 40 of 255)."""
+        return stats is not None and stats["spread"] <= 40
+
+    @staticmethod
+    def differs(a, b, by=1.0):
+        """Two regions' mean colours differ (by [by] or more in a channel)."""
+        return a is not None and b is not None and max(abs(a["mean"][i] - b["mean"][i]) for i in range(3)) >= by
+
+    def search_results(self, word="track"):
+        """The search page (from the top bar's search button) with [word]'s results, the on-screen keyboard away so the
+        bars show; the nodes, or None when the page or its results did not come."""
+        s = self.strings[self.lang]
+        nodes = self.open_music()
+        search = [n for n in self.app_nodes(nodes) if n.desc.strip() == s["nag_search"]]
+        if not search:
+            return None
+        self.tap(search[0])
+        time.sleep(1.5)
+        # the page keeps its words: cleared first
+        clear = [n for n in self.app_nodes(self.nodes(self.dump())) if n.desc.strip() == s["nag_search_clear"]]
+        if clear:
+            self.tap(clear[0], record=False)
+            time.sleep(0.8)
+        self.sh("input text %s" % word)
+        time.sleep(2.0)
+        # the keyboard away (the bars come back); a Back without one would leave the page
+        if self.keyboard_shown():
+            self.key(4, record=False)
+            time.sleep(1.0)
+        nodes = self.step("Search: %s" % word, wait=1.0)
+        return nodes if self.by_id(nodes, "search") else None
+
+    def glass_b_check(self):
+        """1.0.3, the user's glass B in the product (the debug build's default and the personal build): the phone's bottom
+        chrome is one glass. The walk runs with the system's animations removed, where the app draws it opaque (the
+        system's fallback): first that, the card and the bar one colour; then with animations on, switched at run time
+        over the still search page with the walk's covers under the mini player, after a short drag, and from a cold
+        start on the Music: the card's glass is not the opaque colour, changes as the list moves, and nothing beneath
+        shows sharp through the card or the bar (the glass blurs from its first frames, no rows sharp under the card)."""
+        nodes = self.search_results()
+        if nodes is None or not self.by_id(nodes, "mini-player"):
+            self.warnings.append("[%s] glass B: no search results with the mini player: not checked" % self.cur_pass)
+            self.back_to_tabs()
+            return
+        w, h = self.screen_size(nodes)
+        # down the results (the bars slide away), then a little back up: the bars return over the covers
+        for _ in range(2):
+            self.glass_drag(w // 2, int(h * 0.66), int(h * 0.40))
+            time.sleep(0.4)
+        self.glass_drag(w // 2, int(h * 0.45), int(h * 0.53))
+        time.sleep(1.2)
+        nodes = self.step("Glass B: animations removed (opaque)", wait=0.8)
+        solid = self.glass_read(nodes, "opaque")
+        self.check("glass B: with animations removed the bottom chrome is opaque, the card as the bar",
+                   solid["card"] is not None and solid["card"]["spread"] <= 2 and solid["bar"] is not None
+                   and not self.differs(solid["card"], solid["bar"], by=2.0), "card %s, bar %s" % (solid["card"], solid["bar"]))
+        self.animations(True)
+        try:
+            time.sleep(2.0)
+            nodes = self.step("Glass B: animations on over the still page", wait=0.8)
+            on = self.glass_read(nodes, "switched on")
+            self.check("glass B: switched on at run time, the card's glass blurs what passes beneath it",
+                       self.blurred(on["card"]) and self.blurred(on["bar"]) and self.differs(on["card"], solid["card"]),
+                       "card %s, bar %s; opaque %s" % (on["card"], on["bar"], solid["card"] and solid["card"]["mean"]))
+            self.glass_drag(w // 2, int(h * 0.45), int(h * 0.50))
+            time.sleep(1.2)
+            nodes = self.step("Glass B: the results moved under the card", wait=0.8)
+            moved = self.glass_read(nodes, "moved")
+            self.check("glass B: the card's glass changes as the list moves under it",
+                       self.blurred(moved["card"]) and self.differs(moved["card"], on["card"], by=0.5),
+                       "before %s, after %s" % (on["card"] and on["card"]["mean"], moved["card"] and moved["card"]["mean"]))
+            # a cold start with the glass on: its first frames, read as soon as the window has drawn
+            rel = self.cold_start()
+            nodes = self.step("Glass B: a cold start", wait=1.0)
+            bar = self.glass_boxes(nodes)["bar"]
+            first = self.region(rel, bar, w) if bar and rel else None
+            cold = self.glass_read(nodes, "cold start")
+            self.check("glass B: from a cold start the bar's glass blurs the rows beneath it (no sharp rows)",
+                       self.blurred(cold["bar"]) and (first is None or self.blurred(first)) and self.differs(cold["bar"], solid["card"]),
+                       "first frames %s, settled %s; opaque %s" % (first, cold["bar"], solid["card"] and solid["card"]["mean"]))
+        finally:
+            self.animations(False)
 
     def keyboard_shown(self):
         """The on-screen keyboard is up (the input method service says so)."""
@@ -1940,12 +2252,16 @@ class Smoke:
                 self.sh("mkdir -p " + dest)
                 self.adb("push", src, dest + f, timeout=120)
                 self.sh("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://%s%s" % (dest, f))
-        # the walk's tracks (a long list to scroll, a queue to swipe through): a folder of their own
+        # the walk's tracks (a long list to scroll, a queue to swipe through): a folder of their own; 1.0.3: with a
+        # bright cover (cover.jpg) for the rows and the mini player, to pass under the phone's glass (glass_b_check)
         if self.a.music and os.path.isdir(self.a.music):
             self.sh("mkdir -p /sdcard/Music/nagmedar-walk")
             rc, out = self.adb("push", *sorted(glob.glob(os.path.join(self.a.music, "*.mp3"))), "/sdcard/Music/nagmedar-walk/", timeout=300)
             if rc != 0:
                 self.warnings.append("the walk's tracks were not pushed: " + out.strip()[-200:])
+            cover = os.path.join(self.out, "raw", "walk-cover.jpg")
+            if self.cover_image(cover, (231, 76, 60), (241, 196, 15)):
+                self.adb("push", cover, "/sdcard/Music/nagmedar-walk/cover.jpg", timeout=60)
 
     def playback(self):
         # a music file opened from another app (1.0 plays no video: it offers itself for audio only)

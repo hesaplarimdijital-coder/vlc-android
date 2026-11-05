@@ -10,14 +10,18 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
@@ -205,10 +209,16 @@ private fun isPowerSave(context: Context): Boolean =
 
 /**
  * Marks this element's drawing as glass source [state]: the content glass surfaces blur. Only
- * records while [mode] is [GlassMode.Blur]; otherwise nothing changes.
+ * records while [mode] is [GlassMode.Blur]; otherwise nothing changes. 1.0.3: a source that starts
+ * recording (the app started, battery saver or "Animasyonları kaldır" turned off) draws itself once
+ * more two frames later ([drawnAgain]): with Haze 2.0.1 the glass over content that did not draw
+ * again stayed empty, the rows sharp beneath it, until the page drew anew.
  */
-fun Modifier.glassSource(state: HazeState?, mode: GlassMode): Modifier =
-    if (state != null && mode == GlassMode.Blur) hazeSource(state) else this
+@Composable
+fun Modifier.glassSource(state: HazeState?, mode: GlassMode): Modifier {
+    if (state == null || mode != GlassMode.Blur) return this
+    return drawnAgain(state).hazeSource(state)
+}
 
 /**
  * Draws a glass surface of [material] in [shape] behind this element's content:
@@ -234,10 +244,30 @@ fun Modifier.glass(
         val input = remember(source) { HazeInput.Sources(source) }
         this
             .clip(shape)
+            // as its source: drawn once more once it blurs, should it have drawn before the source first recorded
+            .drawnAgain(source)
             .hazeBlur(input = input, style = style)
     }
     mode == GlassMode.Translucent && source != null -> background(material.translucent, shape)
     else -> background(material.solid, shape)
+}
+
+/**
+ * 1.0.3: what follows this modifier (a glass source or a blur) draws once more two frames after it
+ * first came for [key]: what a page drawn anew did for the glass after a switch at run time.
+ */
+@Composable
+private fun Modifier.drawnAgain(key: Any): Modifier {
+    val again = remember(key) { mutableIntStateOf(0) }
+    LaunchedEffect(key) {
+        withFrameNanos { }
+        withFrameNanos { }
+        again.intValue++
+    }
+    return drawWithContent {
+        // read while drawing: the count's change draws this, and what follows it, again
+        if (again.intValue >= 0) drawContent()
+    }
 }
 
 /** The Haze blur of this material (Desktop Kit 2): its tint over the blurred content, the radius, a little noise. */
