@@ -6,6 +6,7 @@ import android.app.ApplicationStartInfo
 import android.os.Build
 import android.os.Process
 import android.os.SystemClock
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.view.OneShotPreDrawListener
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,22 @@ object StartupPerf {
     private const val FOR_THE_WINDOW_MS = 5_000L
 
     private var watched = false
+
+    private var listShown = false
+
+    /**
+     * 1.0.3: the Music's list is on screen with [tracks] tracks, [kept] when it came from the list kept on the device:
+     * the first time in a process that started for its window, the time since the process started is written to the
+     * log ("NagmedarPerf: music_list ms=… tracks=… kept=…"), which the emulator walk reads after its restart. Main thread.
+     */
+    fun musicListShown(tracks: Int, kept: Boolean) {
+        if (listShown) return
+        listShown = true
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
+        val started = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Process.getStartRequestedUptimeMillis() else Process.getStartUptimeMillis()
+        val ms = SystemClock.uptimeMillis() - started
+        if (ms in 1..120_000) Log.i(PerfLog.TAG, "music_list ms=$ms tracks=$tracks kept=$kept")
+    }
 
     /** The process's first window [activity], new ([restored] false): its start-up is kept once it shows. */
     fun watch(activity: Activity, restored: Boolean) {

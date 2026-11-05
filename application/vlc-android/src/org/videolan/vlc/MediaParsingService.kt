@@ -88,6 +88,7 @@ import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.registerReceiverCompat
 import org.videolan.resources.util.startForegroundCompat
 import org.videolan.resources.util.stopForegroundCompat
+import org.videolan.tools.AppScope
 import org.videolan.tools.KEY_MEDIALIBRARY_AUTO_RESCAN
 import org.videolan.tools.KEY_MEDIALIBRARY_SCAN
 import org.videolan.tools.ML_SCAN_OFF
@@ -135,6 +136,9 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
 
     /** 1.0.3: the window saw the media index change while the library worked: it is compared once the work is over. */
     @Volatile private var recheckAfter = false
+
+    /** 1.0.3: the commands this service was given (main thread): a stop decided before the last one does not end its work. */
+    @Volatile private var commands = 0
 
     private val settings by lazy { Settings.getInstance(this) }
 
@@ -245,6 +249,10 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         if (lastNotificationTime <= 0L) lastNotificationTime = if (AndroidUtil.isOOrLater) 0L else System.currentTimeMillis()
         super.onStartCommand(intent, flags, startId)
         dispatcher.onServicePreSuperOnStart()
+        // Nağmedar 1.0.3: counted and held before anything below can end the work (exitCommand): a stop scheduled before
+        // this command does not end the service under it, and the wake lock is never taken after its release
+        commands++
+        if (!wakeLock.isHeld) wakeLock.acquire()
         if (intent == null) {
             exitCommand()
             return START_NOT_STICKY
@@ -281,7 +289,6 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
                 return START_NOT_STICKY
             }
         }
-        if (!wakeLock.isHeld) wakeLock.acquire()
         return START_NOT_STICKY
     }
 
@@ -355,6 +362,8 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
         if (medialibrary.isInitiated) {
             medialibrary.resumeBackgroundOperations()
             if (parse && !scanActivated) actions.trySend(StartScan(upgrade))
+            // Nağmedar 1.0.3: nothing to do: the service goes (unless the library works) rather than keep its wake lock
+            else exitCommand()
         } else actions.trySend(Init(upgrade, parse, removeDevices))
     }
 
@@ -622,15 +631,19 @@ class MediaParsingService : LifecycleService(), DevicesDiscoveryCb {
             if (::notificationActor.isInitialized) notificationActor.trySend(Hide)
             //Delay service stop to ensure service goes foreground.
             // Otherwise, we get some RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()
+            val given = commands
             lifecycleScope.launch {
                 delay(100L)
-                stopService(Intent(applicationContext, MediaParsingService::class.java))
+                // Nağmedar 1.0.3: a command that came meanwhile keeps the service for its work, whose end stops it
+                if (commands == given) stopService(Intent(applicationContext, MediaParsingService::class.java))
             }
         }
     }
 
     override fun onDestroy() {
         dispatcher.onServicePreSuperOnDestroy()
+        // Nağmedar 1.0.3: never left held by a service that is gone
+        if (wakeLock.isHeld) runCatching { wakeLock.release() }
         medialibrary.removeDeviceDiscoveryCb(this)
         unregisterReceiver(receiver)
         medialibrary.exceptionHandler = null
@@ -741,10 +754,21 @@ fun Context.reloadLibrary() {
 /** Nağmedar 1.0.3: the system's media index changed while a window is open: the library looks again if its folders may have changed. */
 private const val ACTION_RECHECK = "nagmedar_medialibrary_recheck"
 
-/** Nağmedar 1.0.3: asks the service to compare the media index with the library's last full look ([MediaParsingService]'s recheck). */
+/**
+ * Nağmedar 1.0.3: compares the media index with the library's last full look, off the main thread, and only when the
+ * folders may have changed asks the service to look ([MediaParsingService]'s recheck, which compares again).
+ */
 fun Context.recheckLibrary() {
     if (!Medialibrary.getInstance().isStarted) return
-    launchForeground(Intent(ACTION_RECHECK, null, this, MediaParsingService::class.java))
+    val app = applicationContext
+    AppScope.launch(Dispatchers.IO) {
+        val settings = Settings.getInstance(app)
+        if (!settings.getBoolean(KEY_MEDIALIBRARY_AUTO_RESCAN, true)) return@launch
+        val stamp = MediaIndexStamp.read(app)
+        val last = settings.getString(NAGMEDAR_LIBRARY_STAMP, null)
+        if (!LibraryRecheck.needed(stamp, last, settings.getLong(NAGMEDAR_LIBRARY_CHECKED_AT, 0L), System.currentTimeMillis())) return@launch
+        app.launchForeground(Intent(ACTION_RECHECK, null, app, MediaParsingService::class.java))
+    }
 }
 
 private sealed class MLAction

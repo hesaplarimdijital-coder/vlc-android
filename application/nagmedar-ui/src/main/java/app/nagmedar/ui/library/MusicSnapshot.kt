@@ -62,7 +62,7 @@ object MusicSnapshot {
             val (scope, tracks) = runCatching { file(context).takeIf { it.isFile }?.inputStream()?.use(::decode) }
                 .onFailure { Log.w(TAG, "the kept music list could not be read: $it") }
                 .getOrNull() ?: return
-            val read = MusicRead(tracks)
+            val read = MusicRead(tracks, kept = true)
             loaded = scope to read
             savedSignature = signature(scope, read)
         }

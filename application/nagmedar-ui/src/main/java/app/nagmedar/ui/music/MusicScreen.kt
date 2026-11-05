@@ -102,6 +102,7 @@ import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.library.rememberScanState
+import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackActions
@@ -462,6 +463,8 @@ fun rememberMusicRead(repository: MediaRepository): MusicRead? {
         }
     }
     LaunchedEffect(read) {
+        // 1.0.3: when the list first stood on screen in this process, for the log (the walk's restart check reads it)
+        read?.let { StartupPerf.musicListShown(it.media.size, it.kept) }
         // S-808: a CUE sheet's tracks share their file, probed once
         read?.media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString()?.let(CueUri::file) }.distinct()) } }
     }

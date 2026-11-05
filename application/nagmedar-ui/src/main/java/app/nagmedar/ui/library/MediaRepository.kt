@@ -191,8 +191,9 @@ class MediaRepository(private val context: Context) {
 /**
  * 1.0.3: one read of the Music's list, with the [fingerprint] of what it shows: a list read again
  * that has the same fingerprint is not shown again (its tracks equal by id would hide a new tag).
+ * [kept] when it is the list kept on the device from an earlier start ([MusicSnapshot]).
  */
-class MusicRead(val media: List<MediaWrapper>, val fingerprint: Long = MusicFingerprint.of(media)) {
+class MusicRead(val media: List<MediaWrapper>, val fingerprint: Long = MusicFingerprint.of(media), val kept: Boolean = false) {
     override fun equals(other: Any?): Boolean = other is MusicRead && other.fingerprint == fingerprint && other.media.size == media.size
 
     override fun hashCode(): Int = fingerprint.hashCode()
