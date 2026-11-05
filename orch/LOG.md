@@ -360,3 +360,18 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
 - Kit mapping: a read-only Plan agent maps kit 1.0.0→2.3.0 onto the app (→ notes/kit-2.3-map.md).
 - 5 Nov ~00:50 PR #96 CI green (debug: 267 screenshots same; release, lab, host ok). merge.sh refused twice by the session's
   permission classifier ("Merge Without Review"): asked the user to allow merges or merge on GitHub.
+- 5 Nov 02:40 kit map done (notes/kit-2.3-map.md, 67 rows): most of 2.0 is in the app already (keep); real work = 2.3 phone
+  motion, the 3-button band (#5), some 2.1/2.2 fixes, kit's 0.2.1/0.2.2 menu/hover fixes never ported. navigation 2.10
+  forces minSdk ≥ 24 and predictivePop* (else NavHost's 70 % scale). Doc tab "1.0.3 planı" (file 8cd193b4-fc7e, node
+  f3c1d53a-3c01, order a05): parts, Turkish map, Auto, decisions. Asked the user: parts to start, minSdk 24/34, Sıradaki
+  button, old branches, merge permission, 1.0.2/1.0.1 device results. Glass: real emulator shots at the start of 2b.
+  Inspector + open player: decided no change (the big player covers the window).
+- 5 Nov ~03:00 the container restarted: the auto-browse agent was lost after ~3 h of research with nothing committed
+  (worktree empty, branch never pushed). Scratch survived (delivery.key still matches PR #96's public half; the agent's
+  reference files in agents/auto-browse/ref). 03:08 relaunched auto-browse (opus) with: use ref/, commit+push early,
+  keep agents/auto-browse/progress.md, push the root-id fix first.
+- 5 Nov ~05:30 second container restart: the relaunched auto-browse agent was lost too (2 h, nothing committed; it left
+  progress.md with the verified diagnosis and a working local K2JVMCompiler from /opt/gradle-8.14.3/lib for pure logic).
+  05:45 the orchestrator committed the root fix itself: b4ccaf3 (ID_ROOT "//app.nagmedar/r" fixed; canonical() for the old
+  debug/benchmark roots in browse/isNoMedia/onPlayFromMediaId; CarRootTest incl. a guard on public consts from APP_ID),
+  pushed story/auto-browse, draft PR #97. Third auto agent launched for the walk check + the tree, told to push every 30–40 min.
