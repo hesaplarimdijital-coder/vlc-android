@@ -630,8 +630,14 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
         emptyMap()
     }
 
-    /** 1.0.3: through the Radio page's library: kept with what the directory said of it, its marks kept. */
-    override suspend fun favourite(station: Station, on: Boolean): Station = RadioCenter.library(context).favourite(station, on)
+    /**
+     * 1.0.3: through the Radio page's library: kept with what the directory said of it, its marks kept. What the directory
+     * said is noted as seen too: a station taken out of the favourites (and no longer kept) still reads as it did.
+     */
+    override suspend fun favourite(station: Station, on: Boolean): Station {
+        station.uuid?.let { seen[it] = station.copy(id = 0, favourite = false, lastVotedAt = 0, lastPlayedAt = 0) }
+        return RadioCenter.library(context).favourite(station, on)
+    }
 
     private companion object {
         const val MUSIC_KEEP_MS = 10 * 60_000L

@@ -781,7 +781,8 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         val page = (ref.page ?: 0).coerceAtLeast(0)
         // one more than a page: whether there is a next one
         val found = data.stations(query.copy(offset = page * stationPage, limit = stationPage + 1))
-        val shown = found.take(stationPage).map(::station)
+        // what the list itself says (its country, its category) is not said again on each row
+        val shown = found.take(stationPage).map { station(it, placed = query.filters.countryCode == null, listTag = query.filters.tag) }
         if (found.size > stationPage) shown + more(ref, page + 1) else shown
     }
 
@@ -991,16 +992,18 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
     )
 
     /**
-     * A station ([stationId]); its country (1.0.3: named in the app's language) and first tag under it. 1.0.3: it offers
-     * "Favorilere ekle", or "Favorilerden çıkar" when it is a favourite.
+     * A station ([stationId]); its country (1.0.3: named in the app's language; not in a country's own list: [placed]
+     * false) and first tag (1.0.3: not the category [listTag] it is listed under) under it. 1.0.3: it offers "Favorilere
+     * ekle", or "Favorilerden çıkar" when it is a favourite.
      */
-    private fun station(station: Station): CarItem {
+    private fun station(station: Station, placed: Boolean = true, listTag: String? = null): CarItem {
         val id = stationId(station)
-        val country = station.countryCode?.takeIf { it.isNotBlank() }?.let { look.country(it, station.country) } ?: station.country
+        val country = if (!placed) null else station.countryCode?.takeIf { it.isNotBlank() }?.let { look.country(it, station.country) } ?: station.country
+        val tag = station.tags.firstOrNull { !it.equals(listTag, ignoreCase = true) }
         return CarItem(
             id = id,
             title = station.name,
-            subtitle = listOfNotNull(country, station.tags.firstOrNull()).joinToString(" · ").ifEmpty { null },
+            subtitle = listOfNotNull(country, tag).joinToString(" · ").ifEmpty { null },
             iconUri = look.webImage(station.logoUrl),
             playable = true,
             actions = listOf(if (station.favourite) CarActions.UNFAVOURITE else CarActions.FAVOURITE),

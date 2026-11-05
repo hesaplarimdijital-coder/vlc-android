@@ -108,7 +108,8 @@ class CarRadioTest {
         assertEquals(StationOrder.Popularity, query.order)
         assertEquals(0, query.offset)
         assertTrue(stations.all { it.playable && !it.browsable })
-        assertEquals("country:TR · pop", stations[0].subtitle)
+        // the country is the list's: each row says its category
+        assertEquals(listOf("pop", "rock", "jazz"), stations.map { it.subtitle })
         assertEquals("web:https://radio.example.org/logo/0.png", stations[0].iconUri)
         // a code asked for in lower case is the same country
         assertEquals(titles(stations), titles(children(data, CarIds.radioCountry("tr"))))
@@ -178,8 +179,11 @@ class CarRadioTest {
     @Test
     fun aCategoryOpensOnItsStationsTheMostListenedFirst() {
         val data = FakeCarData(directory = directory)
-        assertEquals(listOf("TRT FM", "SWR3"), titles(children(data, CarIds.tag("pop"))))
+        val pop = children(data, CarIds.tag("pop"))
+        assertEquals(listOf("TRT FM", "SWR3"), titles(pop))
         assertEquals("pop", data.listQueries.single().filters.tag)
+        // each row says its country and another of its categories, not the list's
+        assertEquals(listOf("country:TR · news", "country:DE"), pop.map { it.subtitle })
         assertEquals(StationOrder.Popularity, data.listQueries.single().order)
     }
 
