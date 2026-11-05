@@ -44,6 +44,8 @@ import app.nagmedar.ui.audio.AbTestState
 import app.nagmedar.ui.audio.MusicEngineAccess
 import app.nagmedar.ui.audio.SignalPathCard
 import app.nagmedar.ui.audio.channelsText
+import app.nagmedar.ui.audio.decibels
+import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.audio.latency.LatencyCenter
 import app.nagmedar.ui.audio.rememberSignalPath
 import app.nagmedar.ui.components.HorizontalRule
@@ -66,6 +68,9 @@ import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import java.text.NumberFormat
+import java.util.Locale
+import kotlin.math.log10
 
 /** Desktop Kit 1.0: the music view's inspector tabs, by their stable ids. */
 internal object InspectorTabs {
@@ -141,6 +146,8 @@ fun TrackInspector(
     onRate: ((Int) -> Unit)?,
     modifier: Modifier = Modifier,
     stats: Map<String, TrackStats> = emptyMap(),
+    /** 1.0.3: its ReplayGain tags, once the probe has read them. */
+    replayGain: ReplayGainTags? = null,
     cover: @Composable (Dp) -> Unit = {},
 ) {
     val colors = NagTheme.colors
@@ -169,7 +176,7 @@ fun TrackInspector(
             WaveformStrip(waveform, Modifier.fillMaxWidth().height(40.dp).padding(vertical = 4.dp), stringResource(R.string.nag_music_waveform))
         }
         HorizontalRule()
-        TrackTags(track, stats)
+        TrackTags(track, stats, replayGain = replayGain)
     }
 }
 
@@ -180,15 +187,55 @@ private val TAG_COLUMNS = listOf(
     MusicColumn.Bitrate, MusicColumn.Plays, MusicColumn.Skips, MusicColumn.LastPlayed, MusicColumn.Added,
 )
 
-/** [track]'s tags as the table words them, one under the other, the empty ones left out; its channels and folder. */
+/**
+ * [track]'s tags as the table words them, one under the other, the empty ones left out; its channels;
+ * 1.0.3: its [replayGain] tags (the track's and the album's gain and peak, "—" for one the file does
+ * not have) once the probe has read them; its folder.
+ */
 @Composable
-fun TrackTags(track: Track, stats: Map<String, TrackStats> = emptyMap(), modifier: Modifier = Modifier) {
+fun TrackTags(track: Track, stats: Map<String, TrackStats> = emptyMap(), modifier: Modifier = Modifier, replayGain: ReplayGainTags? = null) {
     val columns = rememberMusicColumns(TAG_COLUMNS, stats)
     Column(modifier.fillMaxWidth().testTag("track-tags"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         columns.forEach { column -> TagRow(column.title, column.value(track), mono = column.mono) }
         track.tech?.channels?.takeIf { it > 0 }?.let { TagRow(stringResource(R.string.nag_inspector_channels), channelsText(it)) }
+        replayGain?.let { tags -> ReplayGainRows(tags) }
         TagRow(stringResource(R.string.nag_inspector_folder), track.folder)
     }
+}
+
+/** 1.0.3: the four ReplayGain tags, in the mono face as the format is, "—" for one the file has not. */
+@Composable
+private fun ReplayGainRows(tags: ReplayGainTags) {
+    val locale = LocalContext.current.resources.locale()
+    val none = stringResource(R.string.nag_inspector_none)
+    val rows = remember(tags, locale, none) { replayGainLines(tags, locale, none) }
+    TagRow(stringResource(R.string.nag_inspector_track_gain), rows.trackGain, mono = true)
+    TagRow(stringResource(R.string.nag_inspector_track_peak), rows.trackPeak, mono = true)
+    TagRow(stringResource(R.string.nag_inspector_album_gain), rows.albumGain, mono = true)
+    TagRow(stringResource(R.string.nag_inspector_album_peak), rows.albumPeak, mono = true)
+}
+
+/** 1.0.3: how the inspector words a file's ReplayGain tags. */
+@Immutable
+internal data class ReplayGainLines(val trackGain: String, val trackPeak: String, val albumGain: String, val albumPeak: String)
+
+/**
+ * 1.0.3: [tags] as the inspector shows them: a gain in dB with its sign ("−6,6 dB"), a peak as the
+ * file has it with what it is at full scale ("0,988 · −0,1 dBFS"), [none] for a tag the file lacks.
+ */
+internal fun replayGainLines(tags: ReplayGainTags, locale: Locale, none: String): ReplayGainLines {
+    fun gain(db: Double?) = db?.takeIf { it.isFinite() }?.let { decibels(it, locale) } ?: none
+    fun peak(value: Double?): String {
+        val peak = value?.takeIf { it.isFinite() && it >= 0 } ?: return none
+        val linear = NumberFormat.getNumberInstance(locale).apply {
+            minimumFractionDigits = 3
+            maximumFractionDigits = 3
+        }.format(peak)
+        // a silent file's peak is 0: no level to say in dB
+        if (peak <= 0.0) return linear
+        return linear + " · " + decibels(20 * log10(peak), locale) + "FS"
+    }
+    return ReplayGainLines(gain(tags.trackGainDb), peak(tags.trackPeak), gain(tags.albumGainDb), peak(tags.albumPeak))
 }
 
 @Composable
@@ -263,6 +310,10 @@ private fun TagsTab(subject: InspectorSubject, onFullScreenVisualizer: () -> Uni
         MusicNowPlaying(onFullScreenVisualizer = onFullScreenVisualizer, withQueue = false, withLyrics = false, below = { PlayingTags(stats) })
         return
     }
+    // 1.0.3: the file's ReplayGain tags, read now if the probe has not come to it yet
+    val gains by TrackTechIndex.gains.collectAsState()
+    val file = remember(track.uri) { CueUri.file(track.uri) }
+    LaunchedEffect(file) { TrackTechIndex.readGains(context, file) }
     val coverTrack = remember(track) { CoverTrack.of(track) }
     val side = 72.dp
     val px = with(LocalDensity.current) { side.roundToPx() }
@@ -276,6 +327,7 @@ private fun TagsTab(subject: InspectorSubject, onFullScreenVisualizer: () -> Uni
         rating = stats[track.statsKey]?.rating ?: 0,
         onRate = { stars -> TrackStatsIndex.rate(context, track.statsKey, stars) },
         stats = stats,
+        replayGain = gains[file],
         cover = { CoverMenuButton(image, side, coverLabel, coverMenu) },
     )
 }
@@ -283,13 +335,17 @@ private fun TagsTab(subject: InspectorSubject, onFullScreenVisualizer: () -> Uni
 /** What plays, as the library knows it: its tags under the now playing pane. */
 @Composable
 private fun PlayingTags(stats: Map<String, TrackStats>) {
+    val context = LocalContext.current
     val media = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO } ?: return
     val tech by TrackTechIndex.tech.collectAsState()
-    val track = remember(media, tech) { media.toTrack(media.uri?.toString()?.let { tech[CueUri.file(it)] }) }
+    val gains by TrackTechIndex.gains.collectAsState()
+    val file = remember(media) { media.uri?.toString()?.let(CueUri::file) }
+    if (file != null) LaunchedEffect(file) { TrackTechIndex.readGains(context, file) }
+    val track = remember(media, tech) { media.toTrack(file?.let { tech[it] }) }
     Spacer(Modifier.height(NagTheme.dimens.gapS))
     HorizontalRule()
     Spacer(Modifier.height(NagTheme.dimens.gapS))
-    TrackTags(track, stats)
+    TrackTags(track, stats, replayGain = file?.let { gains[it] })
 }
 
 /** The signal path of what plays; a word when the selection is another track. */

@@ -59,6 +59,23 @@ object MusicSamples {
     /** S-808: the samples' ratings and counts, by uri. */
     val stats: Map<String, TrackStats> get() = sampleStats
 
+    /**
+     * 1.0.3: the ReplayGain tags the probe read, by uri: the Itrî album's tracks tagged by a loudness scan, the
+     * Gece Yolcusu album's read without tags (the inspector says "—"), the others not read for them yet.
+     */
+    val gains: Map<String, ReplayGainTags> = tracks.mapNotNull { track ->
+        when (track.album) {
+            "Itrî'nin İzinde" -> track.uri to ReplayGainTags(
+                trackGainDb = listOf(-5.84, -6.62, -7.48)[track.trackNumber - 1],
+                trackPeak = listOf(0.944105, 0.988312, 0.999451)[track.trackNumber - 1],
+                albumGainDb = -7.12,
+                albumPeak = 0.999451,
+            )
+            "Gece Yolcusu" -> track.uri to ReplayGainTags()
+            else -> null
+        }
+    }.toMap()
+
     /** A waveform that looks like music: verses, a louder chorus, a fade at the end. */
     val waveform: Waveform = Waveform(
         FloatArray(Waveforms.POINTS * 2) { i ->
