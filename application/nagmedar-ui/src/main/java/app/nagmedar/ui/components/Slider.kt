@@ -47,6 +47,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
@@ -111,7 +112,9 @@ internal fun BoxScope.TimelineLabel(text: String, anchorPx: Float, widthPx: Floa
  * - drag or click anywhere on the track;
  * - mouse wheel and two-finger touchpad scroll move it by [wheelStep] per notch;
  * - arrow keys move it by [keyStep] when focused (Home/End jump to the ends);
- * - exposes progress semantics so TalkBack can read and set it;
+ * - exposes progress semantics so TalkBack can read and set it; [label] is what TalkBack calls it
+ *   ("Ses düzeyi") and [valueText] how it reads the value ("−6 dB"; a percentage by default), as
+ *   Desktop Kit 2.0's slider has them;
  * - [marks] (chapters) are ticks on the track; the pointer near one, or the focus on the bar, names it.
  */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -128,6 +131,10 @@ fun NagSlider(
     hoverLabel: ((Float) -> String)? = null,
     /** S-1104: the chapters' starts; the bar names the one under the pointer, or the one playing while it has the focus. */
     marks: List<SliderMark> = emptyList(),
+    /** What TalkBack calls the slider. */
+    label: String? = null,
+    /** How TalkBack reads the value (0..1) shown; a percentage when null. A chapter playing is read instead. */
+    valueText: ((Float) -> String)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -155,7 +162,9 @@ fun NagSlider(
             .focusable(enabled, interaction)
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(shown, 0f..1f)
-                playingMark?.let { stateDescription = it.label }
+                if (label != null) contentDescription = label
+                val read = playingMark?.label ?: valueText?.invoke(shown)
+                if (read != null) stateDescription = read
                 if (enabled) setProgress { target -> latestOnChange(target.coerceIn(0f, 1f)); true }
             }
             .onKeyEvent { event ->

@@ -208,9 +208,24 @@ fun TrackClickModifiers(modifier: Modifier = Modifier, content: @Composable () -
 /**
  * Ctrl+A and Esc go to the screen in front (S-405): it says what all is and what Esc lets go of.
  * The menu bar's "Tümünü seç", the palette and Ctrl+A run [selectAll]; an Esc nothing else used
- * runs [escape].
+ * runs [escape]. 1.0.3: while a layer over the whole window hides the screen ([covered]: the big
+ * player, Sıradaki, the lyrics) none of them reaches it.
  */
 class ScreenCommands {
+    /** The layers over the whole window that hide the screen now; plain, nothing redraws from it. */
+    private val covers = mutableSetOf<Any>()
+
+    /** A layer over the whole window hides the screen ([app.nagmedar.ui.components.blockInputBelow], [coveredByLayer]). */
+    val covered: Boolean get() = covers.isNotEmpty()
+
+    internal fun cover(by: Any) {
+        covers += by
+    }
+
+    internal fun uncover(by: Any) {
+        covers -= by
+    }
+
     internal var selectAllHandler: (() -> Boolean)? = null
     internal var escapeHandler: (() -> Boolean)? = null
 
@@ -221,15 +236,15 @@ class ScreenCommands {
     /** Desktop Kit 1.0: the music view's inspector shown or hidden (Ctrl+I), while the view has one. */
     internal var inspectorHandler: (() -> Boolean)? = null
 
-    fun selectAll(): Boolean = selectAllHandler?.invoke() ?: false
+    fun selectAll(): Boolean = !covered && selectAllHandler?.invoke() == true
 
-    fun escape(): Boolean = escapeHandler?.invoke() ?: false
+    fun escape(): Boolean = !covered && escapeHandler?.invoke() == true
 
-    fun up(): Boolean = upHandler?.invoke() ?: false
+    fun up(): Boolean = !covered && upHandler?.invoke() == true
 
-    fun refresh(): Boolean = refreshHandler?.invoke() ?: false
+    fun refresh(): Boolean = !covered && refreshHandler?.invoke() == true
 
-    fun toggleInspector(): Boolean = inspectorHandler?.invoke() ?: false
+    fun toggleInspector(): Boolean = !covered && inspectorHandler?.invoke() == true
 }
 
 val LocalScreenCommands = staticCompositionLocalOf { ScreenCommands() }

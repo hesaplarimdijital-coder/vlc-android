@@ -6,6 +6,7 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +69,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.VerticalRule
+import app.nagmedar.ui.components.animateInteractionColor
 import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
@@ -165,13 +168,14 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
 private fun NavIndicator(selected: Boolean, state: InteractionState, shape: RoundedCornerShape, modifier: Modifier, content: @Composable () -> Unit) {
     val colors = NagTheme.colors
     val fraction = animateFloatAsState(if (selected) 1f else 0f, NagTheme.motion.spatial(), label = "navIndicator")
-    val feedback = animateStateColor(
+    // with a mouse the hover and the press show at once, the selection still eases (Desktop Kit 0.2.1)
+    val feedback by animateInteractionColor(
         when {
             state.pressed -> colors.pressed
             state.hovered && !selected -> colors.hover
-            else -> colors.pressed.copy(alpha = 0f)
+            else -> Color.Transparent
         },
-        "navFeedback",
+        selected,
     )
     val selection = colors.selection
     Box(
@@ -572,7 +576,10 @@ fun MenuBarChrome(
     }
 }
 
-/** Field-looking button that opens search / the command palette. */
+/**
+ * Field-looking button that opens search / the command palette. Outlined as a field is (Desktop Kit
+ * 2.0): in the light theme its surface is as white as the menu bar around it.
+ */
 @Composable
 fun SearchField(onClick: () -> Unit, shortcut: String?, modifier: Modifier = Modifier) {
     val interaction = remember { MutableInteractionSource() }
@@ -584,6 +591,8 @@ fun SearchField(onClick: () -> Unit, shortcut: String?, modifier: Modifier = Mod
         modifier = modifier
             .heightIn(min = dimens.controlHeight.coerceAtLeast(dimens.minTarget))
             .focusRing(state, shape)
+            // the focus ring takes the outline's place
+            .then(if (state.focused) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))
             .background(stateBackground(state, rest = colors.surface), shape)
             .nagClickable(interaction, onClick, onClickLabel = stringResource(R.string.nag_search))
             .padding(start = 10.dp, end = 5.dp),
@@ -598,13 +607,18 @@ fun SearchField(onClick: () -> Unit, shortcut: String?, modifier: Modifier = Mod
     }
 }
 
-/** Keyboard key cap, e.g. "Ctrl+K", in the monospace face. */
+/**
+ * Keyboard key cap, e.g. "Ctrl+K", in the monospace face. Outlined (Desktop Kit 2.0): the light
+ * theme's raised surface is as white as the bars, and the outline shows the key there.
+ */
 @Composable
 fun KeyCap(text: String, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
+    val shape = RoundedCornerShape(4.dp)
     Box(
         modifier
-            .background(colors.surfaceRaised, RoundedCornerShape(4.dp))
+            .background(colors.surfaceRaised, shape)
+            .border(1.dp, colors.border, shape)
             .padding(horizontal = 6.dp, vertical = 1.dp),
     ) {
         Text(text, style = NagTheme.type.mono, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)

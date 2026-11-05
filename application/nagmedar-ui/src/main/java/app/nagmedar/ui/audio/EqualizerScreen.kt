@@ -719,7 +719,17 @@ private fun LabelledSlider(
             Text(label, style = NagTheme.type.label, color = colors.textSecondary, modifier = Modifier.weight(1f))
             Text(valueText, style = NagTheme.type.mono, color = colors.text)
         }
-        NagSlider(value = fraction.coerceIn(0f, 1f), onValueChange = onFraction, keyStep = keyStep, wheelStep = keyStep, enabled = enabled, modifier = Modifier.fillMaxWidth())
+        // TalkBack reads the label and the value written beside it (Desktop Kit 2.0)
+        NagSlider(
+            value = fraction.coerceIn(0f, 1f),
+            onValueChange = onFraction,
+            keyStep = keyStep,
+            wheelStep = keyStep,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+            label = label,
+            valueText = { valueText },
+        )
     }
 }
 

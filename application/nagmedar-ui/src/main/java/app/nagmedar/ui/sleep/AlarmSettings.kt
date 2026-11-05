@@ -155,7 +155,9 @@ private fun AlarmRows(alarm: Alarm, edit: ((Alarm) -> Alarm) -> Unit, exact: Boo
             onSelect = { seconds -> edit { it.copy(rampSeconds = seconds) } },
         )
     }
-    SettingRow(stringResource(R.string.nag_alarm_loudness), subtitle = stringResource(R.string.nag_alarm_loudness_hint)) {
+    val loudnessTitle = stringResource(R.string.nag_alarm_loudness)
+    val loudnessText = NumberFormat.getPercentInstance(locale).format(alarm.loudness / 100.0)
+    SettingRow(loudnessTitle, subtitle = stringResource(R.string.nag_alarm_loudness_hint)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             NagSlider(
                 value = alarm.loudness / 100f,
@@ -167,10 +169,13 @@ private fun AlarmRows(alarm: Alarm, edit: ((Alarm) -> Alarm) -> Unit, exact: Boo
                 keyStep = 0.05f,
                 wheelStep = 0.05f,
                 modifier = Modifier.width(200.dp).testTag("alarm-loudness"),
+                // TalkBack reads the setting's name and the percentage beside it (Desktop Kit 2.0)
+                label = loudnessTitle,
+                valueText = { loudnessText },
             )
             Spacer(Modifier.width(dimens.gapS))
             Text(
-                NumberFormat.getPercentInstance(locale).format(alarm.loudness / 100.0),
+                loudnessText,
                 style = NagTheme.type.mono,
                 color = colors.textSecondary,
                 modifier = Modifier.width(56.dp),

@@ -1,6 +1,8 @@
 package app.nagmedar.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -8,6 +10,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
@@ -32,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -39,6 +44,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.rememberNagHaptics
 
 /**
  * Row of mutually exclusive options (theme, density, view mode); [fill], the options share the
@@ -46,7 +52,8 @@ import app.nagmedar.ui.theme.NagTheme
  *
  * 1.0.1: options that do not fit the width side by side go on as many lines as they need
  * ([segmentLines]), each line filling the width, and a label longer than the whole width wraps
- * onto a second line: no option is ever cut (a phone at 320 dp, One UI's largest font).
+ * onto a second line: no option is ever cut (a phone at 320 dp, One UI's largest font). By touch
+ * another option picked ticks ([app.nagmedar.ui.theme.NagHaptics.tick], Desktop Kit 2.0).
  */
 @Composable
 fun <T> SegmentedChoice(
@@ -61,6 +68,7 @@ fun <T> SegmentedChoice(
     val dimens = NagTheme.dimens
     val outer = RoundedCornerShape(dimens.radiusControl + 2.dp)
     val gap = 2.dp
+    val haptics = rememberNagHaptics()
     Layout(
         modifier = modifier
             .then(if (enabled) Modifier else Modifier.alpha(0.45f))
@@ -84,6 +92,7 @@ fun <T> SegmentedChoice(
                         .background(stateBackground(state, isSelected), shape)
                         .pointerHoverIcon(PointerIcon.Hand)
                         .selectable(selected = isSelected, interactionSource = interaction, indication = null, enabled = enabled, role = Role.RadioButton) {
+                            if (!isSelected) haptics.tick()
                             onSelect(value)
                         }
                         .padding(horizontal = dimens.gapM),
@@ -175,11 +184,15 @@ internal fun segmentLines(widths: List<Int>, maxWidth: Int, gap: Int): List<IntR
     return if (fits) even else greedy
 }
 
-/** Colour swatches for the accent choice. */
+/**
+ * Colour swatches for the accent choice. More colours than fit the width (a phone's, with touch
+ * targets) go on to a second line (Desktop Kit 2.1).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
-    Row(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    FlowRow(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp), itemVerticalAlignment = Alignment.CenterVertically) {
         options.forEach { (value, swatch, label) ->
             val interaction = remember { MutableInteractionSource() }
             val state = interaction.collectState()
@@ -259,7 +272,10 @@ fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? =
 /** The narrowest a setting's label may get beside its control. */
 private val MinLabelWidth = 160.dp
 
-/** On/off switch with its label; the whole row toggles it (the states' "Resume automatically"). */
+/**
+ * On/off switch with its label; the whole row toggles it (the states' "Resume automatically"). By
+ * touch it vibrates as it turns on or off ([app.nagmedar.ui.theme.NagHaptics.toggle], Desktop Kit 2.0).
+ */
 @Composable
 fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
     val interaction = remember { MutableInteractionSource() }
@@ -267,6 +283,11 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    val haptics = rememberNagHaptics()
+    val motion = NagTheme.motion
+    // the thumb's spring stops half a pixel from its end (Desktop Kit 2.3): without a threshold it ran on unseen to a
+    // hundredth of a dp
+    val halfPixel = with(LocalDensity.current) { THUMB_THRESHOLD_PX.toDp() }
     Row(
         modifier = modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
@@ -280,13 +301,19 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
                 indication = null,
                 enabled = enabled,
                 role = Role.Switch,
-                onValueChange = onCheckedChange,
-            )
+            ) { on ->
+                haptics.toggle(on)
+                onCheckedChange(on)
+            }
             .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
-        val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(), label = "switchThumb")
+        val thumbStart = animateDpAsState(
+            if (checked) 18.dp else 4.dp,
+            if (motion.reduced) snap() else spring(dampingRatio = 0.9f, stiffness = 1400f, visibilityThreshold = halfPixel),
+            label = "switchThumb",
+        )
         Box(
             Modifier
                 .size(width = 38.dp, height = 24.dp)
@@ -305,7 +332,10 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
     }
 }
 
-/** A box to tick with its label; the whole row ticks it (S-603: "Save for this file"). */
+/**
+ * A box to tick with its label; the whole row ticks it (S-603: "Save for this file"). By touch it
+ * vibrates as it is ticked or cleared ([app.nagmedar.ui.theme.NagHaptics.toggle], Desktop Kit 2.0).
+ */
 @Composable
 fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true) {
     val interaction = remember { MutableInteractionSource() }
@@ -314,6 +344,7 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val box = RoundedCornerShape(3.dp)
+    val haptics = rememberNagHaptics()
     Row(
         modifier = modifier
             .heightIn(min = dimens.minTarget.coerceAtLeast(28.dp))
@@ -327,8 +358,10 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
                 indication = null,
                 enabled = enabled,
                 role = Role.Checkbox,
-                onValueChange = onCheckedChange,
-            )
+            ) { on ->
+                haptics.toggle(on)
+                onCheckedChange(on)
+            }
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -345,3 +378,6 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
         Text(label, style = NagTheme.type.label, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
     }
 }
+
+/** Where the switch's thumb counts as arrived, in px (Desktop Kit 2.3): half a pixel. */
+private const val THUMB_THRESHOLD_PX = 0.5f

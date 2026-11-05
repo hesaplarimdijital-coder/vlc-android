@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,13 +94,13 @@ fun NagPlayButton(
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
     val hit = dimens.minTarget.coerceAtLeast(36.dp)
-    val fill = animateStateColor(
+    // with a mouse the hover and the press show at once (Desktop Kit 0.2.1)
+    val fill by animateInteractionColor(
         when {
             state.pressed -> lerp(colors.accent, colors.onAccent, 0.24f)
             state.hovered -> lerp(colors.accent, colors.onAccent, 0.12f)
             else -> colors.accent
         },
-        "playFill",
     )
     Box(
         modifier = modifier
@@ -141,7 +142,8 @@ fun NagButton(
     val shape = RoundedCornerShape(dimens.radiusControl)
     val primaryFill = fill ?: colors.accent
     val primaryContent = onFill ?: colors.onAccent
-    val background = animateStateColor(
+    // with a mouse the hover and the press show at once (Desktop Kit 0.2.1)
+    val background by animateInteractionColor(
         when {
             // the fill moves toward its text colour: darker on the dark themes, lighter on the light one
             primary && state.pressed -> lerp(primaryFill, primaryContent, 0.24f)
@@ -151,7 +153,6 @@ fun NagButton(
             state.hovered -> colors.hover
             else -> colors.surfaceRaised
         },
-        "buttonFill",
     )
     val content = if (primary) primaryContent else colors.text
     Row(
