@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,8 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SamplePlayerBar
@@ -71,7 +70,9 @@ import kotlin.math.roundToInt
  * frame at a time and saves the frames side by side as build/outputs/screenshots/motion/<name>.png,
  * which CI pushes with the screenshots to ci/shots-pr-<n> (motion/). Nothing is asserted beyond the strip
  * being made: the strips are there to be looked at, before and after a change of motion. The frames are
- * those of the frame clock (16 ms apart); each frame lists the milliseconds since the change.
+ * those of the frame clock (16 ms apart); each frame lists the milliseconds since the change, with a "•"
+ * while something still waits for the next frame (a spring that has not arrived), and the strip's last
+ * label says when the window went still ("durdu").
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -102,6 +103,12 @@ class MotionStripsTest {
         return bitmap
     }
 
+    /** The first frame (ms after the change) on which nothing waited for another frame; null while it still moves. */
+    private var stillAt: Long? = null
+
+    /** Something of the window waits for the next frame: an animation running, a spring not yet arrived. */
+    private fun moving(): Boolean = compose.runOnIdle { Recomposer.runningRecomposers.value.any { it.hasPendingWork } }
+
     /** Frame by frame up to [t] ms (a run of frames without an idle in between leaves Robolectric's recomposer asleep). */
     private fun advanceTo(t: Long, now: Long): Long {
         var at = now
@@ -109,23 +116,30 @@ class MotionStripsTest {
             compose.mainClock.advanceTimeByFrame()
             compose.waitForIdle()
             at += FRAME_MS
+            if (stillAt == null && !moving()) stillAt = at
         }
         return at
     }
+
+    /** "96 ms", with a "•" while the window still waits for frames. */
+    private fun label(now: Long): String = if (stillAt == null) "$now ms •" else "$now ms"
 
     /** The window before [change] and [at] ms after it, as one strip; [change] runs on the UI thread. */
     private fun strip(name: String, at: List<Long> = times, change: () -> Unit) {
         compose.mainClock.autoAdvance = false
         val frames = mutableListOf("önce" to shot())
+        stillAt = null
         compose.runOnIdle { change() }
         var now = 0L
         for (t in at) {
             now = advanceTo(t, now)
-            frames += "$now ms" to shot()
+            frames += label(now) to shot()
         }
+        // how long it went on after the last frame shown
+        while (stillAt == null && now < STILL_LIMIT_MS) now = advanceTo(now + FRAME_MS, now)
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        saveStrip(name, frames)
+        saveStrip(name, frames, stillAt?.let { "durdu: $it ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
     }
 
     // ---------------------------------------------------------------- the tabs and the pages
@@ -201,28 +215,33 @@ class MotionStripsTest {
         return player!!
     }
 
-    /** A tap on the mini player: the sheet grows from the strip on the spring, the bottom bar pushed away under it. */
+    /** A tap on the mini player (the app's opens it with expand()): the sheet grows from the strip, the bottom bar pushed away under it. */
     @Test
     fun playerExpand() {
         val player = playerShell()
         strip("player-expand", at = times + 640L) { playerScope?.launch { player.expand() } }
     }
 
+    /** The full player open (the sample bar's own tap opens nothing: through its state, as the app's tap does). */
+    private fun openPlayer(player: ExpandablePlayerState) {
+        compose.runOnIdle { playerScope?.launch { player.expand() } }
+        compose.waitForIdle()
+        check(player.isExpanded) { "the player did not open" }
+    }
+
     /** The full player's collapse (its button, the notification): back down onto the strip. */
     @Test
     fun playerCollapse() {
         val player = playerShell()
-        compose.onNodeWithTag("mini").performClick()
-        compose.waitForIdle()
+        openPlayer(player)
         strip("player-collapse", at = times + 640L) { playerScope?.launch { player.collapse() } }
     }
 
     /** Back (the key, three-button navigation's Back) on the full player. */
     @Test
     fun playerBack() {
-        playerShell()
-        compose.onNodeWithTag("mini").performClick()
-        compose.waitForIdle()
+        val player = playerShell()
+        openPlayer(player)
         strip("player-back", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
     }
 
@@ -327,7 +346,7 @@ class MotionStripsTest {
         }
     }
 
-    private fun saveStrip(name: String, frames: List<Pair<String, Bitmap>>) {
+    private fun saveStrip(name: String, frames: List<Pair<String, Bitmap>>, end: String) {
         val scale = 0.5f
         val width = (frames.first().second.width * scale).roundToInt()
         val height = (frames.first().second.height * scale).roundToInt()
@@ -342,7 +361,7 @@ class MotionStripsTest {
         }
         frames.forEachIndexed { index, (text, bitmap) ->
             val x = index * (width + gap)
-            canvas.drawText(text, x + 6f, 20f, paint)
+            canvas.drawText(if (index == frames.lastIndex) "$text · $end" else text, x + 6f, 20f, paint)
             canvas.drawBitmap(bitmap, null, Rect(x, label, x + width, label + height), paint)
         }
         val dir = File(File(System.getProperty("nagmedar.screenshotDir") ?: "build/outputs/screenshots"), "motion")
@@ -353,5 +372,8 @@ class MotionStripsTest {
     private companion object {
         /** The frame clock's step. */
         const val FRAME_MS = 16L
+
+        /** How long a strip waits for the window to go still. */
+        const val STILL_LIMIT_MS = 2_000L
     }
 }
