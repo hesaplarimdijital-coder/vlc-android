@@ -280,6 +280,8 @@ AUTO_ICONS = (
     ('continue', 'Resume'), ('new', 'Plus'), ('favourites', 'StarFilled'), ('categories', 'Grid'),
     # 1.0.3: the Music tab's shuffle, genres, every track and the smart lists
     ('shuffle', 'Shuffle'), ('genres', 'Visualizer'), ('tracks', 'Music'), ('smart', 'SmartList'),
+    # 1.0.3: the Podcast tab's Keşfet, its popular shows and countries, and "Abone ol" (a row and a browse action)
+    ('discover', 'Search'), ('popular', 'Star'), ('countries', 'Network'), ('subscribe', 'PlaylistAdd'),
 )
 
 

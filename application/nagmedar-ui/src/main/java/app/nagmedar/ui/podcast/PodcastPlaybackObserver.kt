@@ -6,6 +6,7 @@ import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastDao
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.playback.PlaybackEngine
+import app.nagmedar.ui.auto.CarIds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -68,6 +69,10 @@ class PodcastPlaybackObserver : PlaybackObserver {
                     asked = location
                     context = location?.let { withContext(Dispatchers.IO) { contextOf(dao, it) } }
                     publish(app, context)
+                    // 1.0.3: Android Auto's "Devam eden bölümler" lists the episodes in the order they were last listened to
+                    context?.let { episode ->
+                        if (withContext(Dispatchers.IO) { ListenedEpisodes(app).heard(episode.episodeId) }) service.notifyChildrenChanged(CarIds.CONTINUE)
+                    }
                 } else if (context != null && location != null && ++looks % REFRESH_LOOKS == 0) {
                     // the show's settings may have changed meanwhile (its boost, its skips): they apply to this episode too
                     context = withContext(Dispatchers.IO) { contextOf(dao, location) }

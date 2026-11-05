@@ -21,9 +21,6 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
 
-/** Every address key the feed answers to: the one it is stored under and the ones it was reached by before it moved. */
-internal fun PodcastFeed.addressKeys(): List<String> = listOf(FeedUrl.key(feedUrl)) + aliasKeys.split('\n').filter { it.isNotEmpty() }
-
 private fun List<PodcastFeed>.byAddressKey(): Map<String, PodcastFeed> {
     val map = HashMap<String, PodcastFeed>()
     forEach { feed -> feed.addressKeys().forEach { map.putIfAbsent(it, feed) } }

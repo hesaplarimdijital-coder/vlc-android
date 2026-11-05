@@ -104,6 +104,8 @@ class PodcastIndexDirectory(
  * requests a minute from one address, so [pace] allows eighteen. Shows with no `feedUrl` (Apple's
  * own, paid ones) cannot be subscribed to and are left out. [country] (a two-letter region) picks
  * the store it asks.
+ * 1.0.3: also a storefront's chart of popular shows ([top]: Apple's "Top Shows" and one lookup for their feeds, both
+ * under the same [pace]).
  */
 class ITunesDirectory(
     private val userAgent: String,
@@ -111,13 +113,32 @@ class ITunesDirectory(
     private val pace: RequestPace = RequestPace(spacingMs = 1_000, perWindow = 18),
     private val client: OkHttpClient = defaultClient,
     private val base: String = BASE_URL,
+    private val lookupBase: String = LOOKUP_URL,
+    private val chartBase: String = CHART_URL,
 ) : PodcastDirectory {
 
     override val available: Boolean get() = true
 
-    override suspend fun search(term: String, limit: Int): List<PodcastHit> {
+    override suspend fun search(term: String, limit: Int): List<PodcastHit> =
+        ITunesJson.hits(call(searchUrl(base, term, limit, country)))
+
+    /**
+     * 1.0.3: the most listened shows of the storefront [storefront] (a two-letter code), at most [limit], in the chart's
+     * order, each with its feed and its top-level categories; those with no feed are left out. Two requests: the chart,
+     * then one lookup of its shows. Throws [DirectoryFailure].
+     */
+    suspend fun top(storefront: String, limit: Int = ApplePodcasts.CHART_LIMIT): List<ChartShow> {
+        val country = ApplePodcasts.storefront(storefront) ?: throw DirectoryFailure.Server(HTTP_NOT_FOUND)
+        val entries = AppleChartJson.entries(call(chartUrl(chartBase, country, limit.coerceIn(1, ApplePodcasts.CHART_LIMIT)))).take(limit)
+        if (entries.isEmpty()) return emptyList()
+        val found = ITunesJson.lookup(call(lookupUrl(lookupBase, entries.map { it.id }, country)))
+        return ApplePodcasts.shows(entries, found)
+    }
+
+    /** The answer's text, in its turn ([pace]). Throws [DirectoryFailure]. */
+    private suspend fun call(url: HttpUrl): String {
         if (!pace.take()) throw DirectoryFailure.Busy(pace.waitMs())
-        val request = Request.Builder().url(searchUrl(base, term, limit, country)).header("User-Agent", userAgent).header("Accept", "application/json").build()
+        val request = Request.Builder().url(url).header("User-Agent", userAgent).header("Accept", "application/json").build()
         return try {
             client.newCall(request).executeCancellable { answer(it) }
         } catch (e: DirectoryFailure) {
@@ -128,10 +149,10 @@ class ITunesDirectory(
         }
     }
 
-    private fun answer(response: Response): List<PodcastHit> = when {
+    private fun answer(response: Response): String = when {
         response.isSuccessful -> {
             pace.answered()
-            ITunesJson.hits(response.body?.let { response.peekBody(MAX_ANSWER).string() } ?: throw DirectoryFailure.Server(response.code))
+            response.body?.let { response.peekBody(MAX_ANSWER).string() } ?: throw DirectoryFailure.Server(response.code)
         }
         // iTunes answers 403 or 429 to a client over its limit
         response.code == HTTP_FORBIDDEN || response.code == HTTP_TOO_MANY || response.code == HTTP_UNAVAILABLE -> {
@@ -143,10 +164,33 @@ class ITunesDirectory(
 
     companion object {
         const val BASE_URL = "https://itunes.apple.com/search"
+
+        /** 1.0.3: shows by Apple's ids, with their feeds. */
+        const val LOOKUP_URL = "https://itunes.apple.com/lookup"
+
+        /** 1.0.3: Apple's charts (Apple's RSS builder, no key): `<base>/<country>/podcasts/top/<limit>/podcasts.json`. */
+        const val CHART_URL = "https://rss.marketingtools.apple.com/api/v2"
         private const val HTTP_FORBIDDEN = 403
+        private const val HTTP_NOT_FOUND = 404
         private const val HTTP_TOO_MANY = 429
         private const val HTTP_UNAVAILABLE = 503
         private const val MAX_ANSWER = 4L * 1024 * 1024
+
+        /** 1.0.3: `<base>/tr/podcasts/top/100/podcasts.json`. */
+        fun chartUrl(base: String, country: String, limit: Int): HttpUrl = base.toHttpUrl().newBuilder()
+            .addPathSegment(country)
+            .addPathSegments("podcasts/top")
+            .addPathSegment(limit.toString())
+            .addPathSegment("podcasts.json")
+            .build()
+
+        /** 1.0.3: `?id=1,2,3&entity=podcast&country=TR`: the shows of a chart, their feeds. */
+        fun lookupUrl(base: String, ids: List<Long>, country: String?): HttpUrl = base.toHttpUrl().newBuilder()
+            // digits and commas, as Apple's examples write them (an encoded comma is no list to every server)
+            .addEncodedQueryParameter("id", ids.joinToString(","))
+            .addQueryParameter("entity", "podcast")
+            .apply { country?.takeIf { it.length == 2 }?.let { addQueryParameter("country", it.uppercase(Locale.ROOT)) } }
+            .build()
 
         /** `?media=podcast&entity=podcast&term=…&limit=…[&country=…]`. */
         fun searchUrl(base: String, term: String, limit: Int, country: String?): HttpUrl = base.toHttpUrl().newBuilder()

@@ -12,13 +12,26 @@ import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackRules
+import app.nagmedar.ui.podcast.ApplePodcasts
+import app.nagmedar.ui.podcast.ChartGenre
+import app.nagmedar.ui.podcast.ChartShow
+import app.nagmedar.ui.podcast.DirectoryFailure
+import app.nagmedar.ui.podcast.FeedFailure
+import app.nagmedar.ui.podcast.FeedUrl
+import app.nagmedar.ui.podcast.ParsedEpisode
+import app.nagmedar.ui.podcast.ParsedFeed
+import app.nagmedar.ui.podcast.PodcastHit
+import app.nagmedar.ui.podcast.addressKeys
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioFailure
 import app.nagmedar.ui.radio.Station
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import org.videolan.vlc.media.CarItem
 import org.videolan.vlc.media.CarStyle
+import java.text.Collator
 import java.util.Locale
 
 /**
@@ -61,6 +74,18 @@ interface CarData {
     /** The episodes left in the middle, not played: the one listened to last first ([CarPodcasts.continuing]). */
     suspend fun continuing(): List<PodcastEpisode>
 
+    /** 1.0.3: the country Keşfet starts from, the device's: a storefront of [ApplePodcasts.COUNTRIES]. */
+    fun country(): String
+
+    /** 1.0.3: the most listened shows of the storefront [country] ([ApplePodcasts]), kept a while. Throws [DirectoryFailure]. */
+    suspend fun chart(country: String): List<ChartShow>
+
+    /** 1.0.3: the podcast directory's shows for [query], as the Podcasts page's search finds them. Throws [DirectoryFailure]. */
+    suspend fun findShows(query: String): List<PodcastHit>
+
+    /** 1.0.3: the feed at [url] read (a show not followed), its episodes the newest first, kept a while. Throws [FeedFailure]. */
+    suspend fun readFeed(url: String): ParsedFeed
+
     /** The new episodes, unplayed and added by a refresh after the subscription, the newest first. */
     suspend fun fresh(): List<PodcastEpisode>
 
@@ -92,6 +117,7 @@ enum class CarText {
     Albums, Artists, Playlists, Years, Folders,
     Genres, AllTracks, ShuffleAll, Smart, UnknownGenre,
     Continue, Subscriptions, NewEpisodes,
+    Discover, PopularShows, Countries, Subscribe, Subscribed, FoundNewShows, PodcastsOffline, ShowUnavailable,
     FavouriteStations, RecentStations, Categories,
     UnknownAlbum, UnknownArtist, UnknownYear, UnknownFolder,
     FoundTracks, FoundAlbums, FoundArtists, FoundEpisodes, FoundShows, FoundStations,
@@ -99,12 +125,13 @@ enum class CarText {
 }
 
 /** What a count counts. */
-enum class CarCount { Tracks, Albums, Episodes, Stations }
+enum class CarCount { Tracks, Albums, Episodes, Stations, Shows }
 
 /** The icons of Android Auto's tabs and lists. */
 enum class CarIcon {
     Music, Podcasts, Radio, Recent, Albums, Artists, Playlists, Years, Folders, Continue, New, Favourites, Categories, NoCover,
     Genres, Tracks, Shuffle, Smart,
+    Discover, Popular, Countries, Subscribe,
 }
 
 /** How Android Auto's entries read and look: the texts in the app's language, the artwork's addresses. */
@@ -120,6 +147,15 @@ interface CarLook {
     fun date(ms: Long): String?
 
     fun icon(icon: CarIcon): String
+
+    /** 1.0.3: the language of the texts: lists of names are sorted in it. */
+    val locale: Locale
+
+    /** 1.0.3: a country by its two-letter code, in the app's language ("Türkiye"). */
+    fun country(code: String): String
+
+    /** 1.0.3: one of Apple's podcast categories in the app's language; its own (English) name when it is not known. */
+    fun category(genre: ChartGenre): String
 
     /** The track's cover (its album's), or the placeholder. */
     fun cover(track: Track?): String
@@ -138,6 +174,15 @@ sealed interface CarPlay {
     data class Episode(val feed: PodcastFeed, val episode: PodcastEpisode) : CarPlay
 
     data class Radio(val station: Station) : CarPlay
+
+    /** 1.0.3: the row "Abone ol" of a show not followed: it subscribes to [show] and plays nothing. */
+    data class Subscribe(val show: PodcastHit) : CarPlay
+}
+
+/** 1.0.3: the custom browse actions of Android Auto's entries. */
+object CarActions {
+    /** "Abone ol" on a show of the directory not followed. */
+    const val SUBSCRIBE = "app.nagmedar.auto.SUBSCRIBE"
 }
 
 /** 1.0: how a decade's name ends in Turkish: "1990'lar", "2000'ler", by the vowel of its last spoken word. */
@@ -153,12 +198,21 @@ object CarDecades {
 object CarPodcasts {
     /**
      * The episodes left in the middle: not played, with a place the episode's page would offer to resume from
-     * ([PlaybackRules.shownPositionMs]); the one listened to last first ([listened]: its place in the playback history,
-     * 0 the latest; null when it is not there), then the newest.
+     * ([PlaybackRules.shownPositionMs]); the one listened to last first. 1.0.3: [heard] is the order the app noted
+     * (the episodes as they were last played, the latest first: [app.nagmedar.ui.podcast.ListenedEpisodes]); those it
+     * does not know (played before 1.0.3) follow by [listened] (their place in the playback history, 0 the latest; null
+     * when it is not there), then the newest.
      */
-    fun continuing(episodes: List<PodcastEpisode>, listened: (PodcastEpisode) -> Int?): List<PodcastEpisode> =
-        episodes.filter { !it.played && PlaybackRules.shownPositionMs(it.positionMs, it.played, null, durationMs = it.durationMs) > 0 }
-            .sortedWith(compareBy<PodcastEpisode> { listened(it) ?: Int.MAX_VALUE }.thenByDescending { it.publishedAt })
+    fun continuing(episodes: List<PodcastEpisode>, heard: List<Long> = emptyList(), listened: (PodcastEpisode) -> Int?): List<PodcastEpisode> {
+        val rank = HashMap<Long, Int>()
+        heard.forEachIndexed { i, id -> rank.putIfAbsent(id, i) }
+        return episodes.filter { !it.played && PlaybackRules.shownPositionMs(it.positionMs, it.played, null, durationMs = it.durationMs) > 0 }
+            .sortedWith(
+                compareBy<PodcastEpisode> { rank[it.id] ?: Int.MAX_VALUE }
+                    .thenBy { listened(it) ?: Int.MAX_VALUE }
+                    .thenByDescending { it.publishedAt },
+            )
+    }
 
     /** What a show plays when it is asked for by name: where it was left, else its newest unplayed episode, else its newest. */
     fun pick(episodes: List<PodcastEpisode>, continuing: List<PodcastEpisode>): PodcastEpisode? {
@@ -179,10 +233,12 @@ object CarPodcasts {
 /**
  * 1.0: Android Auto's browse tree. The root's four tabs: Müzik (1.0.3: the whole music shuffled at one tap, albums,
  * artists, genres when the music has some, playlists and smart lists, years, the Music section's folders, every track
- * A–Z), Podcast (the episodes left in the middle, the subscriptions, the new episodes), Radyo (the favourite stations,
- * those played last, the directory's categories) and Son çalınanlar (the music played last). Long lists are cut into
- * pages of [pageSize]; an empty list says so in one line, as does music the medialibrary does not give in time
- * ([MusicUnavailable]). Also the search and what an entry plays ([play]).
+ * A–Z), Podcast (the episodes left in the middle, the subscriptions, the new episodes; 1.0.3: Keşfet, Apple's popular
+ * shows of the device's country, by category and of the other countries, whose shows not followed open on their feed's
+ * episodes under a row "Abone ol"), Radyo (the favourite stations, those played last, the directory's categories) and
+ * Son çalınanlar (the music played last). Long lists are cut into pages of [pageSize]; an empty list says so in one
+ * line, as does music the medialibrary does not give in time ([MusicUnavailable]) and a directory that cannot be
+ * reached. Also the search, what an entry plays ([play]) and the show a browse action subscribes to ([subscription]).
  */
 class CarTree(private val data: CarData, private val look: CarLook, private val pageSize: Int = PAGE) {
 
@@ -215,6 +271,9 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 CarIds.CONTINUE -> episodes(data.continuing(), withShow = true)
                 CarIds.SHOWS -> filled(data.feeds().map(::show))
                 CarIds.NEW -> episodes(data.fresh(), withShow = true)
+                CarIds.DISCOVER -> discover()
+                CarIds.CATEGORIES -> data.country().let { country -> charted { categories(country, data.chart(country)) } }
+                CarIds.COUNTRIES -> countries()
                 CarIds.RADIO -> radio()
                 CarIds.FAVOURITES -> filled(data.favouriteStations().map(::station))
                 CarIds.STATIONS_RECENT -> filled(data.recentStations().map(::station))
@@ -232,13 +291,17 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 val list = data.smartLists().firstOrNull { it.id == ref.number } ?: return listOf(nothing(CarText.Empty))
                 tracks(ref.path, ref, data.smartTracks(list), album = false)
             }
-            CarKind.Show -> {
-                val feedId = ref.number ?: return emptyList()
-                val episodes = data.episodes(feedId)
-                if (episodes.isEmpty()) return listOf(nothing(CarText.Empty))
-                val shown = if (episodes.size > pageSize) episodes.take(pageSize) else episodes
-                shown.map { episode(it, null) }
+            CarKind.Show -> showEpisodes(ref.number ?: return emptyList())
+            CarKind.Chart -> {
+                val country = ApplePodcasts.storefront(ref.key) ?: return emptyList()
+                charted { shows(data.chart(country).map { it.hit }) }
             }
+            CarKind.Category -> {
+                val genre = ref.number?.toInt() ?: return emptyList()
+                val country = ApplePodcasts.storefront(ref.params["c"]) ?: return emptyList()
+                charted { shows(data.chart(country).filter { show -> show.genres.any { it.id == genre } }.map { it.hit }) }
+            }
+            CarKind.DirectoryShow -> directoryShowEntries(hitOf(ref) ?: return emptyList())
             CarKind.Tag -> {
                 val tag = ref.key?.takeIf { it.isNotEmpty() } ?: return emptyList()
                 directory { data.tagged(tag).map(::station) }
@@ -247,7 +310,7 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 val tracks = searchTracks(ref.key.orEmpty()).take(pageSize)
                 tracks.mapIndexed { i, track -> trackItem(CarIds.searchTracks(ref.key.orEmpty()), i, track, album = false) }
             }
-            CarKind.Episode, CarKind.Station, CarKind.DirectoryStation -> emptyList()
+            CarKind.Episode, CarKind.Station, CarKind.DirectoryStation, CarKind.DirectoryEpisode, CarKind.Subscribe -> emptyList()
         }
     }
 
@@ -302,13 +365,54 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 val feed = data.feeds().firstOrNull { it.id == episode.feedId } ?: return null
                 CarPlay.Episode(feed, episode)
             }
+            CarKind.DirectoryEpisode -> directoryEpisode(ref)
+            CarKind.Subscribe -> hitOf(ref)?.let(CarPlay::Subscribe)
             CarKind.Station -> data.station(ref.number ?: return null)?.let(CarPlay::Radio)
             CarKind.DirectoryStation -> {
                 val url = ref.params["u"]?.takeIf { it.isNotBlank() } ?: return null
                 CarPlay.Radio(Station(uuid = ref.key?.takeIf { it.isNotEmpty() }, name = ref.params["n"].orEmpty().ifBlank { url }, streamUrl = url, logoUrl = ref.params["l"]))
             }
-            CarKind.Decade, CarKind.Show, CarKind.Tag -> null
+            CarKind.Decade, CarKind.Show, CarKind.Tag, CarKind.Chart, CarKind.Category, CarKind.DirectoryShow -> null
         }?.takeUnless { it is CarPlay.Tracks && it.tracks.isEmpty() }
+    }
+
+    /**
+     * 1.0.3: an episode of a show not followed, read from its feed: it plays as the app plays an episode (EpisodeMedia),
+     * from its start. A show followed meanwhile plays its own episode, where it was left.
+     */
+    private suspend fun directoryEpisode(ref: CarRef): CarPlay? {
+        val url = ref.params["u"]?.takeIf { it.isNotBlank() } ?: return null
+        val guid = ref.key?.takeIf { it.isNotEmpty() } ?: return null
+        followed(url)?.let { feed -> data.episodes(feed.id).firstOrNull { it.guid == guid }?.let { return CarPlay.Episode(feed, it) } }
+        val parsed = try {
+            data.readFeed(url)
+        } catch (e: FeedFailure) {
+            return null
+        }
+        val episode = parsed.episodes.firstOrNull { it.guid == guid } ?: return null
+        return CarPlay.Episode(PodcastFeed(feedUrl = url, title = parsed.title, author = parsed.author, imageUrl = parsed.imageUrl), playable(episode))
+    }
+
+    /**
+     * 1.0.3: the entry [id] alone, as a list shows it: a show of the directory (followed or not, with its browse action
+     * while it is not) or a show followed; null for any other. Auto reads one again after a browse action changed it.
+     */
+    suspend fun item(id: String): CarItem? {
+        val ref = CarIds.parse(id) ?: return null
+        return when (ref.kind) {
+            CarKind.DirectoryShow -> hitOf(ref)?.let { hit -> directoryShow(hit, followed(hit.feedUrl)) }
+            CarKind.Show -> data.feeds().firstOrNull { it.id == ref.number }?.let(::show)
+            else -> null
+        }
+    }
+
+    /**
+     * 1.0.3: the show the entry [id] subscribes to: a show of the directory (its browse action "Abone ol") or its row
+     * "Abone ol"; null for any other entry. Followed already, it is still given (subscribing then says so).
+     */
+    fun subscription(id: String): PodcastHit? {
+        val ref = CarIds.parse(id) ?: return null
+        return if (ref.kind == CarKind.DirectoryShow || ref.kind == CarKind.Subscribe) hitOf(ref) else null
     }
 
     /**
@@ -336,13 +440,22 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         }
         val feeds = data.feeds()
         val byFeed = feeds.associateBy { it.id }
+        // 1.0.3: the two directories are asked side by side, each given [DIRECTORY_WAIT_MS]
+        val (directoryShows, directoryStations) = coroutineScope {
+            val shows = async { withTimeoutOrNull(DIRECTORY_WAIT_MS) { reachable { data.findShows(query) } }.orEmpty() }
+            val stations = async { withTimeoutOrNull(DIRECTORY_WAIT_MS) { quietly { data.findStations(query) } }.orEmpty() }
+            shows.await() to stations.await()
+        }
         data.findEpisodes(query, MAX_FOUND).forEach { found += episode(it, byFeed[it.feedId]).copy(group = look.text(CarText.FoundEpisodes)) }
         ranked(query, feeds) { it.title }.take(MAX_FOUND_GROUPS).forEach { found += show(it).copy(group = look.text(CarText.FoundShows)) }
+        // 1.0.3: the shows of the directory not followed, under their own heading
+        val followedKeys = feeds.flatMapTo(HashSet()) { it.addressKeys() }
+        directoryShows.filter { FeedUrl.key(it.feedUrl) !in followedKeys }.distinctBy { FeedUrl.key(it.feedUrl) }.take(MAX_FOUND_GROUPS)
+            .forEach { found += directoryShow(it, null).copy(group = look.text(CarText.FoundNewShows)) }
         val kept = (data.favouriteStations() + data.recentStations()).distinctBy { it.key }
         val stations = ranked(query, kept) { it.name }.toMutableList()
-        val directory = withTimeoutOrNull(DIRECTORY_WAIT_MS) { quietly { data.findStations(query) } }.orEmpty()
         val keys = stations.mapTo(HashSet()) { it.key }
-        stations += directory.filter { it.key !in keys }
+        stations += directoryStations.filter { it.key !in keys }
         stations.take(MAX_FOUND).forEach { found += station(it).copy(group = look.text(CarText.FoundStations)) }
         return found.ifEmpty { listOf(nothing(CarText.NoResult)) }
     }
@@ -394,7 +507,130 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         tab(CarIds.CONTINUE, CarText.Continue, CarIcon.Continue, CarStyle.List),
         tab(CarIds.SHOWS, CarText.Subscriptions, CarIcon.Podcasts, CarStyle.Grid),
         tab(CarIds.NEW, CarText.NewEpisodes, CarIcon.New, CarStyle.List),
+        tab(CarIds.DISCOVER, CarText.Discover, CarIcon.Discover, CarStyle.List),
     )
+
+    /** 1.0.3: Keşfet: the popular shows of the device's country, its categories, the countries (each its popular shows). */
+    private fun discover() = listOf(
+        tab(CarIds.chart(data.country()), CarText.PopularShows, CarIcon.Popular, CarStyle.Grid),
+        tab(CarIds.CATEGORIES, CarText.Categories, CarIcon.Categories, CarStyle.List),
+        tab(CarIds.COUNTRIES, CarText.Countries, CarIcon.Countries, CarStyle.List),
+    )
+
+    /**
+     * 1.0.3: the categories of [country]'s popular shows ([chart]), those with the most shows first (then by name); each
+     * opens on its shows in the chart's order, its tile the cover of its first.
+     */
+    private fun categories(country: String, chart: List<ChartShow>): List<CarItem> {
+        val shows = LinkedHashMap<Int, MutableList<ChartShow>>()
+        val names = HashMap<Int, String>()
+        chart.forEach { show ->
+            show.genres.forEach { genre ->
+                shows.getOrPut(genre.id) { ArrayList() } += show
+                names.getOrPut(genre.id) { look.category(genre) }
+            }
+        }
+        val collator = Collator.getInstance(look.locale)
+        val order = compareByDescending<Map.Entry<Int, List<ChartShow>>> { it.value.size }
+            .then { a, b -> collator.compare(names[a.key].orEmpty(), names[b.key].orEmpty()) }
+        return shows.entries.sortedWith(order).map { (genre, list) ->
+            CarItem(
+                id = CarIds.category(country, genre),
+                title = names[genre].orEmpty(),
+                subtitle = look.count(CarCount.Shows, list.size),
+                iconUri = look.webImage(list.first().hit.imageUrl),
+                browsable = true,
+                children = CarStyle.Grid,
+            )
+        }
+    }
+
+    /** 1.0.3: the countries whose popular shows Keşfet lists: the device's first, then the others by name in the app's language. */
+    private fun countries(): List<CarItem> {
+        val home = data.country()
+        val collator = Collator.getInstance(look.locale)
+        val others = ApplePodcasts.COUNTRIES.filter { it != home }.map { it to look.country(it) }.sortedWith { a, b -> collator.compare(a.second, b.second) }
+        return (listOf(home to look.country(home)) + others).map { (code, name) ->
+            CarItem(id = CarIds.chart(code), title = name, iconUri = look.icon(CarIcon.Countries), browsable = true, children = CarStyle.Grid)
+        }
+    }
+
+    /** 1.0.3: shows of the directory as tiles: those followed say so, the others offer "Abone ol". */
+    private suspend fun shows(hits: List<PodcastHit>): List<CarItem> {
+        val feeds = data.feeds()
+        return hits.map { hit -> directoryShow(hit, feeds.firstOrNull { FeedUrl.key(hit.feedUrl) in it.addressKeys() }) }
+    }
+
+    /** The feed followed at [url] (any address it answers to); null when it is not followed. */
+    private suspend fun followed(url: String): PodcastFeed? {
+        val key = FeedUrl.key(url)
+        return data.feeds().firstOrNull { key in it.addressKeys() }
+    }
+
+    /**
+     * 1.0.3: a show of a directory: followed ([followed]), it says so and opens on its episodes as Programlarım does; not
+     * followed, it offers the browse action "Abone ol" and opens on its feed's episodes. Its id keeps what the directory
+     * said of it, for subscribing.
+     */
+    private fun directoryShow(hit: PodcastHit, followed: PodcastFeed?) = CarItem(
+        id = CarIds.directoryShow(hit.feedUrl, hit.title, hit.author, hit.imageUrl),
+        title = followed?.title ?: hit.title,
+        subtitle = if (followed != null) look.text(CarText.Subscribed) else hit.author,
+        iconUri = look.webImage(followed?.imageUrl ?: hit.imageUrl),
+        browsable = true,
+        children = CarStyle.List,
+        actions = if (followed == null) listOf(CarActions.SUBSCRIBE) else emptyList(),
+    )
+
+    /**
+     * 1.0.3: what a show of a directory opens on: followed, its episodes as Programlarım lists them; not followed, the row
+     * "Abone ol" every Auto shows, then its feed's episodes (the newest first, playable); a feed that cannot be read says so.
+     */
+    private suspend fun directoryShowEntries(hit: PodcastHit): List<CarItem> {
+        followed(hit.feedUrl)?.let { return showEpisodes(it.id) }
+        val feed = try {
+            data.readFeed(hit.feedUrl)
+        } catch (e: FeedFailure) {
+            return listOf(nothing(CarText.ShowUnavailable))
+        }
+        val subscribe = CarItem(
+            id = CarIds.subscribe(hit.feedUrl, hit.title, hit.author, hit.imageUrl),
+            title = look.text(CarText.Subscribe),
+            subtitle = feed.title.ifBlank { hit.title },
+            iconUri = look.icon(CarIcon.Subscribe),
+            playable = true,
+        )
+        val cover = feed.imageUrl ?: hit.imageUrl
+        return listOf(subscribe) + feed.episodes.take(pageSize - 1).map { episode ->
+            CarItem(
+                id = CarIds.directoryEpisode(hit.feedUrl, episode.guid),
+                title = episode.title,
+                subtitle = look.date(episode.publishedAt),
+                iconUri = look.webImage(episode.imageUrl ?: cover),
+                playable = true,
+            )
+        }
+    }
+
+    /** A followed show's episodes, the newest first. */
+    private suspend fun showEpisodes(feedId: Long): List<CarItem> {
+        val episodes = data.episodes(feedId)
+        if (episodes.isEmpty()) return listOf(nothing(CarText.Empty))
+        return episodes.take(pageSize).map { episode(it, null) }
+    }
+
+    /** 1.0.3: the show an entry of a directory names: its feed's address, and its title, author and cover as the directory gave them. */
+    private fun hitOf(ref: CarRef): PodcastHit? {
+        val url = ref.key?.takeIf { it.isNotBlank() } ?: return null
+        return PodcastHit(feedUrl = url, title = ref.params["n"]?.takeIf { it.isNotBlank() } ?: url, author = ref.params["a"], imageUrl = ref.params["l"])
+    }
+
+    /** 1.0.3: the podcast directory's answer, or one line saying it cannot be reached. */
+    private suspend fun charted(read: suspend () -> List<CarItem>): List<CarItem> = try {
+        filled(read())
+    } catch (e: DirectoryFailure) {
+        listOf(nothing(CarText.PodcastsOffline))
+    }
 
     private fun radio() = listOf(
         tab(CarIds.FAVOURITES, CarText.FavouriteStations, CarIcon.Favourites, CarStyle.Grid),
@@ -669,5 +905,26 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         } catch (e: RadioFailure) {
             null
         }
+
+        /** 1.0.3: [block]'s answer, or null when the podcast directory could not give one. */
+        internal suspend fun <T> reachable(block: suspend () -> T): T? = try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: DirectoryFailure) {
+            null
+        }
+
+        /** 1.0.3: an episode of a feed as the player's episode: from its start, never played, not downloaded. */
+        internal fun playable(episode: ParsedEpisode) = PodcastEpisode(
+            feedId = 0,
+            guid = episode.guid,
+            title = episode.title,
+            audioUrl = episode.audioUrl,
+            mimeType = episode.mimeType,
+            durationMs = episode.durationMs,
+            publishedAt = episode.publishedAt,
+            imageUrl = episode.imageUrl,
+        )
     }
 }
