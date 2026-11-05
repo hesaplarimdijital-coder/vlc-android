@@ -27,6 +27,7 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -137,6 +138,8 @@ internal fun SmartPane(
 ) {
     val compact = currentWidthClass() == WidthClass.Compact
     val pointer = NagTheme.inputMode == InputMode.Pointer
+    // 1.0.3: on a phone a smart list's first tracks arrive in turn (once they are chosen)
+    val appear = rememberListAppear(list.id, tracks == null)
     Column(Modifier.fillMaxSize().testTag("smart-pane")) {
         val playable = tracks.orEmpty()
         val covers = remember(tracks) { PlaylistCards.coversOf(playable) }
@@ -197,6 +200,7 @@ internal fun SmartPane(
                     // a phone's rows end with "⋯": the same menu as the long press, as a sheet
                     rowMoreButton = currentWidthClass() == WidthClass.Compact,
                     rowMoreTitle = { it.title },
+                    rowAppear = appear,
                 )
             }
         }

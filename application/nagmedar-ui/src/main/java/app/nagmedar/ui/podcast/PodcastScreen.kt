@@ -22,8 +22,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -77,6 +78,8 @@ import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.copyToClipboard
+import app.nagmedar.ui.components.listAppear
+import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
@@ -87,6 +90,8 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.openLink
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.DetailTransition
+import app.nagmedar.ui.shell.detailSharedCard
+import app.nagmedar.ui.shell.detailSharedElement
 import app.nagmedar.ui.shell.ListDetailPanes
 import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.NavKind
@@ -216,6 +221,8 @@ fun PodcastsContent(
         defaultDetailWidth = if (episodeOpen) 600.dp else 420.dp,
         minDetailWidth = 340.dp,
         minListWidth = 420.dp,
+        // 1.0.3: a phone's show opens from its row's cover (and from its tile, which grows into the page's header)
+        sharedElements = true,
     )
     model.add?.let { AddAddressDialog(it, actions.onAddSubmit, actions.onAddDismiss) }
     model.importing?.let { ImportDialog(it, actions.onImportDismiss) }
@@ -560,6 +567,7 @@ private fun subscriptionMenu(res: android.content.res.Resources, summary: Podcas
 @Composable
 private fun SubscriptionGrid(subscriptions: List<PodcastFeedSummary>, actions: PodcastActions) {
     val dimens = NagTheme.dimens
+    val appear = rememberListAppear()
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = Modifier.fillMaxSize().testTag("podcast-grid"),
@@ -567,12 +575,14 @@ private fun SubscriptionGrid(subscriptions: List<PodcastFeedSummary>, actions: P
         horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
         verticalArrangement = Arrangement.spacedBy(dimens.gapM),
     ) {
-        items(subscriptions, key = { it.feed.id }) { summary -> SubscriptionTile(summary, actions) }
+        gridItemsIndexed(subscriptions, key = { _, summary -> summary.feed.id }) { index, summary ->
+            SubscriptionTile(summary, actions, Modifier.listAppear(appear, index))
+        }
     }
 }
 
 @Composable
-private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastActions) {
+private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastActions, modifier: Modifier = Modifier) {
     val res = LocalContext.current.resources
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -582,9 +592,12 @@ private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastAction
     ContextMenuArea(
         entries = { subscriptionMenu(res, summary, actions) },
         accessibilityLabel = res.getString(R.string.nag_pod_actions),
+        modifier = modifier,
     ) {
         BoxWithConstraints(
             Modifier
+                // 1.0.3: on a phone the tile grows into the show's page header
+                .detailSharedCard(podcastCardKey(summary.feed.id), shape)
                 .fillMaxWidth()
                 .focusRing(state, shape)
                 .background(stateBackground(state), shape)
@@ -596,7 +609,7 @@ private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastAction
             val cover = rememberPodcastCover(summary.feed.imageUrl, with(LocalDensity.current) { side.roundToPx().coerceAtMost(COVER_MAX_PX) })
             Column {
                 Box {
-                    CoverTile(cover, side, corner = dimens.radiusControl, placeholder = NagIcons.Podcasts)
+                    CoverTile(cover, side, Modifier.detailSharedElement(podcastCoverKey(summary.feed.id)), corner = dimens.radiusControl, placeholder = NagIcons.Podcasts)
                     if (summary.newCount > 0) {
                         ToneBadge(
                             pluralStringResource(R.plurals.nag_pod_new, summary.newCount, summary.newCount),
@@ -617,12 +630,15 @@ private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastAction
 @Composable
 private fun SubscriptionList(subscriptions: List<PodcastFeedSummary>, actions: PodcastActions) {
     val dimens = NagTheme.dimens
+    val appear = rememberListAppear()
     LazyColumn(
         Modifier.fillMaxSize().testTag("podcast-list"),
         contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
         verticalArrangement = Arrangement.spacedBy(dimens.gapXs),
     ) {
-        items(subscriptions, key = { it.feed.id }) { summary -> SubscriptionRow(summary, actions, Modifier.widthIn(max = ListWidth)) }
+        itemsIndexed(subscriptions, key = { _, summary -> summary.feed.id }) { index, summary ->
+            SubscriptionRow(summary, actions, Modifier.listAppear(appear, index).widthIn(max = ListWidth))
+        }
     }
 }
 
@@ -652,7 +668,8 @@ private fun SubscriptionRow(summary: PodcastFeedSummary, actions: PodcastActions
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            CoverTile(cover, COVER_ROW, placeholder = NagIcons.Podcasts)
+            // 1.0.3: on a phone the cover flies to the show's page header
+            CoverTile(cover, COVER_ROW, Modifier.detailSharedElement(podcastCoverKey(summary.feed.id)), placeholder = NagIcons.Podcasts)
             Column(Modifier.weight(1f)) {
                 Text(summary.feed.title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 val meta = listOfNotNull(summary.feed.author, res.getQuantityString(R.plurals.nag_pod_episodes, summary.episodeCount, summary.episodeCount)).joinToString(" · ")
@@ -668,6 +685,12 @@ private fun SubscriptionRow(summary: PodcastFeedSummary, actions: PodcastActions
 
 /** The cover in a row, in dp. */
 internal val COVER_ROW: Dp = 56.dp
+
+/** 1.0.3: what a show's cover is called on both sides of its page's transition (its row or tile, the page's header). */
+internal fun podcastCoverKey(feedId: Long): String = "podcast-cover-" + feedId
+
+/** 1.0.3: what a show's tile and its page's header are called in the transition: the tile grows into the header. */
+internal fun podcastCardKey(feedId: Long): String = "podcast-card-" + feedId
 
 /** Covers are decoded no larger than this, however wide the tile. */
 private const val COVER_MAX_PX = 480
