@@ -42,7 +42,22 @@ data class CarItem(
     val progress: Double? = null,
     val played: Boolean = false,
     val downloaded: Boolean = false,
+    /** 1.0.3: the ids of the custom browse actions Auto offers on this entry ([CarCatalog.browseActions]: "Abone ol"). */
+    val actions: List<String> = emptyList(),
 )
+
+/**
+ * 1.0.3: a custom browse action of Android Auto (androidx.media 1.7): an icon Auto shows on the entries that name its
+ * [id] ([CarItem.actions]); tapped, Auto stays on the list and the catalog does it ([CarCatalog.act]). [iconUri] is a
+ * tintable vector drawable's android.resource:// address.
+ */
+data class CarAction(val id: String, val label: String, val iconUri: String)
+
+/**
+ * 1.0.3: what a custom browse action came to: the [message] Auto shows (that it worked, or why not) and the entry it
+ * reads again ([refresh], through [CarCatalog.item]), whose look changed.
+ */
+data class CarActionResult(val message: String, val refresh: String? = null)
 
 /**
  * 1.0: Android Auto's catalog: Nağmedar's music, podcasts and radio, kept by the new interface's module, which this one
@@ -82,6 +97,15 @@ interface CarCatalog {
      * as playing; null when it is none of the tree's. Quick: called on the main thread at every state change.
      */
     fun playingId(location: String?): String?
+
+    /** 1.0.3: the custom browse actions the catalog's entries may offer, in [context]'s language; none by default. */
+    fun browseActions(context: Context): List<CarAction> = emptyList()
+
+    /** 1.0.3: the entry [mediaId] alone, as a list shows it (Auto reads one again after an action changed it); null when unknown. */
+    suspend fun item(context: Context, mediaId: String): CarItem? = null
+
+    /** 1.0.3: does the browse action [action] on the entry [mediaId]; null when it is none of the catalog's. */
+    suspend fun act(context: Context, action: String, mediaId: String): CarActionResult? = null
 }
 
 object CarHook {

@@ -1,6 +1,7 @@
 # S-1401: builds the test media set from testmedia/manifest.json, checks every sample
 # and publishes it as the "nagmedar-test-media" artifact. Runs when testmedia/ changes
 # or by hand; the output is cached until the generator or the manifest changes.
+# 1.0.3: music, podcast and radio samples only (Nağmedar plays no video since 1.0).
 name: Test medya seti
 
 on:
@@ -10,11 +11,6 @@ on:
       - 'testmedia/**'
       - '.github/workflows/testmedia.yml'
   workflow_dispatch:
-    inputs:
-      heavy:
-        description: '4K 100 Mbit/s yük testi örneğini de üret (yaklaşık 190 MB)'
-        type: boolean
-        default: true
 
 permissions:
   contents: read
@@ -23,57 +19,36 @@ jobs:
   media:
     name: Test medya seti
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    env:
-      SKIP_HEAVY: ${{ github.event_name == 'workflow_dispatch' && !inputs.heavy }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
+      # 1.0.3: audio only (the video, HDR and Dolby Vision samples and their tools left with video in 1.0)
       - name: Araçlar
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg mkvtoolnix python3-numpy python3-pil
+          sudo apt-get install -y -qq ffmpeg python3-numpy python3-pil
           pip install --quiet --break-system-packages mutagen
-          mkdir -p "$RUNNER_TEMP/bin"
-          gh release download 2.3.4 --repo quietvoid/dovi_tool \
-            --pattern 'dovi_tool-2.3.4-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
-          gh release download 1.7.2 --repo quietvoid/hdr10plus_tool \
-            --pattern 'hdr10plus_tool-1.7.2-x86_64-unknown-linux-musl.tar.gz' -O - | tar xz -C "$RUNNER_TEMP/bin"
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-          # profile 7 MEL sample: dovi_tool's test assets (MIT) at the same version
-          mkdir -p "$RUNNER_TEMP/dovi-assets"
-          for f in regular_start_code_4_muxed_el.hevc regular_rpu_mel.bin; do
-            curl -fsSL -o "$RUNNER_TEMP/dovi-assets/$f" \
-              "https://raw.githubusercontent.com/quietvoid/dovi_tool/2.3.4/assets/hevc_tests/$f"
-          done
-          echo "DOVI_TOOL_ASSETS=$RUNNER_TEMP/dovi-assets" >> "$GITHUB_ENV"
           ffmpeg -hide_banner -version | head -1
-          mkvmerge --version
 
       - name: Önbellek
         id: cache
         uses: actions/cache@v4
         with:
           path: out/testmedia
-          key: testmedia-${{ hashFiles('testmedia/**', 'application/nagmedar-ui/src/main/res/font/*') }}-heavy-${{ env.SKIP_HEAVY != 'true' }}
+          key: testmedia-${{ hashFiles('testmedia/**', 'application/nagmedar-ui/src/main/res/font/*') }}
 
       - name: Üret
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           set -o pipefail
-          args=()
-          [ "$SKIP_HEAVY" = true ] && args+=(--skip-heavy)
-          python3 testmedia/generate.py out/testmedia --work "$RUNNER_TEMP/work" "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/generate.log" || {
+          python3 testmedia/generate.py out/testmedia --work "$RUNNER_TEMP/work" 2>&1 | tee "$RUNNER_TEMP/generate.log" || {
             echo "::error title=Üretim günlüğü::$(tail -c 2500 "$RUNNER_TEMP/generate.log" | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}')"
             exit 1
           }
 
       - name: Doğrula
-        run: |
-          python3 testmedia/verify.py out/testmedia \
-            $([ "$SKIP_HEAVY" = true ] && echo --allow-missing stress-2160p23976-100mbps)
+        run: python3 testmedia/verify.py out/testmedia
 
       - name: Özet
         if: always()

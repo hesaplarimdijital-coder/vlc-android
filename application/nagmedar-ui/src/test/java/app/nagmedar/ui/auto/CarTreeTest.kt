@@ -57,8 +57,9 @@ class CarTreeTest {
             listOf(null, CarStyle.Grid, CarStyle.Grid, CarStyle.Grid, CarStyle.List, CarStyle.List, CarStyle.List),
             children(data, CarIds.MUSIC).map { it.children },
         )
-        assertEquals(listOf(CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW), ids(children(data, CarIds.PODCASTS)))
-        assertEquals(listOf(CarStyle.List, CarStyle.Grid, CarStyle.List), children(data, CarIds.PODCASTS).map { it.children })
+        // 1.0.3: Keşfet last (CarPodcastTest)
+        assertEquals(listOf(CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.DISCOVER), ids(children(data, CarIds.PODCASTS)))
+        assertEquals(listOf(CarStyle.List, CarStyle.Grid, CarStyle.List, CarStyle.List), children(data, CarIds.PODCASTS).map { it.children })
         assertEquals(listOf(CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS), ids(children(data, CarIds.RADIO)))
         assertEquals(listOf(CarStyle.Grid, CarStyle.Grid, CarStyle.List), children(data, CarIds.RADIO).map { it.children })
     }
