@@ -101,7 +101,7 @@ ext {
     // Nağmedar 1.0: compiled against Android 17 (API 37); its behaviour stays Android 16's until the
     // local network permission, the background audio rules and the widget bitmap limit that
     // targeting 37 brings are handled (buildsystem/release/README.md)
-    targetSdkVersion = 36
+    targetSdkVersion = 37
     compileSdkVersion = 37
     desugarLib = '2.0.4'
     androidxLegacyVersion = '1.0.0'
