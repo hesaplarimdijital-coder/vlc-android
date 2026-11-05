@@ -185,10 +185,7 @@ class RadioSearch(
         } catch (e: Exception) {
             emptyMap()
         }
-        return found.map { station ->
-            val mark = station.uuid?.let(kept::get) ?: return@map station
-            station.copy(id = mark.id, favourite = mark.favourite, lastVotedAt = mark.lastVotedAt, lastPlayedAt = mark.lastPlayedAt)
-        }
+        return found.map { station -> station.withMarks(station.uuid?.let(kept::get)) }
     }
 
     companion object {

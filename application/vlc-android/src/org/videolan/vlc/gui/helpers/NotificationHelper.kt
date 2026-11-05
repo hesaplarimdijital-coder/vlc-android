@@ -168,7 +168,8 @@ object NotificationHelper {
         return PendingIntent.getBroadcast(ctx, actionId.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
-    fun createScanNotification(ctx: Context, progressText: String, paused: Boolean, max:Int, progress: Int): Notification {
+    /** Nağmedar 1.0.3: [pauseButton] false for the service's first notification, which the system then shows only if it stays. */
+    fun createScanNotification(ctx: Context, progressText: String, paused: Boolean, max:Int, progress: Int, pauseButton: Boolean = true): Notification {
         // the Nağmedar window on its home page (a VIEW without data opened nothing)
         val intent = Intent(NAGMEDAR_ACTION_LIBRARY).setClassName(ctx, START_ACTIVITY)
         val scanCompatBuilder = NotificationCompat.Builder(ctx, MEDIALIBRRARY_CHANNEL_ID)
@@ -181,6 +182,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setOngoing(true)
         scanCompatBuilder.setContentText(progressText)
+        if (!pauseButton) return scanCompatBuilder.build()
 
         notificationIntent.action = if (paused) ACTION_RESUME_SCAN else ACTION_PAUSE_SCAN
         notificationIntent.`package` = ctx.packageName

@@ -97,6 +97,7 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.animatedAccent
 import kotlinx.coroutines.delay
@@ -186,9 +187,9 @@ fun ProgressTimeline(
         else -> if (bar) 5.dp else 6.dp
     }
     // the thumb and the track grow on the fast spring, as the kit's slider (Desktop Kit 0.2.0)
-    val thumb by animateFloatAsState(with(density) { thumbTarget.toPx() }, motion.fastSpatial(), label = "thumb")
+    val thumb by animateFloatAsState(with(density) { thumbTarget.toPx() }, motion.fastSpatial(NagMotion.PIXEL), label = "thumb")
     val trackTarget = if (active) 6.dp else if (bar) 3.dp else 4.dp
-    val track by animateFloatAsState(with(density) { trackTarget.toPx() }, motion.fastSpatial(), label = "track")
+    val track by animateFloatAsState(with(density) { trackTarget.toPx() }, motion.fastSpatial(NagMotion.PIXEL), label = "track")
     val phone = style == TimelineStyle.Phone
     val waveHeight = when (style) {
         TimelineStyle.Panel -> 36.dp

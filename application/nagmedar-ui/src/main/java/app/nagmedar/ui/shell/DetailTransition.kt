@@ -62,6 +62,15 @@ object DetailMotion {
     const val BACK_CORNER_DP = 28
     const val BACK_LEAN_DP = 24
 
+    /**
+     * 1.0.3: where the phone's spring counts the way as done (Desktop Kit 2.3.0's rule: once less than half a pixel
+     * is left to move). The parts' curves flatten towards both ends: within a fiftieth of the way less than a
+     * twentieth of a pixel of the slide is left on the widest phone and the fades are over, so the spring stops
+     * there and an open detail's list is no longer drawn under it (a thousandth would add some 130 ms of frames
+     * that move nothing; without a threshold Compose stopped it at a hundredth of the old, slower spring).
+     */
+    const val ARRIVED = 0.02f
+
     /** The frame at [progress]; [opening] tells which way it runs, as each way has its own curves. */
     fun frame(progress: Float, opening: Boolean): DetailFrame {
         val p = progress.coerceIn(0f, 1f)
@@ -115,7 +124,7 @@ class DetailMotionState internal constructor(open: Boolean) {
         if (motion.reduced || tier == MotionTier.Reduced) {
             progress.snapTo(target)
         } else if (tier == MotionTier.Gesture) {
-            progress.animateTo(target, NagMotion.gesture())
+            progress.animateTo(target, NagMotion.gesture(DetailMotion.ARRIVED))
         } else {
             val duration = (abs(target - progress.value) * NagMotion.LONG).roundToInt()
             progress.animateTo(target, tween(duration, easing = LinearEasing))
@@ -161,6 +170,7 @@ fun rememberDetailMotion(open: Boolean): DetailMotionState = remember { DetailMo
 fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val motion = NagTheme.motion
+    val tier = LocalMotionTier.current
     val latestOnBack by rememberUpdatedState(onBack)
     PredictiveBackHandler(enabled = enabled) { events ->
         state.back.snapTo(0f)
@@ -171,7 +181,9 @@ fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> 
             }
             latestOnBack()
         } catch (e: CancellationException) {
-            scope.launch { state.back.animateTo(0f, motion.spatial()) }
+            // 1.0.3 (Desktop Kit 2.3.0): on a phone back to full size on the gesture spring, arrived within a thousandth
+            // (the spatial spring's bounce took the scale past 1 for a frame); wider windows keep it; at once with reduced motion
+            scope.launch { state.back.animateTo(0f, NagMotion.spatial(tier, motion.spatial(), NagMotion.FRACTION)) }
             throw e
         }
     }

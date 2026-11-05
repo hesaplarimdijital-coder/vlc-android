@@ -29,7 +29,9 @@ import java.util.concurrent.atomic.AtomicReference
  * Podcasts' shows the feed the walk followed ("nagmedar.feed"), and the search finds a track. The personal walk runs
  * it (buildsystem/ci/emulator_smoke.py): the personal APK once gave Auto a root its own catalog did not know, which
  * no debug build showed. 1.0.3: it connects as an Auto that shows custom browse actions, and the root offers "Abone
- * ol"; Keşfet's lists answer (Apple's shows, or the one line that says the directory cannot be reached).
+ * ol"; Keşfet's lists answer (Apple's shows, or the one line that says the directory cannot be reached). The Radio
+ * tab's seven lists answer (the radio directory's countries, languages, categories, most listened and most liked
+ * too), a country opens on its stations, and every station offers "Favorilere ekle" or "Favorilerden çıkar".
  */
 @RunWith(AndroidJUnit4::class)
 class AutoBrowseTest {
@@ -86,8 +88,7 @@ class AutoBrowseTest {
         browseActions()
         music("$root/music")
         podcasts("$root/podcasts")
-        // the radio's lists: stations, or the one line that says the directory cannot be reached
-        lists("$root/radio", 3).forEach { list -> assertAnswers(list) }
+        radio("$root/radio")
         assertAnswers(tabs.last())
         found()
     }
@@ -126,14 +127,38 @@ class AutoBrowseTest {
         }
     }
 
-    /** 1.0.3: the root offers Auto its custom browse action "Abone ol" (with a label and an icon). */
+    /**
+     * 1.0.3: the root offers Auto its custom browse actions, each with a label and an icon: "Abone ol", "Favorilere ekle"
+     * and "Favorilerden çıkar".
+     */
     @Suppress("DEPRECATION") // the typed getter needs API 33; the test runs on older ones too
     private fun browseActions() {
         val actions = browser.extras?.getParcelableArrayList<Bundle>(MediaConstants.BROWSER_SERVICE_EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ROOT_LIST).orEmpty()
-        val subscribe = actions.firstOrNull { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) == SUBSCRIBE }
-        assertNotNull("the root's browse actions: ${actions.map { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) }}", subscribe)
-        assertFalse("its label", subscribe!!.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_LABEL).isNullOrBlank())
-        assertTrue("its icon", subscribe.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ICON_URI).orEmpty().startsWith("android.resource://"))
+        for (id in listOf(SUBSCRIBE, FAVOURITE, UNFAVOURITE)) {
+            val action = actions.firstOrNull { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) == id }
+            assertNotNull("$id among the root's browse actions: ${actions.map { it.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID) }}", action)
+            assertFalse("$id's label", action!!.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_LABEL).isNullOrBlank())
+            assertTrue("$id's icon", action.getString(MediaConstants.EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ICON_URI).orEmpty().startsWith("android.resource://"))
+        }
+    }
+
+    /**
+     * 1.0.3: the Radio's seven lists answer (stations, or the one line that says why there are none: nothing kept yet,
+     * the directory cannot be reached); the first country opens on its stations; every station offers "Favorilere ekle"
+     * or "Favorilerden çıkar".
+     */
+    private fun radio(id: String) {
+        lists(id, 7).forEach { list -> stationsOffer(list, assertAnswers(list)) }
+        val country = children("$id/countries", NETWORK_WAIT_MS).firstOrNull { it.isBrowsable } ?: return
+        stationsOffer(country, assertAnswers(country))
+    }
+
+    /** The stations among [entries] of [list] each offer a favourite's browse action. */
+    private fun stationsOffer(list: MediaItem, entries: List<MediaItem>) {
+        entries.filter { it.isPlayable && !it.isNothing }.forEach { station ->
+            val actions = station.description.extras?.getStringArrayList(MediaConstants.DESCRIPTION_EXTRAS_KEY_CUSTOM_BROWSER_ACTION_ID_LIST).orEmpty()
+            assertTrue("${station.title} in ${list.title}: $actions", actions.any { it == FAVOURITE || it == UNFAVOURITE })
+        }
     }
 
     /**
@@ -166,12 +191,13 @@ class AutoBrowseTest {
 
     /**
      * A list answers: entries, or one line that says why it has none (an empty list's, an offline directory's), given
-     * [NETWORK_WAIT_MS] (a directory's list asks its servers in turn).
+     * [NETWORK_WAIT_MS] (a directory's list asks its servers in turn). Returns them.
      */
-    private fun assertAnswers(list: MediaItem) {
+    private fun assertAnswers(list: MediaItem): List<MediaItem> {
         val entries = children(list.mediaId!!, NETWORK_WAIT_MS)
         assertTrue("${list.title} (${list.mediaId}) gave Auto nothing", entries.isNotEmpty())
         if (entries.any { it.isNothing }) assertEquals("${list.title}: ${describe(entries)}", 1, entries.size)
+        return entries
     }
 
     /**
@@ -237,9 +263,14 @@ class AutoBrowseTest {
     private companion object {
         const val SERVICE = "org.videolan.vlc.PlaybackService"
 
-        /** The custom browse actions a car shows on an entry, and Nağmedar's "Abone ol" (CarActions.SUBSCRIBE). */
+        /**
+         * The custom browse actions a car shows on an entry, and Nağmedar's (CarActions): "Abone ol", "Favorilere ekle",
+         * "Favorilerden çıkar".
+         */
         const val BROWSE_ACTIONS = 4
         const val SUBSCRIBE = "app.nagmedar.auto.SUBSCRIBE"
+        const val FAVOURITE = "app.nagmedar.auto.FAVOURITE"
+        const val UNFAVOURITE = "app.nagmedar.auto.UNFAVOURITE"
 
         /** The browser's root in every build (MediaSessionBrowser.ID_ROOT). */
         const val ROOT = "//app.nagmedar/r"

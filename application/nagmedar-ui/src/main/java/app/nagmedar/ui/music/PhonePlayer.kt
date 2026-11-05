@@ -262,7 +262,7 @@ fun PhonePlayer(
             .fillMaxSize()
             .offset { IntOffset(0, drop.value.roundToInt()) }
             // standing alone, pulled down from anywhere (what in it moves by a drag of its own keeps it) it closes
-            .then(if (hosted) Modifier else Modifier.pointerInput(drop) { pullDown(drop, scope, motion.spatial()) { latestClose() } })
+            .then(if (hosted) Modifier else Modifier.pointerInput(drop) { pullDown(drop, scope, motion.spatial(NagMotion.PIXEL)) { latestClose() } })
             .drawBehind {
                 // with the whole window, under the system's bars too: the backdrop has no seam; a desktop window's
                 // caption bar over it has it too
@@ -487,7 +487,7 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
     val next = stringResource(R.string.nag_next)
     val previous = stringResource(R.string.nag_previous)
     val close = stringResource(R.string.nag_player_close)
-    val settle = motion.spatial<Float>()
+    val settle = motion.spatial(NagMotion.PIXEL)
     BoxWithConstraints(
         modifier
             .semantics {

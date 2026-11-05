@@ -1064,7 +1064,6 @@
     <string name="nag_auto_continue">Devam eden bölümler</string>
     <string name="nag_auto_subscriptions">Programlarım</string>
     <string name="nag_auto_new_episodes">Yeni bölümler</string>
-    <string name="nag_auto_favourite_stations">Favori istasyonlar</string>
     <string name="nag_auto_categories">Kategoriler</string>
     <string name="nag_auto_found_tracks">Müzik parçaları</string>
     <string name="nag_auto_found_episodes">Podcast bölümleri</string>
@@ -1077,8 +1076,8 @@
     <string name="nag_auto_decade_front">%1$d\'ler</string>
     <string name="nag_auto_decade_back">%1$d\'lar</string>
     <plurals name="nag_auto_stations">
-        <item quantity="one">%d istasyon</item>
-        <item quantity="other">%d istasyon</item>
+        <item quantity="one">%d radyo</item>
+        <item quantity="other">%d radyo</item>
     </plurals>
     <string name="nag_auto_shuffle_all">Tüm müziği karıştırarak çal</string>
     <string name="nag_auto_all_tracks">Tüm parçalar</string>
@@ -1109,6 +1108,15 @@
     <string name="nag_auto_genre_technology">Teknoloji</string>
     <string name="nag_auto_genre_true_crime">Gerçek suç</string>
     <string name="nag_auto_genre_tv">Dizi ve film</string>
+    <!-- 1.0.3: Android Auto'nun Radyo sekmesi: radyo rehberi ülkelere, dillere göre; en çok dinlenen ve en çok beğenilen radyolar -->
+    <string name="nag_auto_recent_stations">Son dinlenenler</string>
+    <string name="nag_auto_languages">Diller</string>
+    <string name="nag_auto_most_listened">En çok dinlenenler</string>
+    <string name="nag_auto_most_liked">En çok beğenilenler</string>
+    <string name="nag_auto_more_stations">Daha fazla radyo</string>
+    <string name="nag_auto_radio_busy">Radyo rehberi yoğun. Bir dakika sonra yeniden deneyin.</string>
+    <string name="nag_auto_favourite_added">“%1$s” favorilere eklendi</string>
+    <string name="nag_auto_favourite_removed">“%1$s” favorilerden çıkarıldı</string>
     <string name="nag_music_unknown_album">Bilinmeyen albüm</string>
     <string name="nag_music_unknown_genre">Türü yok</string>
     <string name="nag_music_unknown_composer">Bestecisi yok</string>
@@ -2189,6 +2197,10 @@
     <string name="nag_lib_exclude">Hariç tut</string>
     <string name="nag_lib_folder_actions">%1$s için işlemler</string>
     <string name="nag_lib_done">Tamam</string>
+    <!-- 1.0.3: Settings › Library: the whole library looked over again on demand -->
+    <string name="nag_lib_rescan">Kütüphaneyi yeniden tara</string>
+    <string name="nag_lib_rescan_hint">Müzik bir kez taranır; sonra yalnızca değişenler arka planda alınır. Bir parça eksikse yeniden tarayın.</string>
+    <string name="nag_lib_rescan_started">Kütüphane yeniden taranıyor; liste bu arada olduğu gibi kalır</string>
     <string name="nag_fr_sources_sections">Müziğin klasörleri</string>
     <string name="nag_fr_sources_sections_desc">İsterseniz müziğin göstereceği klasörleri seçin; seçmezseniz kütüphanenin tümü görünür. Klasörleri sonra Ayarlar › Kütüphane\'den değiştirebilirsiniz.</string>
     <!-- Sources › Streams: open a network stream, the streams played before -->

@@ -385,11 +385,12 @@ fun GlassBottomSheet(
     val latestDismiss by rememberUpdatedState(onDismiss)
     val drag = rememberSheetDrag { latestDismiss() }
     LaunchedEffect(visible) {
+        // 1.0.3: the springs arrive within a thousandth of the sheet's height, not a hundredth left to jump at the end
         if (visible) {
             drag.reset()
-            progress.animateTo(1f, NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate)))
+            progress.animateTo(1f, NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate), NagMotion.FRACTION))
         } else {
-            progress.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate)))
+            progress.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate), NagMotion.FRACTION))
         }
     }
     val host = shellOverlayHere()
@@ -458,7 +459,7 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
         }
         settling?.cancel()
         settling = scope.launch {
-            val spec = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized))
+            val spec = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized), NagMotion.PIXEL)
             animate(offset, 0f, velocity, spec) { value, _ -> offset = value.coerceAtLeast(0f) }
         }
     }

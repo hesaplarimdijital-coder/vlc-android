@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,7 +28,6 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.theme.NagTheme
-import kotlinx.coroutines.delay
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.vlc.media.MediaUtils
 
@@ -61,18 +59,6 @@ fun mediaMenu(context: Context, media: MediaWrapper, play: () -> Unit, info: (()
 }
 
 // ---------------------------------------------------------------- shelves
-
-/** While the medialibrary scans, the screens reload this often so new media appear. */
-private const val RELOAD_WHILE_SCANNING_MS = 4_000L
-
-/** Loads with [load] now and, while a scan runs, again every few seconds. */
-internal suspend fun <T> ProduceStateScope<T?>.loadWhileScanning(scanning: Boolean, load: suspend () -> T) {
-    while (true) {
-        value = load()
-        if (!scanning) break
-        delay(RELOAD_WHILE_SCANNING_MS)
-    }
-}
 
 @Composable
 internal fun ShelfTitle(text: String) {

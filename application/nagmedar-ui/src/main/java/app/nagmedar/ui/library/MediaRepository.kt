@@ -34,6 +34,79 @@ class MediaRepository(private val context: Context) {
     suspend fun tracks(section: LibrarySection? = null): List<MediaWrapper> = tracksOfFiles(section).first
 
     /**
+     * 1.0.3: what the Music's list is read for: the access and the section's folders. A list kept
+     * for another one ([MusicSnapshot]) is not shown.
+     */
+    fun musicScope(): String {
+        val settings = Settings.getInstance(context)
+        val media = MediaAccess.hasMediaAccess(context)
+        val picked = if (media) emptyList() else settings.getStringSet(NAGMEDAR_SAF_FOLDERS, null).orEmpty().sorted()
+        return buildString {
+            append(if (media) "media" else "picked")
+            picked.forEach { append('\n').append(it) }
+            append("\n--\n").append(LibraryScopes.encode(sources().of(LibrarySection.Music)))
+        }
+    }
+
+    /**
+     * 1.0.3: the Music's list as it was last read for [scope], kept on the device; null when none
+     * was. Reads the disk the first time: off the main thread.
+     */
+    suspend fun keptMusic(scope: String): MusicRead? = withContext(Dispatchers.IO) { MusicSnapshot.read(context, scope) }
+
+    /** 1.0.3: the Music's list [read] for [scope], kept for the next start. */
+    suspend fun keepMusic(scope: String, read: MusicRead) = withContext(Dispatchers.IO) { MusicSnapshot.save(context, scope, read) }
+
+    /** 1.0.3: [tracks] of the Music read now, with their fingerprint (made off the main thread). */
+    suspend fun musicRead(): MusicRead {
+        val tracks = tracks(LibrarySection.Music)
+        return withContext(Dispatchers.Default) { MusicRead(tracks) }
+    }
+
+    /**
+     * 1.0.3: each change of the library's music as the medialibrary reports it (a scan or a look
+     * found, changed or lost a file) or a picked folder's listing changed, a burst as one: the
+     * Music reads its list again on each instead of every few seconds while a scan runs.
+     */
+    fun musicChanges(): Flow<Unit> = callbackFlow {
+        val medialibrary = Medialibrary.getInstance()
+        val callback = object : Medialibrary.MediaCb {
+            override fun onMediaAdded() {
+                trySend(Unit)
+            }
+
+            // a track played changes its media too (its position, its play count): only the work of a scan counts
+            override fun onMediaModified() {
+                if (medialibrary.isWorking) trySend(Unit)
+            }
+
+            override fun onMediaDeleted(id: LongArray?) {
+                trySend(Unit)
+            }
+
+            override fun onMediaConvertedToExternal(id: LongArray?) {
+                trySend(Unit)
+            }
+        }
+        // the end of a scan's work: what its last reports said is read once more
+        val idle = object : Medialibrary.OnMedialibraryReadyListener {
+            override fun onMedialibraryReady() {}
+
+            override fun onMedialibraryIdle() {
+                trySend(Unit)
+            }
+        }
+        medialibrary.addMediaCb(callback)
+        medialibrary.addOnMedialibraryReadyListener(idle)
+        val picked = SafLibrary.listen { trySend(Unit) }
+        awaitClose {
+            medialibrary.removeMediaCb(callback)
+            medialibrary.removeOnMedialibraryReadyListener(idle)
+            picked()
+        }
+    }.conflate()
+
+    /**
      * 1.0: [tracks] of [section] with the medialibrary ids of the files they were read from (a CUE sheet's image is one
      * file): what [recentAudio] keeps the tracks played last to, without listing the library again.
      */
@@ -113,6 +186,17 @@ class MediaRepository(private val context: Context) {
         }
         return if (folders.isEmpty()) emptyList() else SafLibrary.media(context, folders, type).distinctBy { it.uri }
     }
+}
+
+/**
+ * 1.0.3: one read of the Music's list, with the [fingerprint] of what it shows: a list read again
+ * that has the same fingerprint is not shown again (its tracks equal by id would hide a new tag).
+ * [kept] when it is the list kept on the device from an earlier start ([MusicSnapshot]).
+ */
+class MusicRead(val media: List<MediaWrapper>, val fingerprint: Long = MusicFingerprint.of(media), val kept: Boolean = false) {
+    override fun equals(other: Any?): Boolean = other is MusicRead && other.fingerprint == fingerprint && other.media.size == media.size
+
+    override fun hashCode(): Int = fingerprint.hashCode()
 }
 
 /** How many tracks the recently played shelf (Music, "Son çalınanlar") shows at most. */

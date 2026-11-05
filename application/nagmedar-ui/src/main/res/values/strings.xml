@@ -1070,7 +1070,6 @@
     <string name="nag_auto_continue">Continue listening</string>
     <string name="nag_auto_subscriptions">My shows</string>
     <string name="nag_auto_new_episodes">New episodes</string>
-    <string name="nag_auto_favourite_stations">Favourite stations</string>
     <string name="nag_auto_categories">Categories</string>
     <string name="nag_auto_found_tracks">Tracks</string>
     <string name="nag_auto_found_episodes">Podcast episodes</string>
@@ -1115,6 +1114,15 @@
     <string name="nag_auto_genre_technology">Technology</string>
     <string name="nag_auto_genre_true_crime">True crime</string>
     <string name="nag_auto_genre_tv">TV and film</string>
+    <!-- 1.0.3: Android Auto's Radio tab: the radio directory by country, by language, its most listened and most liked stations -->
+    <string name="nag_auto_recent_stations">Recent stations</string>
+    <string name="nag_auto_languages">Languages</string>
+    <string name="nag_auto_most_listened">Most listened</string>
+    <string name="nag_auto_most_liked">Most liked</string>
+    <string name="nag_auto_more_stations">More stations</string>
+    <string name="nag_auto_radio_busy">The radio directory is busy. Try again in a minute.</string>
+    <string name="nag_auto_favourite_added">“%1$s” added to favourites</string>
+    <string name="nag_auto_favourite_removed">“%1$s” removed from favourites</string>
     <string name="nag_music_unknown_album">Unknown album</string>
     <string name="nag_music_unknown_genre">No genre</string>
     <string name="nag_music_unknown_composer">No composer</string>
@@ -2195,6 +2203,10 @@
     <string name="nag_lib_exclude">Leave out</string>
     <string name="nag_lib_folder_actions">Actions for %1$s</string>
     <string name="nag_lib_done">Done</string>
+    <!-- 1.0.3: Settings › Library: the whole library looked over again on demand -->
+    <string name="nag_lib_rescan">Rescan the library</string>
+    <string name="nag_lib_rescan_hint">The music is scanned once; afterwards only what changed is read again, in the background. Rescan when a track is missing.</string>
+    <string name="nag_lib_rescan_started">Scanning the library again; the list stays as it is meanwhile</string>
     <string name="nag_fr_sources_sections">The music\'s folders</string>
     <string name="nag_fr_sources_sections_desc">If you like, choose the folders the music shows; with none it shows all of the library. You can change them later under Settings › Library.</string>
     <!-- Sources › Streams: open a network stream, the streams played before -->

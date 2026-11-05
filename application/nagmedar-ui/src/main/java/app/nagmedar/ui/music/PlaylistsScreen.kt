@@ -87,7 +87,6 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.MediaRepository
-import app.nagmedar.ui.library.rememberScanState
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.screens.PageHeader
@@ -128,11 +127,11 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
     val smartStore = remember(context) { DatabaseSmartLists(context.applicationContext) }
     val smart = remember(smartStore, scope) { SmartListsState(smartStore, scope) }
     LaunchedEffect(smart) { smart.follow() }
-    val scan = rememberScanState()
-    val media = rememberMusicMedia(repository, scan.active)
+    val read = rememberMusicRead(repository)
+    val media = read?.media
     val tech by TrackTechIndex.tech.collectAsState()
-    val library = remember(media, tech) { media?.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) } }
-    val byUri = remember(media) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
+    val library = remember(read, tech) { media?.map { item -> item.toTrack(item.uri?.toString()?.let { tech[CueUri.file(it)] }) } }
+    val byUri = remember(read) { media.orEmpty().associateBy { it.uri?.toString().orEmpty() } }
     val stats by TrackStatsIndex.stats.collectAsState()
     LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
     // S-808: "Puan ver…" from a line's menu

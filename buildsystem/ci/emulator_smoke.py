@@ -1707,6 +1707,7 @@ class Smoke:
             self.first_run_walk("First run again")
             time.sleep(8)
             self.step("After the scan")
+            self.music_after_restart()
         else:
             self.warnings.append("[phone-en] 'first run again' not found in Settings")
         self.library_ready = True
@@ -1954,6 +1955,43 @@ class Smoke:
         self.step("Home during playback")
         self.launch(force=False)
         self.step("Back to the app after playback")
+
+    def music_after_restart(self):
+        """1.0.3: the library is scanned once. After the first run's scan the app is ended and started again from the
+        launcher: the Music lists the walk's tracks at once (the app's own log line "NagmedarPerf: music_list ms=…" says
+        when the list first stood on screen, from the process's start) and neither the loading state nor a scan strip
+        ("Scanning the library", "Looking for media folders") shows in front of the known list. One short step."""
+        s = self.strings[self.lang]
+        busy = {s[k] for k in ("nag_state_scanning", "nag_state_discovering", "nag_library_loading") if k in s}
+        is_row = lambda n: n.text.startswith("Profile track") or n.text.strip() == "Smoke tone"
+        self.sh("am force-stop " + self.pkg)
+        self.adb("logcat", "-c", timeout=30)
+        time.sleep(1)
+        started = time.time()
+        out = self.sh("am start -W -n %s" % self.launcher, timeout=90)
+        frame = re.search(r"TotalTime:\s*(\d+)", out)
+        seen_busy, rows = set(), []
+        # the screen is read as often as uiautomator allows (about a dump a second) until the tracks show
+        while time.time() - started < 15:
+            nodes = self.nodes(self.dump())
+            seen_busy |= busy & self.texts(nodes)
+            rows = [n for n in self.app_nodes(nodes) if is_row(n)]
+            if rows:
+                break
+        took = time.time() - started
+        time.sleep(1)
+        _, log = self.adb("logcat", "-d", "-s", "NagmedarPerf:I", timeout=60)
+        listed = re.search(r"music_list ms=(\d+) tracks=(\d+) kept=(\w+)", log)
+        cold = re.search(r"startup cold_ms=(\d+)", log)
+        detail = "%d rows seen %.1f s after am start%s%s%s" % (
+            len(rows), took,
+            "; list on screen %s ms after the process started (%s tracks, %s)" % (
+                listed.group(1), listed.group(2), "kept list" if listed.group(3) == "true" else "read") if listed else "",
+            "; first frame %s ms (am start)%s" % (frame.group(1) if frame else "?", ", %s ms (the system's record)" % cold.group(1) if cold else ""),
+            "; seen: " + ", ".join(sorted(seen_busy)) if seen_busy else "")
+        self.step("Cold start: the Music's list", lambda: detail, wait=0.3)
+        self.check("after a restart the Music lists its tracks at once, without a scanning state",
+                   bool(rows) and not seen_busy and (listed is None or int(listed.group(1)) <= 8000), detail)
 
     def auto_tree(self):
         """1.0.3: Android Auto's tree as a car reads it, by application/benchmark's AutoBrowseTest (--auto-apk, the
