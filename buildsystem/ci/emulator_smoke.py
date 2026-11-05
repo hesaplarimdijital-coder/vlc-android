@@ -1864,10 +1864,11 @@ class Smoke:
         read as soon as its window has come in (within its first second); the path of that screenshot, or None."""
         self.sh("am force-stop " + self.pkg)
         time.sleep(1)
-        extra = " --es nagmedar_destination %s" % route if route else ""
+        # a page: the app's activity itself with the extra (the launcher's activity hands no extras on)
+        target = "%s/app.nagmedar.ui.NagmedarActivity --es nagmedar_destination %s" % (self.pkg, route) if route else self.launcher
         # the window drawn, its opening animation (on in the glass checks) over and the list's first rows arrived in turn
         # (ListAppear, about 0.3 s): the app's first second
-        self.sh("am start -W -n %s%s ; sleep 1.0 ; screencap -p /sdcard/nag-cold.png" % (self.launcher, extra), timeout=90)
+        self.sh("am start -W -n %s ; sleep 1.0 ; screencap -p /sdcard/nag-cold.png" % target, timeout=90)
         rc, data = self.adb("exec-out", "cat /sdcard/nag-cold.png", timeout=60, binary=True)
         if rc != 0 or len(data) < 1000:
             return None
