@@ -413,17 +413,20 @@ internal class DepthState(open: Boolean) {
     /** The transition run back to where it came from on [spec]; then the side on its way lets go, and it stands still. */
     suspend fun undo(spec: FiniteAnimationSpec<Float>) {
         runningBack = true
+        var done = false
         try {
             seekable.runBack(spec)
             dropped = true
             withFrameNanos { }
             withFrameNanos { }
-            gestureClose = false
             seekable.snapTo(seekable.currentState)
             // the content that was on its way leaves with this composition; only then may the next transition share
             withFrameNanos { }
+            done = true
         } finally {
-            // together: the layout is left in the composition that would let the dropped side's elements back
+            // together, in one composition: the layout is left as the dropped side's elements would come back; a
+            // gesture's look stays to the end (cancelled, it is left to what takes over)
+            if (done) gestureClose = false
             dropped = false
             runningBack = false
         }
@@ -517,12 +520,7 @@ internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boo
             events.collectLatest { event ->
                 depth.swipeEdge = event.swipeEdge
                 if (animated && depth.seekable.currentState) {
-                    if (!depth.gestureClose) {
-                        // the first touch: the list comes behind and the shared elements find each other in a frame
-                        // in which nothing moves yet (looks as at rest); the seek that moves them is the next frame's
-                        depth.gestureClose = true
-                        withFrameNanos { }
-                    }
+                    depth.gestureClose = true
                     depth.seekable.seekTo(event.progress * DetailDepth.GESTURE_END, false)
                 }
             }
@@ -640,14 +638,16 @@ private val DepthBounds = BoundsTransform { _, _ -> NagMotion.open(Rect.Visibili
  * The list and the detail of [depth] in [modifier]'s place: in a plain box while nothing moves, moved (state
  * and all: scroll places, text, effects) into a [SharedTransitionLayout] while something does when [shared], so a
  * list scrolled at rest is measured once a frame (Desktop Kit 2.3.0, "Lookahead"). [content] gets the sides'
- * scopes then.
+ * scopes then. A Back gesture moves the detail as a whole, without the layout.
  */
 @Composable
 internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifier: Modifier, content: @Composable (DepthShared?) -> Unit) {
     val latestContent by rememberUpdatedState(content)
     val body = remember { movableContentOf { scopes: DepthShared? -> latestContent(scopes) } }
     val latestOpen by rememberUpdatedState(open)
-    val moving by remember(depth) { derivedStateOf { depth.moving(latestOpen) } }
+    // a finger closing the detail moves it as a whole: its shared elements fly only on a tap's way (in the kit 2.3.0's
+    // strips they waited at the list's place through the gesture and its run back, then jumped)
+    val moving by remember(depth) { derivedStateOf { depth.moving(latestOpen) && !depth.gestureClose } }
     if (shared && moving) {
         SharedTransitionLayout(modifier) {
             val list = sideScopes(this, depth.transition, DetailSide.List)
@@ -680,8 +680,8 @@ internal fun DepthSide(scopes: DepthShared?, side: DetailSide, depth: DepthState
 /**
  * Inside a phone's [DetailTransition] (or [ListDetailPanes]) with shared elements, this element and the element
  * with the same [key] on the other side (the list's row and the detail) are one: opening the detail moves it
- * from the row to its place in the detail, closing moves it back, and the Back gesture moves it with the
- * finger. For things that look the same at both sizes: a cover. Put it first in the element's modifiers, before
+ * from the row to its place in the detail, closing it (its back arrow, the Back button) moves it back; the Back
+ * gesture shrinks it with the detail. For things that look the same at both sizes: a cover. Put it first in the element's modifiers, before
  * its size, so all of it flies; [shape] rounds it in place and in flight (a clip inside it does too). Elsewhere,
  * and with reduced motion, nothing flies.
  */
