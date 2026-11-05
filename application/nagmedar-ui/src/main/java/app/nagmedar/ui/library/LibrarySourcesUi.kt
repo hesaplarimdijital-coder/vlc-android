@@ -74,21 +74,26 @@ internal fun sectionLabel(section: LibrarySection): String = stringResource(
  */
 @Composable
 fun LibrarySourcesSection(prefs: NagmedarPreferences) {
-    val sources = rememberSourceActions(prefs)
     val context = LocalContext.current
+    LibrarySourcesSection(prefs.librarySources, rememberSourceActions(prefs), onRescan = { rescanLibrary(context) })
+}
+
+/** [LibrarySourcesSection] with its folders, editors' [sources] and [onRescan] given (the screenshot tests' own). */
+@Composable
+internal fun LibrarySourcesSection(scopes: LibraryScopes, sources: SourceActions, onRescan: () -> Unit) {
     SettingsSection(stringResource(R.string.nag_section_library)) {
         Text(stringResource(R.string.nag_lib_sources_hint), style = NagTheme.type.body, color = NagTheme.colors.textSecondary)
         LibrarySection.entries.forEach { section ->
             Spacer(Modifier.height(NagTheme.dimens.gapS))
             HorizontalRule()
-            SectionSourcesEditor(section, prefs.librarySources, sources)
+            SectionSourcesEditor(section, scopes, sources)
         }
         Spacer(Modifier.height(NagTheme.dimens.gapS))
         HorizontalRule()
         SettingRow(stringResource(R.string.nag_lib_rescan), subtitle = stringResource(R.string.nag_lib_rescan_hint)) {
             NagButton(
                 stringResource(R.string.nag_lib_rescan),
-                { rescanLibrary(context) },
+                onRescan,
                 icon = NagIcons.Repeat,
                 modifier = Modifier.testTag("library-rescan"),
             )
