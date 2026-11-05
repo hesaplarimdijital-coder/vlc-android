@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -33,14 +34,40 @@ class RemoteAccessSectionTest {
 
     private val control = RecordingControl()
 
-    private fun show(): RemoteAccessSettings {
+    private var allowed = 0
+
+    private fun show(access: LocalNetworkState? = null): RemoteAccessSettings {
         val prefs = ApplicationProvider.getApplicationContext<Context>().getSharedPreferences("ra-section-test", Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
         val settings = RemoteAccessSettings(prefs, control)
         compose.setContent {
-            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) { RemoteAccessSection(settings) }
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                if (access == null) RemoteAccessSection(settings) else RemoteAccessSection(settings, access) { allowed++ }
+            }
         }
         return settings
+    }
+
+    @Test
+    fun turnedOnWithoutTheLocalNetworkPermissionItAsksAndSaysWhy() {
+        val settings = show(LocalNetworkState.Ask)
+        compose.onNodeWithTag("ra-permission").assertDoesNotExist()
+        compose.onNodeWithTag("ra-enable").performClick()
+        assertTrue(settings.enabled)
+        // Android 17: browsers on this network reach the server only with it
+        assertEquals(1, allowed)
+        compose.onNodeWithTag("ra-permission").assertExists()
+        compose.onNodeWithText("Bu ağdaki tarayıcılar uzaktan erişime yalnızca yerel ağ izniyle ulaşır.").assertExists()
+        compose.onNodeWithText("İzin ver").performClick()
+        assertEquals(2, allowed)
+    }
+
+    @Test
+    fun withThePermissionNothingIsSaid() {
+        show(LocalNetworkState.Granted)
+        compose.onNodeWithTag("ra-enable").performClick()
+        assertEquals(0, allowed)
+        compose.onNodeWithTag("ra-permission").assertDoesNotExist()
     }
 
     @Test

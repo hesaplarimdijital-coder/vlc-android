@@ -100,12 +100,15 @@ object Alarms {
      * loudness if lower, the music started, its volume rising from nothing.
      */
     fun play(context: Context, alarm: Alarm) {
-        raiseMediaVolume(context, alarm.loudness)
         AppScope.launch {
             val service = PlaybackService.instance ?: run {
                 PlaybackService.start(context)
                 withTimeoutOrNull(10_000) { PlaybackService.serviceFlow.filterNotNull().first() }
             } ?: return@launch
+            // Android 17: the volume is the app's to set only with a window shown or a foreground service running (it
+            // was raised before the service started, and Android 17 ignored it): the service goes in the foreground first
+            service.keepForeground()
+            raiseMediaVolume(context, alarm.loudness)
             // from nothing; the engine that takes the music takes this volume too
             service.setVolume(0)
             when (val source = alarm.source) {

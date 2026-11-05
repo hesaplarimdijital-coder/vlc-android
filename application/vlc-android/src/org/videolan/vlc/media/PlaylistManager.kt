@@ -444,6 +444,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     fun play() {
+        // Android 17: in the foreground before any sound or the focus (PlaybackService.keepForeground)
+        if (hasMedia()) service.keepForeground()
         // Nağmedar: a stream that dropped and waits to be opened again opens playing, where it was (libVLC would start
         // it from where it was first opened)
         if (reopenPending() && dropoutHold.play()) {
@@ -683,6 +685,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         // S-1302: a handover between the music engine and libVLC goes on where it was
         val resume = castResume?.takeIf { it.index == index && it.uri == mw.uri }
         castResume = null
+        // Android 17: in the foreground before either engine makes a sound or asks for the focus, unless it opens paused
+        if (resume?.paused != true) service.keepForeground()
         // Nağmedar: another item (or the same one asked for again) in place of a stream waiting to be opened again
         if (resume == null) dropoutHold.left()
         // the position comes from the handover, not from what was kept

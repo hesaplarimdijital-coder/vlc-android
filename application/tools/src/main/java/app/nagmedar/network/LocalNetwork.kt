@@ -12,7 +12,7 @@ import java.util.Locale
  * home. Without it a connection waits until it times out and a multicast or a broadcast is refused. An app that
  * targets 36 or lower keeps that access (the system grants the permission with INTERNET) and must neither declare nor
  * ask for it (developer.android.com, "Local network permission"): the build that targets 37 declares it
- * (application/app/src/targetSdk37/AndroidManifest.xml).
+ * (application/app/flavors/targetSdk37/AndroidManifest.xml).
  */
 object LocalNetwork {
     const val PERMISSION = "android.permission.ACCESS_LOCAL_NETWORK"
@@ -119,11 +119,11 @@ object LocalNetwork {
         val first = address.substringBefore(':').takeIf { it.isNotEmpty() && it.length <= 4 }?.toIntOrNull(16) ?: return false
         return when {
             // fe80::/10 link-local
-            first and 0xffc0 == 0xfe80 -> true
+            (first and 0xffc0) == 0xfe80 -> true
             // fc00::/7 unique local
-            first and 0xfe00 == 0xfc00 -> true
+            (first and 0xfe00) == 0xfc00 -> true
             // ff00::/8 multicast
-            first and 0xff00 == 0xff00 -> true
+            (first and 0xff00) == 0xff00 -> true
             else -> false
         }
     }

@@ -61,6 +61,7 @@ import androidx.annotation.StringRes
 import androidx.car.app.connection.CarConnection
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
@@ -852,23 +853,48 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
     @TargetApi(Build.VERSION_CODES.O)
     private fun forceForeground(launchedInForeground: Boolean = false) {
         if (!AndroidUtil.isOOrLater || isForeground) return
-        val ctx = applicationContext
         val stopped = PlayerController.playbackState == PlaybackStateCompat.STATE_STOPPED || PlayerController.playbackState == PlaybackStateCompat.STATE_NONE
         if (stopped && !launchedInForeground) {
             if (BuildConfig.DEBUG) Log.i("PlaybackService", "Service not in foreground and player is stopped. Skipping the notification")
             return
         }
-        val notification = if (this::notification.isInitialized && !stopped) notification
-        else {
-            val pi = if (::playlistManager.isInitialized) sessionPendingIntent else null
-            NotificationHelper.createPlaybackNotification(ctx,
-                    ctx.resources.getString(R.string.loading), "", "", null, false, true,
-                    true, ::playlistManager.isInitialized && isEpisodePlaying, false, enabledActions, null, pi)
-        }
-        if (startForegroundCompat(NotificationIds.PLAYBACK, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)) {
+        if (startForegroundCompat(NotificationIds.PLAYBACK, foregroundNotification(stopped), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)) {
             isForeground = true
         }
         if (stopped) lifecycleScope.launch { hideNotification(true) }
+    }
+
+    /** The notification the service is put in the foreground with: what plays, or "Loading" before anything is shown. */
+    private fun foregroundNotification(stopped: Boolean): Notification {
+        if (this::notification.isInitialized && !stopped) return notification
+        val ctx = applicationContext
+        val pi = if (::playlistManager.isInitialized) sessionPendingIntent else null
+        return NotificationHelper.createPlaybackNotification(ctx,
+                ctx.resources.getString(R.string.loading), "", "", null, false, true,
+                true, ::playlistManager.isInitialized && isEpisodePlaying, false, enabledActions, null, pi)
+    }
+
+    /**
+     * Android 17: sound, the audio focus and the volume are the app's only while one of its windows is shown or a
+     * foreground service of it runs; for an app that targets 17, one started while the user was using it (a tap in the
+     * app, on its notification or widget, a media button, Android Auto). The service goes in the foreground before the
+     * engine plays or asks for the focus, not ~100 ms after the first Playing event (showNotification): a play from a
+     * headset, the lock screen or the car while paused in the background is neither silenced at its start nor refused
+     * the focus. Started first, as [launchForeground] does: Android Auto's browser may only be bound to it. Main thread.
+     */
+    @MainThread
+    fun keepForeground() {
+        if (isForeground) return
+        try {
+            ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java).putExtra("foreground", true))
+        } catch (e: Exception) {
+            // not allowed from the background now: the Playing event's notification tries again, as before
+            Log.w(TAG, "the service could not be started in the foreground before playing", e)
+            return
+        }
+        if (startForegroundCompat(NotificationIds.PLAYBACK, foregroundNotification(stopped = !hasMedia()), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)) {
+            isForeground = true
+        }
     }
 
     private fun sendStartSessionIdIntent() {

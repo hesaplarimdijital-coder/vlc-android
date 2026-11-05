@@ -57,6 +57,7 @@ Sözlüğü testler denetler:
 | hariç tutmak | leave out | | | Bir bölümün klasörlerinden birini göstermemek: menüde “Hariç tut”, klasörün rozeti “Hariç” |
 | ağ paylaşımı | network share | | | SMB, DLNA, WebDAV |
 | uzaktan erişim | remote access | uzak erişim | | Ayarlar › Uzaktan erişim: bu ağdaki bir tarayıcıdan kütüphaneye bakmak, oynatmayı denetlemek, dosya göndermek; web sayfası bu cihazdaki sunucudan gelir, “VLC for Android” tabanlı olduğu Hakkında'da yazar |
+| yerel ağ izni | local network access | | | Android 17'nin “Yakındaki cihazlar” grubundaki izni: Android 17'yi hedefleyen bir uygulama ev ağındaki cihazlara (Ağ sayfasındaki sunucular ve paylaşımlar, yayınlanan TV ya da hoparlör, uzaktan erişimi açan tarayıcı, evdeki bir radyo ya da podcast yayını) yalnızca bununla ulaşır. Gerektiği an sorulur; verilmezse sayfa nedenini söyler: “İzin ver”, Android artık sormuyorsa “Ayarları aç” |
 | tek seferlik kod | one-time code | OTP, bir kerelik | OTP | Her yeni tarayıcıdan önce cihazın bildirimde gösterdiği 6 haneli, 60 sn geçerli kod; tarayıcı sayfasında “Tek seferlik uzaktan erişim parolası” da onu anar |
 | akış | stream | | | “Ağ akışı aç…” |
 | radyo rehberi | radio directory | radyo dizini | | Radio Browser: ada, ülkeye, dile, etikete, kodeğe göre aranan topluluk listesi; listedeki tek öğe “radyo”, İngilizcede “station” |
