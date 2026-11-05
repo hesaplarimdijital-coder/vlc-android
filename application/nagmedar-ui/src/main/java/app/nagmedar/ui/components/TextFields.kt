@@ -184,8 +184,8 @@ private fun FieldColumn(look: FieldLook, field: @Composable () -> Unit) {
                 look.supportingText,
                 style = NagTheme.type.labelSmall,
                 color = if (failing) colors.danger else colors.textTertiary,
-                // an error's words are said as they come, as the network form's were
-                modifier = Modifier.padding(top = 4.dp).then(if (failing) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier),
+                // an error's words are said as they come, as the network form's were; 6 dp under the field, as there
+                modifier = Modifier.padding(top = 6.dp).then(if (failing) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier),
             )
         }
     }

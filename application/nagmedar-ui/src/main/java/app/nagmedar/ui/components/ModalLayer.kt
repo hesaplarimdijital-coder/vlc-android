@@ -9,10 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusEventModifierNode
+import androidx.compose.ui.focus.FocusProperties
+import androidx.compose.ui.focus.FocusPropertiesModifierNode
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.invalidateFocusProperties
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -81,11 +84,7 @@ fun Modifier.blockInputBelow(paneTitle: String? = null): Modifier {
  * ([ScreenCommands.covered]). Not covered, it is a plain focus group: the order of Tab through it
  * and the arrows' search into it stay what they were.
  */
-@OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.coveredByLayer(covered: Boolean): Modifier = this
-    .then(CoveredElement(covered))
-    .focusProperties { if (covered) onEnter = { cancelFocusChange() } }
-    .focusGroup()
+fun Modifier.coveredByLayer(covered: Boolean): Modifier = this then CoveredElement(covered) then Modifier.focusGroup()
 
 private data class CoveredElement(val covered: Boolean) : ModifierNodeElement<CoveredNode>() {
     override fun create() = CoveredNode(covered)
@@ -98,9 +97,13 @@ private data class CoveredElement(val covered: Boolean) : ModifierNodeElement<Co
     }
 }
 
-/** [coveredByLayer]'s part that silences the screen's commands and takes the focus out when it becomes covered. */
-private class CoveredNode(private var covered: Boolean) : Modifier.Node(), CompositionLocalConsumerModifierNode, FocusEventModifierNode {
-    /** The focus is in the covered part (the focus group after this node). */
+/**
+ * [coveredByLayer]'s node, before the focus group it guards: it cancels the focus's way in while covered, takes the
+ * focus out when the group becomes covered with the focus in it, and silences the screen's commands meanwhile.
+ */
+private class CoveredNode(private var covered: Boolean) :
+    Modifier.Node(), CompositionLocalConsumerModifierNode, FocusEventModifierNode, FocusPropertiesModifierNode {
+    /** The focus is in the group (the focus group after this node). */
     private var hasFocus = false
     private var commands: ScreenCommands? = null
 
@@ -116,7 +119,12 @@ private class CoveredNode(private var covered: Boolean) : Modifier.Node(), Compo
         if (covered == this.covered) return
         this.covered = covered
         if (!isAttached) return
+        invalidateFocusProperties()
         if (covered) cover() else uncover()
+    }
+
+    override fun applyFocusProperties(focusProperties: FocusProperties) {
+        if (covered) focusProperties.onEnter = { cancelFocusChange() }
     }
 
     override fun onFocusEvent(focusState: FocusState) {
