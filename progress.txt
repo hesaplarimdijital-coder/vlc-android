@@ -1,0 +1,9 @@
+2712 s, 240 steps, pass phone-tr, 0 crashes
+233 phone-tr Open Daha fazla (overflow) ok
+234 phone-tr Settings ok
+235 phone-tr Settings scroll 1 ok
+236 phone-tr Settings scroll 2 ok
+237 phone-tr Settings scroll 3 ok
+238 phone-tr Settings scroll 4 ok
+239 phone-tr Settings scroll 5 ok
+240 phone-tr Settings scroll 6 ok
