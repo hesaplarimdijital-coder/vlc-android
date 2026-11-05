@@ -5,10 +5,12 @@ import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.PlaylistSummary
+import app.nagmedar.ui.music.SmartList
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.radio.DirectoryTag
 import app.nagmedar.ui.radio.RadioFailure
 import app.nagmedar.ui.radio.Station
+import app.nagmedar.ui.stats.TrackStats
 import java.util.Locale
 
 /** 1.0: Android Auto's catalog over fixed data: the music, the podcasts and the radio of a test. */
@@ -16,6 +18,10 @@ class FakeCarData(
     var tracks: List<Track> = emptyList(),
     var recent: List<Track> = emptyList(),
     var playlists: Map<PlaylistSummary, List<Track>> = emptyMap(),
+    /** 1.0.3: the smart lists, and the ratings and plays they read (by the track's uri) at [now]. */
+    var smart: List<SmartList> = emptyList(),
+    var stats: Map<String, TrackStats> = emptyMap(),
+    var now: Long = 100L * DAY_MS,
     var feeds: List<PodcastFeed> = emptyList(),
     var episodes: List<PodcastEpisode> = emptyList(),
     /** The episodes in the order they were last listened to, the latest first. */
@@ -42,6 +48,11 @@ class FakeCarData(
     override suspend fun playlists() = medialibrary { playlists.keys.toList() }
 
     override suspend fun playlistTracks(id: Long) = medialibrary { playlists.entries.firstOrNull { it.key.id == id }?.value.orEmpty() }
+
+    override suspend fun smartLists() = smart
+
+    /** As the app chooses them: the music's tracks a list's rules take, in its order. */
+    override suspend fun smartTracks(list: SmartList) = medialibrary { list.select(tracks, stats, now, Locale.ROOT) }
 
     private fun <T> medialibrary(answer: () -> T): T {
         if (musicUnavailable) throw MusicUnavailable()
@@ -86,6 +97,9 @@ class FakeCarData(
         return answer()
     }
 }
+
+/** A day, in ms: the smart lists' clock. */
+const val DAY_MS = 86_400_000L
 
 /** Texts are their names, counts "3 Tracks", icons "icon:Music", covers "cover:<uri>": what the tests compare. */
 object FakeCarLook : CarLook {

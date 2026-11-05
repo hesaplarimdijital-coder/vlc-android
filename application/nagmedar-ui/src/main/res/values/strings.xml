@@ -1086,6 +1086,9 @@
         <item quantity="one">%d station</item>
         <item quantity="other">%d stations</item>
     </plurals>
+    <string name="nag_auto_shuffle_all">Shuffle all music</string>
+    <string name="nag_auto_all_tracks">All tracks</string>
+    <string name="nag_auto_smart_list">Smart list</string>
     <string name="nag_music_unknown_album">Unknown album</string>
     <string name="nag_music_unknown_genre">No genre</string>
     <string name="nag_music_unknown_composer">No composer</string>

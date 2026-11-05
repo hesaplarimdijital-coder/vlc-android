@@ -7,6 +7,7 @@ import app.nagmedar.ui.music.MusicGroup
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.music.PlaylistSummary
+import app.nagmedar.ui.music.SmartList
 import app.nagmedar.ui.music.Track
 import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 import org.videolan.vlc.media.CarItem
 import org.videolan.vlc.media.CarStyle
+import java.util.Locale
 
 /**
  * 1.0: what Android Auto's catalog reads: the Music page's library and its playlists, the podcasts in Room, the radio's
@@ -37,6 +39,16 @@ interface CarData {
 
     /** Throws [MusicUnavailable]. */
     suspend fun playlistTracks(id: Long): List<Track>
+
+    /** 1.0.3: the smart lists, in the order they were made (the Playlists page's). */
+    suspend fun smartLists(): List<SmartList>
+
+    /**
+     * 1.0.3: the tracks [list] takes from the music, with the ratings and plays, as the Playlists page reads them; the
+     * same for as long as the music read is kept, so that a track tapped in Auto is the one it showed. Throws
+     * [MusicUnavailable].
+     */
+    suspend fun smartTracks(list: SmartList): List<Track>
 
     /** The subscriptions, by title. */
     suspend fun feeds(): List<PodcastFeed>
@@ -78,6 +90,7 @@ class MusicUnavailable : Exception("the medialibrary did not answer in time")
 enum class CarText {
     Music, Podcasts, Radio, Recent,
     Albums, Artists, Playlists, Years, Folders,
+    Genres, AllTracks, ShuffleAll, Smart, UnknownGenre,
     Continue, Subscriptions, NewEpisodes,
     FavouriteStations, RecentStations, Categories,
     UnknownAlbum, UnknownArtist, UnknownYear, UnknownFolder,
@@ -89,7 +102,10 @@ enum class CarText {
 enum class CarCount { Tracks, Albums, Episodes, Stations }
 
 /** The icons of Android Auto's tabs and lists. */
-enum class CarIcon { Music, Podcasts, Radio, Recent, Albums, Artists, Playlists, Years, Folders, Continue, New, Favourites, Categories, NoCover }
+enum class CarIcon {
+    Music, Podcasts, Radio, Recent, Albums, Artists, Playlists, Years, Folders, Continue, New, Favourites, Categories, NoCover,
+    Genres, Tracks, Shuffle, Smart,
+}
 
 /** How Android Auto's entries read and look: the texts in the app's language, the artwork's addresses. */
 interface CarLook {
@@ -161,8 +177,9 @@ object CarPodcasts {
 }
 
 /**
- * 1.0: Android Auto's browse tree. The root's four tabs: Müzik (albums, artists, playlists, years, the Music section's
- * folders), Podcast (the episodes left in the middle, the subscriptions, the new episodes), Radyo (the favourite stations,
+ * 1.0: Android Auto's browse tree. The root's four tabs: Müzik (1.0.3: the whole music shuffled at one tap, albums,
+ * artists, genres when the music has some, playlists and smart lists, years, the Music section's folders, every track
+ * A–Z), Podcast (the episodes left in the middle, the subscriptions, the new episodes), Radyo (the favourite stations,
  * those played last, the directory's categories) and Son çalınanlar (the music played last). Long lists are cut into
  * pages of [pageSize]; an empty list says so in one line, as does music the medialibrary does not give in time
  * ([MusicUnavailable]). Also the search and what an entry plays ([play]).
@@ -186,7 +203,11 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 CarIds.MUSIC -> music()
                 CarIds.ALBUMS -> paged(ref, data.music().groups(MusicView.Albums), CarStyle.Grid, { it.title ?: look.text(CarText.UnknownAlbum) }, ::album)
                 CarIds.ARTISTS -> paged(ref, data.music().groups(MusicView.Artists), CarStyle.Grid, { it.title ?: look.text(CarText.UnknownArtist) }, ::artist)
-                CarIds.PLAYLISTS -> filled(data.playlists().map(::playlist))
+                CarIds.PLAYLISTS -> playlists()
+                CarIds.GENRES -> paged(ref, genres(data.music()), CarStyle.List, { genreName(it.title) }, ::genre)
+                CarIds.TRACKS -> data.music().let { library ->
+                    tracks(CarIds.TRACKS, ref, library.tracksByTitle(), album = false) { track -> initial(track.title, library.locale) }
+                }
                 CarIds.YEARS -> filled(decades(data.music()))
                 CarIds.FOLDERS -> paged(ref, data.music().groups(MusicView.Folders), CarStyle.List, { folderName(it.title) }, ::folder)
                 CarIds.RECENT -> tracks(CarIds.RECENT, ref, data.recentTracks(), album = false)
@@ -206,6 +227,11 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
             CarKind.Decade -> filled(years(data.music(), ref.number?.toInt() ?: return emptyList()))
             CarKind.Year -> groupTracks(ref, MusicView.Years, album = false)
             CarKind.Folder -> groupTracks(ref, MusicView.Folders, album = false)
+            CarKind.Genre -> groupTracks(ref, MusicView.Genres, album = false)
+            CarKind.Smart -> {
+                val list = data.smartLists().firstOrNull { it.id == ref.number } ?: return listOf(nothing(CarText.Empty))
+                tracks(ref.path, ref, data.smartTracks(list), album = false)
+            }
             CarKind.Show -> {
                 val feedId = ref.number ?: return emptyList()
                 val episodes = data.episodes(feedId)
@@ -213,7 +239,10 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 val shown = if (episodes.size > pageSize) episodes.take(pageSize) else episodes
                 shown.map { episode(it, null) }
             }
-            CarKind.Tag -> directory { data.tagged(ref.key.orEmpty()).map(::station) }
+            CarKind.Tag -> {
+                val tag = ref.key?.takeIf { it.isNotEmpty() } ?: return emptyList()
+                directory { data.tagged(tag).map(::station) }
+            }
             CarKind.Search -> {
                 val tracks = searchTracks(ref.key.orEmpty()).take(pageSize)
                 tracks.mapIndexed { i, track -> trackItem(CarIds.searchTracks(ref.key.orEmpty()), i, track, album = false) }
@@ -237,13 +266,17 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         return when (ref.kind) {
             null -> when (ref.path) {
                 CarIds.RECENT -> CarPlay.Tracks(data.recentTracks(), start)
+                CarIds.TRACKS -> CarPlay.Tracks(data.music().tracksByTitle(), start)
+                // the whole music shuffled, as the Music page's Shuffle plays it
+                CarIds.SHUFFLE -> CarPlay.Tracks(data.music().tracks.shuffled(), 0)
                 else -> null
             }
-            CarKind.Album, CarKind.Artist, CarKind.Year, CarKind.Folder -> {
+            CarKind.Album, CarKind.Artist, CarKind.Year, CarKind.Folder, CarKind.Genre -> {
                 val view = when (ref.kind) {
                     CarKind.Album -> MusicView.Albums
                     CarKind.Artist -> MusicView.Artists
                     CarKind.Year -> MusicView.Years
+                    CarKind.Genre -> MusicView.Genres
                     else -> MusicView.Folders
                 }
                 val group = group(data.music(), view, ref) ?: return null
@@ -259,6 +292,10 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
                 val name = data.playlists().firstOrNull { it.id == id }?.name
                 CarPlay.Tracks(data.playlistTracks(id), start, name?.let { PlaySource(PlayFrom.Playlist, it) })
             }
+            CarKind.Smart -> {
+                val list = data.smartLists().firstOrNull { it.id == ref.number } ?: return null
+                CarPlay.Tracks(data.smartTracks(list), start, PlaySource(PlayFrom.Playlist, list.name))
+            }
             CarKind.Search -> CarPlay.Tracks(searchTracks(ref.key.orEmpty()), start)
             CarKind.Episode -> {
                 val episode = data.episode(ref.number ?: return null) ?: return null
@@ -268,7 +305,7 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
             CarKind.Station -> data.station(ref.number ?: return null)?.let(CarPlay::Radio)
             CarKind.DirectoryStation -> {
                 val url = ref.params["u"]?.takeIf { it.isNotBlank() } ?: return null
-                CarPlay.Radio(Station(uuid = ref.key, name = ref.params["n"].orEmpty().ifBlank { url }, streamUrl = url, logoUrl = ref.params["l"]))
+                CarPlay.Radio(Station(uuid = ref.key?.takeIf { it.isNotEmpty() }, name = ref.params["n"].orEmpty().ifBlank { url }, streamUrl = url, logoUrl = ref.params["l"]))
             }
             CarKind.Decade, CarKind.Show, CarKind.Tag -> null
         }?.takeUnless { it is CarPlay.Tracks && it.tracks.isEmpty() }
@@ -320,13 +357,38 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         tab(CarIds.RECENT, CarText.Recent, CarIcon.Recent, CarStyle.List),
     )
 
-    private fun music() = listOf(
-        tab(CarIds.ALBUMS, CarText.Albums, CarIcon.Albums, CarStyle.Grid),
-        tab(CarIds.ARTISTS, CarText.Artists, CarIcon.Artists, CarStyle.Grid),
-        tab(CarIds.PLAYLISTS, CarText.Playlists, CarIcon.Playlists, CarStyle.Grid),
-        tab(CarIds.YEARS, CarText.Years, CarIcon.Years, CarStyle.List),
-        tab(CarIds.FOLDERS, CarText.Folders, CarIcon.Folders, CarStyle.List),
-    )
+    /**
+     * The Music tab: the whole music shuffled at one tap first, then its lists as the Music page groups it, every track
+     * last; Genres only when some track has a genre (music not given in time leaves it out, not the tab, and Auto is
+     * told once it is read).
+     */
+    private suspend fun music(): List<CarItem> {
+        val genres = try {
+            genres(data.music()).any { it.title != null }
+        } catch (e: MusicUnavailable) {
+            false
+        }
+        return listOfNotNull(
+            CarItem(id = CarIds.SHUFFLE, title = look.text(CarText.ShuffleAll), iconUri = look.icon(CarIcon.Shuffle), playable = true),
+            tab(CarIds.ALBUMS, CarText.Albums, CarIcon.Albums, CarStyle.Grid),
+            tab(CarIds.ARTISTS, CarText.Artists, CarIcon.Artists, CarStyle.Grid),
+            if (genres) tab(CarIds.GENRES, CarText.Genres, CarIcon.Genres, CarStyle.List) else null,
+            tab(CarIds.PLAYLISTS, CarText.Playlists, CarIcon.Playlists, CarStyle.Grid),
+            tab(CarIds.YEARS, CarText.Years, CarIcon.Years, CarStyle.List),
+            tab(CarIds.FOLDERS, CarText.Folders, CarIcon.Folders, CarStyle.List),
+            tab(CarIds.TRACKS, CarText.AllTracks, CarIcon.Tracks, CarStyle.List),
+        )
+    }
+
+    /** The playlists, then the smart lists (each read when opened), as the Playlists page lists them. */
+    private suspend fun playlists(): List<CarItem> {
+        val playlists = data.playlists().map(::playlist)
+        val smart = data.smartLists().map(::smartList)
+        return filled(playlists + smart)
+    }
+
+    /** The genres, the tracks of none last. */
+    private fun genres(library: MusicLibrary): List<MusicGroup> = library.groups(MusicView.Genres)
 
     private fun podcasts() = listOf(
         tab(CarIds.CONTINUE, CarText.Continue, CarIcon.Continue, CarStyle.List),
@@ -369,6 +431,27 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         browsable = true,
         children = CarStyle.List,
     )
+
+    /** 1.0.3: a smart list: its tracks are read only when it is opened (its line says it is a smart list, not a count). */
+    private fun smartList(list: SmartList) = CarItem(
+        id = CarIds.smart(list.id),
+        title = list.name,
+        subtitle = look.text(CarText.Smart),
+        iconUri = look.icon(CarIcon.Smart),
+        browsable = true,
+        children = CarStyle.List,
+    )
+
+    private fun genre(group: MusicGroup) = CarItem(
+        id = CarIds.genre(group.key),
+        title = genreName(group.title),
+        subtitle = look.count(CarCount.Tracks, group.tracks.size),
+        iconUri = look.cover(group.tracks.firstOrNull()),
+        browsable = true,
+        children = CarStyle.List,
+    )
+
+    private fun genreName(title: String?): String = title ?: look.text(CarText.UnknownGenre)
 
     private fun folder(group: MusicGroup) = CarItem(
         id = CarIds.folder(group.key),
@@ -428,7 +511,7 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
     private fun artistAlbums(library: MusicLibrary, key: String): List<MusicGroup> =
         library.groups(MusicView.Albums).filter { (it.artist?.let(MusicLibrary::artistKey) ?: "") == key }
 
-    /** The group of [view] [ref] names; a year's by its number (0 for no year). */
+    /** The group of [view] [ref] names; a year's by its number (0 for no year); a genre's by its key ("" for none). */
     private fun group(library: MusicLibrary, view: MusicView, ref: CarRef): MusicGroup? {
         val groups = library.groups(view)
         return if (view == MusicView.Years) {
@@ -444,11 +527,15 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         return tracks(ref.path, ref, group.tracks, album)
     }
 
-    /** [tracks] as the list [listId], in pages when it is long; [album]: an album's own, whose tracks need no album line. */
-    private fun tracks(listId: String, ref: CarRef, tracks: List<Track>, album: Boolean): List<CarItem> {
+    /**
+     * [tracks] as the list [listId], in pages when it is long, each named by its first and last track's [pageName] (their
+     * titles; the first letters of a list in the order of its titles: "A – Ç"); [album]: an album's own, whose tracks need
+     * no album line.
+     */
+    private fun tracks(listId: String, ref: CarRef, tracks: List<Track>, album: Boolean, pageName: (Track) -> String = { it.title }): List<CarItem> {
         if (tracks.isEmpty()) return listOf(nothing(CarText.Empty))
         val page = ref.page
-        if (page == null && tracks.size > pageSize) return pages(listId, tracks, CarStyle.List, { it.title }) { look.cover(it) }
+        if (page == null && tracks.size > pageSize) return pages(listId, tracks, CarStyle.List, pageName) { look.cover(it) }
         val from = (page ?: 0) * pageSize
         return tracks.withIndex().drop(from).take(pageSize).map { (i, track) -> trackItem(listId, i, track, album) }
     }
@@ -477,7 +564,7 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
         entries.chunked(pageSize).mapIndexed { page, chunk ->
             CarItem(
                 id = CarIds.page(listId, page),
-                title = "${title(chunk.first())} – ${title(chunk.last())}",
+                title = listOf(title(chunk.first()), title(chunk.last())).distinct().joinToString(" – "),
                 iconUri = icon(chunk.first()) ?: look.icon(CarIcon.NoCover),
                 browsable = true,
                 children = style,
@@ -566,6 +653,13 @@ class CarTree(private val data: CarData, private val look: CarLook, private val 
 
         /** How long a search waits for the radio directory. */
         const val DIRECTORY_WAIT_MS = 4_000L
+
+        /**
+         * 1.0.3: the first letter of [title] as a capital of [locale] ("İ" for "ilk" in Turkish), a page of every track
+         * named by it; "#" for a title that starts with no letter.
+         */
+        internal fun initial(title: String, locale: Locale): String =
+            title.trim().firstOrNull()?.takeIf { it.isLetter() }?.toString()?.uppercase(locale) ?: "#"
 
         /** [block]'s answer, or null when the directory could not give one. */
         internal suspend fun <T> quietly(block: suspend () -> T): T? = try {

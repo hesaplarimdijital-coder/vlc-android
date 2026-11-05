@@ -47,9 +47,16 @@ class CarTreeTest {
     @Test
     fun eachTabHasItsLists() {
         val data = FakeCarData()
-        assertEquals(listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS), ids(children(data, CarIds.MUSIC)))
-        // grid for albums, artists, shows and stations; rows for tracks and episodes
-        assertEquals(listOf(CarStyle.Grid, CarStyle.Grid, CarStyle.Grid, CarStyle.List, CarStyle.List), children(data, CarIds.MUSIC).map { it.children })
+        // 1.0.3: the shuffle first, every track last; no genres in a music without any (CarMusicTest)
+        assertEquals(
+            listOf(CarIds.SHUFFLE, CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS),
+            ids(children(data, CarIds.MUSIC)),
+        )
+        // grid for albums, artists, shows and stations; rows for tracks and episodes; the shuffle opens nothing
+        assertEquals(
+            listOf(null, CarStyle.Grid, CarStyle.Grid, CarStyle.Grid, CarStyle.List, CarStyle.List, CarStyle.List),
+            children(data, CarIds.MUSIC).map { it.children },
+        )
         assertEquals(listOf(CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW), ids(children(data, CarIds.PODCASTS)))
         assertEquals(listOf(CarStyle.List, CarStyle.Grid, CarStyle.List), children(data, CarIds.PODCASTS).map { it.children })
         assertEquals(listOf(CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS), ids(children(data, CarIds.RADIO)))
@@ -65,7 +72,7 @@ class CarTreeTest {
     @Test
     fun anEmptyListSaysSoInOneLineThatPlaysNothing() {
         val data = FakeCarData()
-        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.RECENT, CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS)) {
+        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.GENRES, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS, CarIds.RECENT, CarIds.CONTINUE, CarIds.SHOWS, CarIds.NEW, CarIds.FAVOURITES, CarIds.STATIONS_RECENT, CarIds.TAGS)) {
             val list = children(data, id)
             assertEquals(id, listOf(CarIds.nothing("Empty")), ids(list))
             assertEquals(id, "Empty", list.single().title)
@@ -306,7 +313,7 @@ class CarTreeTest {
             favourites = listOf(station(3, "Tarkan FM")),
             musicUnavailable = true,
         )
-        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.RECENT, CarIds.album("x"))) {
+        for (id in listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.GENRES, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS, CarIds.RECENT, CarIds.album("x"), CarIds.genre("pop"))) {
             assertEquals(id, listOf(CarIds.nothing("MusicUnavailable")), ids(children(data, id)))
         }
         assertNull(runBlocking { tree(data).play(CarIds.track(CarIds.RECENT, 0)) })

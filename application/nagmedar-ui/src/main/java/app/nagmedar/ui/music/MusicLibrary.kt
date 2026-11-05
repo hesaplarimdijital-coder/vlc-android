@@ -129,7 +129,7 @@ data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBa
  * The Recent view's list is the playback history's, which changes as tracks play: it is not part of
  * the library (1.0: a new history does not make the library again), see [recentGroups].
  */
-class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.getDefault()) {
+class MusicLibrary(val tracks: List<Track>, val locale: Locale = Locale.getDefault()) {
 
     /** The reader's collator; one for each grouping or sort, as a collator is not for two threads at once. */
     private fun collator(): Collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
@@ -226,6 +226,12 @@ class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.
     /** Album, disc and track number, then title: as an album plays. */
     fun sortTracks(list: List<Track>): List<Track> = sortedTracks(list, collator())
 
+    /** 1.0.3: every track by its title in the reader's order (Android Auto's every track, A–Z), made once ([ordered]). */
+    fun tracksByTitle(): List<Track> = ordered(TITLE_ORDER) {
+        val collator = collator()
+        tracks.sortedWith(compareBy(collator) { it.title })
+    }
+
     private fun sortedTracks(list: List<Track>, collator: Collator): List<Track> = list.sortedWith(
         compareBy<Track, String?>(nullsLast(collator)) { it.album }
             .thenBy { it.discNumber }
@@ -236,6 +242,9 @@ class MusicLibrary(val tracks: List<Track>, private val locale: Locale = Locale.
     companion object {
         /** The Recent view's one group. */
         const val RECENT_KEY = "recent"
+
+        /** The key of [tracksByTitle]'s order among the tables' orders. */
+        private const val TITLE_ORDER = "title-order"
 
         /** The orders kept per library: the groups a session opens. */
         private const val MAX_ORDERS = 24

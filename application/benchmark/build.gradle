@@ -7,6 +7,7 @@ plugins {
  * S-1404: Nağmedar's macrobenchmarks: the cold and warm start-up, the Settings and Music lists
  * scrolled (frame times), and a track of the Music played. They run on a device against the app's
  * benchmark build (buildsystem/benchmark/run.sh checks them against thresholds.json); CI builds them.
+ * 1.0.3: built against the personal build too, for AutoBrowseTest (Android Auto's tree).
  */
 android {
     namespace = 'app.nagmedar.macrobenchmark'
@@ -25,12 +26,19 @@ android {
             signingConfig = signingConfigs.debug
             matchingFallbacks = ['release']
         }
+        // 1.0.3: against the app's personal build (R8, app.nagmedar.debug), the APK the owner runs:
+        // AutoBrowseTest reads Android Auto's tree from it in the personal walk (emulator.yml)
+        personal {
+            debuggable = true
+            signingConfig = signingConfigs.debug
+            matchingFallbacks = ['release']
+        }
     }
 }
 
 androidComponents {
     beforeVariants(selector().all()) { variant ->
-        variant.enable = variant.buildType == 'benchmark'
+        variant.enable = variant.buildType in ['benchmark', 'personal']
     }
 }
 
@@ -38,4 +46,6 @@ dependencies {
     implementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
     implementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiautomatorVersion"
     implementation "androidx.benchmark:benchmark-macro-junit4:$rootProject.ext.macrobenchmarkVersion"
+    // AutoBrowseTest: Android Auto's client side (MediaBrowserCompat), the library the app's service uses
+    implementation "androidx.media:media:$rootProject.ext.mediaVersion"
 }

@@ -3,6 +3,7 @@ package app.nagmedar.ui.auto
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import app.nagmedar.audio.cue.CueUri
 import app.nagmedar.data.NagmedarDatabase
 import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
@@ -10,10 +11,13 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.library.MediaRepository
+import app.nagmedar.ui.music.DatabaseSmartLists
 import app.nagmedar.ui.music.MediaLibraryPlaylists
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.PlaylistSummary
+import app.nagmedar.ui.music.SmartList
 import app.nagmedar.ui.music.Track
+import app.nagmedar.ui.music.TrackTechIndex
 import app.nagmedar.ui.music.toTrack
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.podcast.DownloadFiles
@@ -27,6 +31,7 @@ import app.nagmedar.ui.radio.StationFilters
 import app.nagmedar.ui.radio.StationOrder
 import app.nagmedar.ui.radio.StationQuery
 import app.nagmedar.ui.radio.toStation
+import app.nagmedar.ui.stats.TrackStatsIndex
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -155,10 +160,14 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
         return musicLists()
     }
 
-    /** The lists of music: the Music tab's own, the tracks played last, and those Auto opened. */
+    /**
+     * The lists of music: the Music tab (1.0.3: its Genres come and go with the music's genres) and its own lists, the
+     * tracks played last, and those Auto opened.
+     */
     private fun musicLists(): List<String> {
         val opened = synchronized(asked) { asked.toList() }
-        return (listOf(CarIds.ALBUMS, CarIds.ARTISTS, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.RECENT) + opened).distinct()
+        val own = listOf(CarIds.MUSIC, CarIds.ALBUMS, CarIds.ARTISTS, CarIds.GENRES, CarIds.PLAYLISTS, CarIds.YEARS, CarIds.FOLDERS, CarIds.TRACKS, CarIds.RECENT)
+        return (own + opened).distinct()
     }
 
     private fun tellLater(ids: List<String>) {
@@ -242,7 +251,8 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
 
 /**
  * [CarData] in the app: the Music page's tracks read once and kept until the medialibrary changes (or for
- * [MUSIC_KEEP_MS]), the playlists of the medialibrary, the podcasts in Room, the stations kept and the radio directory,
+ * [MUSIC_KEEP_MS]), the playlists of the medialibrary (1.0.3: and the smart lists, their tracks chosen once from the
+ * music kept), the podcasts in Room, the stations kept and the radio directory,
  * whose categories are kept for [TAGS_KEEP_MS] and their stations for [TAGGED_KEEP_MS]. What the medialibrary answers
  * is waited for [ML_WAIT_MS] at most ([MusicUnavailable]); the music goes on being read in [scope] and [musicLate] is
  * called once it is, when a wait gave up on it.
@@ -250,6 +260,7 @@ class AppCarCatalog(context: Context, private val tell: (List<String>) -> Unit =
 class AppCarData(private val context: Context, private val scope: CoroutineScope, private val musicLate: () -> Unit = {}) : CarData {
     private val repository = MediaRepository(context)
     private val playlistStore = MediaLibraryPlaylists(context)
+    private val smartStore = DatabaseSmartLists(context)
     private val podcasts get() = NagmedarDatabase.get(context).podcasts()
 
     /** The medialibrary's items of the tracks read, by uri: what playing them needs. Let go with the music read. */
@@ -257,8 +268,10 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
     private var items = ConcurrentHashMap<String, MediaWrapper>()
     private val musicLock = Mutex()
 
-    /** The music read: the library, the ids of the files it was read from, when. */
-    private class Snapshot(val library: MusicLibrary, val files: Set<Long>, val at: Long)
+    /** The music read: the library, the ids of the files it was read from, when; the smart lists' tracks chosen from it. */
+    private class Snapshot(val library: MusicLibrary, val files: Set<Long>, val at: Long) {
+        val smart = ConcurrentHashMap<SmartList, List<Track>>()
+    }
 
     @Volatile
     private var music: Snapshot? = null
@@ -331,6 +344,25 @@ class AppCarData(private val context: Context, private val scope: CoroutineScope
     override suspend fun playlists(): List<PlaylistSummary> = fromMl { playlistStore.playlists() }
 
     override suspend fun playlistTracks(id: Long): List<Track> = fromMl { playlistStore.tracks(id) }.also { items.putAll(playlistStore.media) }
+
+    override suspend fun smartLists(): List<SmartList> = smartStore.lists.first()
+
+    /**
+     * The tracks [list] takes, chosen as the Playlists page chooses them: from the music kept, with what the probe read
+     * (a CUE sheet's track has its file's) and the ratings and plays of the database. Chosen once for the music kept
+     * (a list changed is chosen again): the track a list's line plays is the one Auto showed there.
+     */
+    override suspend fun smartTracks(list: SmartList): List<Track> {
+        val music = snapshot()
+        music.smart[list]?.let { return it }
+        val tech = TrackTechIndex.read(context)
+        val stats = TrackStatsIndex.read(context)
+        val chosen = withContext(Dispatchers.Default) {
+            val tracks = music.library.tracks.map { track -> tech[CueUri.file(track.uri)]?.let { track.copy(tech = it) } ?: track }
+            list.select(tracks, stats, System.currentTimeMillis(), music.library.locale)
+        }
+        return music.smart.putIfAbsent(list, chosen) ?: chosen
+    }
 
     override suspend fun feeds(): List<PodcastFeed> = withContext(Dispatchers.IO) { podcasts.feedList() }
 
@@ -416,6 +448,11 @@ class AppCarLook(private val context: Context, private val media: (Track) -> Med
             CarText.Playlists -> R.string.nag_nav_playlists
             CarText.Years -> R.string.nag_music_view_years
             CarText.Folders -> R.string.nag_music_view_folders
+            CarText.Genres -> R.string.nag_music_view_genres
+            CarText.AllTracks -> R.string.nag_auto_all_tracks
+            CarText.ShuffleAll -> R.string.nag_auto_shuffle_all
+            CarText.Smart -> R.string.nag_auto_smart_list
+            CarText.UnknownGenre -> R.string.nag_music_unknown_genre
             CarText.Continue -> R.string.nag_auto_continue
             CarText.Subscriptions -> R.string.nag_auto_subscriptions
             CarText.NewEpisodes -> R.string.nag_auto_new_episodes
@@ -470,6 +507,10 @@ class AppCarLook(private val context: Context, private val media: (Track) -> Med
             CarIcon.New -> org.videolan.resources.R.drawable.nagmedar_auto_new
             CarIcon.Favourites -> org.videolan.resources.R.drawable.nagmedar_auto_favourites
             CarIcon.Categories -> org.videolan.resources.R.drawable.nagmedar_auto_categories
+            CarIcon.Genres -> org.videolan.resources.R.drawable.nagmedar_auto_genres
+            CarIcon.Tracks -> org.videolan.resources.R.drawable.nagmedar_auto_tracks
+            CarIcon.Shuffle -> org.videolan.resources.R.drawable.nagmedar_auto_shuffle
+            CarIcon.Smart -> org.videolan.resources.R.drawable.nagmedar_auto_smart
             CarIcon.NoCover -> ArtworkProvider.noCover(MediaWrapper.TYPE_AUDIO)
         },
     ).toString()

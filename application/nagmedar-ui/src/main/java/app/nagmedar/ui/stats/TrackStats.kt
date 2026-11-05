@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.tools.AppScope
 
 /** S-808: a track's rating (0 none, 1–5 stars) and what was done with it. */
@@ -45,6 +46,14 @@ object TrackStatsIndex {
             }
             following = false
         }
+    }
+
+    /**
+     * 1.0.3: every track's statistics as the database has them now, read off the main thread: Android Auto's smart
+     * lists, which may be read before (or without) [follow].
+     */
+    suspend fun read(context: Context): Map<String, TrackStats> = withContext(Dispatchers.IO) {
+        NagmedarDatabase.get(context).trackStats().all().associate { it.trackKey to it.toStats() }
     }
 
     /** [key]'s rating: 0 (none) to 5 stars. */
