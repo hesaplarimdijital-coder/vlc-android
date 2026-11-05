@@ -69,6 +69,13 @@ BOUNDS_RE = re.compile(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]")
 # what 1.0 deleted (films, series, videos, the Home page, TV Lab) and 1.0.2 (Whisper's transcripts, the Lab's SP-05)
 # must not be named on the app's screens
 GONE_RE = re.compile(r"(?<!\w)(Filmler|Diziler|Videolar|Ana sayfa|TV Lab|Films|Movies|TV shows|Videos|Whisper|SP-05)(?!\w)")
+# 1.0.3: the system's error dialogs, "<who> isn't responding" (an ANR) and "<who> keeps stopping" / "<who> has stopped"
+# (a crash), in English or, when the system's language is Turkish, in Turkish; <who> is an app's label
+DIALOG_RE = re.compile(r"^(.+?)\s+(isn.t responding|keeps stopping|has stopped|yanıt vermiyor|durmaya devam ediyor|durdu)\b", re.S)
+# a hierarchy that may hold one of the dialogs system_dialogs() deals with (a cheap test before parsing it)
+DIALOG_HINT = re.compile(r"aerr_|permission_allow|isn.t responding|keeps stopping|has stopped|yanıt vermiyor|durmaya devam|durdu|Got it")
+# the app's label, as the system's dialogs name it
+APP_LABELS = ("Nağmedar", "Nagmedar")
 
 
 class Node:
@@ -141,6 +148,12 @@ class Smoke:
         self.checks = []  # 1.0's checks: pass, name, ok, detail, step
         self.jank = []  # dumpsys gfxinfo around a gesture
         self.gone = collections.OrderedDict()  # a deleted feature's word -> where it was first seen
+        # 1.0.3: the system's own ANRs and crashes (System UI, the launcher: the emulator's), recorded, not failures
+        self.system_events = []
+        self.dialogs_seen = []  # what dump() dealt with: "permission", "notice", "app" or "system", in order
+        self.last_app_sig = None  # the app's part of the screen at the end of the last step
+        self.library_ready = False  # the walk's media pushed and granted, and scanned (the first run with them)
+        self.sheet_trials = []  # the sheet-drag pass's trials
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
