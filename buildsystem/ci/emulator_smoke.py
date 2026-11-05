@@ -1593,6 +1593,11 @@ class Smoke:
         self.prepare_media()
         self.launch()
         nodes = self.step("Launch (phone)")
+        if any(x.text.strip() == s["nag_fr_skip"] for x in self.app_nodes(nodes)):
+            # 1.0.3: the phone's job of the split walk starts on a fresh app: its first run, with the media granted
+            self.first_run_walk()
+            time.sleep(8)
+            nodes = self.step("After the first run (phone)")
         self.check_bottom_bar(nodes)
         self.visit_destinations()
         self.settings_pass(full=True)
