@@ -34,6 +34,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
@@ -210,6 +213,11 @@ class ClickModifiers {
      * null when the click came without one (a key, TalkBack). Read it before [take].
      */
     fun takeFinger(): Boolean? = finger.also { finger = null }
+
+    /** A key went down: the click it may make (Enter, Space) has no press of a pointer behind it. */
+    internal fun keyPressed() {
+        finger = null
+    }
 }
 
 /**
@@ -240,13 +248,19 @@ enum class ListClick {
 /** The window's [ClickModifiers], recorded by [TrackClickModifiers]. */
 val LocalClickModifiers = staticCompositionLocalOf { ClickModifiers() }
 
-/** Records, before any child sees a press, the keys held with it (S-405). */
+/**
+ * Records, before any child sees a press, the keys held with it (S-405) and, 1.0.3, the pointer
+ * that pressed; a key going down forgets the pointer, so the click a key makes is a key's.
+ */
 @Composable
 fun TrackClickModifiers(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val modifiers = remember { ClickModifiers() }
     CompositionLocalProvider(LocalClickModifiers provides modifiers) {
         Box(
-            modifier.pointerInput(modifiers) {
+            modifier.onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown) modifiers.keyPressed()
+                false
+            }.pointerInput(modifiers) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)

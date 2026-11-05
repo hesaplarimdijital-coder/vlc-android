@@ -730,7 +730,7 @@ internal fun recommendedTimeout(millis: Long, controls: Boolean): Long {
 
 /**
  * A notice or an undo bar a finger swipes sideways off the screen (Desktop Kit 2.0; 2.3: at the
- * finger's speed). Let go past [SWIPE_DISMISS] of its width or flung, it carries on the way it was
+ * finger's speed). Let go past [NOTICE_DISMISS] of its width or flung, it carries on the way it was
  * going at the finger's speed and [onDismiss] runs once it is out (on a phone on the gesture spring;
  * wider windows and reduced motion let it go where it is); short of that it springs back. Only by
  * touch: a mouse does not swipe, it has its button. [key] is what it shows: a new one starts still.
@@ -772,7 +772,7 @@ internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier 
                         when (tier) {
                             MotionTier.Gesture -> spring(dampingRatio = 0.92f, stiffness = 600f, visibilityThreshold = 0.5f)
                             MotionTier.Timed -> spring(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = 0.5f)
-                            MotionTier.Reduced -> snap()
+                            MotionTier.Reduced -> snap<Float>()
                         },
                         initialVelocity = if (tier == MotionTier.Gesture) velocity else 0f,
                     )
@@ -782,10 +782,10 @@ internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier 
 }
 
 /** How far across a notice must be swiped, as a part of its width, to leave when let go. */
-internal const val SWIPE_DISMISS = 0.3f
+internal const val NOTICE_DISMISS = 0.3f
 
 /** A sideways fling this fast (px/s) takes a notice away however short it was. */
-internal const val SWIPE_FLING = 1200f
+internal const val NOTICE_FLING = 1200f
 
 /** What letting a swiped notice go does (Desktop Kit 2.3), free of Compose for the tests. */
 internal object SwipeDismissRules {
@@ -801,7 +801,7 @@ internal object SwipeDismissRules {
     }
 
     fun release(offset: Float, velocity: Float, width: Int, tier: MotionTier): Release = when {
-        abs(offset) <= width * SWIPE_DISMISS && abs(velocity) <= SWIPE_FLING -> Release.Back
+        abs(offset) <= width * NOTICE_DISMISS && abs(velocity) <= NOTICE_FLING -> Release.Back
         tier == MotionTier.Gesture -> Release.CarryOut
         else -> Release.Dismiss
     }

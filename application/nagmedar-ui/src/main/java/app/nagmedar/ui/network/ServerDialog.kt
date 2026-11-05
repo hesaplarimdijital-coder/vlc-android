@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -443,7 +444,11 @@ internal fun FormField(
             imeAction = imeAction,
             autoCorrect = false,
             filled = true,
-            modifier = if (tag != null) Modifier.testTag(tag) else Modifier,
+            // the form's 40 dp fields, as before
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            modifier = Modifier
+                .heightIn(min = NagTheme.dimens.minTarget.coerceAtLeast(40.dp))
+                .then(if (tag != null) Modifier.testTag(tag) else Modifier),
         )
     }
 }

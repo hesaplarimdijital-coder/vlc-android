@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagTheme
@@ -311,7 +312,7 @@ fun NagSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Strin
         // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
         val thumbStart = animateDpAsState(
             if (checked) 18.dp else 4.dp,
-            if (motion.reduced) snap() else spring(dampingRatio = 0.9f, stiffness = 1400f, visibilityThreshold = halfPixel),
+            if (motion.reduced) snap<Dp>() else spring(dampingRatio = 0.9f, stiffness = 1400f, visibilityThreshold = halfPixel),
             label = "switchThumb",
         )
         Box(
