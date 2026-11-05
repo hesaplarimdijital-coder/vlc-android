@@ -713,6 +713,8 @@ private const val PLAYER_KEY_STEP_MS = 5_000L
 private val UnderBars = setOf(
     Destination.Music, Destination.Podcasts, Destination.Radio, Destination.Playlists, Destination.Device, Destination.Network,
     Destination.Streams, Destination.Downloads, Destination.Settings, Destination.Search, Destination.More,
+    // 1.0.3 (Desktop Kit 2.3.0): a page the shell pads is measured again on every frame of the bars' slide
+    Destination.Equalizer,
 )
 
 /** Of [UnderBars], the pages that are one list from the top: they scroll beneath the top bar too. */

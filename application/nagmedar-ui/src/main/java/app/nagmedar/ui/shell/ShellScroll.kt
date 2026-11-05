@@ -75,7 +75,7 @@ class ShellScrollState {
         val target = settleTarget(start, maxOffsetPx) ?: return
         when (tier) {
             MotionTier.Reduced -> offsetPx = target
-            MotionTier.Gesture -> animate(start, target, initialVelocity = velocity, animationSpec = NagMotion.gesture()) { value, _ ->
+            MotionTier.Gesture -> animate(start, target, initialVelocity = velocity, animationSpec = NagMotion.gesture(NagMotion.PIXEL)) { value, _ ->
                 offsetPx = value.coerceIn(0f, maxOffsetPx)
             }
             MotionTier.Timed -> animate(start, target, animationSpec = timedSettle) { value, _ -> offsetPx = value }
