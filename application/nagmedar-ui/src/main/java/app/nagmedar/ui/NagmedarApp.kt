@@ -13,14 +13,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -158,6 +154,8 @@ import app.nagmedar.ui.search.mediaItems
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
+import app.nagmedar.ui.shell.DebugChrome
+import app.nagmedar.ui.shell.WindowRoot
 import app.nagmedar.ui.shell.rememberCaptionBar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.DropOverlay
@@ -210,14 +208,18 @@ fun NagmedarApp(
         // in a desktop window the shell draws the caption bar (S-306); the first run stays below it
         SystemBarsFollowTheme(drawsCaption = prefs.firstRunDone)
         val caption = if (prefs.firstRunDone) rememberCaptionBar() else null
-        Box(
-            Modifier
+        // 1.0.3 (Desktop Kit 2.0): the shell draws behind the navigation bar at the window's bottom (the three buttons, the
+        // gesture handle) and keeps its controls above it; the first run, outside the shell, stays above it as before.
+        // Decided here, in composition, so the shell's first frame already sits on the bar (no gap under it at first launch)
+        WindowRoot(
+            shell = prefs.firstRunDone,
+            belowCaption = caption != null,
+            modifier = Modifier
                 .fillMaxSize()
                 .background(NagTheme.colors.background)
                 // the test tags as resource ids, for UI Automator and the macrobenchmarks (S-1404)
                 .semantics { testTagsAsResourceId = true }
-                .trackInputMode(inputMode)
-                .windowInsetsPadding(if (caption != null) WindowInsets.safeDrawing.exclude(WindowInsets.captionBar) else WindowInsets.safeDrawing),
+                .trackInputMode(inputMode),
         ) {
             if (prefs.firstRunDone) {
                 // Ctrl and Shift held with a click select several items (S-405)
@@ -494,6 +496,8 @@ private fun NagmedarMain(
                 floatingPlayer = true,
                 // 1.0.1: bars, menus and sheets are solid surfaces; nothing changes colour with what passes beneath
                 glass = false,
+                // 1.0.3: the phone's bars on glass only for the user's decision's screenshots (a debuggable build's walk)
+                chromeGlass = DebugChrome.glass,
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -550,9 +554,10 @@ private fun NagmedarMain(
                             )
                         }
                     }
-                    // the app's notices (what the library, the service and the screens say), over the undo bars
+                    // the app's notices (what the library, the service and the screens say), over the undo bars; above the
+                    // system's buttons when a page over the whole window reaches down behind them (1.0.3)
                     Column(
-                        Modifier.align(Alignment.BottomCenter).padding(16.dp),
+                        Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {

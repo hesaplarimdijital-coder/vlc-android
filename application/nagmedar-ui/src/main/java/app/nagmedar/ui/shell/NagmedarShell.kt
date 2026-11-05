@@ -56,8 +56,10 @@ import app.nagmedar.ui.theme.LocalGlassMode
 import app.nagmedar.ui.theme.LocalGlassSource
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
+import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.glass
 import app.nagmedar.ui.theme.glassSource
 import app.nagmedar.ui.theme.rememberSystemGlassMode
 import dev.chrisbanes.haze.HazeState
@@ -101,6 +103,14 @@ val LocalFloatingPlayer = staticCompositionLocalOf { false }
  * frosted glass over the content (the kit's [app.nagmedar.ui.theme.NagGlass]); false, the default
  * since 1.0.1, draws them as solid surfaces. [floatingPlayer] (tablet, DeX): the [player] floats
  * over the content's bottom edge instead of being stacked under it.
+ *
+ * 1.0.3 (Desktop Kit 2.0): the shell owns the system's navigation bar at the window's bottom (the
+ * three buttons or the gesture handle; the root leaves it, [LocalWindowRootInsets]): on a phone the
+ * bottom bar's colour continues behind the buttons and stays there, a rule over it, when the bars
+ * slide away; on tablets and DeX the chrome colour lies there; with the keyboard up there is none.
+ * The screens' bottom padding includes it on a phone, full pages too. Tab and TalkBack go top bar,
+ * navigation, content, player, a phone's bottom bar last. [chromeGlass]: the phone's chrome for the
+ * user's glass decision (off, [ChromeGlass.Solid], in the product).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -123,6 +133,8 @@ fun NagmedarShell(
     contentOnly: Boolean = false,
     floatingPlayer: Boolean = false,
     glass: Boolean = false,
+    /** 1.0.3: the phone's chrome on glass, for the user's decision (a debuggable build's walk only); solid in the product. */
+    chromeGlass: ChromeGlass = ChromeGlass.Solid,
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
@@ -131,6 +143,8 @@ fun NagmedarShell(
     val tier = NagMotion.tier(widthClass, motion.reduced)
     val systemGlass = rememberSystemGlassMode()
     val glassMode = if (!glass) GlassMode.Solid else LocalGlassMode.current ?: systemGlass
+    // 1.0.3: the phone's bars on glass (the user's decision; solid in the product) while menus and sheets stay as [glass] says
+    val chromeMode = if (chromeGlass == ChromeGlass.Solid) GlassMode.Solid else LocalGlassMode.current ?: systemGlass
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
@@ -190,6 +204,14 @@ fun NagmedarShell(
     val floating = floatingPlayer && navKind != NavKind.BottomBar
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
+    // 1.0.3: the system's navigation bar at the window's bottom, which the root leaves to the shell (read while measuring)
+    val rootInsets = LocalWindowRootInsets.current
+    val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
+    // the phone's one bottom glass, for the user's decision: behind the mini player, the bottom bar and the band
+    val colors = NagTheme.colors
+    val onBottomGlass = chromeGlass != ChromeGlass.Solid && navKind == NavKind.BottomBar && !contentOnly
+    val glassSurface: @Composable () -> Modifier = { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
+    val bottomGlass: (@Composable () -> Modifier)? = if (onBottomGlass) glassSurface else null
     // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
     val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)
     // the tab lit: the one whose pages are on screen (none on the search page)
@@ -222,6 +244,8 @@ fun NagmedarShell(
         metrics.underFloatingPlayer = floating && !chromeAway
         metrics.floatingMarginPx = with(density) { floatingMargin.roundToPx() }
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
+        metrics.systemBottomPx = systemBottom
+        overlayHost.systemBottomPx = systemBottom
         overlayHost.onExpandStart = { scroll.showBars() }
         overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset() else 0f }
         overlayHost.rootView = view.rootView
@@ -267,6 +291,9 @@ fun NagmedarShell(
                         caption = caption,
                         onBack = onBack.takeIf { NavRules.showsBack(current, navKind) },
                         modifier = Modifier.onSizeChanged { metrics.topPx = it.height }.underPlayer(playerOver),
+                        // the kit's top bar (C of the user's glass decision): glass while content passes under it
+                        glass = if (chromeGlass == ChromeGlass.Kit && navKind == NavKind.BottomBar) chromeMode else null,
+                        scrolled = { scroll.scrolled },
                     )
                 }
             },
@@ -276,7 +303,7 @@ fun NagmedarShell(
                         BottomNavBar(
                             selected,
                             navigator::selectTab,
-                            Modifier
+                            modifier = Modifier
                                 .onSizeChanged {
                                     scroll.maxOffsetPx = it.height.toFloat()
                                     metrics.navPx = it.height
@@ -288,6 +315,7 @@ fun NagmedarShell(
                                 }
                                 .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier)
                                 .coveredByLayer(playerOver),
+                            onGlass = onBottomGlass,
                         )
                     }
                     NavKind.Rail -> NavRail(selected, navigator::selectTab)
@@ -310,7 +338,7 @@ fun NagmedarShell(
                         // a solid card with its border, whatever passes beneath (1.0.1)
                         .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
                 ) {
-                    CompositionLocalProvider(LocalFloatingPlayer provides floating) { player(navKind) }
+                    CompositionLocalProvider(LocalFloatingPlayer provides floating, LocalOnBottomGlass provides onBottomGlass) { player(navKind) }
                 }
             },
             content = {
@@ -318,7 +346,8 @@ fun NagmedarShell(
                     Modifier
                         .fillMaxSize()
                         .underPlayer(playerOver)
-                        .glassSource(glassSource, glassMode)
+                        // what the glass blurs: menus and sheets ([glass]) or the phone's bars on glass ([chromeGlass])
+                        .glassSource(glassSource, if (glassMode != GlassMode.Solid) glassMode else chromeMode)
                         .background(NagTheme.colors.background)
                         .nestedScroll(scroll.connection),
                 ) {
@@ -380,6 +409,17 @@ fun NagmedarShell(
             floatingMargin = floatingMargin,
             // the transport bar of a desktop window needs the room of its three parts; a tablet's mini player less
             floatingMaxWidth = if (navKind == NavKind.Sidebar) 1180.dp else 760.dp,
+            // 1.0.3: the system's navigation bar, the chrome continued behind it; none with the keyboard up
+            systemBottom = systemBottom,
+            systemBand = {
+                SystemBand(
+                    navKind,
+                    // the rule over the band shows as far as the bars have slid away beneath it
+                    hidden = { if (metrics.navPx > 0) bottomOffset() / metrics.navPx else if (barsHidden) 1f else 0f },
+                    onGlass = onBottomGlass,
+                )
+            },
+            bottomGlass = bottomGlass,
         )
     }
 }
@@ -387,13 +427,15 @@ fun NagmedarShell(
 /**
  * The floating player's card (Desktop Kit 1.0, solid since 1.0.1): the surface, the border and
  * the corners of the tablet's and the desktop's floating bar. 1.0.2: the phone's bar is the same
- * card ([app.nagmedar.ui.playback.CompactTransportBar]).
+ * card ([app.nagmedar.ui.playback.CompactTransportBar]). 1.0.3: on the phone's bottom glass (the
+ * user's glass decision, [LocalOnBottomGlass]) only its border and corners: the glass is its surface.
  */
 @Composable
 fun Modifier.floatingPlayerCard(): Modifier {
     val colors = NagTheme.colors
     val shape = RoundedCornerShape(NagTheme.dimens.radiusCard.coerceAtLeast(12.dp))
-    return clip(shape).background(colors.surfaceRaised, shape).border(1.dp, colors.borderStrong, shape)
+    val fill = if (LocalOnBottomGlass.current) this.clip(shape) else this.clip(shape).background(colors.surfaceRaised, shape)
+    return fill.border(1.dp, colors.borderStrong, shape)
 }
 
 /**

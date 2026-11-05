@@ -81,6 +81,7 @@ import androidx.compose.ui.window.DialogProperties
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.shell.LocalShellOverlayHost
+import app.nagmedar.ui.shell.bottomInsetPadding
 import app.nagmedar.ui.shell.ShellOverlayHost
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -394,7 +395,7 @@ fun GlassBottomSheet(
     }
     val host = shellOverlayHere()
     if (host != null) {
-        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, content) }
+        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, content, host.systemBottomPx) }
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -571,6 +572,8 @@ private fun SheetSurface(
     inShell: Boolean,
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
+    /** 1.0.3: in the shell, the system's navigation bar under the sheet (px): its surface reaches behind it, its rows stay above. */
+    bottomInset: () -> Int = { 0 },
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -622,7 +625,7 @@ private fun SheetSurface(
                 .focusable()
                 // 1.0.2: the whole sheet follows a drag down, its rows and title as well as its handle
                 .sheetDrag(drag)
-                .then(if (inShell) Modifier else Modifier.navigationBarsPadding())
+                .then(if (inShell) Modifier.bottomInsetPadding(bottomInset) else Modifier.navigationBarsPadding())
                 .padding(bottom = dimens.gapM),
         ) {
             // the handle says "drag me"

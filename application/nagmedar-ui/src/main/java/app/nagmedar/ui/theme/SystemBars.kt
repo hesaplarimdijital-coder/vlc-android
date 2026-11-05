@@ -16,16 +16,23 @@ import androidx.compose.ui.platform.LocalContext
  * system's: the light theme on a dark system gets dark icons at once, and the other way round.
  * S-306: in a desktop window (Android 15) the caption bar's buttons follow it too, and when the
  * app [drawsCaption], the bar is transparent: the menu bar goes up into it.
+ *
+ * 1.0.3 (Desktop Kit 2.0): the system draws no scrim behind three-button navigation and enforces
+ * no contrast over it: the app's chrome lies there (the shell's band; the first run's background),
+ * and the buttons take the theme's colour (dark on the light theme).
  */
 @Composable
 fun SystemBarsFollowTheme(drawsCaption: Boolean = false) {
     val dark = NagTheme.colors.isDark
     val activity = LocalContext.current.findActivity() ?: return
     DisposableEffect(activity, dark, drawsCaption) {
+        val clear = android.graphics.Color.TRANSPARENT
         activity.enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { dark },
-            navigationBarStyle = SystemBarStyle.auto(LIGHT_SCRIM, DARK_SCRIM) { dark },
+            statusBarStyle = SystemBarStyle.auto(clear, clear) { dark },
+            navigationBarStyle = SystemBarStyle.auto(clear, clear) { dark },
         )
+        activity.window.isNavigationBarContrastEnforced = false
+        activity.window.isStatusBarContrastEnforced = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             val transparent = WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
             val light = WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
@@ -37,10 +44,6 @@ fun SystemBarsFollowTheme(drawsCaption: Boolean = false) {
         onDispose {}
     }
 }
-
-/** The navigation bar scrims of enableEdgeToEdge()'s defaults, for three-button navigation. */
-private val LIGHT_SCRIM = android.graphics.Color.argb(0xE6, 0xFF, 0xFF, 0xFF)
-private val DARK_SCRIM = android.graphics.Color.argb(0x80, 0x1B, 0x1B, 0x1B)
 
 private tailrec fun Context.findActivity(): ComponentActivity? = when (this) {
     is ComponentActivity -> this

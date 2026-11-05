@@ -26,6 +26,16 @@ violations). The walk, in passes (a size and a language each):
   phone-tr     every destination and Settings in Turkish, the bottom bar and the ⋯ pages
   sheet-trials (on demand) the phone's track sheet dragged down again and again by `input swipe`, by
                drag() and by a stalled swipe, with the moves the system delivered (sheet-trials.md)
+  glass        (on demand, debug build) the user's glass decision: the phone in three-button
+               navigation, dark and light, the Music list and the Playlists' grid scrolled so rows and
+               covers pass under the bars, the mini player showing, for the chrome's three modes (A
+               solid, B the bottom on one glass, C the kit's: and the top bar fading to glass), the
+               app relaunched in each by the debug-only extra app.nagmedar.debug.CHROME_GLASS
+               (glass/README.md names each screenshot)
+
+1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
+bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band)
+and Back is pressed as he presses it.
 
 1.0.3: the workflow runs the passes in two jobs (tablet-en, workstation and phone-tr; phone-en), so
 each pass brings what it needs: phone-en goes through a fresh app's first run, workstation and
@@ -91,6 +101,11 @@ DIALOG_HINT = re.compile(r"aerr_|permission_allow|isn.t responding|keeps stoppin
 # the app's label, as the system's dialogs name it
 APP_LABELS = ("Nağmedar", "Nagmedar")
 TIME_RE = re.compile(r"\d:\d\d")
+# 1.0.3: the system's three-button navigation (an overlay of the emulator's System UI) and the gesture one it replaces
+THREE_BUTTON_OVERLAY = "com.android.internal.systemui.navbar.threebutton"
+GESTURAL_OVERLAY = "com.android.internal.systemui.navbar.gestural"
+# 1.0.3: the debug-only launch extra that draws the phone's chrome on glass (shell/ChromeGlass.kt)
+CHROME_GLASS_EXTRA = "app.nagmedar.debug.CHROME_GLASS"
 
 
 class Node:
@@ -300,6 +315,36 @@ class Smoke:
         self.sh("wm density %s" % (density or "reset"))
         time.sleep(2)
         self.log("display: %s %s" % (self.sh("wm size").replace("\n", " "), self.sh("wm density").replace("\n", " ")))
+
+    def three_button_navigation(self):
+        """1.0.3: the system's three-button navigation (Back, Home, Recents), as on the user's phone; True when it is on.
+        The emulator's System UI swaps its navigation bar by an overlay; the bar's height is read back from the window."""
+        out = self.sh("cmd overlay enable-exclusive --category %s" % THREE_BUTTON_OVERLAY, timeout=60)
+        if "rror" in out or "nknown" in out:
+            out = self.sh("cmd overlay enable %s" % THREE_BUTTON_OVERLAY, timeout=60)
+        time.sleep(3)
+        listed = self.sh("cmd overlay list android", timeout=60)
+        on = any(THREE_BUTTON_OVERLAY in l and l.strip().startswith("[x]") for l in listed.splitlines())
+        self.log("three-button navigation: %s (%s)" % ("on" if on else "NOT on", " ".join(out.split())[:200]))
+        if not on:
+            self.warnings.append("[%s] three-button navigation could not be turned on: %s" % (self.cur_pass, " ".join(out.split())[:200]))
+        return on
+
+    def band_check(self, nodes, what):
+        """1.0.3: in three-button navigation the bottom bar's colour continues behind the buttons (the shell's band): the
+        pixel under the bar (at a quarter of the width, clear of the buttons' icons) is the bar's own colour, read from
+        the last step's screenshot."""
+        w, h = self.screen_size(nodes)
+        more = [n for n in self.app_nodes(nodes) if n.text.strip() == self.strings[self.lang]["nag_nav_more"] and n.center[1] > h * 0.8]
+        if Image is None or not more or not self.steps or not self.steps[-1]["shot"]:
+            self.warnings.append("[%s] the band behind the buttons was not read (%s)" % (self.cur_pass, what))
+            return
+        rel = self.steps[-1]["shot"]
+        # the bar's own colour between its first two tabs' labels, and behind the buttons near the window's bottom
+        bar = self.pixel(rel, w // 4, more[0].center[1], w)
+        band = self.pixel(rel, w // 8, h - 6, w)
+        self.check("the bottom bar's colour continues behind the three buttons (%s)" % what, bar is not None and bar == band,
+                   "bar %s, behind the buttons %s" % (bar, band))
 
     def rotate(self, rotation):
         self.sh("settings put system user_rotation %d" % rotation)
@@ -1644,6 +1689,8 @@ class Smoke:
         s = self.strings["en"]
         self.sh("am force-stop " + self.pkg)
         self.set_display("1080x2400", "420")
+        # 1.0.3: the user's phone has three-button navigation: the band and Back are walked as he uses them
+        self.three_button_navigation()
         self.prepare_media()
         self.launch()
         nodes = self.step("Launch (phone)")
@@ -1653,6 +1700,7 @@ class Smoke:
             time.sleep(8)
             nodes = self.step("After the first run (phone)")
         self.check_bottom_bar(nodes)
+        self.band_check(nodes, "at the first launch")
         self.visit_destinations()
         self.settings_pass(full=True)
         self.open_label(s["nag_nav_settings"])
@@ -1710,6 +1758,178 @@ class Smoke:
         self.visit_destinations()
         self.settings_pass(full=True)
         self.sh("cmd locale set-app-locales %s --locales en-US" % self.pkg)
+
+    def pass_glass(self):
+        """1.0.3, on demand (passes=glass, the debug build): screenshots for the user's glass decision. The phone in
+        three-button navigation, dark then light, the walk's albums in folders of their own with covers and a playlist
+        each; in each mode of the chrome (A solid, B the bottom glass, C the kit's), set by the debug-only extra on an
+        intent to the running app (playback goes on, the mini player stays): the Music list at its top and scrolled so its
+        rows pass under the bars, then the Playlists' grid likewise with its covers. The system's animations are on for
+        the pass: with "Remove animations" the app draws glass solid. glass/README.md names each screenshot."""
+        self.cur_pass, self.lang = "glass", "en"
+        s = self.strings["en"]
+        self.sh("am force-stop " + self.pkg)
+        self.set_display("1080x2400", "420")
+        self.three_button_navigation()
+        self.glass_media()
+        self.launch()
+        nodes = self.step("Launch (glass)")
+        if any(x.text.strip() == s["nag_fr_skip"] for x in self.app_nodes(nodes)):
+            self.first_run_walk("First run (glass)")
+            time.sleep(10)
+            self.step("After the scan (glass)")
+        self.animations(True)
+        os.makedirs(os.path.join(self.out, "glass"), exist_ok=True)
+        shots = []
+        nodes = self.open_music()
+        # the scan may still be going: the walk's tracks are waited for
+        nodes, _ = self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 40)
+        self.play_track(nodes)
+        time.sleep(2)
+        # paused: the strip and the lists stand still for the pictures
+        self.key(85)
+        activity = "%s/app.nagmedar.ui.NagmedarActivity" % self.pkg
+        for theme in ("dark", "light"):
+            self.sh("cmd uimode night %s" % ("yes" if theme == "dark" else "no"))
+            time.sleep(2)
+            for mode, letter in (("solid", "A"), ("bottom", "B"), ("kit", "C")):
+                if self.over_time():
+                    break
+                self.sh("am start -n %s --activity-single-top --activity-clear-top --es %s %s" % (activity, CHROME_GLASS_EXTRA, mode), timeout=60)
+                time.sleep(2)
+                # a page change once the mode changed: the glass switched on at run time over a still page draws only after
+                # the page is drawn anew (Haze 2.0.1: the content records itself after the bar's last draw)
+                self.open_label(s["nag_nav_podcasts_short"], via_more=False)
+                time.sleep(1.5)
+                nodes = self.open_music()
+                self.glass_top(nodes)
+                nodes = self.step("Music (%s, %s)" % (letter, theme), wait=1.0)
+                self.check("the mini player shows (%s, %s)" % (letter, theme), bool(self.by_id(nodes, "mini-player")))
+                if letter == "A":
+                    self.band_check(nodes, "%s theme" % theme)
+                shots += self.glass_shots(nodes, letter, theme, "music")
+                if self.open_label(s["nag_nav_playlists"]):
+                    time.sleep(1.5)
+                    nodes = self.nodes(self.settle(1.0))
+                    self.glass_top(nodes)
+                    nodes = self.step("Playlists (%s, %s)" % (letter, theme), wait=1.0)
+                    shots += self.glass_shots(nodes, letter, theme, "playlists")
+                # the search page's results, the phone's list that scrolls beneath the top bar as well (C's top bar)
+                nodes = self.open_music()
+                search = [n for n in self.app_nodes(nodes) if n.desc.strip() == s["nag_search"]]
+                if search:
+                    self.tap(search[0])
+                    time.sleep(1.5)
+                    # the page keeps its words: cleared first, then one word every walk track has
+                    clear = [n for n in self.app_nodes(self.nodes(self.dump())) if n.desc.strip() == s["nag_search_clear"]]
+                    if clear:
+                        self.tap(clear[0], record=False)
+                        time.sleep(0.8)
+                    self.sh("input text track")
+                    time.sleep(2.0)
+                    # the on-screen keyboard away (the bars come back); a Back without one would leave the page
+                    if self.keyboard_shown():
+                        self.key(4, record=False)
+                        time.sleep(1.0)
+                    nodes = self.step("Search (%s, %s)" % (letter, theme), wait=1.0)
+                    if self.by_id(nodes, "search"):
+                        shots += self.glass_shots(nodes, letter, theme, "search")
+                    self.key(4, record=False)
+                    self.step("Back from the search page")
+                self.back_to_tabs()
+        self.sh("cmd uimode night no")
+        self.animations(False)
+        with open(os.path.join(self.out, "glass", "README.md"), "w", encoding="utf-8") as f:
+            f.write("# Glass decision: the phone's chrome in three modes\n\n"
+                    "Real emulator screenshots (API %s, %s, 1080x2400 at 420 dpi, three-button navigation, the debug build), "
+                    "switched with the debug-only extra `%s`. A = all opaque (the product today); B = the mini player, the "
+                    "bottom bar and the band behind the buttons on one glass, the top bar opaque and never changing colour; "
+                    "C = the kit's: B and a top bar that fades to glass while content passes under it. The track is paused. "
+                    "On the Music and Playlists pages the page's own header stays under the top bar (only the search page's "
+                    "list scrolls beneath it on a phone), so C's top bar shows its glass over that header there.\n\n"
+                    "| file | mode | theme | what |\n|---|---|---|---|\n"
+                    % (getattr(self, "device", {}).get("sdk", "?"), getattr(self, "device", {}).get("model", "?"), CHROME_GLASS_EXTRA))
+            for name, letter, theme, what in shots:
+                f.write("| %s | %s | %s | %s |\n" % (name, letter, theme, what))
+        self.check("the glass screenshots were taken (A, B, C in dark and light)", len(shots) >= 12, "%d screenshots" % len(shots))
+
+    def glass_media(self):
+        """The walk's tracks in a folder per album, each with a cover of its own (cover.jpg) and a playlist of the album
+        (an M3U the library reads as a playlist): covers for the lists and the Playlists' grid to pass under the bars."""
+        self.library_ready = True
+        for perm in PERMISSIONS_MEDIA:
+            self.sh("pm grant %s %s" % (self.pkg, perm))
+        tracks = sorted(glob.glob(os.path.join(self.a.music or "", "*.mp3")))
+        if not tracks:
+            self.warnings.append("[glass] no walk tracks: the lists stay empty")
+            return
+        work = os.path.join(self.out, "raw", "glass-media")
+        os.makedirs(work, exist_ok=True)
+        palette = [((231, 76, 60), (241, 196, 15)), ((46, 134, 193), (26, 188, 156)), ((142, 68, 173), (236, 112, 99)),
+                   ((39, 174, 96), (244, 208, 63)), ((211, 84, 0), (52, 73, 94)), ((22, 160, 133), (155, 89, 182)),
+                   ((192, 57, 43), (93, 173, 226)), ((241, 196, 15), (44, 62, 80))]
+        for album in range(1, 9):
+            mine = [t for t in tracks if os.path.basename(t).startswith("album%d-" % album)]
+            if not mine:
+                continue
+            folder = "/sdcard/Music/nagmedar-walk/album%d" % album
+            self.sh("mkdir -p %s" % folder)
+            self.adb("push", *mine, folder + "/", timeout=300)
+            local = os.path.join(work, "album%d" % album)
+            os.makedirs(local, exist_ok=True)
+            if Image is not None:
+                a, b = palette[album - 1]
+                im = Image.new("RGB", (600, 600), a)
+                from PIL import ImageDraw
+                d = ImageDraw.Draw(im)
+                for i in range(0, 1200, 120):
+                    d.polygon([(i, 0), (i + 60, 0), (i - 540, 600), (i - 600, 600)], fill=b)
+                d.ellipse((180, 180, 420, 420), fill=(250, 250, 250))
+                d.ellipse((270, 270, 330, 330), fill=a)
+                im.save(os.path.join(local, "cover.jpg"), "JPEG", quality=90)
+                self.adb("push", os.path.join(local, "cover.jpg"), folder + "/cover.jpg", timeout=60)
+            with open(os.path.join(local, "list.m3u"), "w", encoding="utf-8") as f:
+                f.write("#EXTM3U\n" + "".join(os.path.basename(t) + "\n" for t in mine))
+            self.adb("push", os.path.join(local, "list.m3u"), "%s/Profile album %d.m3u" % (folder, album), timeout=60)
+
+    def keyboard_shown(self):
+        """The on-screen keyboard is up (the input method service says so)."""
+        return "mInputShown=true" in self.sh("dumpsys input_method", timeout=60)
+
+    def glass_top(self, nodes):
+        """The page's list back at its top, the bars shown."""
+        w, h = self.screen_size(nodes)
+        for _ in range(3):
+            self.drag(w // 2, int(h * 0.30), w // 2, int(h * 0.75), moves=6)
+        time.sleep(0.8)
+
+    def glass_drag(self, x, y0, y1, moves=16):
+        """A drag that stops before it lifts: the list moves by the drag alone, no fling after it (so the three modes'
+        screenshots show the list at the same place)."""
+        pts = [(x, y0 + (y1 - y0) * i // moves) for i in range(1, moves + 1)]
+        self.sh(" ; ".join(["input motionevent DOWN %d %d" % (x, y0)] + ["input motionevent MOVE %d %d" % p for p in pts]
+                           + ["sleep 0.4", "input motionevent UP %d %d" % (x, y1)]), timeout=90)
+
+    def glass_shots(self, nodes, letter, theme, what):
+        """The page as it is (its top) and scrolled so its content lies under the bars, the bars shown again over it; each
+        screenshot copied to glass/<mode>-<theme>-<what>-<n>-<state>.png."""
+        out = []
+        w, h = self.screen_size(nodes)
+        for i, label in ((1, "top"), (2, "scrolled")):
+            if i == 2:
+                # down the list (the bars slide away), then a little back up: they return over the rows beneath them
+                for _ in range(2):
+                    self.glass_drag(w // 2, int(h * 0.66), int(h * 0.38))
+                    time.sleep(0.5)
+                self.glass_drag(w // 2, int(h * 0.45), int(h * 0.53))
+                time.sleep(1.5)
+            self.step("Glass %s %s %s (%s)" % (letter, theme, what, label), wait=0.8)
+            shot = self.steps[-1]["shot"]
+            if shot:
+                name = "%s-%s-%s-%d-%s.png" % (letter, theme, what, i, label)
+                shutil.copyfile(os.path.join(self.out, shot), os.path.join(self.out, "glass", name))
+                out.append((name, letter, theme, "%s, %s" % (what, "at its top" if i == 1 else "scrolled: content under the bars")))
+        return out
 
     def prepare_media(self):
         if not self.a.media or not os.path.isdir(self.a.media):
