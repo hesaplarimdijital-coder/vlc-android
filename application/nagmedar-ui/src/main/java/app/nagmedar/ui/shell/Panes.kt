@@ -1,5 +1,6 @@
 package app.nagmedar.ui.shell
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -40,9 +42,11 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.paneHandleWidth
 import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /** The window's width class, provided by the shell; outside it (previews, tests) it follows the configuration. */
 val LocalWidthClass = compositionLocalOf<WidthClass?> { null }
@@ -123,6 +127,11 @@ private const val DIVIDER = "divider"
  * area. Beside the list the pane slides in over [NagMotion.LONG] on the emphasized curve; over
  * it, the details come and go on the shared axis of [DetailMotion] and Back is the predictive
  * gesture (Desktop Kit 0.2.0). The pane keeps its content while it closes.
+ *
+ * 1.0.3 (Desktop Kit 2.3.0): in a phone's window the details open in depth ([DetailDepth]) as a
+ * [DetailTransition]'s do, Back seeks their closing with the list behind them, and with
+ * [sharedElements] what the list and the details mark ([detailSharedElement], [detailSharedCard])
+ * flies between them.
  */
 @Composable
 fun <K : Any> ListDetailPanes(
@@ -135,28 +144,50 @@ fun <K : Any> ListDetailPanes(
     defaultDetailWidth: Dp = 336.dp,
     minDetailWidth: Dp = 280.dp,
     minListWidth: Dp = 360.dp,
+    sharedElements: Boolean = false,
 ) {
     val side = currentWidthClass() >= WidthClass.Expanded
     val motion = NagTheme.motion
     val tier = LocalMotionTier.current
+    // 1.0.3: a phone's window, where the details open in depth
+    val phone = !side && tier == MotionTier.Gesture
+    val animated = !motion.reduced && tier != MotionTier.Reduced
     val width = rememberPaneWidth(widthKey, defaultDetailWidth)
     val state = rememberDetailMotion(detail != null)
+    val depth = rememberDepth(detail != null)
     val progress = state.progress
     var retained by remember { mutableStateOf(detail) }
+    val latestDetail by rememberUpdatedState(detail)
     // registered before the details' own handlers: those (a selection, an episode) go first
-    DetailBackHandler(enabled = detail != null && !side, state = state, onBack = onCloseDetail)
-    LaunchedEffect(detail, side) {
-        if (detail != null) {
-            retained = detail
-            if (side) progress.animateTo(1f, motion.emphasized()) else state.show(open = true, motion, tier)
-        } else {
-            if (side) progress.animateTo(0f, motion.emphasizedExit()) else state.show(open = false, motion, tier)
-            retained = null
+    DetailBackHandler(enabled = detail != null && !side && !phone, state = state, onBack = onCloseDetail)
+    DepthBackHandler(enabled = detail != null && phone, depth = depth, animated = animated, isOpen = { latestDetail != null }, onBack = onCloseDetail)
+    LaunchedEffect(detail, side, phone, animated) {
+        val open = detail != null
+        if (open) retained = detail
+        when {
+            side -> {
+                // the phone's transition stands where this one goes, without holding it up (it waits for a composition)
+                launch { depth.stand(open) }
+                progress.animateTo(if (open) 1f else 0f, if (open) motion.emphasized() else motion.emphasizedExit())
+            }
+            phone -> {
+                state.stand(open)
+                depth.drive(open, animated)
+            }
+            else -> {
+                launch { depth.stand(open) }
+                state.show(open = open, motion, tier)
+            }
         }
+        if (!open) retained = null
     }
-    val shown = detail ?: retained
+    // on a phone the details are drawn while the transition has them (gone in the frame it ends)
+    val shown = (detail ?: retained).takeIf { !phone || detail != null || depth.seekable.currentState || depth.seekable.targetState }
     val opening = detail != null
-    val listCovered by remember(side, state) { derivedStateOf { !side && state.covered } }
+    val listCovered by remember(side, phone, state, depth) { derivedStateOf { !side && (if (phone) depth.covered else state.covered) } }
+    val shared = sharedElements && phone && animated
+    // on a phone the details are opaque: the list is behind them while the Back gesture shrinks them
+    val page = if (phone) Modifier.background(NagTheme.colors.background) else Modifier
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val dividerLabel = stringResource(R.string.nag_pane_divider)
     BoxWithConstraints(modifier.fillMaxSize().clipToBounds().then(if (side) Modifier else Modifier.detailShade(state))) {
@@ -164,68 +195,71 @@ fun <K : Any> ListDetailPanes(
         val maxDetail = (maxWidth - minListWidth - handle).coerceAtLeast(minDetailWidth)
         val range = minDetailWidth.value..maxDetail.value
         val detailWidth = width.widthDp.coerceIn(range).dp
-        Layout(
-            content = {
-                Box(
-                    // covered by the details: out of the accessibility tree too
-                    Modifier.layoutId(LIST).then(if (listCovered && shown != null) Modifier.clearAndSetSemantics {} else Modifier),
-                    propagateMinConstraints = true,
-                ) { list() }
-                if (shown != null) {
+        DepthHost(depth, opening, shared, Modifier.fillMaxSize()) { scopes ->
+            Layout(
+                content = {
                     Box(
-                        Modifier
-                            .layoutId(DETAIL)
-                            .onKeyEvent { event ->
-                                if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
-                                    onCloseDetail()
-                                    true
-                                } else {
-                                    false
-                                }
-                            },
+                        // covered by the details: out of the accessibility tree too
+                        Modifier.layoutId(LIST).then(if (listCovered && shown != null) Modifier.clearAndSetSemantics {} else Modifier),
                         propagateMinConstraints = true,
-                    ) { detailPane(shown, !side) }
-                    if (side) {
-                        PaneDivider(
-                            widthDp = detailWidth.value,
-                            range = range,
-                            // the pane is at the end: moving its edge towards the end narrows it
-                            onResize = { towardsEnd -> width.resize(-towardsEnd, range) },
-                            onSet = { width.widthDp = it.coerceIn(range) },
-                            onResizeEnd = width::save,
-                            label = dividerLabel,
-                            modifier = Modifier.layoutId(DIVIDER).width(handle),
-                            line = Alignment.CenterEnd,
-                        )
+                    ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
+                    if (shown != null) {
+                        Box(
+                            Modifier
+                                .layoutId(DETAIL)
+                                .then(page)
+                                .onKeyEvent { event ->
+                                    if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
+                                        onCloseDetail()
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
+                            propagateMinConstraints = true,
+                        ) { DepthSide(scopes, DetailSide.Detail, depth, shared) { detailPane(shown, !side) } }
+                        if (side) {
+                            PaneDivider(
+                                widthDp = detailWidth.value,
+                                range = range,
+                                // the pane is at the end: moving its edge towards the end narrows it
+                                onResize = { towardsEnd -> width.resize(-towardsEnd, range) },
+                                onSet = { width.widthDp = it.coerceIn(range) },
+                                onResizeEnd = width::save,
+                                label = dividerLabel,
+                                modifier = Modifier.layoutId(DIVIDER).width(handle),
+                                line = Alignment.CenterEnd,
+                            )
+                        }
                     }
+                },
+            ) { measurables, constraints ->
+                val w = constraints.maxWidth
+                val h = constraints.maxHeight
+                val listM = measurables.first { it.layoutId == LIST }
+                val detailM = measurables.firstOrNull { it.layoutId == DETAIL }
+                val dividerM = measurables.firstOrNull { it.layoutId == DIVIDER }
+                if (side) {
+                    // the list takes its new width at once and reflows once; the pane slides over it
+                    val handlePx = handle.roundToPx()
+                    val detailPx = detailWidth.roundToPx()
+                    val reserved = if (detailM != null && opening) detailPx + handlePx else 0
+                    val list = listM.measure(Constraints.fixed((w - reserved).coerceAtLeast(0), h))
+                    val divider = dividerM?.measure(Constraints.fixed(handlePx, h))
+                    val pane = detailM?.measure(Constraints.fixed(detailPx, h))
+                    layout(w, h) {
+                        // read while placing: the slide moves the pane without measuring anything again
+                        val edge = w - ((detailPx + handlePx) * progress.value).roundToInt()
+                        list.placeRelative(0, 0)
+                        pane?.placeRelative(edge + handlePx, 0)
+                        divider?.placeRelative(edge, 0)
+                    }
+                } else {
+                    // once the details cover the area the list is neither measured, drawn nor read out, but stays composed
+                    val list = if (detailM != null && listCovered) null else listM.measure(Constraints.fixed(w, h))
+                    val pane = detailM?.measure(Constraints.fixed(w, h))
+                    layout(w, h) { if (phone) placeDepth(depth, list, pane, w, direction) else placeListAndDetail(state, list, pane, w, direction) }
                 }
-            },
-        ) { measurables, constraints ->
-            val w = constraints.maxWidth
-            val h = constraints.maxHeight
-            val listM = measurables.first { it.layoutId == LIST }
-            val detailM = measurables.firstOrNull { it.layoutId == DETAIL }
-            val dividerM = measurables.firstOrNull { it.layoutId == DIVIDER }
-            if (side) {
-                // the list takes its new width at once and reflows once; the pane slides over it
-                val handlePx = handle.roundToPx()
-                val detailPx = detailWidth.roundToPx()
-                val reserved = if (detailM != null && opening) detailPx + handlePx else 0
-                val list = listM.measure(Constraints.fixed((w - reserved).coerceAtLeast(0), h))
-                val divider = dividerM?.measure(Constraints.fixed(handlePx, h))
-                val pane = detailM?.measure(Constraints.fixed(detailPx, h))
-                layout(w, h) {
-                    // read while placing: the slide moves the pane without measuring anything again
-                    val edge = w - ((detailPx + handlePx) * progress.value).roundToInt()
-                    list.placeRelative(0, 0)
-                    pane?.placeRelative(edge + handlePx, 0)
-                    divider?.placeRelative(edge, 0)
-                }
-            } else {
-                // once the details cover the area the list is neither measured, drawn nor read out, but stays composed
-                val list = if (detailM != null && listCovered) null else listM.measure(Constraints.fixed(w, h))
-                val pane = detailM?.measure(Constraints.fixed(w, h))
-                layout(w, h) { placeListAndDetail(state, list, pane, w, direction) }
             }
         }
     }
