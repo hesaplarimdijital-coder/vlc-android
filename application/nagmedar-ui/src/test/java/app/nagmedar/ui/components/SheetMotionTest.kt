@@ -37,6 +37,8 @@ import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -165,21 +167,49 @@ class SheetMotionTest {
 
     /**
      * A finger on the sheet's first row moved by [segments] (in twentieths of the sheet's height, down positive),
-     * each segment sent and settled on its own (moves sent together reach the sheet as their sum), then lifted.
+     * each segment settled on its own, then lifted; returns where the sheet's top was after each. The moves go to
+     * the window, which stays where it is: sent to the row, which goes down with the sheet, each relative move
+     * would be taken from where the row has gone (the finger would cover half the way).
      */
     private fun drag(vararg segments: Int): List<Float> {
         val step = compose.onNodeWithTag("sheet").fetchSemanticsNode().size.height / 20f
-        val row = compose.onNodeWithText("Oynat")
+        val start = compose.onNodeWithText("Oynat").fetchSemanticsNode().boundsInRoot.center
+        val window = compose.onRoot()
         val tops = mutableListOf<Float>()
-        row.performTouchInput { down(center) }
+        window.performTouchInput { down(start) }
         for (n in segments) {
-            row.performTouchInput { repeat(abs(n)) { moveBy(Offset(0f, if (n > 0) step else -step)) } }
+            window.performTouchInput { repeat(abs(n)) { moveBy(Offset(0f, if (n > 0) step else -step)) } }
             compose.waitForIdle()
             tops += top()
         }
-        row.performTouchInput { up() }
+        window.performTouchInput { up() }
         compose.waitForIdle()
         return tops
+    }
+
+    /** The tick's rule, finger by finger: once each time a pull passes a third of the sheet, never on the way back. */
+    @Test
+    fun theTickComesOncePerCrossing() {
+        var ticks = 0
+        val drag = SheetDrag(CoroutineScope(Job()), flingClosePx = 1200f)
+        drag.height = 900
+        drag.onThreshold = { ticks++ }
+        drag.held = true
+        drag.pull(200f)
+        assertEquals("short of a third", 0, ticks)
+        drag.pull(200f)
+        assertEquals("past it", 1, ticks)
+        drag.pull(50f)
+        assertEquals("further on: no more", 1, ticks)
+        drag.pull(-200f)
+        assertEquals("back above it", 1, ticks)
+        drag.pull(100f)
+        assertEquals("past it again", 2, ticks)
+        // let go and caught again down there: the new press starts past it, no tick where it already is
+        drag.held = false
+        drag.held = true
+        drag.pull(10f)
+        assertEquals(2, ticks)
     }
 
     /** Pulled past a third, back above it and past it again: a tick each time it passes the closing point, by touch only. */
