@@ -1,0 +1,125 @@
+1246 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3797 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3797 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3797 E/.nagmedar.debug: hiddenapi: Accessing hidden field Ljava/util/Collections$SynchronizedCollection;->mutex:Ljava/lang/Object; (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+3797 E/.nagmedar.debug: hiddenapi: Accessing hidden method Ljava/util/Collections$SynchronizedSet;-><init>(Ljava/util/Set;Ljava/lang/Object;)V (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+3797 E/.nagmedar.debug: hiddenapi: Accessing hidden method Ljava/util/Collections$SynchronizedCollection;-><init>(Ljava/util/Collection;Ljava/lang/Object;)V (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+3797 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3797 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3797 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3797 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3797 W/.nagmedar.debug: Verification of kotlinx.coroutines.channels.ChannelSegment kotlinx.coroutines.channels.BufferedChannel.access$findSegmentSend(kotlinx.coroutines.channels.BufferedChannel, long, kotlinx.coroutines.channels.ChannelSegment) took 159.565ms (31.34 bytecodes/s) (0B arena alloc)
+622 W/ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{4920736 u0 app.nagmedar.debug/org.videolan.vlc.StartActivity t9 f}}
+622 W/ActivityTaskManager: Activity pause timeout for ActivityRecord{4920736 u0 app.nagmedar.debug/org.videolan.vlc.StartActivity t9 f}}
+3797 W/HWUI: Unknown dataspace 0
+3797 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3797 W/VLC: [0000736bc762bb70/1306] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc7636e50/130a] libvlc access: cannot insert stream filter record
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3797 W/VLC: [0000736bc762dc10/130b] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc7636e50/130e] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762bb70/130f] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc76368b0/1310] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1311] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc7636e50/1312] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762bb70/1313] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc76368b0/1314] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1315] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc7636e50/1316] libvlc access: cannot insert stream filter record
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3797 W/VLC: [0000736bc762bb70/1317] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1319] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762bb70/131c] libvlc access: cannot insert stream filter record
+622 E/NotificationService: Package enqueue rate is 5.0496016. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+3797 W/VLC: [0000736bc76414d0/1320] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc76413b0/1323] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/1324] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1328] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/132a] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1334] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/1343] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/134a] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/134c] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1350] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/1353] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/1358] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/135c] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762dc10/135f] libvlc access: cannot insert stream filter record
+3797 W/VLC: [0000736bc762e2d0/1367] libvlc access: cannot insert stream filter record
+3797 E/VLC: [0000736bc762dc10/1369] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3797 E/VLC: [0000736b976cdc80/1369] libvlc input: Your media can't be opened
+3797 E/VLC: [0000736b976cdc80/1369] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3797 W/VLC: [0000736bc762dc10/136a] libvlc access: cannot insert stream filter record
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3797 E/VLC: [0000736bc7646930/136c] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3797 E/VLC: [0000736b976cdc80/136c] libvlc input: Your media can't be opened
+3797 E/VLC: [0000736b976cdc80/136c] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3797 W/VLC: [0000736bc762bb70/136d] libvlc access: cannot insert stream filter record
+3797 W/VLC/medialibrary: [T#126901719728320] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityTaskManager: Force removing ActivityRecord{67222526 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+622 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+622 W/WindowManager: Exception thrown during dispatchAppVisibility Window{54b9fe3 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+622 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{7af2691 #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ef40465
+5404 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+5404 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+5404 E/.nagmedar.debug: hiddenapi: Accessing hidden field Ljava/util/Collections$SynchronizedCollection;->mutex:Ljava/lang/Object; (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+5404 E/.nagmedar.debug: hiddenapi: Accessing hidden method Ljava/util/Collections$SynchronizedSet;-><init>(Ljava/util/Set;Ljava/lang/Object;)V (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+5404 E/.nagmedar.debug: hiddenapi: Accessing hidden method Ljava/util/Collections$SynchronizedCollection;-><init>(Ljava/util/Collection;Ljava/lang/Object;)V (runtime_flags=0, domain=core-platform, api=max-target-o) from Lj$/util/DesugarCollections; (domain=app, TargetSdkVersion=36) using reflection: denied
+5404 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+5404 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+5404 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+5404 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+5404 W/HWUI: Unknown dataspace 0
+5404 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+5404 W/VLC: [0000736bc7627910/154b] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7626050/154c] libvlc access: cannot insert stream filter record
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+5404 W/VLC: [0000736bc76287b0/154d] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7624550/154e] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/154f] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7624550/1550] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc76287b0/1551] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7627010/1552] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/1553] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7627010/1554] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7627010/1555] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7629f50/1556] libvlc access: cannot insert stream filter record
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+5404 W/VLC: [0000736bc7628450/1557] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7629f50/1558] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc76287b0/1559] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7629f50/155a] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/155c] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762e1b0/155d] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc76287b0/155e] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762ecf0/155f] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/1560] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762cfb0/1561] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc76287b0/1562] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762ecf0/1563] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/1564] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762cfb0/1565] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc76287b0/1566] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762d1f0/1567] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc7628450/1568] libvlc access: cannot insert stream filter record
+5404 W/VLC: [0000736bc762cfb0/1569] libvlc access: cannot insert stream filter record
+5404 E/VLC: [0000736bc76287b0/156a] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+5404 E/VLC: [0000736b976534e0/156a] libvlc input: Your media can't be opened
+5404 E/VLC: [0000736b976534e0/156a] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+5404 W/VLC: [0000736bc762d1f0/156b] libvlc access: cannot insert stream filter record
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+5404 E/VLC: [0000736bc7628450/156c] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+5404 E/VLC: [0000736b976534e0/156c] libvlc input: Your media can't be opened
+5404 E/VLC: [0000736b976534e0/156c] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+5404 W/VLC: [0000736bc762cfb0/156d] libvlc access: cannot insert stream filter record
+5404 W/VLC/medialibrary: [T#126901793030336] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 E/NotificationService: Package enqueue rate is 6.9410825. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
