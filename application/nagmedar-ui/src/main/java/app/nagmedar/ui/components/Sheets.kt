@@ -3,7 +3,10 @@ package app.nagmedar.ui.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
@@ -11,6 +14,7 @@ import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -62,6 +67,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -70,6 +77,7 @@ import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,6 +101,7 @@ import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.glass
+import app.nagmedar.ui.theme.rememberNagHaptics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -229,12 +238,14 @@ fun MoreSheet(
     if (currentWidthClass() == WidthClass.Compact) {
         val held = remember { ActionGroupsKept(groups) }
         if (visible && groups.isNotEmpty()) held.groups = groups
+        // the rows read the groups of this composition: a switch flipped in the sheet (1.0.3) shows its new state
+        val shown = held.groups
         GlassBottomSheet(visible = visible, onDismiss = onDismiss, label = title) {
             if (title != null) {
                 Text(title, style = NagTheme.type.title, color = NagTheme.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = NagTheme.dimens.gapL + 4.dp, vertical = NagTheme.dimens.gapS))
             }
-            ActionGroupList(held.groups, onDismiss)
+            ActionGroupList(shown, onDismiss)
         }
     } else {
         MenuPopup(
@@ -296,7 +307,10 @@ fun MoreButton(
 fun moreActionsLabel(name: String?): String =
     if (name.isNullOrBlank()) stringResource(R.string.nag_more_actions) else stringResource(R.string.nag_more_actions_for, name)
 
-/** The rows of [MoreSheet]: group captions, then one row per action. */
+/**
+ * The rows of [MoreSheet]: group captions, then one row per action. An action closes the sheet; an on/off
+ * one (1.0.3, Desktop Kit 2.3: `checked` set) is a switch that flips in view and leaves the sheet open.
+ */
 @Composable
 internal fun ActionGroupList(groups: List<ActionGroup>, onDismiss: () -> Unit) {
     val dimens = NagTheme.dimens
@@ -308,13 +322,18 @@ internal fun ActionGroupList(groups: List<ActionGroup>, onDismiss: () -> Unit) {
         }
         group.actions.forEach { action ->
             SheetActionRow(action) {
-                onDismiss()
+                if (action.checked == null) onDismiss()
                 action.onClick()
             }
         }
     }
 }
 
+/**
+ * One action of [MoreSheet]: its icon, its label and (with a keyboard) its keys. 1.0.3 (Desktop Kit 2.3): an
+ * item with `checked` set is a switch at the end of the line; the whole line flips it, a screen reader reads it
+ * as a switch, and by touch it vibrates as it turns on or off. A menu ([MenuPopup], [MenuSheet]) keeps its check mark.
+ */
 @Composable
 private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
@@ -322,11 +341,13 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    val haptics = rememberNagHaptics()
     val content = when {
         !item.enabled -> colors.textTertiary
         item.destructive -> colors.danger
         else -> colors.text
     }
+    val checked = item.checked
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,14 +355,27 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
             .heightIn(min = SHEET_ROW_HEIGHT.coerceAtLeast(dimens.minTarget))
             .focusRing(state, shape)
             .background(stateBackground(state), shape)
-            .nagClickable(interaction, onClick, enabled = item.enabled)
+            .then(
+                if (checked == null) {
+                    Modifier.nagClickable(interaction, onClick, enabled = item.enabled)
+                } else {
+                    Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .hoverable(interaction, item.enabled)
+                        .focusMemory()
+                        .toggleable(checked, interaction, indication = null, enabled = item.enabled, role = Role.Switch) { on ->
+                            haptics.toggle(on)
+                            onClick()
+                        }
+                },
+            )
             .padding(horizontal = dimens.gapM),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // the icon column stays when an item has no icon, so the labels line up
         Box(Modifier.size(dimens.iconLarge), contentAlignment = Alignment.Center) {
-            val icon = if (item.checked == true) NagIcons.Check else item.icon
-            if (icon != null) {
-                Icon(icon, contentDescription = null, tint = if (item.destructive) colors.danger else colors.textSecondary,
+            if (item.icon != null) {
+                Icon(item.icon, contentDescription = null, tint = if (item.destructive) colors.danger else colors.textSecondary,
                     modifier = Modifier.size(dimens.icon))
             }
         }
@@ -353,6 +387,10 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
         if (shortcut != null) {
             Text(shortcut, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 1)
         }
+        if (checked != null) {
+            Spacer(Modifier.width(dimens.gapM))
+            SwitchTrack(checked)
+        }
     }
 }
 
@@ -362,6 +400,11 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
  * its rows) it follows the finger as the phone's full player does; what it holds scrolls back to
  * its top first. Let go past a third of its height or flung down it closes, short of that it
  * springs back ([SheetDrag]). At most 640 dp wide, centred; [label] names it for a screen reader.
+ *
+ * 1.0.3 (Desktop Kit 2.3): on a phone it comes and goes on one firm spring ([sheetWay]); taken out
+ * by the finger it carries on at the finger's speed and is dismissed the moment it is out, with
+ * nothing left to animate; closed part way down by the scrim or Back it goes from where it is. In
+ * the shell, the keyboard's focus goes back where it was when it closes ([ReturnFocusOnClose]).
  *
  * In the shell's window it is drawn in the shell's overlay over everything (and blurs the screen
  * behind it); elsewhere (in a dialog, before the shell) in a window of its own, solid. Closed and
@@ -385,17 +428,21 @@ fun GlassBottomSheet(
     val latestDismiss by rememberUpdatedState(onDismiss)
     val drag = rememberSheetDrag { latestDismiss() }
     LaunchedEffect(visible) {
-        // 1.0.3: the springs arrive within a thousandth of the sheet's height, not a hundredth left to jump at the end
-        if (visible) {
-            drag.reset()
-            progress.animateTo(1f, NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate), NagMotion.FRACTION))
-        } else {
-            progress.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate), NagMotion.FRACTION))
+        when {
+            visible -> {
+                drag.reset()
+                progress.animateTo(1f, sheetWay(tier, tween(NagMotion.LONG, easing = NagMotion.EmphasizedDecelerate)))
+            }
+            // pulled or flung out by the finger (1.0.3): it is gone already, nothing to animate
+            drag.carriedOut -> progress.snapTo(0f)
+            // the scrim, Back, Esc or an action: down from where it is
+            else -> progress.animateTo(0f, sheetWay(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate)))
         }
     }
     val host = shellOverlayHere()
     if (host != null) {
         OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, content, host.systemBottomPx) }
+        ReturnFocusOnClose(host, visible)
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -403,6 +450,34 @@ fun GlassBottomSheet(
             StillDialogWindow()
             SheetSurface(progress, drag, label, modifier, inShell = false, { latestDismiss() }, content)
         }
+    }
+}
+
+/**
+ * The sheet's way in and out (1.0.3, Desktop Kit 2.3): on a phone one firm spring both ways, 0.92 at 800 (a
+ * sheet is a small thing: the screens' spring is slow on it), arrived within a thousandth of the way; [timed]
+ * (the 0.2.0 curve) wider up; a jump with reduced motion.
+ */
+internal fun sheetWay(tier: MotionTier, timed: FiniteAnimationSpec<Float>): FiniteAnimationSpec<Float> = when (tier) {
+    MotionTier.Gesture -> spring(dampingRatio = SHEET_DAMPING, stiffness = SHEET_STIFFNESS, visibilityThreshold = NagMotion.FRACTION)
+    MotionTier.Timed -> timed
+    MotionTier.Reduced -> snap()
+}
+
+/** The phone's sheet spring ([sheetWay]): all but critically damped, firmer than the screens' 600. */
+private const val SHEET_DAMPING = 0.92f
+private const val SHEET_STIFFNESS = 800f
+
+/**
+ * 1.0.3 (Desktop Kit 2.3): while a layer over the shell is [open] (a sheet), remembers the control that had
+ * the keyboard focus when it opened ([FocusMemory]); when the layer closes the focus goes back there, so Tab
+ * goes on from where it was (a layer in the shell's window would otherwise leave the focus nowhere).
+ */
+@Composable
+internal fun ReturnFocusOnClose(host: ShellOverlayHost, open: Boolean) {
+    DisposableEffect(host, open) {
+        val previous = if (open) host.focusMemory.current() else null
+        onDispose { previous?.restore() }
     }
 }
 
@@ -415,6 +490,12 @@ fun GlassBottomSheet(
  * faster than [FLING_CLOSE], it closes ([onClose]); short of that it springs back on the motion
  * tier's spring with the finger's speed (a jump with reduced motion). Only a pressed pointer pulls:
  * a mouse wheel at the list's top leaves the sheet where it is.
+ *
+ * 1.0.3 (Desktop Kit 2.3): on a phone a sheet let go to close carries on down at the finger's speed
+ * and [onClose] comes the moment it is out (half a pixel left), [carriedOut] telling what closes it
+ * that nothing is left to animate: before, it was closed at once and went down from a standstill, a
+ * visible pause after a fling. Wider windows and reduced motion close at once, as in 1.0.2. On the
+ * way past the closing point the finger feels one tick ([onThreshold]: touch only).
  */
 @Stable
 class SheetDrag internal constructor(private val scope: CoroutineScope, private val flingClosePx: Float) {
@@ -428,12 +509,30 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
     internal var onClose: () -> Unit = {}
     internal var tier: MotionTier = MotionTier.Gesture
 
+    /** The drag went past the point where letting go closes the sheet (1.0.3: the haptic tick). */
+    internal var onThreshold: () -> Unit = {}
+
     /** A finger (or a pressed button) is on the sheet. */
     internal var held = false
+        set(value) {
+            // a new press pulls from where the sheet is: caught past the closing point, it does not tick again there
+            if (value && !field) armed = pastClosing(offset)
+            field = value
+        }
+
+    /**
+     * 1.0.3: the finger took the sheet out (let go past a third or flung, on a phone): it is gone when
+     * [onClose] comes, and what closes it has nothing left to animate. Cleared by [reset].
+     */
+    var carriedOut by mutableStateOf(false)
+        private set
 
     /** Let go far enough: it is going, nothing pulls it any more. */
     private var closing = false
     private var settling: Job? = null
+
+    /** The pull is past the closing point: the tick came on the way there. */
+    private var armed = false
 
     /** The sheet is below its place: dragged, or springing back. */
     val pulled: Boolean get() = offset > 0f
@@ -446,15 +545,29 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
         settling = null
         val before = offset
         offset = (before + delta).coerceAtLeast(0f)
+        val past = pastClosing(offset)
+        if (past != armed) {
+            armed = past
+            if (past) onThreshold()
+        }
         return offset - before
     }
+
+    private fun pastClosing(at: Float): Boolean = height > 0 && at > height / 3f
 
     /** Let go at [velocity] px/s (down positive): it closes or springs back. */
     fun release(velocity: Float) {
         if (closing || !pulled) return
+        armed = false
         if (SheetDragRules.closes(offset, height, velocity, flingClosePx)) {
             closing = true
-            onClose()
+            settling?.cancel()
+            settling = null
+            if (SheetDragRules.carriesOut(tier) && height > 0) {
+                settling = scope.launch { carryOut(velocity) }
+            } else {
+                onClose()
+            }
             return
         }
         settling?.cancel()
@@ -464,11 +577,33 @@ class SheetDrag internal constructor(private val scope: CoroutineScope, private 
         }
     }
 
+    /**
+     * Down and out at [velocity] px/s on the phone's gesture spring, closed ([onClose]) the moment it is out
+     * whatever the spring still does; a slow let-go past a third still leaves on the spring, from rest.
+     */
+    private suspend fun carryOut(velocity: Float) {
+        val end = height.toFloat()
+        var gone = false
+        fun out() {
+            if (gone) return
+            gone = true
+            carriedOut = true
+            onClose()
+        }
+        animate(offset, end, velocity.coerceAtLeast(0f), NagMotion.gesture(NagMotion.PIXEL)) { value, _ ->
+            offset = value.coerceAtLeast(0f)
+            if (value >= end - NagMotion.PIXEL) out()
+        }
+        out()
+    }
+
     /** Back at its place at once, nothing going: the sheet (re)opens. */
     fun reset() {
         settling?.cancel()
         settling = null
         closing = false
+        carriedOut = false
+        armed = false
         offset = 0f
     }
 
@@ -508,16 +643,27 @@ internal object SheetDragRules {
     /** Pulled [offset] px down a sheet [height] px high and let go at [velocity] px/s: past a third, or flung down, it closes. */
     fun closes(offset: Float, height: Int, velocity: Float, flingClosePx: Float): Boolean =
         offset > 0f && ((height > 0 && offset > height / 3f) || velocity > flingClosePx)
+
+    /**
+     * 1.0.3 (Desktop Kit 2.3): a sheet let go to close carries on out at the finger's speed on a phone; wider
+     * windows close it at once and it goes from where it is (their timed curve), and reduced motion jumps.
+     */
+    fun carriesOut(tier: MotionTier): Boolean = tier == MotionTier.Gesture
 }
 
-/** A [SheetDrag] that closes with [onClose] (the latest one), on the window's motion tier. */
+/**
+ * A [SheetDrag] that closes with [onClose] (the latest one), on the window's motion tier; the drag past the
+ * closing point ticks by touch (1.0.3, [app.nagmedar.ui.theme.NagHaptics.threshold]).
+ */
 @Composable
 internal fun rememberSheetDrag(onClose: () -> Unit): SheetDrag {
     val scope = rememberCoroutineScope()
     val flingClose = with(LocalDensity.current) { FLING_CLOSE.toPx() }
     val drag = remember(scope, flingClose) { SheetDrag(scope, flingClose) }
+    val haptics = rememberNagHaptics()
     drag.onClose = onClose
     drag.tier = LocalMotionTier.current
+    drag.onThreshold = { haptics.threshold() }
     return drag
 }
 
