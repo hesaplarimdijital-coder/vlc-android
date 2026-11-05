@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.ui.library.currentLocale
 
 /** S-206: a home network for the network browser's tests and screenshots. */
@@ -74,6 +75,9 @@ fun SampleNetworkBrowser(
     /** Whether the network is still being searched. */
     searching: Boolean = false,
     draft: ServerDraft? = null,
+    /** Android 17: the local network permission, and what asking for it does. */
+    access: LocalNetworkState = LocalNetworkState.Granted,
+    onAllowLocalNetwork: () -> Unit = {},
     setUp: (NetworkModel) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
@@ -81,7 +85,7 @@ fun SampleNetworkBrowser(
     val model = remember { NetworkModel(source, store, scope, locale, now = { 1_000L }, searchMs = if (searching) 600_000L else 0L) }
     LaunchedEffect(model) { model.followSaved() }
     LaunchedEffect(model) { setUp(model) }
-    NetworkBrowser(model, actions, lan, clock = clock, initialDraft = draft)
+    NetworkBrowser(model, actions, lan, clock = clock, initialDraft = draft, access = access, onAllowLocalNetwork = onAllowLocalNetwork)
 }
 
 /** The samples' servers found on the network. */

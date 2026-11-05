@@ -60,6 +60,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.nagmedar.network.LocalNetwork
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.BrowserCommands
 import app.nagmedar.ui.components.ColumnWidth
@@ -138,18 +140,24 @@ fun NetworkScreen(undo: UndoBarState? = null) {
     var sharesOn by remember { mutableStateOf(sharesEnabled(context)) }
     val lanFlow = remember(context) { NetworkMonitor.getInstance(context).connectionFlow.drop(1).map { it.connected && (!it.mobile || it.vpn) } }
     val lan by lanFlow.collectAsState(initial = lanNow(context))
+    val access = rememberLocalNetworkState()
     val state = when {
         !sharesOn -> LanState.Disabled
         !lan -> LanState.NoLan
+        access != LocalNetworkState.Granted -> LanState.NoPermission
         else -> LanState.Available
     }
     LaunchedEffect(state) {
         if (state == LanState.Available) model.discover() else model.stopDiscovery()
+        // Android 17: the page needs the local network: the system's question, the first time (then the page says why)
+        if (state == LanState.NoPermission && access == LocalNetworkState.Ask) LocalNetworkAccess.ask(context)
     }
     NetworkBrowser(
         model = model,
         actions = actions,
         lan = state,
+        access = access,
+        onAllowLocalNetwork = { LocalNetworkAccess.ask(context) },
         undo = undo,
         onEnableShares = {
             Settings.getInstance(context).edit().putBoolean(NAGMEDAR_NETWORK_SHARES, true).putBoolean(KEY_BROWSE_NETWORK, true).apply()
@@ -211,6 +219,9 @@ fun NetworkBrowser(
     actions: NetworkActions,
     lan: LanState,
     modifier: Modifier = Modifier,
+    /** Android 17: the local network permission, and the way to give it (the question, or the system settings). */
+    access: LocalNetworkState = LocalNetworkState.Granted,
+    onAllowLocalNetwork: () -> Unit = {},
     undo: UndoBarState? = null,
     onEnableShares: () -> Unit = {},
     onOpenWifiSettings: () -> Unit = {},
@@ -230,6 +241,22 @@ fun NetworkBrowser(
     BrowserCommands(onUp = { model.up() }, onRefresh = refresh)
     val addServer = { editing = Editing.New(ServerDraft()) }
     val editServer = { server: SavedServer -> editing = Editing.Change(server, ServerDraft.of(server)) }
+    // Android 17: a server on the local network asks for the permission while Android still asks, and opens once it is given
+    var waiting by remember { mutableStateOf<SavedServer?>(null) }
+    val openServer = { server: SavedServer ->
+        val ask = lan == LanState.NoPermission && LocalNetwork.isLocalUrl(server.url) &&
+            (access == LocalNetworkState.Ask || access == LocalNetworkState.Denied)
+        if (ask) {
+            waiting = server
+            onAllowLocalNetwork()
+        } else {
+            model.open(server)
+        }
+    }
+    LaunchedEffect(access) {
+        if (access == LocalNetworkState.Granted) waiting?.let { model.open(it) }
+        waiting = null
+    }
     val saveFound = { server: DiscoveredServer -> editing = Editing.New(ServerDraft.of(server)) }
     val removeServer = { server: SavedServer ->
         model.remove(server) { restore ->
@@ -251,10 +278,12 @@ fun NetworkBrowser(
         HorizontalRule()
         val servers = @Composable { paneModifier: Modifier ->
             ServerPane(model, lan, paneModifier, onAdd = addServer, onEdit = editServer, onRemove = removeServer, onSaveFound = saveFound,
-                onEnableShares = onEnableShares, onOpenWifiSettings = onOpenWifiSettings)
+                onEnableShares = onEnableShares, onOpenWifiSettings = onOpenWifiSettings, access = access, onAllowLocalNetwork = onAllowLocalNetwork,
+                onOpen = openServer)
         }
         val folderPane = @Composable { paneModifier: Modifier ->
-            FolderPane(model, actions, paneModifier, clock = clock, onAdd = addServer, onEdit = editServer, showBack = !wide)
+            FolderPane(model, actions, paneModifier, clock = clock, onAdd = addServer, onEdit = editServer, showBack = !wide, access = access,
+                onAllowLocalNetwork = onAllowLocalNetwork)
         }
         if (wide) {
             Row(Modifier.fillMaxSize()) {
@@ -310,6 +339,9 @@ private fun ServerPane(
     onSaveFound: (DiscoveredServer) -> Unit,
     onEnableShares: () -> Unit,
     onOpenWifiSettings: () -> Unit,
+    access: LocalNetworkState,
+    onAllowLocalNetwork: () -> Unit,
+    onOpen: (SavedServer) -> Unit,
 ) {
     val res = LocalContext.current.resources
     val dimens = NagTheme.dimens
@@ -337,6 +369,18 @@ private fun ServerPane(
                     StateAction(stringResource(R.string.nag_net_wifi_settings), onOpenWifiSettings),
                 )
             }
+            LanState.NoPermission -> item(key = "no-permission") {
+                // what the permission is for, in the app's words, and the way to give it
+                val words = localNetworkWords(access) ?: localNetworkWords(LocalNetworkState.Ask)!!
+                PaneNotice(
+                    if (access == LocalNetworkState.Ask) StateTone.Info else StateTone.Warning,
+                    NagIcons.Shield,
+                    stringResource(words.title),
+                    stringResource(words.description),
+                    StateAction(stringResource(words.action), onAllowLocalNetwork),
+                    tag = "network-permission",
+                )
+            }
             LanState.Available -> Unit
         }
         item(key = "saved-caption") { PaneCaption(stringResource(R.string.nag_net_saved)) }
@@ -347,7 +391,7 @@ private fun ServerPane(
             ContextMenuArea(
                 entries = {
                     listOf(
-                        MenuEntry.Item(res.getString(R.string.nag_net_open), { model.open(server) }),
+                        MenuEntry.Item(res.getString(R.string.nag_net_open), { onOpen(server) }),
                         MenuEntry.Item(res.getString(R.string.nag_net_edit), { onEdit(server) }),
                         MenuEntry.Separator,
                         MenuEntry.Item(res.getString(R.string.nag_net_remove_server), { onRemove(server) }, icon = NagIcons.Delete, destructive = true),
@@ -361,7 +405,7 @@ private fun ServerPane(
                     detail = serverDetail(server.protocol, server.url),
                     selected = openUrl == server.url,
                     locked = server.signedIn,
-                    onClick = { model.open(server) },
+                    onClick = { onOpen(server) },
                 )
             }
         }
@@ -430,7 +474,7 @@ private fun PaneHint(text: String, action: StateAction?) {
 
 /** What keeps the network from being looked through, in the servers' pane, with the way out. */
 @Composable
-private fun PaneNotice(tone: StateTone, icon: ImageVector, title: String, message: String, action: StateAction) {
+private fun PaneNotice(tone: StateTone, icon: ImageVector, title: String, message: String, action: StateAction, tag: String = "network-notice") {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val c = toneColors(tone)
@@ -442,7 +486,7 @@ private fun PaneNotice(tone: StateTone, icon: ImageVector, title: String, messag
             .background(colors.alertBackground(tone), shape)
             .padding(dimens.gapM)
             .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
-            .testTag("network-notice"),
+            .testTag(tag),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -499,6 +543,8 @@ private fun FolderPane(
     onAdd: () -> Unit,
     onEdit: (SavedServer) -> Unit,
     showBack: Boolean,
+    access: LocalNetworkState,
+    onAllowLocalNetwork: () -> Unit,
 ) {
     val view = model.folder
     Column(modifier) {
@@ -521,13 +567,28 @@ private fun FolderPane(
             when (val status = view.status) {
                 is FolderStatus.Connecting -> Centered { Connecting(view, status.since, clock, onCancel = model::cancel) }
                 FolderStatus.Unreachable -> Centered {
+                    // Android 17: a server on the local network without the permission: why, and the way to give it
+                    val words = localNetworkWords(access)?.takeIf { LocalNetwork.isLocalUrl(view.url) }
                     StatePanel(
                         tone = StateTone.Error,
                         icon = NagIcons.NetworkOff,
                         title = stringResource(R.string.nag_net_unreachable_title),
-                        description = stringResource(R.string.nag_net_unreachable_desc, displayHost(view.url)),
-                        primary = StateAction(stringResource(R.string.nag_net_try_again), model::refresh),
-                        secondary = savedServer?.let { StateAction(stringResource(R.string.nag_net_edit), { onEdit(it) }) },
+                        description = if (words != null) {
+                            stringResource(R.string.nag_lan_server_blocked, displayHost(view.url))
+                        } else {
+                            stringResource(R.string.nag_net_unreachable_desc, displayHost(view.url))
+                        },
+                        primary = if (words != null) {
+                            StateAction(stringResource(words.action), onAllowLocalNetwork)
+                        } else {
+                            StateAction(stringResource(R.string.nag_net_try_again), model::refresh)
+                        },
+                        secondary = if (words != null) {
+                            StateAction(stringResource(R.string.nag_net_try_again), model::refresh)
+                        } else {
+                            savedServer?.let { StateAction(stringResource(R.string.nag_net_edit), { onEdit(it) }) }
+                        },
+                        modifier = Modifier.testTag("network-unreachable"),
                     )
                 }
                 is FolderStatus.SignIn -> Centered {

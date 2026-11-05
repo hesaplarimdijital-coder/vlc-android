@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -49,7 +50,14 @@ class CastPickerTest {
     private var searchedAgain = 0
     private lateinit var inputModes: InputModeManager
 
-    private fun show(view: CastPickerView, active: CastDevice? = null, notices: List<CastNotice> = emptyList()) {
+    private var allowed = 0
+
+    private fun show(
+        view: CastPickerView,
+        active: CastDevice? = null,
+        notices: List<CastNotice> = emptyList(),
+        access: LocalNetworkState = LocalNetworkState.Granted,
+    ) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 inputModes = LocalInputModeManager.current
@@ -61,6 +69,8 @@ class CastPickerTest {
                     onThisDevice = { here++ },
                     onClose = {},
                     onSearchAgain = { searchedAgain++ },
+                    access = access,
+                    onAllowLocalNetwork = { allowed++ },
                 )
             }
         }
@@ -118,6 +128,24 @@ class CastPickerTest {
         compose.onNodeWithText("Bu cihaz ve TV aynı Wi-Fi'de, misafir ağında değil.").assertExists()
         compose.onNodeWithText("Yeniden ara").performClick()
         assertEquals(1, searchedAgain)
+    }
+
+    @Test
+    fun withoutTheLocalNetworkPermissionItSaysWhyAndAsks() {
+        show(CastPickerView.NoPermission, access = LocalNetworkState.Denied)
+        compose.onNodeWithTag("cast-permission").assertExists()
+        compose.onNodeWithText("Yerel ağ izni kapalı").assertExists()
+        // this device is still there to choose
+        row("Bu cihaz").assertIsSelected()
+        compose.onNodeWithText("İzin ver").performClick()
+        assertEquals(1, allowed)
+    }
+
+    @Test
+    fun onceAndroidNoLongerAsksTheSettingsOpen() {
+        show(CastPickerView.NoPermission, access = LocalNetworkState.Blocked)
+        compose.onNodeWithText("Ayarları aç").performClick()
+        assertEquals(1, allowed)
     }
 
     @Test

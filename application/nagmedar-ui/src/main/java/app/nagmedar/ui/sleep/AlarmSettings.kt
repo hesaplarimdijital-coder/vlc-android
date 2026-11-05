@@ -1,5 +1,6 @@
 package app.nagmedar.ui.sleep
 
+import android.os.Build
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -182,6 +183,7 @@ private fun AlarmRows(alarm: Alarm, edit: ((Alarm) -> Alarm) -> Unit, exact: Boo
         }
     }
     ExactRow(exact)
+    PageRow()
     Spacer(Modifier.height(dimens.gapS))
     NagButton(stringResource(R.string.nag_alarm_try), { Alarms.play(context.applicationContext, alarm) }, icon = NagIcons.Alarm, modifier = Modifier.testTag("alarm-try"))
 }
@@ -337,6 +339,33 @@ private fun StreamAddress(url: String, onChange: (String) -> Unit) {
             },
         )
         Text(stringResource(R.string.nag_alarm_stream_hint), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+    }
+}
+
+/**
+ * Android 17, an app that targets it: the alarm rings through its page ([AlarmActivity]), which comes with a
+ * notification, and opens over the lock screen by itself with the full-screen intent; what is missing is said.
+ */
+@Composable
+private fun PageRow() {
+    val context = LocalContext.current
+    if (!Alarms.ringsThroughPage(Build.VERSION.SDK_INT, context.applicationInfo.targetSdkVersion)) return
+    val missing = produceState(AlarmNotification.missing(context)) {
+        // back from the system's page, it is known within moments
+        while (true) {
+            delay(2_000)
+            value = AlarmNotification.missing(context)
+        }
+    }.value ?: return
+    val dimens = NagTheme.dimens
+    Row(
+        Modifier.padding(vertical = dimens.gapXs).testTag("alarm-page-missing"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimens.gapS),
+    ) {
+        val text = if (missing == AlarmNotification.Missing.Notifications) R.string.nag_alarm_page_notifications else R.string.nag_alarm_page_full_screen
+        Text(stringResource(text), style = NagTheme.type.labelSmall, color = NagTheme.colors.warning, modifier = Modifier.weight(1f))
+        NagButton(stringResource(R.string.nag_alarm_exact_allow), { AlarmNotification.openSettings(context, missing) })
     }
 }
 

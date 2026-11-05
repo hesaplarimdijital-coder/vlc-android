@@ -101,6 +101,8 @@ fun FragmentActivity.share(file: File) {
         intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, "$packageName.provider", fileWithinMyDir))
         intentShareFile.putExtra(Intent.EXTRA_SUBJECT, file.name)
         intentShareFile.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message, file.name))
+        // Android 17 (from 18 on): the app chosen reads the file by this grant only, no longer by an implicit one
+        intentShareFile.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(Intent.createChooser(intentShareFile, getString(R.string.share_file,file.name)))
     }
 }
@@ -128,6 +130,8 @@ suspend fun AppCompatActivity.share(media: MediaWrapper) {
             intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, "$packageName.provider", fileWithinMyDir))
             intentShareFile.putExtra(Intent.EXTRA_SUBJECT, media.title)
             intentShareFile.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message, media.title))
+            // Android 17 (from 18 on): the app chosen reads the file by this grant only, no longer by an implicit one
+            intentShareFile.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(Intent.createChooser(intentShareFile, getString(R.string.share_file, media.title)))
         } else Snackbar.make(findViewById(android.R.id.content), R.string.invalid_file, Snackbar.LENGTH_LONG).show()
 }
@@ -152,6 +156,8 @@ fun FragmentActivity.share(medias: List<MediaWrapper>) = lifecycleScope.launch {
             intentShareFile.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
             intentShareFile.putExtra(Intent.EXTRA_SUBJECT, title)
             intentShareFile.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message, title))
+            // Android 17 (from 18 on): the app chosen reads the files by this grant only, no longer by an implicit one
+            intentShareFile.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(Intent.createChooser(intentShareFile, getString(R.string.share_file, title)))
         } else Snackbar.make(findViewById(android.R.id.content), R.string.invalid_file, Snackbar.LENGTH_LONG).show()
 }

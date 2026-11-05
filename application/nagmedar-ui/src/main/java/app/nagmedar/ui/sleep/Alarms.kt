@@ -37,6 +37,15 @@ object Alarms {
     private const val REQUEST = 1007
     const val ACTION_RING = "app.nagmedar.action.ALARM"
 
+    /** On the alarm page's intent: it was opened by the alarm ringing, and starts its music. */
+    const val EXTRA_RING = "app.nagmedar.extra.ALARM_RING"
+
+    /**
+     * Android 17, an app that targets it ([sdk], [targetSdk] 37 or later): music started from the background without
+     * the user is silenced, and an alarm's is: it rings through its page ([AlarmActivity]), which starts the music.
+     */
+    fun ringsThroughPage(sdk: Int, targetSdk: Int): Boolean = sdk >= 37 && targetSdk >= 37
+
     fun load(context: Context): Alarm = Alarm.decode(Settings.getInstance(context).getString(NAGMEDAR_ALARM, null))
 
     /** [alarm] kept and set (or taken off the system's clock when it is off). */
@@ -88,10 +97,11 @@ object Alarms {
         }
     }
 
-    /** The alarm rings: the next one set first, then the music. */
+    /** The alarm rings: the next one set first, then the music (Android 17: its page, which starts the music). */
     fun ring(context: Context) {
         val alarm = load(context)
         if (alarm.days.isEmpty()) save(context, alarm.copy(enabled = false)) else schedule(context, alarm)
+        if (ringsThroughPage(Build.VERSION.SDK_INT, context.applicationInfo.targetSdkVersion) && AlarmNotification.post(context)) return
         play(context, alarm)
     }
 
@@ -100,12 +110,15 @@ object Alarms {
      * loudness if lower, the music started, its volume rising from nothing.
      */
     fun play(context: Context, alarm: Alarm) {
-        raiseMediaVolume(context, alarm.loudness)
         AppScope.launch {
             val service = PlaybackService.instance ?: run {
                 PlaybackService.start(context)
                 withTimeoutOrNull(10_000) { PlaybackService.serviceFlow.filterNotNull().first() }
             } ?: return@launch
+            // Android 17: the volume is the app's to set only with a window shown or a foreground service running (it
+            // was raised before the service started, and Android 17 ignored it): the service goes in the foreground first
+            service.keepForeground()
+            raiseMediaVolume(context, alarm.loudness)
             // from nothing; the engine that takes the music takes this volume too
             service.setVolume(0)
             when (val source = alarm.source) {

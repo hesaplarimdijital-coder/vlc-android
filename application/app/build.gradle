@@ -90,6 +90,10 @@ android {
         def baselineProfiles = file('src/main/baselineProfiles')
         onVariants(selector().all()) { variant ->
             if (baselineProfiles.isDirectory()) variant.sources.baselineProfiles?.addStaticSourceDirectory(baselineProfiles.absolutePath)
+            // Android 17: the local network permission is declared by a build that targets 37 only
+            // (app.nagmedar.network.LocalNetwork): one that targets 36 keeps the local network through
+            // INTERNET, and must neither declare nor ask for it
+            if (variant.targetSdk.apiLevel >= 37) variant.sources.manifests.addStaticManifestFile('flavors/targetSdk37/AndroidManifest.xml')
         }
     }
 
