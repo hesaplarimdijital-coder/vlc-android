@@ -86,8 +86,11 @@ ext {
     libvlcVersion = vlcMajorVersion == 3 ? '3.7.7' :'4.0.0-eap29'
     medialibraryVersion = (vlcMajorVersion == 3 ? '0.13.24' : '0.13.22-vlc4')
 
-    targetJVM = JavaVersion.VERSION_1_8
-    targetJVMKotlin = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+    // Nağmedar 1.0.3: Java 17 bytecode, as Desktop Kit 2's. Compose 1.12 and the AndroidX releases with it
+    // are built for Java 11, and Kotlin cannot inline their functions into older bytecode; D8 turns it into
+    // what Android 14 runs
+    targetJVM = JavaVersion.VERSION_17
+    targetJVMKotlin = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
