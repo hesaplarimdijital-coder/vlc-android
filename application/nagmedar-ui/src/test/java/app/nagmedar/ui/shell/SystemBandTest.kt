@@ -42,6 +42,7 @@ import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -91,6 +92,7 @@ class SystemBandTest {
         theme: ThemeMode = ThemeMode.Dark,
         shell: Boolean = true,
         fontScale: Float = 1f,
+        chromeGlass: ChromeGlass = ChromeGlass.Product,
         screen: (@androidx.compose.runtime.Composable () -> Unit)? = null,
     ) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
@@ -103,7 +105,7 @@ class SystemBandTest {
                     // as NagmedarApp: the first run (no shell yet) pads the buttons, the shell draws behind them
                     WindowRoot(shell = shell && shown, belowCaption = false, modifier = Modifier.fillMaxSize().background(NagTheme.colors.background)) {
                         if (shell && shown) {
-                            TestShell(widthClass, screen = { d, n -> if (screen == null) app.nagmedar.ui.SampleScreen(d, n) else screen() })
+                            TestShell(widthClass, chromeGlass = chromeGlass, screen = { d, n -> if (screen == null) app.nagmedar.ui.SampleScreen(d, n) else screen() })
                         } else {
                             Box(Modifier.fillMaxSize().testTag("first-run"))
                         }
@@ -135,8 +137,22 @@ class SystemBandTest {
         val tab = compose.onNodeWithText("Radyo").getBoundsInRoot()
         assertTrue("tab ends at ${tab.bottom}, buttons start at ${root.bottom - 48.dp}", tab.bottom <= root.bottom - 48.dp)
         val bitmap = window()
+        // behind the buttons: the bar's own surface, as on the bar just above them. By the user's decision of 6 Nov
+        // (B) both lie on the shell's one glass, here its translucent form over the page: not the opaque chrome
+        val behind = bitmap.getPixel(bitmap.width / 2, bitmap.height - px(12.dp))
+        val bar = bitmap.getPixel(bitmap.width / 4, bitmap.height - px(48.dp) - px(4.dp))
+        assertEquals("the bar and behind the buttons: one glass", Integer.toHexString(bar), Integer.toHexString(behind))
+        assertNotEquals("the glass, not the opaque chrome", NagPalette.dark(Accent.Blue).chrome.toArgb(), behind)
+    }
+
+    @Test
+    @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
+    fun theOpaqueChromeReachesBehindTheButtonsToo() {
+        // A, the 1.0.1–1.0.2 bars the walk still compares: the opaque chrome colour, behind the buttons as on the bar
+        app(chromeGlass = ChromeGlass.Solid)
+        systemBars(status = 24.dp, navigation = 48.dp)
+        val bitmap = window()
         val chrome = NagPalette.dark(Accent.Blue).chrome.toArgb()
-        // behind the buttons: the bar's own colour, as on the bar just above them
         assertEquals("behind the buttons", chrome, bitmap.getPixel(bitmap.width / 2, bitmap.height - px(12.dp)))
         assertEquals("the bar over them", chrome, bitmap.getPixel(bitmap.width / 4, bitmap.height - px(48.dp) - px(4.dp)))
     }
