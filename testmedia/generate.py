@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 """Builds Nağmedar's test media set (S-1401) from scratch.
 
-Everything is synthesised (test patterns, tones, our own captions and font),
-so the set carries no third-party content and can be published with the
-repository. Samples that cannot be synthesised (Dolby Vision profiles 5 and 7,
-DTS-HD MA, TrueHD Atmos, VobSub) are listed in manifest.json as "manual".
+Everything is synthesised (tones, our own cover and lyrics), so the set
+carries no third-party content and can be published with the repository.
+Samples that cannot be synthesised (DTS-HD MA, TrueHD Atmos) are listed in
+manifest.json as "manual". 1.0.3: Nağmedar plays audio only since 1.0, so the
+video, Dolby Vision, HDR and subtitle samples (and what only they needed:
+x265, mkvmerge, dovi_tool, hdr10plus_tool, the PGS writer) are gone.
 
-Usage: generate.py <out-dir> [--only id,id] [--skip-heavy]
+Usage: generate.py <out-dir> [--only id,id]
 
-Needs ffmpeg/ffprobe (with libx265, libx264, libsvtav1, libmp3lame, libopus),
-mkvmerge, dovi_tool, hdr10plus_tool on PATH, and Python with numpy, Pillow
-and mutagen. Without mkvmerge the HEVC samples fall back to ffmpeg muxing,
-which loses the Dolby Vision configuration record (verify.py reports it).
+Needs ffmpeg/ffprobe (with libmp3lame and libopus) on PATH and Python with
+Pillow and mutagen.
 """
 import argparse
 import json
-import math
 import os
-import shutil
 import subprocess
 import sys
 import textwrap
@@ -25,22 +23,14 @@ import textwrap
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'tools'))
 
-import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 import dsf  # noqa: E402
-import pgs  # noqa: E402
 import tracker  # noqa: E402
 
 REPO = os.path.dirname(HERE)
 FONT_DIR = os.path.join(REPO, 'application', 'nagmedar-ui', 'src', 'main', 'res', 'font')
 FONT = os.path.join(FONT_DIR, 'ibm_plex_sans_semibold.ttf')
-FONT_REGULAR = os.path.join(FONT_DIR, 'ibm_plex_sans_regular.ttf')
-
-FPS_2398 = '24000/1001'
-MASTER_DISPLAY = 'G(13250,34500)B(7500,3000)R(34000,16000)WP(15635,16450)L(10000000,1)'
-HDR10_X265 = ('hdr10=1:hdr10-opt=1:repeat-headers=1:colorprim=bt2020:transfer=smpte2084:'
-              'colormatrix=bt2020nc:range=limited:master-display=' + MASTER_DISPLAY + ':max-cll=1000,400')
 
 ALBUM = {'artist': 'Nağmedar Test Orkestrası', 'album': 'Ölçüm Kayıtları', 'date': '2026', 'genre': 'Test'}
 
@@ -67,28 +57,11 @@ def ffmpeg(*args):
     return run('ffmpeg', '-hide_banner', '-loglevel', 'error', '-nostdin', '-y', *args)
 
 
-def has_encoder(name):
-    out = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True).stdout
-    return any(line.split()[1:2] == [name] for line in out.splitlines() if len(line.split()) > 1)
-
-
-def srt_text(lines):
-    """SubRip text of (start ms, end ms, text) lines."""
-    def ts(ms):
-        return '%02d:%02d:%02d,%03d' % (ms // 3600000, ms // 60000 % 60, ms // 1000 % 60, ms % 1000)
-    return '\n'.join(f'{i}\n{ts(a)} --> {ts(b)}\n{text}\n' for i, (a, b, text) in enumerate(lines, 1))
-
-
-def ffmpeg_text(text):
-    """Escapes text for the drawtext filter."""
-    return text.replace('\\', '\\\\').replace(':', '\\:').replace("'", "\\'").replace('%', '\\%')
-
 
 class Builder:
     def __init__(self, out, work):
         self.out = out
         self.work = work
-        self.mkvmerge = shutil.which('mkvmerge')
         os.makedirs(out, exist_ok=True)
         os.makedirs(work, exist_ok=True)
 
@@ -118,43 +91,6 @@ class Builder:
         img.save(p)
         return p
 
-    def pq_ramp(self, width, height):
-        """16-bit grey ramp over the full 10-bit code range: shows where a display clips."""
-        p = self.tmp(f'ramp_{width}x{height}.png')
-        if not os.path.exists(p):
-            ramp = np.linspace(0, 65535, width, dtype=np.float64)
-            img = np.tile(ramp, (height, 1)).astype(np.uint16)
-            Image.fromarray(img).save(p)  # uint16 -> 16-bit greyscale PNG
-        return p
-
-    def hevc_base(self, name, width, height, fps, frames, label, x265_params, bitrate=None, noise=False):
-        """Annex-B HEVC Main 10 test pattern with a burnt-in label and a PQ ramp strip."""
-        p = self.tmp(name + '.hevc')
-        if os.path.exists(p):
-            return p
-        ramp_h = height // 6
-        ramp = self.pq_ramp(width, ramp_h)
-        size = min(width, height) // 20
-        chain = (f'[0:v]format=yuv420p10le,drawtext=fontfile={FONT}:text=\'{ffmpeg_text(label)}\':'
-                 f'fontsize={size}:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw={size // 3}:x={size}:y={size},'
-                 'drawtext=fontfile=' + FONT + ':text=\'%{pts\\:hms} %{n}\':'
-                 f'fontsize={size}:fontcolor=white:box=1:boxcolor=black@0.6:x=w-tw-{size}:y={size}[top];'
-                 f'[1:v]format=yuv420p10le[ramp];[top][ramp]vstack=inputs=2,format=yuv420p10le')
-        if noise:
-            # grain the encoder cannot predict, so the bitrate is really spent
-            chain += ',format=yuv420p,noise=alls=24:allf=t,format=yuv420p10le'
-        params = x265_params
-        if bitrate:
-            params += f':bitrate={bitrate}:vbv-maxrate={int(bitrate * 1.2)}:vbv-bufsize={int(bitrate * 1.2)}'
-        else:
-            params += ':crf=20'
-        ffmpeg('-f', 'lavfi', '-i', f'testsrc2=size={width}x{height - ramp_h}:rate={fps}',
-               '-loop', '1', '-framerate', fps, '-i', ramp,
-               '-filter_complex', chain, '-frames:v', frames,
-               '-c:v', 'libx265', '-preset', 'ultrafast' if bitrate else 'veryfast', '-profile:v', 'main10',
-               '-x265-params', params + ':log-level=error', '-f', 'hevc', p)
-        return p
-
     def audio_wav(self, name, expr, rate, seconds, layout=None):
         p = self.tmp(name + '.wav')
         if not os.path.exists(p):
@@ -169,300 +105,6 @@ class Builder:
         n = {'5.1': 6, '7.1': 8}[layout]
         expr = '|'.join(f'0.3*sin(2*PI*{220 + 110 * i}*t)' for i in range(n))
         return self.audio_wav(f'surround_{layout}_{rate}', expr, rate, seconds, layout)
-
-    def mkv_from_hevc(self, out, hevc, fps, extra_inputs=(), transfer='pq'):
-        """Muxes annex-B HEVC; [transfer] 'pq' adds the HDR10 colour and mastering elements, 'hlg' the HLG ones."""
-        if self.mkvmerge:
-            cmd = [self.mkvmerge, '-q', '-o', out, '--default-duration', f'0:{fps}p', '--language', '0:und']
-            if transfer:
-                cmd += ['--colour-matrix-coefficients', '0:9', '--colour-range', '0:1',
-                        '--colour-transfer-characteristics', '0:' + ('16' if transfer == 'pq' else '18'),
-                        '--colour-primaries', '0:9']
-            if transfer == 'pq':
-                cmd += ['--max-content-light', '0:1000', '--max-frame-light', '0:400',
-                        '--chromaticity-coordinates', '0:0.68,0.32,0.265,0.69,0.15,0.06',
-                        '--white-colour-coordinates', '0:0.3127,0.329', '--max-luminance', '0:1000',
-                        '--min-luminance', '0:0.0001']
-            cmd += [hevc]
-            for extra in extra_inputs:
-                cmd += list(extra)
-            run(*cmd)
-        else:
-            log('  ! mkvmerge missing: muxing with ffmpeg (no Dolby Vision configuration record)')
-            args = ['-fflags', '+genpts', '-r', fps, '-i', hevc]
-            files = [e[-1] for e in extra_inputs if e[0] != '--chapters']
-            for f in files:
-                args += ['-i', f]
-            args += ['-map', '0:v']
-            for i in range(len(files)):
-                args += ['-map', f'{i + 1}']
-            ffmpeg(*args, '-c', 'copy', out)
-
-    # ---------------------------------------------------------------- video
-
-    def hdr10(self):
-        frames = 240
-        hevc = self.hevc_base('hdr10_4k', 3840, 2160, FPS_2398, frames, 'HDR10 · PQ · 1000 cd/m² · 23,976', HDR10_X265)
-        audio = self.tmp('eac3_51.eac3')
-        if not os.path.exists(audio):
-            ffmpeg('-i', self.surround(seconds=10), '-c:a', 'eac3', '-b:a', '768k', audio)
-        self.mkv_from_hevc(self.path('video/hdr10_2160p23976_hevc10_eac3.mkv'), hevc, FPS_2398,
-                           extra_inputs=[('--language', '0:tur', '--track-name', '0:E-AC-3 5.1', audio)])
-
-    def hdr10plus(self):
-        frames = 240
-        hevc = self.hevc_base('hdr10_4k', 3840, 2160, FPS_2398, frames, 'HDR10 · PQ · 1000 cd/m² · 23,976', HDR10_X265)
-        meta = self.tmp('hdr10plus.json')
-        scenes = [(0, 80, 900, 2000), (80, 80, 9000, 15000), (160, 80, 3000, 6000)]  # start, length, avg, maxscl
-        info = []
-        for scene_id, (start, length, avg, maxscl) in enumerate(scenes):
-            for i in range(length):
-                info.append({
-                    'LuminanceParameters': {
-                        'AverageRGB': avg,
-                        'LuminanceDistributions': {
-                            'DistributionIndex': [1, 5, 10, 25, 50, 75, 90, 95, 99],
-                            'DistributionValues': [2, 3000, 40, avg // 8, avg // 3, avg, avg * 2, maxscl // 2, maxscl - 1],
-                        },
-                        'MaxScl': [maxscl, maxscl, maxscl],
-                    },
-                    'NumberOfWindows': 1,
-                    'TargetedSystemDisplayMaximumLuminance': 0,
-                    'SceneFrameIndex': i,
-                    'SceneId': scene_id,
-                    'SequenceFrameIndex': start + i,
-                })
-        with open(meta, 'w') as fh:
-            json.dump({
-                'JSONInfo': {'HDR10plusProfile': 'A', 'Version': '1.0'},
-                'SceneInfo': info,
-                'SceneInfoSummary': {'SceneFirstFrameIndex': [s[0] for s in scenes], 'SceneFrameNumbers': [s[1] for s in scenes]},
-                'ToolInfo': {'Tool': 'nagmedar testmedia', 'Version': '1'},
-            }, fh)
-        out_hevc = self.tmp('hdr10plus_4k.hevc')
-        run('hdr10plus_tool', 'inject', '-i', hevc, '-j', meta, '-o', out_hevc)
-        self.mkv_from_hevc(self.path('video/hdr10plus_2160p23976_hevc10.mkv'), out_hevc, FPS_2398)
-
-    def dolby_vision_p81(self):
-        frames = 240
-        hevc = self.hevc_base('hdr10_4k', 3840, 2160, FPS_2398, frames, 'HDR10 · PQ · 1000 cd/m² · 23,976', HDR10_X265)
-        config = self.tmp('dv_p81.json')
-        shots = [(0, 80, 0, 2081, 819), (80, 80, 0, 3079, 1580), (160, 80, 7, 2700, 1200)]
-        with open(config, 'w') as fh:
-            json.dump({
-                'cm_version': 'V40',
-                'length': frames,
-                'level6': {'max_display_mastering_luminance': 1000, 'min_display_mastering_luminance': 1,
-                           'max_content_light_level': 1000, 'max_frame_average_light_level': 400},
-                'shots': [{'start': s, 'duration': d, 'metadata_blocks': [{'Level1': {'min_pq': mn, 'max_pq': mx, 'avg_pq': av}}]}
-                          for s, d, mn, mx, av in shots],
-            }, fh)
-        rpu = self.tmp('dv_p81_rpu.bin')
-        run('dovi_tool', 'generate', '-j', config, '-o', rpu)
-        out_hevc = self.tmp('dv_p81_4k.hevc')
-        run('dovi_tool', 'inject-rpu', '-i', hevc, '--rpu-in', rpu, '-o', out_hevc)
-        self.mkv_from_hevc(self.path('video/dv_p8.1_2160p23976_hevc10.mkv'), out_hevc, FPS_2398)
-
-    def dolby_vision_p5(self):
-        """Profile 5 RPU (no reshaping) on the test pattern. A real profile 5 base layer is IPTPQc2, this one
-        is not, so a correct player shows wrong colours here: the sample tests detection and the decoder path
-        (and that SP-03 refuses to convert it), not the picture."""
-        frames = 120
-        hevc = self.hevc_base('dv_p5_base_4k', 3840, 2160, FPS_2398, frames, 'DV P5 · sentetik · renkler yanlış',
-                              'range=full:repeat-headers=1')
-        config = self.tmp('dv_p5.json')
-        with open(config, 'w') as fh:
-            json.dump({
-                'cm_version': 'V40',
-                'profile': '5',
-                'length': frames,
-                'level6': {'max_display_mastering_luminance': 1000, 'min_display_mastering_luminance': 1,
-                           'max_content_light_level': 1000, 'max_frame_average_light_level': 400},
-                'shots': [{'start': s, 'duration': d, 'metadata_blocks': [{'Level1': {'min_pq': 0, 'max_pq': mx, 'avg_pq': av}}]}
-                          for s, d, mx, av in [(0, 60, 2081, 819), (60, 60, 3079, 1580)]],
-            }, fh)
-        rpu = self.tmp('dv_p5_rpu.bin')
-        run('dovi_tool', 'generate', '-j', config, '-o', rpu)
-        out_hevc = self.tmp('dv_p5_4k.hevc')
-        run('dovi_tool', 'inject-rpu', '-i', hevc, '--rpu-in', rpu, '-o', out_hevc)
-        self.mkv_from_hevc(self.path('video/dv_p5_2160p23976_hevc10.mkv'), out_hevc, FPS_2398, transfer=None)
-
-    def dolby_vision_p7(self):
-        """Profile 7 MEL (base and enhancement layer in one stream, as on UHD Blu-ray remuxes) from dovi_tool's
-        test assets (MIT): 256x144, 259 frames. $DOVI_TOOL_ASSETS points at dovi_tool's assets/hevc_tests."""
-        assets = os.environ.get('DOVI_TOOL_ASSETS', '')
-        el = os.path.join(assets, 'regular_start_code_4_muxed_el.hevc')
-        mel = os.path.join(assets, 'regular_rpu_mel.bin')
-        if not (os.path.exists(el) and os.path.exists(mel)):
-            raise RuntimeError('DOVI_TOOL_ASSETS must point at dovi_tool 2.3.4 assets/hevc_tests '
-                               '(regular_start_code_4_muxed_el.hevc, regular_rpu_mel.bin)')
-        hevc = self.tmp('dv_p7_mel.hevc')
-        run('dovi_tool', 'inject-rpu', '-i', el, '--rpu-in', mel, '-o', hevc)
-        audio = self.tmp('eac3_51.eac3')
-        if not os.path.exists(audio):
-            ffmpeg('-i', self.surround(seconds=10), '-c:a', 'eac3', '-b:a', '768k', audio)
-        subs = self.tmp('dv_p7.srt')
-        with open(subs, 'w', encoding='utf-8') as fh:
-            fh.write('1\n00:00:01,000 --> 00:00:04,000\nDönüştürmeden sonra bu altyazı kalmalı.\n\n'
-                     '2\n00:00:05,000 --> 00:00:09,000\nSes izi ve bölümler de korunmalı.\n')
-        chapters = self.tmp('dv_p7_chapters.xml')
-        with open(chapters, 'w', encoding='utf-8') as fh:
-            fh.write('<?xml version="1.0" encoding="UTF-8"?>\n<Chapters><EditionEntry>'
-                     '<ChapterAtom><ChapterTimeStart>00:00:00.000</ChapterTimeStart><ChapterDisplay><ChapterString>Bir</ChapterString></ChapterDisplay></ChapterAtom>'
-                     '<ChapterAtom><ChapterTimeStart>00:00:05.000</ChapterTimeStart><ChapterDisplay><ChapterString>İki</ChapterString></ChapterDisplay></ChapterAtom>'
-                     '</EditionEntry></Chapters>\n')
-        self.mkv_from_hevc(self.path('video/dv_p7_mel_144p23976_hevc10.mkv'), hevc, FPS_2398, extra_inputs=[
-            ('--language', '0:tur', '--track-name', '0:E-AC-3 5.1', audio),
-            ('--language', '0:tur', '--sub-charset', '0:UTF-8', subs),
-            ('--chapters', chapters),
-        ])
-
-    def hlg(self):
-        hevc = self.hevc_base('hlg_1080p50', 1920, 1080, '50', 250, 'HLG · BT.2020 · 50p',
-                              'colorprim=bt2020:transfer=arib-std-b67:colormatrix=bt2020nc:range=limited:repeat-headers=1')
-        self.mkv_from_hevc(self.path('video/hlg_1080p50_hevc10.mkv'), hevc, '50', transfer='hlg')
-
-    def stress(self):
-        hevc = self.hevc_base('stress_4k', 3840, 2160, FPS_2398, 360, 'Yük testi · 100 Mbit/s · 23,976', HDR10_X265,
-                              bitrate=100000, noise=True)
-        self.mkv_from_hevc(self.path('video/stress_2160p23976_hevc10_100mbps.mkv'), hevc, FPS_2398)
-
-    def interlaced(self):
-        ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=50',
-               '-f', 'lavfi', '-i', "aevalsrc='0.4*sin(2*PI*1000*t)|0.4*sin(2*PI*1000*t)':s=48000",
-               '-vf', 'tinterlace=mode=interleave_top,fieldorder=tff,format=yuv420p', '-t', '10',
-               '-c:v', 'libx264', '-preset', 'veryfast', '-flags', '+ilme+ildct', '-x264-params', 'tff=1', '-field_order', 'tt',
-               '-c:a', 'ac3', '-b:a', '448k', self.path('video/interlaced_1080i25_h264_ac3.mkv'))
-
-    def av1(self):
-        out = self.path('video/av1_1080p24_10bit_opus.mkv')
-        if has_encoder('libsvtav1'):
-            venc = ['-c:v', 'libsvtav1', '-preset', '10', '-crf', '35']
-        elif has_encoder('libaom-av1'):
-            venc = ['-c:v', 'libaom-av1', '-cpu-used', '8', '-row-mt', '1', '-crf', '35', '-b:v', '0']
-        else:
-            log('  ! no AV1 encoder: skipped')
-            return
-        ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=24',
-               '-f', 'lavfi', '-i', "aevalsrc='0.4*sin(2*PI*440*t)|0.4*sin(2*PI*660*t)':s=48000",
-               '-t', '10', '-pix_fmt', 'yuv420p10le', *venc, '-c:a', 'libopus', '-b:a', '128k', out)
-
-    def rotated(self):
-        """Phone recordings stored turned: an upright picture kept turned the other way, with the
-        track matrix that turns it back (what a phone writes as "rotate 90")."""
-        # the clockwise turn that shows it, the upright picture, how it is stored
-        for degrees, size, store in ((90, '1080x1920', 'transpose=2'), (180, '1920x1080', 'hflip,vflip'),
-                                     (270, '1080x1920', 'transpose=1')):
-            stored = self.tmp(f'rotated_{degrees}_stored.mp4')
-            label = ffmpeg_text(f'TOP · {degrees}°')
-            ffmpeg('-f', 'lavfi', '-i', f'testsrc2=size={size}:rate=30',
-                   '-f', 'lavfi', '-i', "aevalsrc='0.3*sin(2*PI*440*t)|0.3*sin(2*PI*440*t)':s=48000",
-                   '-t', '10', '-vf', f"drawtext=fontfile={FONT}:text='{label}':fontsize=96:fontcolor=white:box=1:"
-                                      f"boxcolor=black@0.6:boxborderw=24:x=(w-text_w)/2:y=80,{store}",
-                   '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', stored)
-            # -display_rotation turns counter-clockwise
-            ffmpeg('-display_rotation', str(-degrees), '-i', stored, '-c', 'copy', self.path(f'video/rotated_{degrees}_h264.mp4'))
-
-    def subtitles(self):
-        base = self.path('video/subtitles_1080p24_h264.mkv')
-        av = self.tmp('subs_av.mkv')
-        ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=24',
-               '-f', 'lavfi', '-i', "aevalsrc='0.3*sin(2*PI*440*t)|0.3*sin(2*PI*550*t)':s=48000",
-               '-t', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', av)
-        tr_lines = [
-            (1000, 4000, 'Gece yarısı Kuzey Işığı’nda buluşalım.'),
-            (5000, 8500, 'Şu dağın ardında güneş doğmuyor mu?\nİğneyle kuyu kazar gibi çalıştık.'),
-            (9500, 13000, 'Çığlık, ığdır, ışık, ılık — İstanbul’da “ş” ve “ğ” sorunsuz mu?'),
-            (14000, 18000, 'İkinci satır: ÇĞİÖŞÜ çğıöşü'),
-            (19000, 23000, 'Ses gecikmesi testi: bu satır tam 19. saniyede görünmeli.'),
-            (24000, 29000, 'Son altyazı · son satır.'),
-        ]
-        en_lines = [(1000, 4000, 'Let us meet at midnight at the Northern Light.'),
-                    (9500, 13000, 'PGS: palette, run-length coding and position are real Blu-ray data.'),
-                    (24000, 29000, 'Last caption.')]
-        signs = [(5000, 8500, '[SIGN: Kuzey Işığı Oteli]'), (19000, 23000, '[TEXT ON SCREEN: 19 s]')]
-
-        srt = srt_text
-
-        tr_srt = self.tmp('tr.srt')
-        with open(tr_srt, 'w', encoding='utf-8') as fh:
-            fh.write(srt(tr_lines))
-        # sidecars: the Turkish one in Windows-1254, as most Turkish subtitle sites serve them
-        side_1254 = self.path('video/subtitles_1080p24_h264.tr.srt')
-        with open(side_1254, 'w', encoding='cp1254', newline='\r\n') as fh:
-            fh.write(srt(tr_lines).replace('’', "'").replace('“', '"').replace('”', '"').replace('—', '-').replace('·', '-'))
-        with open(self.path('video/subtitles_1080p24_h264.en.srt'), 'w', encoding='utf-8-sig') as fh:
-            fh.write(srt(en_lines))
-        signs_srt = self.tmp('signs.srt')
-        with open(signs_srt, 'w', encoding='utf-8') as fh:
-            fh.write(srt(signs))
-        ass = self.tmp('tr.ass')
-        with open(ass, 'w', encoding='utf-8') as fh:
-            fh.write(textwrap.dedent('''\
-                [Script Info]
-                Title: Nağmedar ASS testi
-                ScriptType: v4.00+
-                PlayResX: 1920
-                PlayResY: 1080
-                WrapStyle: 0
-                ScaledBorderAndShadow: yes
-
-                [V4+ Styles]
-                Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-                Style: Default,IBM Plex Sans SemiBold,64,&H00FFFFFF,&H0000B8F2,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,3,1,2,80,80,60,1
-                Style: Top,IBM Plex Sans SemiBold,52,&H006EFF7A,&H00FFFFFF,&H00000000,&H80000000,0,1,0,0,100,100,0,0,1,3,0,8,80,80,50,1
-                Style: Karaoke,IBM Plex Sans SemiBold,60,&H00FFFFFF,&H0000B8F2,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,3,1,2,80,80,140,1
-
-                [Events]
-                Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-                Dialogue: 0,0:00:01.00,0:00:04.00,Default,,0,0,0,,Gece yarısı {\\i1}Kuzey Işığı{\\i0}’nda buluşalım.
-                Dialogue: 0,0:00:01.00,0:00:08.00,Top,,0,0,0,,{\\fad(400,400)}Üst satır: aynı anda iki altyazı
-                Dialogue: 0,0:00:05.00,0:00:08.50,Default,,0,0,0,,{\\pos(960,540)\\frz8\\c&H6EFF7A&}Ortada, döndürülmüş, yeşil
-                Dialogue: 0,0:00:09.50,0:00:13.00,Karaoke,,0,0,0,,{\\k50}Şar{\\k50}kı {\\k60}söz{\\k60}le{\\k80}ri {\\k100}ka{\\k100}ra{\\k120}o{\\k120}ke
-                Dialogue: 0,0:00:14.00,0:00:18.00,Default,,0,0,0,,{\\an7\\pos(80,80)\\fs40}Sol üst köşe · \\N{\\b1}kalın{\\b0} ve {\\u1}altı çizili{\\u0}
-                Dialogue: 0,0:00:19.00,0:00:23.00,Default,,0,0,0,,{\\move(200,900,1720,900)}Kayan yazı
-                Dialogue: 0,0:00:24.00,0:00:29.00,Default,,0,0,0,,Son altyazı · son satır.
-                '''))
-        shutil.copy(ass, self.path('video/subtitles_1080p24_h264.tr.ass'))
-        sup = self.tmp('en.sup')
-        pgs.write_sup(sup, en_lines, FONT)
-        chapters = self.tmp('chapters.xml')
-        with open(chapters, 'w', encoding='utf-8') as fh:
-            fh.write(textwrap.dedent('''\
-                <?xml version="1.0" encoding="UTF-8"?>
-                <Chapters><EditionEntry>
-                  <ChapterAtom><ChapterTimeStart>00:00:00.000</ChapterTimeStart><ChapterDisplay><ChapterString>Açılış</ChapterString><ChapterLanguage>tur</ChapterLanguage></ChapterDisplay></ChapterAtom>
-                  <ChapterAtom><ChapterTimeStart>00:00:09.500</ChapterTimeStart><ChapterDisplay><ChapterString>Karaoke</ChapterString><ChapterLanguage>tur</ChapterLanguage></ChapterDisplay></ChapterAtom>
-                  <ChapterAtom><ChapterTimeStart>00:00:19.000</ChapterTimeStart><ChapterDisplay><ChapterString>Senkron ölçümü</ChapterString><ChapterLanguage>tur</ChapterLanguage></ChapterDisplay></ChapterAtom>
-                </EditionEntry></Chapters>
-                '''))
-        if self.mkvmerge:
-            run(self.mkvmerge, '-q', '-o', base, av,
-                '--language', '0:tur', '--track-name', '0:Türkçe', '--default-track-flag', '0:yes', tr_srt,
-                '--language', '0:tur', '--track-name', '0:Türkçe (ASS, stilli)', '--default-track-flag', '0:no', ass,
-                '--language', '0:eng', '--track-name', '0:English (PGS)', '--default-track-flag', '0:no', sup,
-                '--language', '0:eng', '--track-name', '0:English signs (forced)', '--forced-display-flag', '0:yes',
-                '--default-track-flag', '0:no', signs_srt,
-                '--attachment-mime-type', 'font/ttf', '--attachment-name', 'IBMPlexSans-SemiBold.ttf', '--attach-file', FONT,
-                '--chapters', chapters)
-        else:
-            log('  ! mkvmerge missing: subtitles muxed with ffmpeg, no chapters/flags')
-            ffmpeg('-i', av, '-i', tr_srt, '-i', ass, '-i', sup, '-i', signs_srt,
-                   '-map', '0', '-map', '1', '-map', '2', '-map', '3', '-map', '4', '-c', 'copy',
-                   '-metadata:s:s:0', 'language=tur', '-metadata:s:s:1', 'language=tur',
-                   '-metadata:s:s:2', 'language=eng', '-metadata:s:s:3', 'language=eng',
-                   '-disposition:s:0', 'default', '-disposition:s:3', 'forced', base)
-
-    def sync(self):
-        # S-704: a beep every five seconds, its subtitle half a second late: the sync assistant should find −500 ms
-        out = self.path('video/sync_1080p24_beeps.mkv')
-        ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=24',
-               '-f', 'lavfi', '-i', "aevalsrc='0.5*sin(2*PI*1000*t)*lt(mod(t,5),0.1)*gte(t,4)':s=48000",
-               '-t', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', out)
-        late = 500
-        lines = [(s * 1000 + late, s * 1000 + late + 1500, f'Bip · {s}. saniye (yarım saniye geç)') for s in range(5, 30, 5)]
-        with open(self.path('video/sync_1080p24_beeps.tr.srt'), 'w', encoding='utf-8') as fh:
-            fh.write(srt_text(lines))
 
     # ---------------------------------------------------------------- audio
 
@@ -671,14 +313,10 @@ class Builder:
 
 
 STEPS = {
-    'hdr10': Builder.hdr10, 'hdr10plus': Builder.hdr10plus, 'dv-p81': Builder.dolby_vision_p81,
-    'dv-p5': Builder.dolby_vision_p5, 'dv-p7': Builder.dolby_vision_p7,
-    'hlg': Builder.hlg, 'stress': Builder.stress, 'interlaced': Builder.interlaced, 'av1': Builder.av1,
-    'rotated': Builder.rotated, 'subtitles': Builder.subtitles, 'sync': Builder.sync, 'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless,
-    'surround': Builder.surround_codecs, 'dsd': Builder.dsd, 'lyrics': Builder.lyrics, 'gapless': Builder.gapless,
-    'cue': Builder.cue, 'tracker': Builder.tracker_modules, 'podcast': Builder.podcast, 'radio': Builder.radio,
+    'flac': Builder.flac, 'codecs': Builder.lossy_and_lossless, 'surround': Builder.surround_codecs, 'dsd': Builder.dsd,
+    'lyrics': Builder.lyrics, 'gapless': Builder.gapless, 'cue': Builder.cue, 'tracker': Builder.tracker_modules,
+    'podcast': Builder.podcast, 'radio': Builder.radio,
 }
-HEAVY = {'stress'}
 
 
 def main():
@@ -686,15 +324,12 @@ def main():
     ap.add_argument('out')
     ap.add_argument('--work', default=None)
     ap.add_argument('--only', default='')
-    ap.add_argument('--skip-heavy', action='store_true')
     args = ap.parse_args()
     builder = Builder(os.path.abspath(args.out), os.path.abspath(args.work or os.path.join(args.out, '..', 'work')))
     only = [s for s in args.only.split(',') if s]
     failed = []
     for name, step in STEPS.items():
         if only and name not in only:
-            continue
-        if args.skip_heavy and name in HEAVY:
             continue
         log(f'== {name}')
         try:
