@@ -5,6 +5,7 @@ import android.view.HapticFeedbackConstants
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -128,14 +129,20 @@ class ExpandablePlayerState(initialValue: PlayerValue, @Suppress("unused") densi
     /** Set by the player: brings the bars back and measures where the mini player rests, before it expands. */
     internal var beforeExpand: () -> Unit = {}
 
+    /** 1.0.3: the motion tier of the shell around the player; set by [ExpandablePlayer], so [expand] jumps with reduced motion. */
+    internal var tier: MotionTier = MotionTier.Gesture
+
+    /** 1.0.3: the gesture spring, arrived within half a pixel (Desktop Kit 2.3.0); a jump with reduced motion. */
+    private fun settle(): FiniteAnimationSpec<Float> = NagMotion.spatial(tier, NagMotion.gesture(NagMotion.PIXEL), NagMotion.PIXEL)
+
     /** Opens the full player on the gesture spring (from a tap, the notification, a link). */
     suspend fun expand() {
         beforeExpand()
-        draggable.animateTo(PlayerValue.Expanded, NagMotion.gesture())
+        draggable.animateTo(PlayerValue.Expanded, settle())
     }
 
     /** Back to the mini player. */
-    suspend fun collapse() = draggable.animateTo(PlayerValue.Collapsed, NagMotion.gesture())
+    suspend fun collapse() = draggable.animateTo(PlayerValue.Collapsed, settle())
 
     /** Jumps to [value] without animation. */
     suspend fun snapTo(value: PlayerValue) = draggable.snapTo(value)
@@ -205,6 +212,8 @@ fun ExpandablePlayer(
 ) {
     val host = shellOverlayHere()
     val scope = rememberCoroutineScope()
+    val tier = LocalMotionTier.current
+    SideEffect { state.tier = tier }
     val expandLabel = stringResource(R.string.nag_open_player)
     val canExpand = expandable && host != null
     var miniCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -437,10 +446,14 @@ private fun PlayerSheet(
         backProgress.snapTo(0f)
         try {
             events.collect { event -> backProgress.snapTo(event.progress) }
-            scope.launch { backProgress.animateTo(0f, tween(NagMotion.LONG, easing = NagMotion.Emphasized)) }
+            // 1.0.3: at once with reduced motion, as the collapse
+            scope.launch { backProgress.animateTo(0f, NagMotion.fade(state.tier, tween(NagMotion.LONG, easing = NagMotion.Emphasized))) }
             collapse()
         } catch (e: CancellationException) {
-            scope.launch { backProgress.animateTo(0f, NagMotion.gesture()) }
+            // a change of mind: back to full size on the spring, arrived within a thousandth (a jump with reduced motion)
+            scope.launch {
+                backProgress.animateTo(0f, NagMotion.spatial(state.tier, tween(NagMotion.MEDIUM, easing = NagMotion.Emphasized), NagMotion.FRACTION))
+            }
             throw e
         }
     }
@@ -448,14 +461,15 @@ private fun PlayerSheet(
 
 /**
  * Letting go of the player (1.0.3, Compose 1.12's fling behaviour, as Desktop Kit 2's): past half way, or a fling
- * towards the other place, it goes there, else it goes back; on the gesture spring, with the finger's speed.
+ * towards the other place, it goes there, else it goes back; on the gesture spring, with the finger's speed, arrived
+ * within half a pixel (at once with reduced motion).
  */
 @Composable
 private fun playerFlingBehavior(state: ExpandablePlayerState): FlingBehavior =
     AnchoredDraggableDefaults.flingBehavior(
         state.draggable,
         positionalThreshold = { distance -> distance * 0.5f },
-        animationSpec = NagMotion.gesture(),
+        animationSpec = NagMotion.spatial(LocalMotionTier.current, NagMotion.gesture(NagMotion.PIXEL), NagMotion.PIXEL),
     )
 
 /** The sheet's corners for a radius of [dp] dp, rounded to a whole dp: made once each, not on every frame of a drag. */
@@ -543,7 +557,7 @@ private fun MiniSwipeArea(onPrevious: (() -> Unit)?, onNext: (() -> Unit)?, cont
                             scope.launch { finishSwipe(offset, action, velocity, width, tier, rtl, latestPrevious, latestNext) }
                         },
                         onDragCancel = {
-                            scope.launch { offset.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM))) }
+                            scope.launch { offset.animateTo(0f, NagMotion.spatial(tier, tween(NagMotion.MEDIUM), NagMotion.PIXEL)) }
                         },
                     ) { change, amount ->
                         change.consume()
@@ -577,7 +591,7 @@ private suspend fun finishSwipe(
     onPrevious: (() -> Unit)?,
     onNext: (() -> Unit)?,
 ) {
-    val spring = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized))
+    val spring = NagMotion.spatial(tier, tween<Float>(NagMotion.MEDIUM, easing = NagMotion.Emphasized), NagMotion.PIXEL)
     if (action == MiniSwipeAction.None) {
         offset.animateTo(0f, spring, initialVelocity = velocity)
         return

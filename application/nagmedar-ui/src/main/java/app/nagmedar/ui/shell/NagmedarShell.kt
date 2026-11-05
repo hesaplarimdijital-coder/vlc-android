@@ -198,7 +198,7 @@ fun NagmedarShell(
     val barsHidden = NavRules.hidesBars(current, navKind)
     val hidden = animateFloatAsState(
         if (barsHidden) 1f else 0f,
-        NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.Emphasized)),
+        NagMotion.spatial(tier, tween(NagMotion.LONG, easing = NagMotion.Emphasized), NagMotion.FRACTION),
         label = "barsHidden",
     )
     // how far the bottom bar and the player strip are down: scrolled away, or away for a page of their own
