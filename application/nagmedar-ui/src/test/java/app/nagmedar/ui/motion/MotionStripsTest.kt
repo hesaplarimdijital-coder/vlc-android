@@ -202,10 +202,11 @@ class MotionStripsTest {
         var player: ExpandablePlayerState? = null
         shell(player = { kind ->
             if (kind == NavKind.BottomBar) {
-                player = rememberExpandablePlayerState()
+                val state = rememberExpandablePlayerState()
+                player = state
                 playerScope = rememberCoroutineScope()
                 ExpandablePlayer(
-                    player!!,
+                    state,
                     mini = { SamplePlayerBar(kind) },
                     full = { FullPlayer() },
                     modifier = Modifier.testTag("mini"),

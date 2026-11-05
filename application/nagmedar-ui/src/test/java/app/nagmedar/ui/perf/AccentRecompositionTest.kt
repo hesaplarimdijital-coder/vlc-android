@@ -27,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /**
  * 1.0.3 (Desktop Kit 2.3.0): an accent or theme change cross-fades the colours over 150 ms, and only what reads
@@ -36,6 +37,7 @@ import org.robolectric.annotation.Config
  * new palette then, at once).
  */
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
 class AccentRecompositionTest {
 
