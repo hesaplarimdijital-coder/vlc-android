@@ -1,0 +1,9 @@
+1493 s, 130 steps, pass phone-tr, 0 crashes
+123 phone-tr Settings scroll 3 ok
+124 phone-tr Settings scroll 4 ok
+125 phone-tr Settings scroll 5 ok
+126 phone-tr Settings scroll 6 ok
+127 phone-tr Settings scroll 7 ok
+128 phone-tr Settings scroll 8 ok
+129 phone-tr Settings scroll 9 ok
+130 phone-tr Open About ok
