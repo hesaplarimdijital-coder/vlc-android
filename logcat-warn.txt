@@ -1,0 +1,195 @@
+1260 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3970 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3970 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3970 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3970 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3970 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3970 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3970 W/HWUI: Unknown dataspace 0
+3970 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3970 W/.nagmedar.debug: Long monitor contention with owner DefaultDispatcher-worker-1 (4061) at void java.lang.Runtime.loadLibrary0(java.lang.ClassLoader, java.lang.Class, java.lang.String)(Runtime.java:1113) waiters=0 in void java.lang.Runtime.loadLibrary0(java.lang.ClassLoader, java.lang.Class, java.lang.String) for 601ms
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3970 W/.nagmedar.debug: Suspending all threads took: 5.570ms
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityTaskManager: Force removing ActivityRecord{47174246 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+622 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+622 W/WindowManager: Exception thrown during dispatchAppVisibility Window{32baec2 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+622 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{7441a67 #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@287d16b
+9282 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+9282 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+9282 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+9282 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+9282 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+9282 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+9282 W/.nagmedar.debug: Verification of void org.videolan.resources.util.VLCCrashHandler$Companion.writeLogcat(java.lang.String) took 108.949ms (523.18 bytecodes/s) (0B arena alloc)
+9282 W/.nagmedar.debug: Verification of kotlinx.coroutines.flow.Flow app.nagmedar.data.NetworkServerDao_Impl.observe() took 110.949ms (243.35 bytecodes/s) (0B arena alloc)
+9282 W/HWUI: Unknown dataspace 0
+9282 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+9282 W/VLC: [0000780630850830/281f] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630852450/2820] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630821af0/2821] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630851b50/2822] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630850830/2823] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630850950/2824] libvlc access: cannot insert stream filter record
+9282 W/VLC: [00007806308566b0/2825] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630856fb0/2826] libvlc access: cannot insert stream filter record
+9282 W/VLC: [00007806308531d0/2829] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630850950/282a] libvlc access: cannot insert stream filter record
+9282 W/VLC: [00007806308531d0/282b] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630856fb0/282c] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630846e10/282d] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630850950/282e] libvlc access: cannot insert stream filter record
+9282 W/VLC: [00007806308531d0/282f] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630856fb0/2830] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630846e10/2831] libvlc access: cannot insert stream filter record
+9282 W/VLC: [00007806308531d0/2833] libvlc access: cannot insert stream filter record
+622 E/NotificationService: Package enqueue rate is 5.1090536. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:24): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:25): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:26): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/VLC: [000078063085a910/283c] libvlc access: cannot insert stream filter record
+9282 W/AndroidMedialib: type=1400 audit(0.0:27): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/VLC: [0000780630859cb0/283e] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630861cf0/283f] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085a910/2840] libvlc access: cannot insert stream filter record
+9282 W/AndroidMedialib: type=1400 audit(0.0:28): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/VLC: [0000780630859cb0/2842] libvlc access: cannot insert stream filter record
+9282 W/AndroidMedialib: type=1400 audit(0.0:29): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/VLC: [000078063085a910/2845] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630859cb0/2847] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085a910/2849] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630860f70/284a] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085e810/284c] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630860f70/284e] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085e810/2850] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630860f70/2852] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085e810/2854] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630860f70/2856] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085e810/2858] libvlc access: cannot insert stream filter record
+9282 E/VLC: [0000780630860f70/285a] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+9282 E/VLC: [00007805f0a1e150/285a] libvlc input: Your media can't be opened
+9282 E/VLC: [00007805f0a1e150/285a] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+9282 W/VLC/medialibrary: [T#131964330787008] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+9282 W/VLC: [0000780630858750/285b] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085aeb0/285d] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085a130/285f] libvlc access: cannot insert stream filter record
+9282 E/VLC: [000078063085aeb0/2861] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+9282 E/VLC: [00007805f0a1e150/2861] libvlc input: Your media can't be opened
+9282 E/VLC: [00007805f0a1e150/2861] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+9282 W/VLC/medialibrary: [T#131964330787008] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+9282 W/VLC: [0000780630858750/2863] libvlc access: cannot insert stream filter record
+9282 W/VLC: [000078063085ab50/2866] libvlc access: cannot insert stream filter record
+9282 W/VLC: [0000780630859cb0/2868] libvlc access: cannot insert stream filter record
+9282 W/AndroidMedialib: type=1400 audit(0.0:58): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:59): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:60): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:61): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+9282 W/AndroidMedialib: type=1400 audit(0.0:62): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106629 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityTaskManager: Force removing ActivityRecord{259432217 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+622 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+622 W/WindowManager: Exception thrown during dispatchAppVisibility Window{60a4a53 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+622 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{5399b1b #10 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@287d16b
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityTaskManager: Force removing ActivityRecord{141305743 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t11 f}}: app died, no saved state
+622 W/InputDispatcher: channel '22531d9 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+622 E/InputDispatcher: channel '22531d9 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+622 W/WindowManager: Exception thrown during dispatchAppVisibility Window{22531d9 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+622 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{4516b7 #11 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@287d16b
+10714 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+10714 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+10714 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+10714 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+10714 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+10714 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10714 W/HWUI: Unknown dataspace 0
+10714 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+10714 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+10714 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+10714 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 W/AppOps: Noting op not finished: uid 10234 pkg app.nagmedar.debug code 154 startTime of in progress event=1793939592719
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+622 W/MR2ServiceImpl: Router record not found for the target package: app.nagmedar.debug
+1056 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+10714 W/VLC/VLCApplication: onTrimMemory, level: 20
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+622 W/ActivityTaskManager: Force removing ActivityRecord{203921179 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t12 f}}: app died, no saved state
+622 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+1245 W/MediaPlayerList: app.nagmedar.debug is already the active player
+1245 W/MediaPlayerList: app.nagmedar.debug is already the active player
+1245 W/MediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+1245 W/MediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+622 W/WindowManager: Exception thrown during dispatchAppVisibility Window{50deed4 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+622 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{2f207be #12 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@287d16b
+13269 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+13269 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+13269 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+13269 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+13269 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+13269 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+13269 W/HWUI: Unknown dataspace 0
+13269 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+13269 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+13269 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+1245 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 W/AppOps: Noting op not finished: uid 10234 pkg app.nagmedar.debug code 154 startTime of in progress event=1793939920838
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+622 W/MR2ServiceImpl: Router record not found for the target package: app.nagmedar.debug
+1056 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+622 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1245 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+13269 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+13269 W/VLC/VLCApplication: onTrimMemory, level: 20
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+622 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
