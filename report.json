@@ -1,0 +1,1122 @@
+{
+ "verdict": "FAILED",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "glass-b",
+   "title": "Launch (glass B)",
+   "status": "ok",
+   "shot": "shots/001-glass-b-launch-glass-b.png",
+   "dump": "dumps/001-glass-b-launch-glass-b.xml",
+   "changed": true,
+   "seconds": 7.4,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "glass-b",
+   "title": "First run (glass B) step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-glass-b-first-run-glass-b-step-1-continue.png",
+   "dump": "dumps/002-glass-b-first-run-glass-b-step-1-continue.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "glass-b",
+   "title": "First run (glass B) step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-glass-b-first-run-glass-b-step-2-continue-2-sources.png",
+   "dump": "dumps/003-glass-b-first-run-glass-b-step-2-continue-2-sources.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "glass-b",
+   "title": "First run (glass B) step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-glass-b-first-run-glass-b-step-3-continue.png",
+   "dump": "dumps/004-glass-b-first-run-glass-b-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "glass-b",
+   "title": "First run (glass B) step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-glass-b-first-run-glass-b-step-4-start.png",
+   "dump": "dumps/005-glass-b-first-run-glass-b-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "glass-b",
+   "title": "After the scan (glass B)",
+   "status": "ok",
+   "shot": "shots/006-glass-b-after-the-scan-glass-b.png",
+   "dump": "dumps/006-glass-b-after-the-scan-glass-b.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "glass-b",
+   "title": "Glass B cold start: music (dark)",
+   "status": "ok",
+   "shot": "shots/007-glass-b-glass-b-cold-start-music-dark.png",
+   "dump": "dumps/007-glass-b-glass-b-cold-start-music-dark.xml",
+   "changed": false,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "glass-b",
+   "title": "Glass B cold start: podcasts (dark)",
+   "status": "ok",
+   "shot": "shots/008-glass-b-glass-b-cold-start-podcasts-dark.png",
+   "dump": "dumps/008-glass-b-glass-b-cold-start-podcasts-dark.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "glass-b",
+   "title": "Glass B cold start: radio (dark)",
+   "status": "ok",
+   "shot": "shots/009-glass-b-glass-b-cold-start-radio-dark.png",
+   "dump": "dumps/009-glass-b-glass-b-cold-start-radio-dark.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "glass-b",
+   "title": "Glass B cold start: playlists (dark)",
+   "status": "ok",
+   "shot": "shots/010-glass-b-glass-b-cold-start-playlists-dark.png",
+   "dump": "dumps/010-glass-b-glass-b-cold-start-playlists-dark.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": "check failed: glass B: playlists, cold start (dark): the glass blurs, nothing sharp beneath it"
+  },
+  {
+   "n": 11,
+   "pass": "glass-b",
+   "title": "Glass B cold start: search (dark)",
+   "status": "ok",
+   "shot": "shots/011-glass-b-glass-b-cold-start-search-dark.png",
+   "dump": "dumps/011-glass-b-glass-b-cold-start-search-dark.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "glass-b",
+   "title": "Glass B cold start: search words (dark)",
+   "status": "ok",
+   "shot": "shots/012-glass-b-glass-b-cold-start-search-words-dark.png",
+   "dump": "dumps/012-glass-b-glass-b-cold-start-search-words-dark.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "glass-b",
+   "title": "Glass B cold start: settings (dark)",
+   "status": "ok",
+   "shot": "shots/013-glass-b-glass-b-cold-start-settings-dark.png",
+   "dump": "dumps/013-glass-b-glass-b-cold-start-settings-dark.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "glass-b",
+   "title": "Glass B cold start: about (dark)",
+   "status": "ok",
+   "shot": "shots/014-glass-b-glass-b-cold-start-about-dark.png",
+   "dump": "dumps/014-glass-b-glass-b-cold-start-about-dark.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "glass-b",
+   "title": "Glass B cold start: more (dark)",
+   "status": "ok",
+   "shot": "shots/015-glass-b-glass-b-cold-start-more-dark.png",
+   "dump": "dumps/015-glass-b-glass-b-cold-start-more-dark.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/016-glass-b-music.png",
+   "dump": "dumps/016-glass-b-music.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "glass-b",
+   "title": "Play Profile track 1.1",
+   "status": "ok",
+   "shot": "shots/017-glass-b-play-profile-track-1-1.png",
+   "dump": "dumps/017-glass-b-play-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 15.8,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/018-glass-b-music.png",
+   "dump": "dumps/018-glass-b-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "glass-b",
+   "title": "Glass B: music, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/019-glass-b-glass-b-music-its-list-under-the-bars-dark.png",
+   "dump": "dumps/019-glass-b-glass-b-music-its-list-under-the-bars-dark.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "glass-b",
+   "title": "Glass B: podcasts (dark)",
+   "status": "ok",
+   "shot": "shots/020-glass-b-glass-b-podcasts-dark.png",
+   "dump": "dumps/020-glass-b-glass-b-podcasts-dark.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "glass-b",
+   "title": "Glass B: podcasts, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/021-glass-b-glass-b-podcasts-its-list-under-the-bars-dark.png",
+   "dump": "dumps/021-glass-b-glass-b-podcasts-its-list-under-the-bars-dark.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "glass-b",
+   "title": "Glass B: radio (dark)",
+   "status": "ok",
+   "shot": "shots/022-glass-b-glass-b-radio-dark.png",
+   "dump": "dumps/022-glass-b-glass-b-radio-dark.xml",
+   "changed": true,
+   "seconds": 6.9,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "glass-b",
+   "title": "Glass B: radio, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/023-glass-b-glass-b-radio-its-list-under-the-bars-dark.png",
+   "dump": "dumps/023-glass-b-glass-b-radio-its-list-under-the-bars-dark.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "glass-b",
+   "title": "Glass B: playlists (dark)",
+   "status": "ok",
+   "shot": "shots/024-glass-b-glass-b-playlists-dark.png",
+   "dump": "dumps/024-glass-b-glass-b-playlists-dark.xml",
+   "changed": true,
+   "seconds": 7.0,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "glass-b",
+   "title": "Glass B: playlists, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/025-glass-b-glass-b-playlists-its-list-under-the-bars-dark.png",
+   "dump": "dumps/025-glass-b-glass-b-playlists-its-list-under-the-bars-dark.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/026-glass-b-music.png",
+   "dump": "dumps/026-glass-b-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "glass-b",
+   "title": "Search: track",
+   "status": "ok",
+   "shot": "shots/027-glass-b-search-track.png",
+   "dump": "dumps/027-glass-b-search-track.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "glass-b",
+   "title": "Glass B: search, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/028-glass-b-glass-b-search-its-list-under-the-bars-dark.png",
+   "dump": "dumps/028-glass-b-glass-b-search-its-list-under-the-bars-dark.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "glass-b",
+   "title": "Back from the search page",
+   "status": "ok",
+   "shot": "shots/029-glass-b-back-from-the-search-page.png",
+   "dump": "dumps/029-glass-b-back-from-the-search-page.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "glass-b",
+   "title": "Glass B: settings (dark)",
+   "status": "ok",
+   "shot": "shots/030-glass-b-glass-b-settings-dark.png",
+   "dump": "dumps/030-glass-b-glass-b-settings-dark.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "glass-b",
+   "title": "Glass B: settings, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/031-glass-b-glass-b-settings-its-list-under-the-bars-dark.png",
+   "dump": "dumps/031-glass-b-glass-b-settings-its-list-under-the-bars-dark.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 32,
+   "pass": "glass-b",
+   "title": "Glass B: more (dark)",
+   "status": "ok",
+   "shot": "shots/032-glass-b-glass-b-more-dark.png",
+   "dump": "dumps/032-glass-b-glass-b-more-dark.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 33,
+   "pass": "glass-b",
+   "title": "Glass B: more, its list under the bars (dark)",
+   "status": "ok",
+   "shot": "shots/033-glass-b-glass-b-more-its-list-under-the-bars-dark.png",
+   "dump": "dumps/033-glass-b-glass-b-more-its-list-under-the-bars-dark.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 34,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/034-glass-b-music.png",
+   "dump": "dumps/034-glass-b-music.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 35,
+   "pass": "glass-b",
+   "title": "Glass B: the full player (dark)",
+   "status": "ok",
+   "shot": "shots/035-glass-b-glass-b-the-full-player-dark.png",
+   "dump": "dumps/035-glass-b-glass-b-the-full-player-dark.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 36,
+   "pass": "glass-b",
+   "title": "Back from the full player",
+   "status": "ok",
+   "shot": "shots/036-glass-b-back-from-the-full-player.png",
+   "dump": "dumps/036-glass-b-back-from-the-full-player.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 37,
+   "pass": "glass-b",
+   "title": "Glass B cold start: music (light)",
+   "status": "ok",
+   "shot": "shots/037-glass-b-glass-b-cold-start-music-light.png",
+   "dump": "dumps/037-glass-b-glass-b-cold-start-music-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 38,
+   "pass": "glass-b",
+   "title": "Glass B cold start: podcasts (light)",
+   "status": "ok",
+   "shot": "shots/038-glass-b-glass-b-cold-start-podcasts-light.png",
+   "dump": "dumps/038-glass-b-glass-b-cold-start-podcasts-light.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 39,
+   "pass": "glass-b",
+   "title": "Glass B cold start: radio (light)",
+   "status": "ok",
+   "shot": "shots/039-glass-b-glass-b-cold-start-radio-light.png",
+   "dump": "dumps/039-glass-b-glass-b-cold-start-radio-light.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 40,
+   "pass": "glass-b",
+   "title": "Glass B cold start: playlists (light)",
+   "status": "FAIL",
+   "shot": "shots/040-glass-b-glass-b-cold-start-playlists-light.png",
+   "dump": "dumps/040-glass-b-glass-b-cold-start-playlists-light.xml",
+   "changed": true,
+   "seconds": 24.7,
+   "note": "app relaunched after the failure"
+  },
+  {
+   "n": 41,
+   "pass": "glass-b",
+   "title": "Glass B cold start: search (light)",
+   "status": "ok",
+   "shot": "shots/041-glass-b-glass-b-cold-start-search-light.png",
+   "dump": "dumps/041-glass-b-glass-b-cold-start-search-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 42,
+   "pass": "glass-b",
+   "title": "Glass B cold start: search words (light)",
+   "status": "ok",
+   "shot": "shots/042-glass-b-glass-b-cold-start-search-words-light.png",
+   "dump": "dumps/042-glass-b-glass-b-cold-start-search-words-light.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 43,
+   "pass": "glass-b",
+   "title": "Glass B cold start: settings (light)",
+   "status": "ok",
+   "shot": "shots/043-glass-b-glass-b-cold-start-settings-light.png",
+   "dump": "dumps/043-glass-b-glass-b-cold-start-settings-light.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 44,
+   "pass": "glass-b",
+   "title": "Glass B cold start: about (light)",
+   "status": "ok",
+   "shot": "shots/044-glass-b-glass-b-cold-start-about-light.png",
+   "dump": "dumps/044-glass-b-glass-b-cold-start-about-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 45,
+   "pass": "glass-b",
+   "title": "Glass B cold start: more (light)",
+   "status": "ok",
+   "shot": "shots/045-glass-b-glass-b-cold-start-more-light.png",
+   "dump": "dumps/045-glass-b-glass-b-cold-start-more-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 46,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/046-glass-b-music.png",
+   "dump": "dumps/046-glass-b-music.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 47,
+   "pass": "glass-b",
+   "title": "Play Profile track 1.1",
+   "status": "ok",
+   "shot": "shots/047-glass-b-play-profile-track-1-1.png",
+   "dump": "dumps/047-glass-b-play-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 15.7,
+   "note": ""
+  },
+  {
+   "n": 48,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/048-glass-b-music.png",
+   "dump": "dumps/048-glass-b-music.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 49,
+   "pass": "glass-b",
+   "title": "Glass B: music, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/049-glass-b-glass-b-music-its-list-under-the-bars-light.png",
+   "dump": "dumps/049-glass-b-glass-b-music-its-list-under-the-bars-light.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 50,
+   "pass": "glass-b",
+   "title": "Glass B: podcasts (light)",
+   "status": "ok",
+   "shot": "shots/050-glass-b-glass-b-podcasts-light.png",
+   "dump": "dumps/050-glass-b-glass-b-podcasts-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 51,
+   "pass": "glass-b",
+   "title": "Glass B: podcasts, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/051-glass-b-glass-b-podcasts-its-list-under-the-bars-light.png",
+   "dump": "dumps/051-glass-b-glass-b-podcasts-its-list-under-the-bars-light.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 52,
+   "pass": "glass-b",
+   "title": "Glass B: radio (light)",
+   "status": "ok",
+   "shot": "shots/052-glass-b-glass-b-radio-light.png",
+   "dump": "dumps/052-glass-b-glass-b-radio-light.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 53,
+   "pass": "glass-b",
+   "title": "Glass B: radio, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/053-glass-b-glass-b-radio-its-list-under-the-bars-light.png",
+   "dump": "dumps/053-glass-b-glass-b-radio-its-list-under-the-bars-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 54,
+   "pass": "glass-b",
+   "title": "Glass B: playlists (light)",
+   "status": "ok",
+   "shot": "shots/054-glass-b-glass-b-playlists-light.png",
+   "dump": "dumps/054-glass-b-glass-b-playlists-light.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 55,
+   "pass": "glass-b",
+   "title": "Glass B: playlists, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/055-glass-b-glass-b-playlists-its-list-under-the-bars-light.png",
+   "dump": "dumps/055-glass-b-glass-b-playlists-its-list-under-the-bars-light.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 56,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/056-glass-b-music.png",
+   "dump": "dumps/056-glass-b-music.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 57,
+   "pass": "glass-b",
+   "title": "Search: track",
+   "status": "ok",
+   "shot": "shots/057-glass-b-search-track.png",
+   "dump": "dumps/057-glass-b-search-track.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 58,
+   "pass": "glass-b",
+   "title": "Glass B: search, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/058-glass-b-glass-b-search-its-list-under-the-bars-light.png",
+   "dump": "dumps/058-glass-b-glass-b-search-its-list-under-the-bars-light.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 59,
+   "pass": "glass-b",
+   "title": "Back from the search page",
+   "status": "ok",
+   "shot": "shots/059-glass-b-back-from-the-search-page.png",
+   "dump": "dumps/059-glass-b-back-from-the-search-page.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 60,
+   "pass": "glass-b",
+   "title": "Glass B: settings (light)",
+   "status": "ok",
+   "shot": "shots/060-glass-b-glass-b-settings-light.png",
+   "dump": "dumps/060-glass-b-glass-b-settings-light.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 61,
+   "pass": "glass-b",
+   "title": "Glass B: settings, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/061-glass-b-glass-b-settings-its-list-under-the-bars-light.png",
+   "dump": "dumps/061-glass-b-glass-b-settings-its-list-under-the-bars-light.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 62,
+   "pass": "glass-b",
+   "title": "Glass B: more (light)",
+   "status": "ok",
+   "shot": "shots/062-glass-b-glass-b-more-light.png",
+   "dump": "dumps/062-glass-b-glass-b-more-light.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 63,
+   "pass": "glass-b",
+   "title": "Glass B: more, its list under the bars (light)",
+   "status": "ok",
+   "shot": "shots/063-glass-b-glass-b-more-its-list-under-the-bars-light.png",
+   "dump": "dumps/063-glass-b-glass-b-more-its-list-under-the-bars-light.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 64,
+   "pass": "glass-b",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/064-glass-b-music.png",
+   "dump": "dumps/064-glass-b-music.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 65,
+   "pass": "glass-b",
+   "title": "Glass B: the full player (light)",
+   "status": "ok",
+   "shot": "shots/065-glass-b-glass-b-the-full-player-light.png",
+   "dump": "dumps/065-glass-b-glass-b-the-full-player-light.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 66,
+   "pass": "glass-b",
+   "title": "Back from the full player",
+   "status": "ok",
+   "shot": "shots/066-glass-b-back-from-the-full-player.png",
+   "dump": "dumps/066-glass-b-back-from-the-full-player.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  }
+ ],
+ "crashes": [
+  {
+   "kind": "FATAL EXCEPTION",
+   "text": "FATAL EXCEPTION: main\nProcess: app.nagmedar.debug, PID: 10354\nandroid.app.RemoteServiceException$ForegroundServiceDidNotStartInTimeException: Context.startForegroundService() did not then call Service.startForeground(): ServiceRecord{aceeea5 u0 app.nagmedar.debug/org.videolan.vlc.MediaParsingService c:app.nagmedar.debug}\n\tat android.app.ActivityThread.generateForegroundServiceDidNotStartInTimeException(ActivityThread.java:2271)\n\tat android.app.ActivityThread.throwRemoteServiceException(ActivityThread.java:2239)\n\tat android.app.ActivityThread.-$$Nest$mthrowRemoteServiceException(Unknown Source:0)\n\tat android.app.ActivityThread$H.handleMessage(ActivityThread.java:2557)\n\tat android.os.Handler.dispatchMessage(Handler.java:107)\n\tat android.os.Looper.loopOnce(Looper.java:232)\n\tat android.os.Looper.loop(Looper.java:317)\n\tat android.app.ActivityThread.main(ActivityThread.java:8705)\n\tat java.lang.reflect.Method.invoke(Native Method)\n\tat com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)\n\tat com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)",
+   "family": "java",
+   "step": 40,
+   "pass": "glass-b"
+  }
+ ],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (18, 22, 28), 'hi': (19, 23, 29), 'mean': (18.4, 22.3, 28.0), 'spread': 1}; band {'lo': (17, 21, 27), 'hi': (20, 24, 29), 'mean': (18.3, 22.2, 28.1), 'spread': 3}",
+   "step": 7
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (18, 22, 28), 'hi': (19, 23, 29), 'mean': (18.4, 22.3, 28.0), 'spread': 1}; band {'lo': (17, 21, 27), 'hi': (20, 24, 29), 'mean': (18.3, 22.2, 28.1), 'spread': 3}",
+   "step": 7
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 8
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 8
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 9
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (19, 23, 29), 'hi': (20, 24, 30), 'mean': (19.6, 23.6, 29.5), 'spread': 1}; band {'lo': (20, 24, 28), 'hi': (25, 30, 33), 'mean': (21.9, 27.6, 30.5), 'spread': 6}",
+   "step": 9
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 20, 24), 'hi': (32, 38, 45), 'mean': (17.1, 20.7, 25.9), 'spread': 21}",
+   "step": 10
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": false,
+   "detail": "bar {'lo': (23, 27, 0), 'hi': (255, 251, 254), 'mean': (86.3, 69.7, 61.7), 'spread': 254}",
+   "step": 10
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 12
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (18, 22, 28), 'hi': (20, 24, 30), 'mean': (18.8, 22.8, 28.6), 'spread': 2}; band {'lo': (19, 22, 27), 'hi': (33, 31, 31), 'mean': (27.2, 27.1, 28.8), 'spread': 14}",
+   "step": 12
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, cold start's first frames (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 15
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, cold start (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 15
+  },
+  {
+   "pass": "glass-b",
+   "name": "a track in the Music's list",
+   "ok": true,
+   "detail": "",
+   "step": 16
+  },
+  {
+   "pass": "glass-b",
+   "name": "the mini player shows the track",
+   "ok": true,
+   "detail": "",
+   "step": 17
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (18, 22, 28), 'mean': (17.9, 21.8, 27.3), 'spread': 1}; bar {'lo': (18, 22, 28), 'hi': (19, 23, 29), 'mean': (18.3, 22.1, 28.0), 'spread': 1}; band {'lo': (17, 21, 27), 'hi': (19, 23, 29), 'mean': (18.3, 22.2, 28.0), 'spread': 2}",
+   "step": 18
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (18, 22, 28), 'mean': (18.0, 21.8, 27.4), 'spread': 1}; bar {'lo': (18, 22, 28), 'hi': (19, 23, 29), 'mean': (18.5, 22.3, 28.0), 'spread': 1}; band {'lo': (18, 22, 28), 'hi': (19, 23, 29), 'mean': (18.6, 22.5, 28.4), 'spread': 1}",
+   "step": 19
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 20
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 21
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (19, 24, 28), 'hi': (23, 28, 35), 'mean': (20.6, 25.4, 31.4), 'spread': 7}; bar {'lo': (19, 23, 29), 'hi': (20, 24, 30), 'mean': (19.6, 23.6, 29.4), 'spread': 1}; band {'lo': (20, 24, 28), 'hi': (25, 30, 33), 'mean': (21.9, 27.8, 30.6), 'spread': 6}",
+   "step": 22
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (18, 21, 27), 'hi': (26, 22, 28), 'mean': (22.1, 21.5, 27.4), 'spread': 8}; bar {'lo': (19, 23, 29), 'hi': (20, 24, 30), 'mean': (19.6, 23.5, 29.2), 'spread': 1}; band {'lo': (20, 23, 29), 'hi': (25, 28, 34), 'mean': (23.3, 26.2, 32.3), 'spread': 5}",
+   "step": 23
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (18, 21, 27), 'hi': (21, 23, 28), 'mean': (19.5, 22.3, 27.2), 'spread': 3}; bar {'lo': (32, 30, 32), 'hi': (43, 44, 47), 'mean': (39.0, 38.9, 42.2), 'spread': 15}; band {'lo': (22, 24, 28), 'hi': (30, 30, 36), 'mean': (26.3, 26.8, 30.5), 'spread': 8}",
+   "step": 24
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (18, 22, 28), 'hi': (21, 24, 31), 'mean': (20.0, 23.2, 29.3), 'spread': 3}; bar {'lo': (17, 21, 27), 'hi': (20, 24, 30), 'mean': (17.8, 21.8, 27.7), 'spread': 3}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 25
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 22, 28), 'hi': (18, 25, 31), 'mean': (17.8, 23.5, 29.4), 'spread': 3}; bar {'lo': (18, 22, 28), 'hi': (20, 24, 30), 'mean': (18.7, 22.7, 28.5), 'spread': 2}; band {'lo': (19, 22, 27), 'hi': (33, 31, 31), 'mean': (27.2, 27.0, 28.8), 'spread': 14}",
+   "step": 27
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (19, 22, 27), 'hi': (23, 24, 28), 'mean': (20.8, 23.0, 27.1), 'spread': 4}; bar {'lo': (18, 22, 28), 'hi': (20, 24, 30), 'mean': (19.1, 22.9, 28.7), 'spread': 2}; band {'lo': (23, 25, 28), 'hi': (33, 31, 31), 'mean': (29.2, 28.3, 29.3), 'spread': 10}",
+   "step": 28
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more with the mini player (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (18, 22, 28), 'mean': (17.3, 21.2, 27.1), 'spread': 1}; bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 32
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, its list under the bars (dark): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (17, 21, 27), 'hi': (18, 22, 28), 'mean': (17.3, 21.2, 27.1), 'spread': 1}; bar {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}; band {'lo': (17, 21, 27), 'hi': (17, 21, 27), 'mean': (17.0, 21.0, 27.0), 'spread': 0}",
+   "step": 33
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, cold start's first frames (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (247, 248, 249), 'hi': (247, 248, 249), 'mean': (247.0, 248.0, 249.0), 'spread': 0}; band {'lo': (246, 247, 248), 'hi': (248, 249, 250), 'mean': (247.0, 248.0, 249.1), 'spread': 2}",
+   "step": 37
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, cold start (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (247, 248, 249), 'hi': (247, 248, 249), 'mean': (247.0, 248.0, 249.0), 'spread': 0}; band {'lo': (246, 247, 248), 'hi': (248, 249, 250), 'mean': (247.0, 248.0, 249.1), 'spread': 2}",
+   "step": 37
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, cold start's first frames (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 38
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, cold start (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 38
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, cold start's first frames (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 39
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, cold start (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.1, 247.2, 248.3), 'spread': 1}; band {'lo': (236, 238, 237), 'hi': (245, 246, 246), 'mean': (239.4, 242.0, 240.9), 'spread': 9}",
+   "step": 39
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, cold start's first frames (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 42
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, cold start (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.6, 247.6, 248.7), 'spread': 1}; band {'lo': (247, 244, 240), 'hi': (248, 248, 248), 'mean': (247.8, 245.6, 243.4), 'spread': 8}",
+   "step": 42
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, cold start's first frames (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 45
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, cold start (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 45
+  },
+  {
+   "pass": "glass-b",
+   "name": "a track in the Music's list",
+   "ok": true,
+   "detail": "",
+   "step": 46
+  },
+  {
+   "pass": "glass-b",
+   "name": "the mini player shows the track",
+   "ok": true,
+   "detail": "",
+   "step": 47
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (247, 248, 249), 'hi': (248, 249, 250), 'mean': (247.7, 248.8, 249.8), 'spread': 1}; bar {'lo': (247, 248, 249), 'hi': (247, 248, 249), 'mean': (247.0, 248.0, 249.0), 'spread': 0}; band {'lo': (246, 247, 248), 'hi': (248, 249, 250), 'mean': (247.2, 248.2, 249.3), 'spread': 2}",
+   "step": 48
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: music, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (247, 248, 249), 'hi': (248, 249, 250), 'mean': (247.7, 248.7, 249.7), 'spread': 1}; bar {'lo': (247, 248, 249), 'hi': (247, 248, 249), 'mean': (247.0, 248.0, 249.0), 'spread': 0}; band {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.9, 247.9, 248.9), 'spread': 1}",
+   "step": 49
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 50
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: podcasts, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 51
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (243, 246, 246), 'hi': (247, 248, 250), 'mean': (245.7, 247.6, 248.7), 'spread': 4}; bar {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.2, 247.2, 248.3), 'spread': 1}; band {'lo': (236, 238, 237), 'hi': (245, 246, 246), 'mean': (239.4, 242.1, 240.9), 'spread': 9}",
+   "step": 52
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: radio, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (247, 242, 243), 'hi': (248, 248, 249), 'mean': (247.8, 245.2, 246.3), 'spread': 6}; bar {'lo': (246, 247, 248), 'hi': (246, 248, 249), 'mean': (246.0, 247.0, 248.2), 'spread': 1}; band {'lo': (240, 240, 241), 'hi': (245, 245, 247), 'mean': (241.7, 242.1, 243.4), 'spread': 6}",
+   "step": 53
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (245, 244, 245), 'hi': (248, 248, 249), 'mean': (246.3, 246.4, 246.8), 'spread': 4}; bar {'lo': (238, 234, 233), 'hi': (246, 245, 244), 'mean': (243.1, 241.3, 240.4), 'spread': 11}; band {'lo': (237, 233, 231), 'hi': (244, 245, 245), 'mean': (240.6, 238.9, 238.4), 'spread': 14}",
+   "step": 54
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: playlists, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (245, 245, 247), 'hi': (247, 248, 249), 'mean': (246.3, 246.8, 248.1), 'spread': 3}; bar {'lo': (247, 248, 249), 'hi': (248, 249, 250), 'mean': (247.8, 248.8, 249.8), 'spread': 1}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 55
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (244, 247, 249), 'hi': (247, 249, 250), 'mean': (245.4, 248.0, 249.1), 'spread': 3}; bar {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.7, 247.7, 248.8), 'spread': 1}; band {'lo': (247, 244, 240), 'hi': (248, 248, 248), 'mean': (247.8, 245.5, 243.4), 'spread': 8}",
+   "step": 57
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: search, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (248, 247, 246), 'hi': (248, 248, 249), 'mean': (248.0, 247.8, 247.5), 'spread': 3}; bar {'lo': (246, 247, 248), 'hi': (247, 248, 249), 'mean': (246.5, 247.5, 248.5), 'spread': 1}; band {'lo': (247, 243, 240), 'hi': (248, 247, 246), 'mean': (247.7, 244.8, 242.0), 'spread': 6}",
+   "step": 58
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more with the mini player (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (247, 248, 249), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 1}; bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 62
+  },
+  {
+   "pass": "glass-b",
+   "name": "glass B: more, its list under the bars (light): the glass blurs, nothing sharp beneath it",
+   "ok": true,
+   "detail": "card {'lo': (247, 248, 249), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 1}; bar {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}; band {'lo': (248, 249, 250), 'hi': (248, 249, 250), 'mean': (248.0, 249.0, 250.0), 'spread': 0}",
+   "step": 63
+  },
+  {
+   "pass": "glass-b",
+   "name": "the glass B screenshots were taken",
+   "ok": true,
+   "detail": "62 screenshots",
+   "step": 66
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 66
+  },
+  {
+   "pass": "all",
+   "name": "no StrictMode violation of the app (debug build)",
+   "ok": true,
+   "detail": "0 in the log, 0 in the dropbox",
+   "step": 66
+  }
+ ],
+ "frames": [],
+ "seconds": 883,
+ "passes": "glass-b",
+ "source": "3ab6f2ec13c00b4f62dc5e97bc571d6a5e86e6c0 (story/glass-b, debug build, API 35, glass-b), run 42132013799",
+ "system": [],
+ "sheet_trials": []
+}

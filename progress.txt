@@ -1,0 +1,9 @@
+801 s, 60 steps, pass glass-b, 1 crashes
+53 glass-b Glass B: radio, its list under the bars (light) ok
+54 glass-b Glass B: playlists (light) ok
+55 glass-b Glass B: playlists, its list under the bars (light) ok
+56 glass-b Music ok
+57 glass-b Search: track ok
+58 glass-b Glass B: search, its list under the bars (light) ok
+59 glass-b Back from the search page ok
+60 glass-b Glass B: settings (light) ok
