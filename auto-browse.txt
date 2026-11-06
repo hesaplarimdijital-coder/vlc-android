@@ -1,0 +1,8 @@
+
+app.nagmedar.macrobenchmark.AutoBrowseTest:.
+
+Time: 5.996
+
+OK (1 test)
+
+
