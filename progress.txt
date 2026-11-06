@@ -1,0 +1,9 @@
+1563 s, 130 steps, pass phone-en, 0 crashes
+123 phone-en Palette query ok
+124 phone-en Palette: select the first result ok
+125 phone-en Escape ok
+126 phone-en Shortcut list (Ctrl+/) ok
+127 phone-en Settings (Ctrl+,) ok
+128 phone-en Rotated to landscape ok
+129 phone-en Rotated back ok
+130 phone-en In the background (home screen) warn
