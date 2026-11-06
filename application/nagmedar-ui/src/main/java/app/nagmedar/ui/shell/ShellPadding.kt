@@ -265,10 +265,10 @@ internal class ShellOverlayHost {
      */
     var systemBottomPx: () -> Int by mutableStateOf({ 0 })
 
-    /** Called when the player starts to expand: the shell brings the bars back first. */
-    var onExpandStart: () -> Unit = {}
-
-    /** How far the bars have slid down now (px); the player measures where its strip rests without it. */
+    /**
+     * How far the bars have slid down now (px, a state read): the phone's player strip is drawn that
+     * much lower than it is laid out, and its sheet opens from and lands on where it is drawn (1.0.3).
+     */
     var navigationOffset: () -> Float = { 0f }
 
     /**
