@@ -10,14 +10,18 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
@@ -36,9 +40,12 @@ import dev.chrisbanes.haze.hazeSource
 /**
  * How much of the content shows through a glass surface (Desktop Kit 1.0). Text sits on [Thin] and
  * [Regular]; they keep `text` readable (4.5:1) even over white (dark themes) or black (light theme)
- * content. [UltraThin] is for surfaces without small text.
+ * content. [UltraThin] is for surfaces without small text. 1.0.3: [Thick] carries small words of
+ * every tone, the secondary and tertiary ones too, and keeps them at 4.5:1 over the same content and
+ * the accent's over the brightest (the phone's bottom chrome, the user's glass B: the mini player's
+ * card with its artist line and times, the bottom bar).
  */
-enum class GlassThickness { UltraThin, Thin, Regular }
+enum class GlassThickness { UltraThin, Thin, Regular, Thick }
 
 /**
  * What glass looks like on this device right now:
@@ -71,6 +78,8 @@ data class GlassMaterial(
  * Only these surfaces are glass, because every blurred surface costs a GPU pass per frame: the
  * phone's bottom bar and the player strip above it, the phone's top bar once content is scrolled
  * under it, the sheets ([app.nagmedar.ui.components.GlassBottomSheet]), menus and context menus.
+ * 1.0.3 (the user's decision of 6 Nov, B): of these only the phone's bottom chrome is glass, one
+ * [GlassThickness.Thick] surface; the top bar, sheets and menus are solid.
  *
  * [app.nagmedar.ui.shell.NagmedarShell] records the content area as the glass source
  * ([LocalGlassSource]) and picks the [GlassMode] ([LocalGlassMode]); [glass] draws a surface with it.
@@ -97,7 +106,8 @@ object NagGlass {
             blurRadius = when (thickness) {
                 GlassThickness.UltraThin -> 16.dp
                 GlassThickness.Thin -> 22.dp
-                GlassThickness.Regular -> 28.dp
+                // the thick glass blurs as the regular one: only its tint is denser
+                GlassThickness.Regular, GlassThickness.Thick -> 28.dp
             },
             noise = 0.04f,
             translucent = tinted.copy(alpha = if (oled) 0.97f else 0.96f),
@@ -111,16 +121,19 @@ object NagGlass {
             GlassThickness.UltraThin -> 0.62f
             GlassThickness.Thin -> 0.76f
             GlassThickness.Regular -> 0.86f
+            GlassThickness.Thick -> 0.88f
         }
         dark -> when (thickness) {
             GlassThickness.UltraThin -> 0.55f
             GlassThickness.Thin -> 0.72f
             GlassThickness.Regular -> 0.82f
+            GlassThickness.Thick -> 0.88f
         }
         else -> when (thickness) {
             GlassThickness.UltraThin -> 0.50f
             GlassThickness.Thin -> 0.68f
             GlassThickness.Regular -> 0.80f
+            GlassThickness.Thick -> 0.90f
         }
     }
 
@@ -196,10 +209,16 @@ private fun isPowerSave(context: Context): Boolean =
 
 /**
  * Marks this element's drawing as glass source [state]: the content glass surfaces blur. Only
- * records while [mode] is [GlassMode.Blur]; otherwise nothing changes.
+ * records while [mode] is [GlassMode.Blur]; otherwise nothing changes. 1.0.3: a source that starts
+ * recording (the app started, battery saver or "Animasyonları kaldır" turned off) draws itself once
+ * more two frames later ([drawnAgain]): with Haze 2.0.1 the glass over content that did not draw
+ * again stayed empty, the rows sharp beneath it, until the page drew anew.
  */
-fun Modifier.glassSource(state: HazeState?, mode: GlassMode): Modifier =
-    if (state != null && mode == GlassMode.Blur) hazeSource(state) else this
+@Composable
+fun Modifier.glassSource(state: HazeState?, mode: GlassMode): Modifier {
+    if (state == null || mode != GlassMode.Blur) return this
+    return drawnAgain(state).hazeSource(state)
+}
 
 /**
  * Draws a glass surface of [material] in [shape] behind this element's content:
@@ -225,10 +244,30 @@ fun Modifier.glass(
         val input = remember(source) { HazeInput.Sources(source) }
         this
             .clip(shape)
+            // as its source: drawn once more once it blurs, should it have drawn before the source first recorded
+            .drawnAgain(source)
             .hazeBlur(input = input, style = style)
     }
     mode == GlassMode.Translucent && source != null -> background(material.translucent, shape)
     else -> background(material.solid, shape)
+}
+
+/**
+ * 1.0.3: what follows this modifier (a glass source or a blur) draws once more two frames after it
+ * first came for [key]: what a page drawn anew did for the glass after a switch at run time.
+ */
+@Composable
+private fun Modifier.drawnAgain(key: Any): Modifier {
+    val again = remember(key) { mutableIntStateOf(0) }
+    LaunchedEffect(key) {
+        withFrameNanos { }
+        withFrameNanos { }
+        again.intValue++
+    }
+    return drawWithContent {
+        // read while drawing: the count's change draws this, and what follows it, again
+        if (again.intValue >= 0) drawContent()
+    }
 }
 
 /** The Haze blur of this material (Desktop Kit 2): its tint over the blurred content, the radius, a little noise. */

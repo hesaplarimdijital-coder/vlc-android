@@ -34,6 +34,7 @@ import app.nagmedar.ui.screens.MoreActionGroup
 import app.nagmedar.ui.screens.MoreScreen
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.CaptionBar
+import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.LocalNavKind
@@ -80,6 +81,8 @@ fun TestShell(
     moreActions: List<MoreActionGroup> = emptyList(),
     /** Glass menus and sheets, as Desktop Kit 1.0 drew them; the app's are solid (1.0.1). */
     glass: Boolean = false,
+    /** 1.0.3: the phone's bottom chrome on the shell's one glass, as the app draws it ([ChromeGlass.Product], the user's B). */
+    chromeGlass: ChromeGlass = ChromeGlass.Product,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, navigator -> SampleScreen(destination, navigator, moreActions) },
 ) {
     val navController = rememberNavController()
@@ -113,6 +116,7 @@ fun TestShell(
         screen = screen,
         floatingPlayer = floatingPlayer,
         glass = glass,
+        chromeGlass = chromeGlass,
     )
 }
 
