@@ -332,7 +332,12 @@ jobs:
           cd "$out"
           git init -q && git checkout -q --orphan "$EVIDENCE"
           git add -A && git commit -q -m "Emulator smoke test of ${SOURCE_SHA::7} ($BUILD, API ${{ matrix.run.api }}, ${{ matrix.run.group }}, run ${GITHUB_RUN_ID})"
-          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$EVIDENCE"
+          # two walks of one sha (the pull request's and a dispatched one) may push the same evidence branch at once:
+          # "cannot lock ref" fails the job though the walk passed, so try again a few seconds later
+          for try in 1 2 3; do
+            git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$EVIDENCE" && break
+            [ "$try" = 3 ] && exit 1; sleep $((try * 7))
+          done
 
       # the profiles at their place in the repository, with the run's report, on ci/baseline-profile
       - name: Profili ci/baseline-profile dalına koy

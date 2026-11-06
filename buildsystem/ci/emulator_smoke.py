@@ -1614,6 +1614,12 @@ class Smoke:
         self.check("a file of the folder plays", bool(playing), playing or "no mini player, no session playing")
         if wide and playing:
             nodes = self.big_player()
+        if playing:
+            # pause the tone (five minutes long): while something plays each dump waits about ten seconds longer for
+            # the window to go still (its time ticks), and the folder's next checks read the screen within seconds;
+            # the bar or the mini player stays, paused
+            self.key(127)
+            time.sleep(0.5)
         # back to the drive: Back on a phone, the trail's first folder beside the places
         if wide:
             crumb = self.in_tag(nodes, "device-trail", internal)
@@ -1638,7 +1644,7 @@ class Smoke:
                 break
             nodes = self.step("Sort menu: %s" % s[entry], lambda: self.tap(item[0]))
             # the rows may still be moving to their new places when the screen is read: read again for a moment
-            nodes, listed = self.wait_for(lambda ns: self.in_tag(ns, "device-table", folder), 5)
+            nodes, listed = self.wait_for(lambda ns: self.in_tag(ns, "device-table", folder), 10)
             self.check("after '%s' the drive still lists its folders" % s[entry], bool(listed))
         if not wide:
             self.key(4)
