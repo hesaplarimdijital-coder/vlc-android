@@ -1657,21 +1657,24 @@ class Smoke:
         nodes, files = self.tap_until("Open the Music folder again", rows[0], lambda ns: self.in_tag(ns, "device-table", tone))
         if not files:
             return
-        # the folder open while the app goes to the background and comes back, then turned
+        # the folder open while the app goes to the background and comes back, then turned. The folder is open when
+        # its file is in the table, or the trail ends in it: a phone turned sideways is a short window whose floating
+        # player (the tone still plays) lies over the table's last rows
+        still_open = lambda ns: self.in_tag(ns, "device-table", tone) or self.in_tag(ns, "device-trail", folder)
         self.key(3)
         time.sleep(2)
         self.step("Home with the folder open")
         self.launch(force=False)
-        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 8)
+        nodes, kept = self.wait_for(still_open, 8)
         self.step("Back in the app with the folder open")
         self.check("after Home the folder is still open", bool(kept))
         self.rotate(1)
         nodes = self.step("Rotated with the folder open", wait=1.5)
-        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 6)
+        nodes, kept = self.wait_for(still_open, 6)
         self.check("rotated, the folder is still open", bool(kept))
         self.rotate(0)
         nodes = self.step("Rotated back with the folder open", wait=1.5)
-        nodes, kept = self.wait_for(lambda ns: self.in_tag(ns, "device-table", tone), 6)
+        nodes, kept = self.wait_for(still_open, 6)
         self.check("rotated back, the folder is still open", bool(kept))
         if not wide:
             self.key(4)
