@@ -39,6 +39,16 @@ class CastPickerModelTest {
     }
 
     @Test
+    fun withoutTheLocalNetworkPermissionNothingIsLookedFor() {
+        // Android 17: nothing is found, nor reached, without it
+        assertEquals(CastPickerView.NoPermission, CastPicker.view(true, lan = true, found = emptyList(), active = null, discovering = true, searchedMs = 0L, permitted = false))
+        assertEquals(CastPickerView.NoPermission, CastPicker.view(true, lan = true, found = listOf(salon), active = salon, discovering = true, searchedMs = 0L, permitted = false))
+        // no Wi-Fi comes first: the permission would not help
+        assertEquals(CastPickerView.NoNetwork, CastPicker.view(true, lan = false, found = emptyList(), active = null, discovering = false, searchedMs = 0L, permitted = false))
+        assertEquals(CastPickerView.Off, CastPicker.view(false, lan = true, found = emptyList(), active = null, discovering = false, searchedMs = 0L, permitted = false))
+    }
+
+    @Test
     fun theDevicesAsTheyComeAndGo() {
         assertEquals(CastPickerView.Devices(listOf(salon), searching = true), CastPicker.view(true, true, listOf(salon), null, discovering = true, searchedMs = 1_000L))
         assertEquals(CastPickerView.Devices(listOf(salon, kitchen), searching = true), CastPicker.view(true, true, listOf(salon, kitchen), null, true, 20_000L))

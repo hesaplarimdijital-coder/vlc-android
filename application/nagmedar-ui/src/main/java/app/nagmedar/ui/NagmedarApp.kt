@@ -98,6 +98,7 @@ import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
 import app.nagmedar.ui.music.WindowPlayer
 import app.nagmedar.ui.network.LibVlcDialogHost
+import app.nagmedar.ui.network.LocalNetworkHost
 import app.nagmedar.ui.network.NetworkScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
@@ -505,7 +506,7 @@ private fun NagmedarMain(
                     val motion = NagTheme.motion
                     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
                     // 1.0.2: the big player of a tablet and a desktop window, from the bar; ← and → seek in it
-                    WindowPlayer(windowPlayerShown, onClose = { windowPlayer = false }, onKey = { event -> playerKey(event, actions) }) { playerModifier, drop ->
+                    WindowPlayer(windowPlayerShown, onClose = { windowPlayer = false }, onKey = { event -> playerKey(event, actions) }) { playerModifier ->
                         PhonePlayerHost(
                             onClose = { windowPlayer = false },
                             onQueue = queuePanel::toggle,
@@ -519,7 +520,6 @@ private fun NagmedarMain(
                             },
                             // as while it shows, also while it goes down
                             fullWindow = caption == null,
-                            drop = drop,
                             captionAbove = caption?.height ?: 0.dp,
                         )
                     }
@@ -661,6 +661,8 @@ private fun NagmedarMain(
     }
     // S-1301: libVLC's sign-ins, questions and progress that no page answers, while this window is in front
     LibVlcDialogHost()
+    // Android 17: the local network permission's question, when a page needs the local network
+    LocalNetworkHost()
     // VLC's "Resume playback: Ask" for music, radio and streams: their question, which nothing answered here
     ResumePromptHost()
     if (paletteOpen) {

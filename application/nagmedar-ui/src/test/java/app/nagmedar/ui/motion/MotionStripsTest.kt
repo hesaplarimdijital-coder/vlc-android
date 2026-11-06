@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.view.View
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -29,10 +30,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SamplePlayerBar
 import app.nagmedar.ui.TestShell
@@ -41,7 +53,12 @@ import app.nagmedar.ui.components.ExpandablePlayer
 import app.nagmedar.ui.components.ExpandablePlayerState
 import app.nagmedar.ui.components.GlassBottomSheet
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.PlayerShared
+import app.nagmedar.ui.components.playerSharedElement
 import app.nagmedar.ui.components.rememberExpandablePlayerState
+import app.nagmedar.ui.playback.FakeQueue
+import app.nagmedar.ui.playback.QueuePage
+import app.nagmedar.ui.playback.QueuePanel
 import app.nagmedar.ui.music.MusicActions
 import app.nagmedar.ui.music.MusicBrowser
 import app.nagmedar.ui.music.MusicBrowserState
@@ -49,12 +66,15 @@ import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.MusicSamples
 import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.music.Track
+import app.nagmedar.ui.playback.compactPlayerCard
 import app.nagmedar.ui.podcast.PodcastActions
 import app.nagmedar.ui.podcast.PodcastSamples
 import app.nagmedar.ui.podcast.PodcastsContent
 import app.nagmedar.ui.sampleTracks
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
@@ -77,9 +97,12 @@ import kotlin.math.roundToInt
 
 /**
  * 1.0.3 (Desktop Kit 2.3.0's strips): the phone's transitions frame by frame, as the app plays them in the
- * real shell: the tab switch's fade-through, a page pushed and popped, the player's expand and collapse
- * (a tap's spring and Back's), a sheet's open and close. Each test plays one with the clock advanced a
- * frame at a time and saves the frames side by side as build/outputs/screenshots/motion/<name>.png,
+ * real shell: the tab switch's fade-through, a page pushed and popped, Back from another tab's first page
+ * (the key, and the predictive gesture let go or given up), the player's expand and collapse (a tap's
+ * spring and Back's; with the bars shown and with the bars hidden by a scroll: the player grows out of the
+ * bar's card, its artwork and title flying), a sheet's open, close and fling, the phone's "Sıradaki" flung
+ * down. Each test plays one with the clock advanced a frame at a time and saves the frames side by side as
+ * build/outputs/screenshots/motion/<name>.png,
  * which CI pushes with the screenshots to ci/shots-pr-<n> (motion/). Nothing is asserted beyond the strip
  * being made: the strips are there to be looked at, before and after a change of motion. The frames are
  * those of the frame clock (16 ms apart); each frame lists the milliseconds since the change, with a "•"
@@ -102,10 +125,13 @@ class MotionStripsTest {
     /** The milliseconds after the change whose frames make a strip: the springs' first frames, their middle and their tail. */
     private val times = listOf(16L, 48L, 96L, 144L, 208L, 304L, 400L, 512L)
 
+    private lateinit var view: View
+
     private fun phoneContent(content: @Composable () -> Unit) {
         // the test activity's theme has an action bar; the app's theme has none
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
+            view = LocalView.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { content() }
             }
@@ -141,12 +167,15 @@ class MotionStripsTest {
     /** "96 ms", with a "•" while the window still waits for frames. */
     private fun label(now: Long): String = if (stillAt == null) "$now ms •" else "$now ms"
 
-    /** The window before [change] and [at] ms after it, as one strip; [change] runs on the UI thread. */
-    private fun strip(name: String, at: List<Long> = times, change: () -> Unit) {
+    /**
+     * The window before [change] and [at] ms after it, as one strip; [change] runs on the UI thread unless it
+     * drives the test's own input ([onUiThread] false: a finger's swipe), which keeps in step with the clock itself.
+     */
+    private fun strip(name: String, at: List<Long> = times, onUiThread: Boolean = true, change: () -> Unit) {
         compose.mainClock.autoAdvance = false
         val frames = mutableListOf("önce" to shot())
         stillAt = null
-        compose.runOnIdle { change() }
+        if (onUiThread) compose.runOnIdle { change() } else change()
         var now = 0L
         for (t in at) {
             now = advanceTo(t, now)
@@ -164,12 +193,13 @@ class MotionStripsTest {
     private var navigator: ShellNavigator? = null
 
     /** The phone's shell with a list under the bars on Müzik and Podcast, the sample pages elsewhere. */
-    private fun shell(player: (@Composable (NavKind) -> Unit)? = null, overlay: @Composable () -> Unit = {}) {
+    private fun shell(player: (@Composable (NavKind) -> Unit)? = null, glass: ChromeGlass = ChromeGlass.Solid, overlay: @Composable () -> Unit = {}) {
         phoneContent {
             TestShell(
                 WidthClass.Compact,
                 player = player,
                 overlay = { overlay() },
+                chromeGlass = glass,
             ) { destination, nav ->
                 navigator = nav
                 when (destination) {
@@ -211,13 +241,85 @@ class MotionStripsTest {
         strip("page-pop") { compose.activity.onBackPressedDispatcher.onBackPressed() }
     }
 
+    /**
+     * Back (the key, three-button navigation's Back) on another tab's first page: to Müzik as it was left, with
+     * the motion it had before the predictive gesture between tabs came (1.0.3).
+     */
+    @Test
+    fun tabBack() {
+        shell()
+        compose.runOnIdle { navigator?.selectTab(Destination.Podcasts) }
+        compose.waitForIdle()
+        strip("tab-back") { compose.activity.onBackPressedDispatcher.onBackPressed() }
+    }
+
+    /**
+     * The predictive Back gesture on another tab's first page (gesture navigation: the system's insets have the
+     * edges' Back gesture): with the finger, then let go.
+     */
+    @Test
+    fun tabBackGesture() {
+        shell()
+        edgeBackGesture()
+        compose.runOnIdle { navigator?.selectTab(Destination.Podcasts) }
+        compose.waitForIdle()
+        gestureStrip("tab-back-gesture", release = true)
+    }
+
+    /** The same gesture given up half way: the tab comes back to its place. */
+    @Test
+    fun tabBackGestureCancelled() {
+        shell()
+        edgeBackGesture()
+        compose.runOnIdle { navigator?.selectTab(Destination.Podcasts) }
+        compose.waitForIdle()
+        gestureStrip("tab-back-gesture-cancelled", release = false)
+    }
+
+    /** What a phone with gesture navigation sends: the left and right edges take the Back gesture. */
+    private fun edgeBackGesture() {
+        val edge = with(compose.density) { 24.dp.roundToPx() }
+        val insets = WindowInsetsCompat.Builder()
+            .setInsets(WindowInsetsCompat.Type.systemGestures(), Insets.of(edge, 0, edge, 0))
+            .build()
+        compose.runOnUiThread { ViewCompat.dispatchApplyWindowInsets(view, insets) }
+        compose.waitForIdle()
+    }
+
+    /** A Back gesture from the left edge: the finger's progress frame by frame, then let go ([release]) or given up. */
+    private fun gestureStrip(name: String, release: Boolean) {
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        fun back(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
+        compose.mainClock.autoAdvance = false
+        val frames = mutableListOf("önce" to shot())
+        stillAt = null
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f)) }
+        for (p in listOf(0.2f, 0.4f, 0.6f, 0.8f)) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(p)) }
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+            frames += "parmak $p" to shot()
+        }
+        compose.runOnUiThread { if (release) dispatcher.onBackPressed() else dispatcher.dispatchOnBackCancelled() }
+        val word = if (release) "bırakınca" else "vazgeçince"
+        var now = 0L
+        for (t in listOf(16L, 48L, 96L, 160L, 304L)) {
+            now = advanceTo(t, now)
+            frames += "$word +$now ms" to shot()
+        }
+        while (stillAt == null && now < STILL_LIMIT_MS) now = advanceTo(now + FRAME_MS, now)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        saveStrip(name, frames, stillAt?.let { "durdu: $it ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
+    }
+
     // ---------------------------------------------------------------- the player
 
     private var playerScope: CoroutineScope? = null
 
-    private fun playerShell(): ExpandablePlayerState {
+    private fun playerShell(glass: ChromeGlass = ChromeGlass.Solid): ExpandablePlayerState {
         var player: ExpandablePlayerState? = null
-        shell(player = { kind ->
+        shell(glass = glass, player = { kind ->
             if (kind == NavKind.BottomBar) {
                 val state = rememberExpandablePlayerState()
                 player = state
@@ -227,6 +329,8 @@ class MotionStripsTest {
                     mini = { SamplePlayerBar(kind) },
                     full = { FullPlayer() },
                     modifier = Modifier.testTag("mini"),
+                    // as the app's bar: the player grows out of its card
+                    card = compactPlayerCard(),
                 )
             }
         })
@@ -263,19 +367,71 @@ class MotionStripsTest {
         strip("player-back", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
     }
 
+    /** The bars slid away by a scroll of the list, as the walk's phone leaves them. */
+    private fun hideBars() {
+        compose.onNodeWithTag("tracks").performTouchInput { swipeUp(startY = height * 0.7f, endY = height * 0.35f, durationMillis = 400) }
+        compose.waitForIdle()
+    }
+
+    /** A tap on the mini player with the bars hidden: the sheet grows from where the strip is drawn, the bars stay hidden under it. */
+    @Test
+    fun playerTapBarsHidden() {
+        val player = playerShell()
+        hideBars()
+        strip("player-tap-bars-hidden", at = times + 640L) { playerScope?.launch { player.expand() } }
+    }
+
+    /** The collapse of a player opened with the bars hidden: it lands where the strip is, still with the bars hidden. */
+    @Test
+    fun playerCollapseBarsHidden() {
+        val player = playerShell()
+        hideBars()
+        openPlayer(player)
+        strip("player-collapse-bars-hidden", at = times + 640L) { playerScope?.launch { player.collapse() } }
+    }
+
+    // ---------------------------------------------------------------- the player on the bottom glass (the user's glass B)
+
+    /** The bar's card on the shell's one bottom glass: the player grows out of it, the page's colour coming over the glass. */
+    @Test
+    fun playerExpandGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        strip("player-expand-glass", at = times + 640L) { playerScope?.launch { player.expand() } }
+    }
+
+    /** Back on the full player over the glass: down onto the card on the glass. */
+    @Test
+    fun playerBackGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        openPlayer(player)
+        strip("player-back-glass", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
+    }
+
+    /** A tap with the bars hidden by a scroll, on the glass. */
+    @Test
+    fun playerTapBarsHiddenGlass() {
+        val player = playerShell(ChromeGlass.Bottom)
+        hideBars()
+        strip("player-tap-bars-hidden-glass", at = times + 640L) { playerScope?.launch { player.expand() } }
+    }
+
     // ---------------------------------------------------------------- a sheet
 
     private fun sheetShell(open: () -> Boolean, close: () -> Unit) {
-        shell(overlay = {
-            GlassBottomSheet(visible = open(), onDismiss = close, label = "Sabaha Kadar") {
-                Text("Sabaha Kadar", style = NagTheme.type.title, color = NagTheme.colors.text, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-                sheetActions.forEach { group ->
-                    group.actions.forEach { action ->
-                        Text(action.label, style = NagTheme.type.body, color = NagTheme.colors.text, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp))
-                    }
+        shell(overlay = { SampleSheet(open, close) })
+    }
+
+    /** A track's sheet: its title and six actions. */
+    @Composable
+    private fun SampleSheet(open: () -> Boolean, close: () -> Unit) {
+        GlassBottomSheet(visible = open(), onDismiss = close, label = "Sabaha Kadar") {
+            Text("Sabaha Kadar", style = NagTheme.type.title, color = NagTheme.colors.text, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            sheetActions.forEach { group ->
+                group.actions.forEach { action ->
+                    Text(action.label, style = NagTheme.type.body, color = NagTheme.colors.text, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp))
                 }
             }
-        })
+        }
     }
 
     @Test
@@ -290,6 +446,77 @@ class MotionStripsTest {
         var open by mutableStateOf(true)
         sheetShell({ open }) { open = false }
         strip("sheet-close") { open = false }
+    }
+
+    /** A finger flinging the sheet down from one of its rows: it carries on at the finger's speed until it is out. */
+    @Test
+    fun sheetFling() {
+        var open by mutableStateOf(true)
+        sheetShell({ open }) { open = false }
+        strip("sheet-fling", onUiThread = false) {
+            compose.onNodeWithText("Albüme git").performTouchInput { swipe(center, center + Offset(0f, 150f), durationMillis = 60) }
+        }
+    }
+
+    /** The phone's "Sıradaki" page flung down from its list: as the sheet. */
+    @Test
+    fun queueFling() {
+        var open by mutableStateOf(true)
+        val queue = FakeQueue(FakeQueue.sample, current = 0)
+        shell(overlay = {
+            QueuePage(open, onClose = { open = false }) { pageModifier ->
+                QueuePanel(queue.entries, queue.current, queue, { open = false }, pageModifier, background = NagTheme.colors.background, page = true)
+            }
+        })
+        strip("queue-fling", onUiThread = false) {
+            compose.onNodeWithTag("queue-Fener").performTouchInput { swipe(center, center + Offset(0f, 200f), durationMillis = 60) }
+        }
+    }
+
+    // ---------------------------------------------------------------- over the bottom glass (the user's B, 6 Nov)
+
+    /**
+     * The phone's shell with its bottom chrome on one glass ([ChromeGlass.Bottom], the user's decision B): the mini
+     * player's card, the bottom bar and the band over a list of covers (Robolectric draws the glass's translucent
+     * form, not the blur); the sheets stay opaque over it.
+     */
+    private fun glassShell(overlay: @Composable () -> Unit) {
+        phoneContent {
+            NagmedarShell(
+                widthClass = WidthClass.Compact,
+                sidebarCollapsed = false,
+                onSidebarCollapsedChange = {},
+                badges = emptyMap(),
+                onSearch = {},
+                menus = {},
+                player = { kind -> SamplePlayerBar(kind) },
+                screen = { destination, nav ->
+                    navigator = nav
+                    if (destination == Destination.Music) TrackList("Müzik") else EpisodeList()
+                },
+                navController = rememberNavController(),
+                overlay = { overlay() },
+                chromeGlass = ChromeGlass.Bottom,
+            )
+        }
+    }
+
+    /** A sheet coming up over the bottom glass: its opaque surface and its scrim over the glass. */
+    @Test
+    fun sheetOpenOverBottomGlass() {
+        var open by mutableStateOf(false)
+        glassShell { SampleSheet({ open }) { open = false } }
+        strip("sheet-open-bottom-glass") { open = true }
+    }
+
+    /** The same sheet flung down over the bottom glass. */
+    @Test
+    fun sheetFlingOverBottomGlass() {
+        var open by mutableStateOf(true)
+        glassShell { SampleSheet({ open }) { open = false } }
+        strip("sheet-fling-bottom-glass", onUiThread = false) {
+            compose.onNodeWithText("Albüme git").performTouchInput { swipe(center, center + Offset(0f, 150f), durationMillis = 60) }
+        }
     }
 
     // ---------------------------------------------------------------- list → detail (1.0.3)
@@ -453,15 +680,15 @@ class MotionStripsTest {
         }
     }
 
-    /** A full player look-alike: the artwork, the title, a seek line and three buttons' places. */
+    /** A full player look-alike: the artwork, the title, a seek line and three buttons' places; the artwork and the title fly from the bar's. */
     @Composable
     private fun FullPlayer() {
         val colors = NagTheme.colors
         Column(Modifier.fillMaxSize().background(colors.background).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(48.dp))
-            Box(Modifier.size(300.dp).background(artwork[0], RoundedCornerShape(12.dp)))
+            Box(Modifier.playerSharedElement(PlayerShared.Artwork, RoundedCornerShape(12.dp)).size(300.dp).background(artwork[0], RoundedCornerShape(12.dp)))
             Spacer(Modifier.height(28.dp))
-            Text(sampleTracks[0].title, style = NagTheme.type.headline, color = colors.text)
+            Text(sampleTracks[0].title, Modifier.playerSharedElement(PlayerShared.Title), style = NagTheme.type.headline, color = colors.text)
             Text(sampleTracks[0].artist, style = NagTheme.type.body, color = colors.textSecondary)
             Spacer(Modifier.height(24.dp))
             Box(Modifier.fillMaxWidth().height(4.dp).background(colors.border, RoundedCornerShape(2.dp))) {

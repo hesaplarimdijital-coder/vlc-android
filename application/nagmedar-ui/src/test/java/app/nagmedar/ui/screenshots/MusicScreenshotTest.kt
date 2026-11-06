@@ -191,7 +191,7 @@ class MusicScreenshotTest {
                     onPlayUpNext = {},
                     artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
                     onRate = {},
-                    below = { TrackTags(neva, MusicSamples.stats, Modifier.padding(top = 12.dp)) },
+                    below = { TrackTags(neva, MusicSamples.stats, Modifier.padding(top = 12.dp), replayGain = MusicSamples.gains[neva.uri]) },
                 )
             } else {
                 TrackInspector(
@@ -201,6 +201,7 @@ class MusicScreenshotTest {
                     rating = MusicSamples.stats[track.statsKey]?.rating ?: 0,
                     onRate = {},
                     stats = MusicSamples.stats,
+                    replayGain = MusicSamples.gains[track.uri],
                     cover = { size -> Artwork(null, size, corner = 8.dp, video = false) },
                 )
             }

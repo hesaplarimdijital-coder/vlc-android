@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import app.nagmedar.ui.shell.LocalShellOverlayHost
 import kotlinx.coroutines.launch
 
 /**
@@ -47,12 +48,20 @@ fun Modifier.blockPointerBelow(): Modifier = pointerInput(Unit) {
  * it when it opens and stays in it (Tab does not leave it for the page under it), so the keys
  * reach nothing beneath. With a [paneTitle] a screen reader announces it, and as it covers the
  * window it reads nothing under it. 1.0.3: while it is there the window's commands of the screen
- * under it are silent ([ScreenCommands.covered]): Ctrl+A on DeX does not select the list it hides.
+ * under it are silent ([ScreenCommands.covered]): Ctrl+A on DeX does not select the list it hides;
+ * when it has gone the keyboard's focus goes back to the control that had it before (Desktop Kit 2.3,
+ * [FocusMemory]), so Tab goes on from there rather than from the window's first control.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Modifier.blockInputBelow(paneTitle: String? = null): Modifier {
     val focus = remember { FocusRequester() }
+    // what had the keyboard before the page took it, given back when the page has gone (in the shell)
+    val host = LocalShellOverlayHost.current
+    DisposableEffect(host) {
+        val previous = host?.focusMemory?.current()
+        onDispose { previous?.restore() }
+    }
     // a key press goes to what has the focus: the page under it keeps nothing of it
     LaunchedEffect(focus) { runCatching { focus.requestFocus() } }
     // nor do the window's shortcuts meant for the screen (select all, up a folder, refresh, the inspector)

@@ -26,6 +26,9 @@ sealed interface CastPickerView {
     /** No Wi-Fi or Ethernet: there is no local network to look on. */
     data object NoNetwork : CastPickerView
 
+    /** Android 17: the app may not reach the local network (its permission was not given). */
+    data object NoPermission : CastPickerView
+
     /** Looking, nothing found yet. */
     data object Searching : CastPickerView
 
@@ -53,12 +56,22 @@ object CastPicker {
     const val EMPTY_AFTER_MS = 10_000L
 
     /**
-     * What the picker shows: casting off, no local network, the devices (the one cast to first
-     * when the discovery has not found it again), searching, or nothing found after
-     * [EMPTY_AFTER_MS] of looking.
+     * What the picker shows: casting off, no local network, no local network permission (Android
+     * 17, [permitted] false), the devices (the one cast to first when the discovery has not found
+     * it again), searching, or nothing found after [EMPTY_AFTER_MS] of looking.
      */
-    fun view(enabled: Boolean, lan: Boolean, found: List<CastDevice>, active: CastDevice?, discovering: Boolean, searchedMs: Long): CastPickerView {
+    fun view(
+        enabled: Boolean,
+        lan: Boolean,
+        found: List<CastDevice>,
+        active: CastDevice?,
+        discovering: Boolean,
+        searchedMs: Long,
+        permitted: Boolean = true,
+    ): CastPickerView {
         if (!enabled) return CastPickerView.Off
+        // nothing is found, nor reached, without it
+        if (!permitted) return if (lan) CastPickerView.NoPermission else CastPickerView.NoNetwork
         val devices = if (active != null && found.none { it.id == active.id }) listOf(active) + found else found
         if (devices.isNotEmpty()) return CastPickerView.Devices(devices, searching = discovering)
         if (!lan) return CastPickerView.NoNetwork

@@ -37,6 +37,19 @@ data class TrackTech(
         get() = if (dsdRate > 0) null else RateBand.entries.firstOrNull { rate <= it.maxHz }
 }
 
+/**
+ * 1.0.3: a music file's ReplayGain tags (an Opus file's R128 gains as ReplayGain's) as the probe read
+ * them ([TrackTechIndex.gains], beside its [TrackTech]): the gains in dB, the peaks at full scale 1.0;
+ * null where the file has no such tag.
+ */
+@Immutable
+data class ReplayGainTags(
+    val trackGainDb: Double? = null,
+    val trackPeak: Double? = null,
+    val albumGainDb: Double? = null,
+    val albumPeak: Double? = null,
+)
+
 /** The filter's depths: 16, 24 and 32 bit lossless, lossy, DSD. */
 enum class Depth { Bits16, Bits24, Bits32, Lossy, Dsd }
 

@@ -40,6 +40,9 @@ object NotificationIds {
     /** The widget's tap: not a notification, the request code of the PendingIntent that opens the window. */
     const val WIDGET_TAP = 1000
 
+    /** S-1007, Android 17: the alarm rings; its full-screen intent opens the alarm's page (and is its request code). */
+    const val ALARM = 1007
+
     /** S-1010: the music converter's job under way. */
     const val CONVERT = 1010
 

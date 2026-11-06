@@ -66,7 +66,9 @@ import app.nagmedar.ui.playback.ChapterStrip
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.QueueEntry
+import app.nagmedar.ui.playback.playbackPositionMs
 import app.nagmedar.ui.playback.playbackRate
+import app.nagmedar.ui.playback.rememberPlayingLength
 import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
@@ -181,6 +183,7 @@ fun NowPlayingPanel(
                     progress, info.lengthMs, onSeek,
                     playing = info.playing, rate = info.rate, waveform = waveform,
                     marks = rememberChapterMarks(info.chapters, info.lengthMs), label = stringResource(R.string.nag_music_waveform),
+                    elapsed = ::playbackPositionMs,
                 )
                 ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
             }
@@ -261,6 +264,8 @@ private fun Playing(
             progress, info.lengthMs, onSeek,
             playing = info.playing, rate = info.rate, waveform = waveform,
             marks = rememberChapterMarks(info.chapters, info.lengthMs), label = stringResource(R.string.nag_music_waveform),
+            // 1.0.3: a file of an unknown length shows the time played alone
+            elapsed = ::playbackPositionMs,
         )
         ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
         if (upNext.isNotEmpty()) {
@@ -338,13 +343,15 @@ fun MusicNowPlaying(
     val coverMenu = rememberCoverMenu(remember(media) { media?.let(CoverTrack::of) })
     val coverLabel = stringResource(R.string.nag_cover_menu)
     val chapters = rememberPlayingChapters()
+    // 1.0.3: the player's length for a file the library has none for
+    val length = rememberPlayingLength(media, nowPlaying.playing)
     val info = media?.let {
         NowPlayingInfo(
             title = it.nowPlaying ?: it.title ?: "",
             artist = it.artistName,
             album = it.albumName,
             format = path?.let { p -> formatLine(p) },
-            lengthMs = it.length,
+            lengthMs = length,
             playing = nowPlaying.playing,
             rating = key?.let { k -> stats[k]?.rating ?: 0 },
             chapters = chapters,

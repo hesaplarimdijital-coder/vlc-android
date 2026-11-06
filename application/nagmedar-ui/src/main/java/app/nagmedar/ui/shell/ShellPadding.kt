@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
+import app.nagmedar.ui.components.FocusMemory
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
 
@@ -264,10 +265,10 @@ internal class ShellOverlayHost {
      */
     var systemBottomPx: () -> Int by mutableStateOf({ 0 })
 
-    /** Called when the player starts to expand: the shell brings the bars back first. */
-    var onExpandStart: () -> Unit = {}
-
-    /** How far the bars have slid down now (px); the player measures where its strip rests without it. */
+    /**
+     * How far the bars have slid down now (px, a state read): the phone's player strip is drawn that
+     * much lower than it is laid out, and its sheet opens from and lands on where it is drawn (1.0.3).
+     */
     var navigationOffset: () -> Float = { 0f }
 
     /**
@@ -281,6 +282,12 @@ internal class ShellOverlayHost {
 
     /** A [WindowPage] covers the window: the bars and the screen under it are neither drawn nor read out. */
     val windowCovered: Boolean get() = windowPages.containsValue(true)
+
+    /**
+     * 1.0.3 (Desktop Kit 2.3): where the keyboard focus was before a layer took it (a sheet, a page over
+     * the window): the layer gives it back there when it closes.
+     */
+    val focusMemory = FocusMemory()
 
     companion object {
         /** The expanded player: over the bars, under the screen's overlays. */

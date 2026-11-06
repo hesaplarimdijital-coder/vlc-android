@@ -7,16 +7,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,8 +65,6 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -100,9 +94,11 @@ import app.nagmedar.ui.components.LocalPlayerSheet
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.PlayerShared
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.playerSharedElement
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCoverMenu
@@ -121,12 +117,14 @@ import app.nagmedar.ui.playback.ServicePlayerBarActions
 import app.nagmedar.ui.playback.TimelineStyle
 import app.nagmedar.ui.playback.TransportControls
 import app.nagmedar.ui.playback.TransportSize
+import app.nagmedar.ui.playback.playbackPositionMs
 import app.nagmedar.ui.playback.playbackRate
 import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.playback.rememberPlayingChapters
+import app.nagmedar.ui.playback.rememberPlayingLength
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.sleep.SleepTimerButton
 import app.nagmedar.ui.sleep.SleepTimerDialog
@@ -156,10 +154,10 @@ import org.videolan.vlc.media.PlaylistManager
  * while paused; the line of the lyrics being sung; the title with the artist and the album, and the button that puts
  * the track in a playlist; a slim timeline over a faint band of the waveform; the controls low, where one thumb reaches
  * them; under them where it plays (casting, the format and the output), sharing and the queue. Nothing in it is a word
- * that could wrap. The artwork swiped left plays the next track and right the previous; swiped down, or Back, closes
+ * that could wrap. The artwork swiped left plays the next track and right the previous; a pull down, or Back, closes
  * the player: in the phone's expanding sheet ([LocalPlayerSheet]) the sheet's own drag and Back do, so that the
- * player goes down with the finger in one piece (1.0); standing alone (a tablet's overlay) its own, from anywhere on
- * it ([drop]). Held sideways, the artwork is on the left and the rest beside it. The artist and the album open their
+ * player goes down with the finger in one piece (1.0); 1.0.3: standing alone, the window it lies in pulls it as a sheet
+ * ([WindowPlayer]). Held sideways, the artwork is on the left and the rest beside it. The artist and the album open their
  * tracks in the music view ([onOpenArtist], [onOpenAlbum]). The same artwork, words and controls as the lock screen's,
  * from the same media session.
  *
@@ -210,20 +208,15 @@ fun PhonePlayer(
     onEqualizer: (() -> Unit)? = null,
     /** The player has the whole window: its backdrop goes on under the system's bars. */
     edgeToEdge: Boolean = false,
-    /** Standing alone, how far it is pulled down to close; given by a window that watches it (1.0.2). */
-    drop: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
     /** 1.0.2: a desktop window's caption bar is this high above the player: its backdrop goes on under it. */
     captionAbove: Dp = 0.dp,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val motion = NagTheme.motion
     val res = LocalContext.current.resources
-    val scope = rememberCoroutineScope()
-    // in the phone's sheet, a drag down and Back are the sheet's (1.0); standing alone, the player's own
+    // in the phone's sheet, Back is the sheet's (1.0); standing alone, the player's own (a window's goes first)
     val hosted = LocalPlayerSheet.current != null
     if (!hosted) BackHandler(onBack = onClose)
-    val latestClose by rememberUpdatedState(onClose)
     // S-1007: the sleep timer's window, from the menu
     var sleepOpen by rememberSaveable { mutableStateOf(false) }
     val top = remember(colors, tint) { tint?.let { backdropTop(colors, it) } }
@@ -260,9 +253,6 @@ fun PhonePlayer(
     BoxWithConstraints(
         modifier
             .fillMaxSize()
-            .offset { IntOffset(0, drop.value.roundToInt()) }
-            // standing alone, pulled down from anywhere (what in it moves by a drag of its own keeps it) it closes
-            .then(if (hosted) Modifier else Modifier.pointerInput(drop) { pullDown(drop, scope, motion.spatial(NagMotion.PIXEL)) { latestClose() } })
             .drawBehind {
                 // with the whole window, under the system's bars too: the backdrop has no seam; a desktop window's
                 // caption bar over it has it too
@@ -303,8 +293,6 @@ fun PhonePlayer(
             info = info,
             actions = actions,
             onClose = onClose,
-            drop = drop,
-            hosted = hosted,
             artwork = artwork,
             stage = when {
                 lyrics != null && lyricsShown -> lyrics
@@ -336,6 +324,8 @@ fun PhonePlayer(
                 playing = info.playing, rate = info.rate, waveform = waveform,
                 marks = rememberChapterMarks(info.chapters, info.lengthMs), style = TimelineStyle.Phone,
                 label = stringResource(R.string.nag_music_waveform),
+                // 1.0.3: a file of an unknown length shows the time played alone
+                elapsed = ::playbackPositionMs,
             )
             // S-1104: the chapters of a podcast episode
             ChapterStrip(info.chapters, info.lengthMs, progress, actions::stepChapter, actions::seekToMs)
@@ -421,9 +411,6 @@ private class PlayerParts(
     val info: NowPlayingInfo,
     val actions: PlayerBarActions,
     val onClose: () -> Unit,
-    val drop: Animatable<Float, AnimationVector1D>,
-    /** In the phone's expanding sheet: a vertical drag on the artwork is the sheet's, not [drop]'s. */
-    val hosted: Boolean,
     val artwork: @Composable (Dp) -> Unit,
     /** The lyrics or the visualiser in the artwork's place; null: the artwork. */
     val stage: (@Composable (Modifier) -> Unit)?,
@@ -460,8 +447,9 @@ private fun Overline(from: PlaySource?, modifier: Modifier = Modifier) {
 
 /**
  * The artwork, as large as the room allows (it comes forward while playing, settles back paused): swiped sideways it
- * changes the track, down it closes the player; or the lyrics or the visualiser in its place, which take their own
- * touches.
+ * changes the track; a drag down is the sheet's or the window's around the player, which closes it. Or the lyrics or
+ * the visualiser in its place, which take their own touches. 1.0.3: on a phone the artwork flies from the mini
+ * player's as the player opens ([playerSharedElement]).
  */
 @Composable
 private fun Stage(parts: PlayerParts, modifier: Modifier) {
@@ -475,7 +463,6 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipe = remember { Animatable(0f) }
-    val drop = parts.drop
     // a swipe that changed the track: the artwork as it was when let go stays there and fades over the next one, which
     // is in its place at once, so the page never shows its background between them (the picture is kept while swiping)
     val picture = rememberGraphicsLayer()
@@ -497,14 +484,12 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                     CustomAccessibilityAction(close) { latestClose(); true },
                 )
             }
-            .pointerInput(parts.hosted) {
+            // only the sideways swipe is the artwork's: a drag down moves the sheet or the window around the player
+            .pointerInput(Unit) {
                 val sideways = with(density) { SWIPE.toPx() }
-                val down = with(density) { CLOSE.toPx() }
                 var dx = 0f
-                var dy = 0f
                 val start: (Offset) -> Unit = {
                     dx = 0f
-                    dy = 0f
                     // a swipe again before the last one's picture has gone: it goes now
                     if (handover?.isActive == true) {
                         handover?.cancel()
@@ -512,10 +497,9 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                     }
                 }
                 val end: () -> Unit = {
-                    val horizontal = abs(dx) > abs(dy)
                     val change: (() -> Unit)? = when {
-                        horizontal && dx <= -sideways -> latestActions::next
-                        horizontal && dx >= sideways -> latestActions::previous
+                        dx <= -sideways -> latestActions::next
+                        dx >= sideways -> latestActions::previous
                         else -> null
                     }
                     if (change != null) {
@@ -523,7 +507,6 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                             handing = true
                             leaving.snapTo(1f)
                             change()
-                            launch { drop.animateTo(0f, settle) }
                             try {
                                 leaving.animateTo(0f, motion.exit(NagMotion.MEDIUM))
                             } finally {
@@ -532,40 +515,15 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
                             swipe.snapTo(0f)
                         }
                     } else {
-                        scope.launch {
-                            // closing, it goes down from where it was let go
-                            if (!horizontal && dy >= down) {
-                                latestClose()
-                                return@launch
-                            }
-                            // back to rest on the spatial spring, both at once
-                            launch { swipe.animateTo(0f, settle) }
-                            drop.animateTo(0f, settle)
-                        }
+                        // back to rest on the spatial spring
+                        scope.launch { swipe.animateTo(0f, settle) }
                     }
                 }
-                val cancel: () -> Unit = {
-                    scope.launch {
-                        launch { swipe.animateTo(0f, settle) }
-                        drop.animateTo(0f, settle)
-                    }
-                }
-                if (parts.hosted) {
-                    // in the sheet only the sideways swipe is the artwork's: a drag down moves the sheet itself
-                    detectHorizontalDragGestures(onDragStart = start, onDragEnd = end, onDragCancel = cancel) { change, amount ->
-                        change.consume()
-                        dx += amount
-                        scope.launch { swipe.snapTo(dx) }
-                    }
-                } else {
-                    detectDragGestures(onDragStart = start, onDragEnd = end, onDragCancel = cancel) { change, amount ->
-                        change.consume()
-                        dx += amount.x
-                        dy += amount.y
-                        scope.launch {
-                            if (abs(dx) > abs(dy)) swipe.snapTo(dx) else drop.snapTo(dy.coerceAtLeast(0f))
-                        }
-                    }
+                val cancel: () -> Unit = { scope.launch { swipe.animateTo(0f, settle) } }
+                detectHorizontalDragGestures(onDragStart = start, onDragEnd = end, onDragCancel = cancel) { change, amount ->
+                    change.consume()
+                    dx += amount
+                    scope.launch { swipe.snapTo(dx) }
                 }
             },
         contentAlignment = Alignment.Center,
@@ -577,6 +535,8 @@ private fun Stage(parts: PlayerParts, modifier: Modifier) {
         val lift by animateDpAsState(if (parts.info.playing) dimens.gapXl else dimens.gapXs, motion.emphasized(), label = "lift")
         Box(
             Modifier
+                // 1.0.3: on a phone it flies from the mini player's artwork as the player opens, and back
+                .playerSharedElement(PlayerShared.Artwork, RoundedCornerShape(dimens.radiusCard))
                 .offset { IntOffset(if (handing) 0 else swipe.value.roundToInt(), 0) }
                 .graphicsLayer {
                     scaleX = scale
@@ -632,7 +592,8 @@ private fun TitleRow(parts: PlayerParts) {
                     color = colors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("phone-title"),
+                    // 1.0.3: on a phone it flies from the mini player's title as the player opens
+                    modifier = Modifier.playerSharedElement(PlayerShared.Title).testTag("phone-title"),
                 )
                 val words = if (parts.big) {
                     NagTheme.type.body.copy(fontSize = NagTheme.type.size(BIG_ARTIST_SP), lineHeight = NagTheme.type.size(BIG_ARTIST_SP * 1.35f))
@@ -727,46 +688,6 @@ private const val SWIPE_FADE = 0.6f
 /** A sideways swipe this long changes the track. */
 private val SWIPE = 80.dp
 
-/** A swipe down this long closes the player; or this fast. */
-private val CLOSE = 140.dp
-private val CLOSE_FLING = 1_000.dp
-
-/**
- * The big player standing alone (1.0.2) pulled down from anywhere on it: it follows the finger ([drop]) and closes
- * ([close]) past [CLOSE] or flung down; let go before, it springs back on [settle]. What moves by a drag of its own (the
- * seek bar, the lyrics, the artwork) keeps it: a drag it took is not this one's.
- */
-private suspend fun PointerInputScope.pullDown(
-    drop: Animatable<Float, AnimationVector1D>,
-    scope: CoroutineScope,
-    settle: AnimationSpec<Float>,
-    close: () -> Unit,
-) {
-    val tracker = VelocityTracker()
-    // the player moves with the finger: the way it went, not where it is on the player, gives the speed
-    var pulled = 0f
-    detectVerticalDragGestures(
-        onDragStart = {
-            tracker.resetTracking()
-            pulled = drop.value
-        },
-        onDragEnd = {
-            val velocity = tracker.calculateVelocity().y
-            if (drop.value >= CLOSE.toPx() || (velocity >= CLOSE_FLING.toPx() && drop.value > 0f)) {
-                close()
-            } else {
-                scope.launch { drop.animateTo(0f, settle, initialVelocity = velocity) }
-            }
-        },
-        onDragCancel = { scope.launch { drop.animateTo(0f, settle) } },
-    ) { change, amount ->
-        change.consume()
-        pulled = (pulled + amount).coerceAtLeast(0f)
-        tracker.addPosition(change.uptimeMillis, Offset(0f, pulled))
-        scope.launch { drop.snapTo(pulled) }
-    }
-}
-
 /** The artwork and the rows under it grow no larger than this (a phone, a small tablet held upright). */
 private val ARTWORK_MAX = 560.dp
 private val CONTENT_MAX_WIDTH = 560.dp
@@ -808,8 +729,8 @@ private val RING = 1.5.dp
  * The phone player on the playback service; [onQueue] opens "Sıradaki" over it, [onFullScreenLyrics] the lyrics over
  * the whole window (S-1004; the line under the artwork too), [onFullScreenVisualizer] the visualiser (S-611),
  * [onEqualizer] the equaliser's page; [fullWindow]: the player has the whole window (a phone's). Nothing without music.
- * 1.0.2: also the big player of a tablet and a desktop window, which watches how far it is pulled down ([drop]) and
- * has a desktop window's caption bar above it ([captionAbove]).
+ * 1.0.2: also the big player of a tablet and a desktop window ([WindowPlayer], which pulls it down as a sheet), with a
+ * desktop window's caption bar above it ([captionAbove]).
  */
 @Composable
 fun PhonePlayerHost(
@@ -820,7 +741,6 @@ fun PhonePlayerHost(
     onFullScreenVisualizer: (() -> Unit)? = null,
     onEqualizer: (() -> Unit)? = null,
     fullWindow: Boolean = false,
-    drop: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
     captionAbove: Dp = 0.dp,
 ) {
     val context = LocalContext.current
@@ -872,7 +792,8 @@ fun PhonePlayerHost(
                 artist = media.artistName,
                 album = media.albumName,
                 format = path?.let { formatLine(it) },
-                lengthMs = media.length,
+                // 1.0.3: the player's length for a file the library has none for
+                lengthMs = rememberPlayingLength(media, nowPlaying.playing),
                 playing = nowPlaying.playing,
                 rating = key?.let { stats[it]?.rating ?: 0 },
                 chapters = rememberPlayingChapters(),
@@ -912,7 +833,6 @@ fun PhonePlayerHost(
             onShare = { share(context, scope, media) },
             onEqualizer = onEqualizer,
             edgeToEdge = fullWindow,
-            drop = drop,
             captionAbove = captionAbove,
         )
     }

@@ -20,6 +20,7 @@ import org.videolan.tools.KEY_SAFE_MODE_PIN
 import org.videolan.tools.KEY_SET_LOCALE
 import org.videolan.tools.NAGMEDAR_LIBRARY_CHECKED_AT
 import org.videolan.tools.NAGMEDAR_LIBRARY_STAMP
+import org.videolan.tools.NAGMEDAR_LOCAL_NETWORK_ASKED
 import org.videolan.tools.NAGMEDAR_SAF_FOLDERS
 import org.videolan.tools.NAGMEDAR_WINDOW_BOUNDS
 import org.videolan.tools.PREF_TV_UI
@@ -63,6 +64,8 @@ object BackupSettings {
         NAGMEDAR_LIBRARY_CHECKED_AT,
         // this device's: the picked folders the lyrics editor was given
         *FolderGrants.keptKeys.toTypedArray(),
+        // this device's: whether it asked for the local network permission (Android 17)
+        NAGMEDAR_LOCAL_NETWORK_ASKED,
         // this session's: what was run lately, the last backup
         NagmedarPreferences.KEY_PALETTE_RECENT,
         KEY_LAST_BACKUP,

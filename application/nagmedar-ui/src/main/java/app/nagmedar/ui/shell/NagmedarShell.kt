@@ -1,12 +1,20 @@
 package app.nagmedar.ui.shell
 
+import androidx.activity.BackEventCompat
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -41,6 +50,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -51,6 +61,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
+import app.nagmedar.ui.theme.GlassThickness
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalGlassMode
 import app.nagmedar.ui.theme.LocalGlassSource
@@ -109,8 +120,9 @@ val LocalFloatingPlayer = staticCompositionLocalOf { false }
  * bottom bar's colour continues behind the buttons and stays there, a rule over it, when the bars
  * slide away; on tablets and DeX the chrome colour lies there; with the keyboard up there is none.
  * The screens' bottom padding includes it on a phone, full pages too. Tab and TalkBack go top bar,
- * navigation, content, player, a phone's bottom bar last. [chromeGlass]: the phone's chrome for the
- * user's glass decision (off, [ChromeGlass.Solid], in the product).
+ * navigation, content, player, a phone's bottom bar last. [chromeGlass]: the phone's chrome, by the
+ * user's decision of 6 Nov the bottom one on one glass ([ChromeGlass.Bottom]), which is off while the
+ * expanded player or a page covers the window: nothing is blurred under their colour.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -133,8 +145,8 @@ fun NagmedarShell(
     contentOnly: Boolean = false,
     floatingPlayer: Boolean = false,
     glass: Boolean = false,
-    /** 1.0.3: the phone's chrome on glass, for the user's decision (a debuggable build's walk only); solid in the product. */
-    chromeGlass: ChromeGlass = ChromeGlass.Solid,
+    /** 1.0.3: the phone's chrome on glass, the user's decision of 6 Nov (B); a debuggable build's walk compares the others. */
+    chromeGlass: ChromeGlass = ChromeGlass.Product,
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
@@ -183,11 +195,22 @@ fun NagmedarShell(
         }
     }
     // 1.0.3: the predictive Back gesture seeks the same pops with the finger, as navigation 2.8 did; 2.10 would
-    // otherwise play its own (the page shrinking to 70 %). The swipe's edge does not change them
+    // otherwise play its own (the page shrinking to 70 %). Between the phone's tabs (Desktop Kit 2.3) its own:
+    // the tab left shrinks toward 90 % with the finger, leaning away from the edge the swipe came from, and
+    // Müzik rises behind it from 94 % ([tabBackEnter], [tabBackExit])
+    val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.() -> Boolean = remember(navigator) {
+        {
+            currentKind == NavKind.BottomBar && NavRules.tabBack(
+                Destination.fromRoute(initialState.destination.route),
+                Destination.fromRoute(targetState.destination.route),
+                currentKind,
+            )
+        }
+    }
     val predictivePopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> EnterTransition =
-        remember(popEnter) { { _ -> popEnter(this) } }
+        remember(popEnter, tabBack) { { _ -> if (tabBack(this)) tabBackEnter(currentMotion, currentTier) else popEnter(this) } }
     val predictivePopExit: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> ExitTransition =
-        remember(popExit) { { _ -> popExit(this) } }
+        remember(popExit, tabBack) { { edge -> if (tabBack(this)) tabBackExit(currentMotion, currentTier, edge) else popExit(this) } }
     // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
     // keyboard must also take room, as isImeVisible reads true until the first insets arrive
     val imeVisible = WindowInsets.isImeVisible
@@ -196,6 +219,13 @@ fun NagmedarShell(
     val view = LocalView.current
     val imeTakesRoom by remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
     val showBottomNav = !(imeVisible && imeTakesRoom)
+    // 1.0.3: gesture navigation, whose Back is a swipe from the window's side edges (the system keeps them for it);
+    // three-button navigation has no such edges
+    val gestures = WindowInsets.systemGestures
+    val edgeBack by remember(gestures, density) {
+        derivedStateOf { gestures.getLeft(density, LayoutDirection.Ltr) > 0 || gestures.getRight(density, LayoutDirection.Ltr) > 0 }
+    }
+    val currentEdgeBack by rememberUpdatedState(edgeBack)
     val scroll = remember { ShellScrollState() }
     val metrics = remember { ShellChromeMetrics() }
     val overlayHost = remember { ShellOverlayHost() }
@@ -207,10 +237,17 @@ fun NagmedarShell(
     // 1.0.3: the system's navigation bar at the window's bottom, which the root leaves to the shell (read while measuring)
     val rootInsets = LocalWindowRootInsets.current
     val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
-    // the phone's one bottom glass, for the user's decision: behind the mini player, the bottom bar and the band
+    // the phone's one bottom glass, the user's decision (B): behind the mini player, the bottom bar and the band; thick, so
+    // that the card's grey artist line and times keep 4.5:1 over a white cover
     val colors = NagTheme.colors
     val onBottomGlass = chromeGlass != ChromeGlass.Solid && navKind == NavKind.BottomBar && !contentOnly
-    val glassSurface: @Composable () -> Modifier = { Modifier.glass(NagGlass.chrome(colors), source = glassSource, mode = chromeMode) }
+    // not drawn while the expanded player or a page covers the window (as what it lies on): nothing is blurred under their
+    // colour. A layer's alpha, not the glass taken away: the blur keeps its source and is right again from the first frame
+    val glassSurface: @Composable () -> Modifier = {
+        Modifier
+            .graphicsLayer { alpha = if (overlayHost.expandProgress() >= 1f || overlayHost.windowCovered) 0f else 1f }
+            .glass(NagGlass.chrome(colors, GlassThickness.Thick), source = glassSource, mode = chromeMode)
+    }
     val bottomGlass: (@Composable () -> Modifier)? = if (onBottomGlass) glassSurface else null
     // 1.0.2: a page over a tablet's or a desktop's whole window (the big player) covers it: the bars stand aside
     val chromeAway = contentOnly || (navKind != NavKind.BottomBar && overlayHost.windowCovered)
@@ -246,7 +283,6 @@ fun NagmedarShell(
         if (!showBottomNav || navKind != NavKind.BottomBar) metrics.navPx = 0
         metrics.systemBottomPx = systemBottom
         overlayHost.systemBottomPx = systemBottom
-        overlayHost.onExpandStart = { scroll.showBars() }
         overlayHost.navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset() else 0f }
         overlayHost.rootView = view.rootView
     }
@@ -338,7 +374,11 @@ fun NagmedarShell(
                         // a solid card with its border, whatever passes beneath (1.0.1)
                         .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
                 ) {
-                    CompositionLocalProvider(LocalFloatingPlayer provides floating, LocalOnBottomGlass provides onBottomGlass) { player(navKind) }
+                    CompositionLocalProvider(
+                        LocalFloatingPlayer provides floating,
+                        LocalOnBottomGlass provides onBottomGlass,
+                        LocalBottomGlassSurface provides bottomGlass,
+                    ) { player(navKind) }
                 }
             },
             content = {
@@ -367,9 +407,13 @@ fun NagmedarShell(
                                 composable(destination.route) {
                                     // another tab's first page: Back goes to Müzik as it was left. First in the page, so
                                     // what the page opens (a detail, a selection) takes Back before it; not while the
-                                    // phone's player, whose handler is older, is open over it
+                                    // phone's player, whose handler is older, is open over it. 1.0.3: nor on a phone with
+                                    // gesture navigation, whose Back gesture the navigation plays with the finger
                                     if (destination != Destination.Music) {
-                                        BackHandler(enabled = NavRules.backToStart(destination, currentKind) && !playerOverState.value) {
+                                        BackHandler(
+                                            enabled = NavRules.backToStart(destination, currentKind) && !playerOverState.value &&
+                                                !NavRules.tabBackFollowsFinger(currentKind, currentEdgeBack),
+                                        ) {
                                             navigator.backToStart()
                                         }
                                     }
@@ -433,10 +477,14 @@ fun NagmedarShell(
 @Composable
 fun Modifier.floatingPlayerCard(): Modifier {
     val colors = NagTheme.colors
-    val shape = RoundedCornerShape(NagTheme.dimens.radiusCard.coerceAtLeast(12.dp))
+    val shape = RoundedCornerShape(floatingPlayerCorner)
     val fill = if (LocalOnBottomGlass.current) this.clip(shape) else this.clip(shape).background(colors.surfaceRaised, shape)
     return fill.border(1.dp, colors.borderStrong, shape)
 }
+
+/** The floating player card's corners ([floatingPlayerCard]); 1.0.3: the phone's full player grows out of this card. */
+internal val floatingPlayerCorner: Dp
+    @Composable get() = NagTheme.dimens.radiusCard.coerceAtLeast(12.dp)
 
 /**
  * What the phone's expanded player covers (1.0), while [covered]: not drawn (no overdraw, no blur
@@ -450,3 +498,37 @@ private fun Modifier.underPlayer(covered: Boolean): Modifier =
 
 /** Where a new screen grows from in the fade-through: a phone's, a tablet's (no movement on a desktop). */
 private fun screenScale(kind: NavKind): Float = if (kind == NavKind.BottomBar) NagMotion.PHONE_SCALE else NagMotion.TABLET_SCALE
+
+/** How long the phone's Back gesture between tabs is seeked over (the finger's part and the way out once let go). */
+private const val TAB_BACK_MILLIS = 300
+
+/** Where the tab left by the Back gesture shrinks toward ([tabBackExit]) and where Müzik rises from behind it ([tabBackEnter]). */
+internal const val TAB_BACK_SHRINK = 0.9f
+internal const val TAB_BACK_BEHIND = 0.94f
+
+/**
+ * 1.0.3 (Desktop Kit 2.3): the phone's predictive Back gesture from another tab's first page, Müzik's side: it
+ * rises from [TAB_BACK_BEHIND] and brightens behind the tab being left. Navigation seeks it with the finger, plays
+ * the rest once let go and runs it back on a cancel; with reduced motion nothing moves.
+ */
+internal fun tabBackEnter(motion: NagMotion, tier: MotionTier): EnterTransition =
+    if (motion.reduced || tier == MotionTier.Reduced) {
+        EnterTransition.None
+    } else {
+        scaleIn(tween(TAB_BACK_MILLIS, easing = NagMotion.Standard), initialScale = TAB_BACK_BEHIND) +
+            fadeIn(tween(TAB_BACK_MILLIS, easing = NagMotion.Standard))
+    }
+
+/**
+ * The tab being left by that gesture: with the finger it shrinks toward [TAB_BACK_SHRINK] and leans a twentieth of
+ * its width away from the edge the swipe came from ([swipeEdge]), whole until the last tenth of the way, where it
+ * fades; as a detail does under the same gesture. With reduced motion nothing moves.
+ */
+internal fun tabBackExit(motion: NagMotion, tier: MotionTier, swipeEdge: Int): ExitTransition {
+    if (motion.reduced || tier == MotionTier.Reduced) return ExitTransition.None
+    val away = if (swipeEdge == BackEventCompat.EDGE_RIGHT) -1 else 1
+    val lastTenth = Easing { fraction -> ((fraction - 0.9f) / 0.1f).coerceIn(0f, 1f) }
+    return scaleOut(tween(TAB_BACK_MILLIS, easing = LinearEasing), targetScale = TAB_BACK_SHRINK) +
+        slideOutHorizontally(tween(TAB_BACK_MILLIS, easing = LinearEasing)) { width -> away * width / 20 } +
+        fadeOut(tween(TAB_BACK_MILLIS, easing = lastTenth))
+}

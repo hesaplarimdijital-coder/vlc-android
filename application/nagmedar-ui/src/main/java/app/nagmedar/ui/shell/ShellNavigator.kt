@@ -61,6 +61,16 @@ object NavRules {
     /** Back on [current] goes to Müzik, the start, rather than out of the tab: another tab's first page. */
     fun backToStart(current: Destination, kind: NavKind): Boolean = current != Destination.Music && isTab(current, kind)
 
+    /** From [from], another tab's first page, back [to] Müzik ([backToStart]): what the phone's Back gesture between tabs plays (1.0.3). */
+    fun tabBack(from: Destination, to: Destination, kind: NavKind): Boolean = to == Destination.Music && backToStart(from, kind)
+
+    /**
+     * 1.0.3 (Desktop Kit 2.3): Back from another tab's first page follows the finger (the navigation plays it with
+     * the gesture, back to Müzik) on a phone with gesture navigation ([edgeBack]: the window's side edges take
+     * the Back gesture). Three-button navigation's Back, and every Back wider up, the shell takes as before.
+     */
+    fun tabBackFollowsFinger(kind: NavKind, edgeBack: Boolean): Boolean = kind == NavKind.BottomBar && edgeBack
+
     /** The top bar's back arrow (phone and rail): on every page that is not a tab's first page. */
     fun showsBack(current: Destination, kind: NavKind): Boolean = kind != NavKind.Sidebar && !isTab(current, kind)
 
