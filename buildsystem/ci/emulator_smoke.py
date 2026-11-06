@@ -267,6 +267,9 @@ class Smoke:
         else:
             raise RuntimeError("adb install failed")
         self.sh("pm grant %s android.permission.POST_NOTIFICATIONS" % self.pkg)
+        # Android 17: a build that targets 37 reaches the walk's feed (10.0.2.2, the local network) and the Network page's
+        # servers only with the local network permission; elsewhere the grant is refused and changes nothing
+        self.sh("pm grant %s android.permission.ACCESS_LOCAL_NETWORK" % self.pkg)
         # what was installed: a release-type build (personal) is neither debuggable nor profileable
         dump = self.sh("dumpsys package %s" % self.pkg, timeout=60)
         keep = [l.strip() for l in dump.splitlines() if re.match(r"\s*(versionCode|versionName|pkgFlags)=", l)]

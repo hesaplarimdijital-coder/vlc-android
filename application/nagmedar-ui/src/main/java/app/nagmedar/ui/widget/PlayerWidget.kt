@@ -7,15 +7,21 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.SizeF
+import android.view.Display
 import android.widget.RemoteViews
 import androidx.annotation.LayoutRes
 import app.nagmedar.ui.NagmedarActivity
 import app.nagmedar.ui.R
 import app.nagmedar.ui.notify.NotificationIds
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -106,23 +112,40 @@ internal object PlayerWidgets {
         last = state
         if (ids == null || ids.isEmpty()) return
         val path = state.coverPath
-        if (path != coverOf) {
+        val side = WidgetCovers.sidePx(context.resources.displayMetrics.density)
+        val key = path?.let { "$it@$side" }
+        if (key != coverOf) {
             // kept only once read: a draw cancelled meanwhile reads it again
-            cover = path?.let { withContext(Dispatchers.IO) { runCatching { AudioUtil.readCoverBitmap(Uri.decode(it), COVER_PX) }.getOrNull() } }
-            coverOf = path
+            cover = path?.let { withContext(Dispatchers.IO) { runCatching { readCover(it, side) }.getOrNull() } }
+            coverOf = key
         }
+        // Android 17: an update whose pictures weigh more than the screen allows is refused (the app's targeting 37) or
+        // logged; the cover is one picture shared by both layouts, counted once
+        val shown = cover?.takeIf { it.allocationByteCount <= WidgetCovers.screenBudget(context) }
+        ids.forEach { id ->
+            val sent = runCatching { manager.updateAppWidget(id, remoteViews(context, manager, id, state, shown)) }
+            // refused all the same: the text and the buttons, with the placeholder, rather than a widget left behind
+            if (sent.isFailure && shown != null) runCatching { manager.updateAppWidget(id, remoteViews(context, manager, id, state, null)) }
+        }
+    }
+
+    /** The widget [id]'s views: both layouts by size (Android 12 and later), else the one its height asks for. */
+    private fun remoteViews(context: Context, manager: AppWidgetManager, id: Int, state: WidgetState, cover: Bitmap?): RemoteViews {
         val bar = views(context, R.layout.nagmedar_widget_bar, state, cover)
         val tall = views(context, R.layout.nagmedar_widget_cover, state, cover)
-        ids.forEach { id ->
-            val views = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                RemoteViews(mapOf(SizeF(180f, 40f) to bar, SizeF(180f, TALL_DP.toFloat()) to tall))
-            } else {
-                // before Android 12 the size is the launcher's word: the cover from about two rows
-                val height = manager.getAppWidgetOptions(id).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-                if (height >= TALL_DP) tall else bar
-            }
-            runCatching { manager.updateAppWidget(id, views) }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            RemoteViews(mapOf(SizeF(180f, 40f) to bar, SizeF(180f, TALL_DP.toFloat()) to tall))
+        } else {
+            // before Android 12 the size is the launcher's word: the cover from about two rows
+            val height = manager.getAppWidgetOptions(id).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            if (height >= TALL_DP) tall else bar
         }
+    }
+
+    /** The cover at [path] (a file or a web address) as the widget draws it: its centred square at most [side] px. */
+    private fun readCover(path: String, side: Int): Bitmap? {
+        val source = AudioUtil.readCoverBitmap(Uri.decode(path), side) ?: return null
+        return WidgetCovers.fitted(source, side)
     }
 
     private fun views(context: Context, @LayoutRes layout: Int, state: WidgetState, cover: Bitmap?): RemoteViews {
@@ -152,8 +175,63 @@ internal object PlayerWidgets {
 
     /** From this height (dp) the widget shows its cover beside the text. */
     private const val TALL_DP = 100
-    private const val COVER_PX = 256
     private const val OPEN_REQUEST = NotificationIds.WIDGET_TAP
+}
+
+/** How a cover of a picture is cut for the widget: the centred square of [side] px at ([left], [top]), drawn [target] px wide. */
+internal data class CoverFit(val left: Int, val top: Int, val side: Int, val target: Int)
+
+/**
+ * Android 17: the pictures a widget update carries. The system refuses an update (for an app
+ * targeting 37; it logs it before) whose bitmaps, every layout's together, weigh more than 1.5
+ * screens of 4-byte pixels; the cover is drawn at its place's size (the 4×2 layout's 96 dp, the
+ * row's 40 dp scaled down from it), its centred square as the layouts' centerCrop shows it, at 2
+ * bytes a pixel when it has no transparency.
+ */
+internal object WidgetCovers {
+    /** The cover's largest place in the widget (the 4×2 layout's), in dp. */
+    const val COVER_DP = 96
+
+    /** What the system allows when the screen's size cannot be read (its own fallback). */
+    const val FALLBACK_BYTES = 15_000_000L
+
+    /** Bytes the bitmaps of one update may weigh on a screen of [width]×[height] pixels: 6 × its pixels. */
+    fun budget(width: Int, height: Int): Long = if (width > 0 && height > 0) 6L * width * height else FALLBACK_BYTES
+
+    /** The cover's side in pixels at [density]. */
+    fun sidePx(density: Float): Int = (COVER_DP * density.coerceAtLeast(1f)).roundToInt()
+
+    /** The centred square of a [width]×[height] picture, drawn at most [sidePx] wide; null for an empty one. */
+    fun fit(width: Int, height: Int, sidePx: Int): CoverFit? {
+        if (width <= 0 || height <= 0 || sidePx <= 0) return null
+        val side = minOf(width, height)
+        return CoverFit((width - side) / 2, (height - side) / 2, side, minOf(side, sidePx))
+    }
+
+    /** Bytes of a square cover [target] pixels wide: 2 a pixel when [opaque] (RGB_565), else 4. */
+    fun bytes(target: Int, opaque: Boolean): Long = target.toLong() * target * if (opaque) 2 else 4
+
+    /**
+     * The budget of the device's own screen, the smaller of its display mode's pixels and the app's metrics (a phone
+     * scaled down from its panel's resolution counts the scaled screen).
+     */
+    fun screenBudget(context: Context): Long {
+        val mode = runCatching { context.getSystemService(DisplayManager::class.java)?.getDisplay(Display.DEFAULT_DISPLAY)?.mode }.getOrNull()
+        val metrics = context.resources.displayMetrics
+        return minOf(mode?.let { budget(it.physicalWidth, it.physicalHeight) } ?: FALLBACK_BYTES, budget(metrics.widthPixels, metrics.heightPixels))
+    }
+
+    /** [source] cut to its [fit] and drawn on a new bitmap: RGB_565 without transparency. */
+    fun fitted(source: Bitmap, sidePx: Int): Bitmap? {
+        val fit = fit(source.width, source.height, sidePx) ?: return null
+        // a hardware bitmap is not drawn on a software canvas
+        val readable = if (source.config == Bitmap.Config.HARDWARE) source.copy(Bitmap.Config.ARGB_8888, false) ?: return null else source
+        val opaque = !readable.hasAlpha()
+        val out = Bitmap.createBitmap(fit.target, fit.target, if (opaque) Bitmap.Config.RGB_565 else Bitmap.Config.ARGB_8888)
+        val from = Rect(fit.left, fit.top, fit.left + fit.side, fit.top + fit.side)
+        Canvas(out).drawBitmap(readable, from, Rect(0, 0, fit.target, fit.target), Paint(Paint.FILTER_BITMAP_FLAG))
+        return out
+    }
 }
 
 /**

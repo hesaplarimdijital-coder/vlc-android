@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.NagDialog
 import androidx.fragment.app.FragmentActivity
+import app.nagmedar.network.LocalNetworkState
 import app.nagmedar.playback.RendererKind
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
@@ -74,6 +75,10 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.hasPrecisePointer
+import app.nagmedar.ui.network.LocalNetworkAccess
+import app.nagmedar.ui.network.LocalNetworkHost
+import app.nagmedar.ui.network.localNetworkWords
+import app.nagmedar.ui.network.rememberLocalNetworkState
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
@@ -119,7 +124,21 @@ private fun CastPickerHost(request: CastRequest, onDismiss: () -> Unit) {
     val nowPlaying = rememberNowPlaying()
     val payload = request.payload
     val subject = payload?.first ?: nowPlaying.media
-    val view = CastPicker.view(enabled, lan, found, active, discovering.value, searchedMs)
+    // Android 17: the devices are looked for and reached only with the local network permission
+    val access = rememberLocalNetworkState()
+    val view = CastPicker.view(enabled, lan, found, active, discovering.value, searchedMs, permitted = access == LocalNetworkState.Granted)
+    // the question the first time the picker needs it; once given, the search starts again from its beginning
+    LaunchedEffect(view == CastPickerView.NoPermission) {
+        if (view == CastPickerView.NoPermission && access == LocalNetworkState.Ask) LocalNetworkAccess.ask(context)
+    }
+    var unanswered by remember { mutableStateOf(access != LocalNetworkState.Granted) }
+    LaunchedEffect(access) {
+        if (access == LocalNetworkState.Granted && unanswered) {
+            RendererDelegate.restart()
+            searchFrom = SystemClock.elapsedRealtime()
+        }
+        unanswered = access != LocalNetworkState.Granted
+    }
     CastPickerSurface(
         view = view,
         active = active,
@@ -146,6 +165,8 @@ private fun CastPickerHost(request: CastRequest, onDismiss: () -> Unit) {
             RendererDelegate.restart()
             searchFrom = SystemClock.elapsedRealtime()
         },
+        access = access,
+        onAllowLocalNetwork = { LocalNetworkAccess.ask(context) },
     )
 }
 
@@ -166,6 +187,8 @@ fun showCastPicker(activity: FragmentActivity) {
         NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
             // the view goes after the click that closed it
             CastPickerDialog(CastRequest()) { root.post { root.removeView(view) } }
+            // Android 17: the local network permission's question, from this window
+            LocalNetworkHost()
         }
     }
     root.addView(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -192,6 +215,9 @@ fun CastPickerSurface(
     onTurnOn: () -> Unit = {},
     onWifiSettings: () -> Unit = {},
     onSearchAgain: () -> Unit = {},
+    /** Android 17: the local network permission (what [CastPickerView.NoPermission] says), and the way to give it. */
+    access: LocalNetworkState = LocalNetworkState.Granted,
+    onAllowLocalNetwork: () -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -226,7 +252,7 @@ fun CastPickerSurface(
                 NagIconButton(NagIcons.Close, stringResource(R.string.nag_cast_close), onClose)
             }
             notices.forEach { NoticeLine(it) }
-            PickerBody(view, active, onChoose, onThisDevice, onTurnOn, onWifiSettings, onSearchAgain)
+            PickerBody(view, active, onChoose, onThisDevice, onTurnOn, onWifiSettings, onSearchAgain, access, onAllowLocalNetwork)
         }
     }
 }
@@ -245,6 +271,8 @@ private fun ColumnScope.PickerBody(
     onTurnOn: () -> Unit,
     onWifiSettings: () -> Unit,
     onSearchAgain: () -> Unit,
+    access: LocalNetworkState,
+    onAllowLocalNetwork: () -> Unit,
 ) {
     val colors = NagTheme.colors
     val first = remember { FocusRequester() }
@@ -279,6 +307,19 @@ private fun ColumnScope.PickerBody(
             primary = StateAction(stringResource(R.string.nag_net_wifi_settings), onWifiSettings),
             dense = true,
         )
+        CastPickerView.NoPermission -> {
+            // what the permission is for, in the app's words, and the way to give it
+            val words = localNetworkWords(access) ?: localNetworkWords(LocalNetworkState.Ask)!!
+            StatePanel(
+                if (access == LocalNetworkState.Ask) StateTone.Info else StateTone.Warning,
+                NagIcons.Shield,
+                stringResource(words.title),
+                Modifier.align(Alignment.CenterHorizontally).testTag("cast-permission"),
+                description = stringResource(words.description),
+                primary = StateAction(stringResource(words.action), onAllowLocalNetwork),
+                dense = true,
+            )
+        }
         CastPickerView.Searching -> Searching()
         CastPickerView.Empty -> StatePanel(
             StateTone.Neutral,

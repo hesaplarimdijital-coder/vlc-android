@@ -98,6 +98,7 @@ import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
 import app.nagmedar.ui.music.WindowPlayer
 import app.nagmedar.ui.network.LibVlcDialogHost
+import app.nagmedar.ui.network.LocalNetworkHost
 import app.nagmedar.ui.network.NetworkScreen
 import app.nagmedar.ui.onboarding.FirstRunHost
 import app.nagmedar.ui.onboarding.rememberAccessController
@@ -661,6 +662,8 @@ private fun NagmedarMain(
     }
     // S-1301: libVLC's sign-ins, questions and progress that no page answers, while this window is in front
     LibVlcDialogHost()
+    // Android 17: the local network permission's question, when a page needs the local network
+    LocalNetworkHost()
     // VLC's "Resume playback: Ask" for music, radio and streams: their question, which nothing answered here
     ResumePromptHost()
     if (paletteOpen) {

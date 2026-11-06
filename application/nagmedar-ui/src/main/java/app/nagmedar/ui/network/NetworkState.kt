@@ -162,6 +162,9 @@ enum class LanState {
 
     /** Network shares were turned off (the first run, or VLC's "Browse the network" setting). */
     Disabled,
+
+    /** Android 17: the app may not reach the local network (its permission was not given). */
+    NoPermission,
 }
 
 /** S-1301: what the servers' list shows of the network: what was found, and whether it is still looked for. */
