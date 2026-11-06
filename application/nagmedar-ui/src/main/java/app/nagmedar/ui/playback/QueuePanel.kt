@@ -3,6 +3,7 @@ package app.nagmedar.ui.playback
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -398,7 +399,9 @@ fun rememberQueuePanelState(): QueuePanelState = rememberSaveable(saver = QueueP
  * title, what plays now, its hint) it follows the finger and closes past a third of the window or
  * on a fling down, as the sheets do; short of that it springs back. A row's handle still moves the
  * row and a row swiped toward the start still goes. 1.0.3: its colour reaches behind the system's
- * navigation bar (the three buttons), its rows end above it.
+ * navigation bar (the three buttons), its rows end above it. Let go to close, it carries on down at
+ * the finger's speed and is gone the moment it is out (Desktop Kit 2.3), as the sheets; closed by
+ * Back or its arrow it goes down from where it is.
  */
 @Composable
 fun QueuePage(
@@ -416,13 +419,15 @@ fun QueuePage(
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val visible = remember { MutableTransitionState(false) }
     visible.targetState = open
-    AnimatedVisibility(visible, modifier = modifier, enter = pageEnter(motion), exit = motion.sheetExit()) {
+    // 1.0.2: pulled down from its list's top it follows the finger and closes as a sheet does
+    val latestClose by rememberUpdatedState(onClose)
+    val drag = rememberSheetDrag { latestClose() }
+    // opened again (also while still going down): back at its place
+    LaunchedEffect(open) { if (open) drag.reset() }
+    // 1.0.3: carried out by the finger it is gone already: nothing is left to slide down
+    val exit = if (drag.carriedOut) ExitTransition.None else motion.sheetExit()
+    AnimatedVisibility(visible, modifier = modifier, enter = pageEnter(motion), exit = exit) {
         val back = rememberDetailMotion(open = true)
-        // 1.0.2: pulled down from its list's top it follows the finger and closes as a sheet does
-        val latestClose by rememberUpdatedState(onClose)
-        val drag = rememberSheetDrag { latestClose() }
-        // opened again while still going down
-        LaunchedEffect(open) { if (open) drag.reset() }
         // up and at rest, no Back gesture or drag moving it: the shell may stop drawing what is under it
         val covers by remember(back, visible, drag) { derivedStateOf { visible.isIdle && visible.currentState && back.covered && !drag.pulled } }
         WindowPage(covers = covers)

@@ -27,7 +27,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusEventModifierNode
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequesterModifierNode
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.requestFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -51,14 +55,20 @@ import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.input.consumePointerUntilAllUp
+import app.nagmedar.ui.shell.LocalShellOverlayHost
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 /** Visual state of an interactive element: hover, press and keyboard focus. */
 data class InteractionState(val hovered: Boolean, val pressed: Boolean, val focused: Boolean)
@@ -186,7 +196,9 @@ private val PressRelease = spring(dampingRatio = 0.75f, stiffness = 1200f, visib
 
 /**
  * Click handling shared by all Nağmedar controls: hand cursor, hover tracking, no ripple
- * (the background states above replace it), keyboard focus with a visible ring.
+ * (the background states above replace it), keyboard focus with a visible ring. 1.0.3 (Desktop
+ * Kit 2.3): the shell remembers which of them has the keyboard focus ([focusMemory]), so a sheet,
+ * a page over the window or the palette gives it back there when it closes.
  */
 fun Modifier.nagClickable(
     interactionSource: MutableInteractionSource,
@@ -203,6 +215,7 @@ fun Modifier.nagClickable(
     .pointerHoverIcon(PointerIcon.Hand)
     .hoverable(interactionSource, enabled)
     .then(if (enabled) Modifier.ignoreSecondaryButtons() else Modifier)
+    .focusMemory()
     .then(
         if (onDoubleClick == null) {
             Modifier.clickable(
@@ -236,6 +249,69 @@ fun Modifier.ignoreSecondaryButtons(): Modifier = pointerInput(Unit) {
         }
     }
 }
+
+/**
+ * 1.0.3 (Desktop Kit 2.3): which of the app's controls has the keyboard focus, so that a layer over
+ * the shell (a sheet, a page over the window, the palette) gives the focus back where it was when it
+ * closes; without it the focus is nowhere once the layer has gone and Tab starts again from the
+ * window's first control. Kept by the shell's overlay host; outside the shell nothing is remembered.
+ * Keyboard and TalkBack users (DeX) are the ones it is for: by touch nothing has the keyboard focus.
+ */
+internal class FocusMemory {
+    /**
+     * The controls that took the focus lately, the latest last: a menu's pop-up window takes it from the window's
+     * control and gives it no word back when it goes, so the control before it is still known.
+     */
+    private val recent = ArrayDeque<WeakReference<FocusMemoryNode>>()
+
+    fun focused(node: FocusMemoryNode) {
+        recent.removeAll { it.get().let { kept -> kept == null || kept === node } }
+        recent.addLast(WeakReference(node))
+        while (recent.size > KEPT) recent.removeFirst()
+    }
+
+    /** The control that has the keyboard focus now, if it is one that remembers it ([focusMemory]). */
+    fun current(): FocusMemoryNode? =
+        recent.asReversed().firstNotNullOfOrNull { ref -> ref.get()?.takeIf { it.isAttached && it.isFocused } }
+
+    private companion object {
+        const val KEPT = 8
+    }
+}
+
+/** [focusMemory]'s node: tells the shell's [FocusMemory] when the control after it takes the focus, and gives it back. */
+internal class FocusMemoryNode :
+    Modifier.Node(), FocusEventModifierNode, FocusRequesterModifierNode, CompositionLocalConsumerModifierNode {
+    var isFocused = false
+        private set
+
+    override fun onFocusEvent(focusState: FocusState) {
+        isFocused = focusState.isFocused
+        if (isFocused) currentValueOf(LocalShellOverlayHost)?.focusMemory?.focused(this)
+    }
+
+    /**
+     * Gives the keyboard focus back to the control, on the control's own scope once the change under
+     * way is applied (the layer that closed may be leaving the composition, its scope with it).
+     */
+    fun restore() {
+        if (!isAttached) return
+        coroutineScope.launch { if (isAttached) requestFocus() }
+    }
+}
+
+private object FocusMemoryElement : ModifierNodeElement<FocusMemoryNode>() {
+    override fun create() = FocusMemoryNode()
+
+    override fun update(node: FocusMemoryNode) = Unit
+
+    override fun hashCode(): Int = 0x6d656d6f
+
+    override fun equals(other: Any?): Boolean = other === this
+}
+
+/** Lets the shell give the keyboard focus back to the focus target after this modifier (1.0.3, [FocusMemory]). */
+internal fun Modifier.focusMemory(): Modifier = this then FocusMemoryElement
 
 /**
  * The keys of an item in a list (S-407), as desktops have them: Enter (or the number pad's) opens
