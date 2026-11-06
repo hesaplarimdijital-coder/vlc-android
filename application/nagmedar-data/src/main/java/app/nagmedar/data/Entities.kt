@@ -271,9 +271,10 @@ data class MediaTechEntry(
 
 /**
  * S-803: a music file as the engine's probe read it (codec, rate, depth, channels, DSD, bitrate,
- * the composer), kept until the file changes (size or modification time) or the probe's format
- * does ([probeVersion]). The library's filters and smart lists read it; the medialibrary keeps
- * the rest of the tags.
+ * the composer; 1.0.3: its ReplayGain tags, the gains in dB and the peaks at full scale 1.0, null
+ * where the file has none), kept until the file changes (size or modification time) or the probe's
+ * format does ([probeVersion]). The library's filters and smart lists read it, the inspector shows
+ * it; the medialibrary keeps the rest of the tags.
  */
 @Entity(tableName = "audio_tech")
 data class AudioTechEntry(
@@ -292,6 +293,10 @@ data class AudioTechEntry(
     @ColumnInfo(name = "duration_ms") val durationMs: Long,
     val composer: String?,
     @ColumnInfo(name = "probed_at") val probedAt: Long = 0,
+    @ColumnInfo(name = "track_gain_db") val trackGainDb: Double? = null,
+    @ColumnInfo(name = "track_peak") val trackPeak: Double? = null,
+    @ColumnInfo(name = "album_gain_db") val albumGainDb: Double? = null,
+    @ColumnInfo(name = "album_peak") val albumPeak: Double? = null,
 )
 
 /**

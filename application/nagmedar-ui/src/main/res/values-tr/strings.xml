@@ -2387,6 +2387,11 @@
     <string name="nag_inspector_not_playing">Seçili parça çalmıyor; burada çalan parça görünüyor.</string>
     <string name="nag_inspector_channels">Kanallar</string>
     <string name="nag_inspector_folder">Klasör</string>
+    <!-- 1.0.3: the inspector's ReplayGain rows; "—" where the file has no such tag -->
+    <string name="nag_inspector_track_gain">Parça kazancı</string>
+    <string name="nag_inspector_track_peak">Parça tepesi</string>
+    <string name="nag_inspector_album_gain">Albüm kazancı</string>
+    <string name="nag_inspector_album_peak">Albüm tepesi</string>
     <string name="nag_columns_move_left">Sola taşı</string>
     <string name="nag_columns_move_right">Sağa taşı</string>
     <string name="nag_columns_reset">Sütunları sıfırla</string>
