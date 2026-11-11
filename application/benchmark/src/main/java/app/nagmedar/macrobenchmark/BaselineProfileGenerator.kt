@@ -7,6 +7,7 @@ import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Configurator
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
@@ -38,6 +39,9 @@ class BaselineProfileGenerator {
 
     @Before
     fun prepare() {
+        // 1.0.3: a playing track's seek bar and times never leave the screen idle: each look at it (and each wait for
+        // it) would take the default ten seconds, and a bar awaited for fifteen was looked for twice
+        Configurator.getInstance().setWaitForIdleTimeout(IDLE_MS)
         // the first run and the subscription on the tablet's screen, where its dialog is a window
         // of the app's; each test then sets the screen it walks
         screen(TABLET)
@@ -88,11 +92,12 @@ class BaselineProfileGenerator {
         val list = waitFor { device.findObject(By.res("music"))?.findObject(By.scrollable(true)) } ?: return device.missing("music-list")
         trace("music: the table")
         passOver {
-            list.setGestureMargin(device.displayWidth / 5)
+            list.insideTheBars(device)
             repeat(2) { list.fling(Direction.DOWN) }
             list.fling(Direction.UP)
             device.waitForIdle()
         }
+        device.freshScreen()
         // a track by its title (the phone's rows also hold a ⋯ button, which opens a sheet instead):
         // the CI run's tracks are "Profile track …" (emulator.yml), another library's first row; a
         // row of the table, not a card of the "recently played" shelf above it, which plays nothing.
@@ -108,20 +113,32 @@ class BaselineProfileGenerator {
                         .let { rows -> rows.getOrNull(rows.size / 2) }
                         ?: music.findObject(By.scrollable(true))?.findObject(By.clickable(true))
                 }
-            }?.click()
+            }?.let { row ->
+                val at = row.visibleCenter
+                trace("music: a tap at ${at.x},${at.y}")
+                row.click()
+            }
         }
         // the phone's mini player opens the phone player (its first clickable part, the track's
         // title, does); 1.0.2: a tablet's transport bar opens the big player over the window
         // with its "open the player" button
         passOver {
-            val open = waitFor(15_000) { device.findObject(By.res("transport-open-player")) ?: device.findObject(By.res("mini-player")) }
+            val open = waitFor(15_000) {
+                device.freshScreen()
+                device.findObject(By.res("transport-open-player")) ?: device.findObject(By.res("mini-player"))
+            }
+            if (open == null) device.missing("player-bar")
             if (open?.resourceName?.endsWith("transport-open-player") == true) {
                 open.click()
             } else {
                 (open?.findObject(By.clickable(true)) ?: open)?.click()
             }
         }
-        if (waitFor(10_000) { device.findObject(By.res("phone-player")) } != null) {
+        val player = waitFor(10_000) {
+            device.freshScreen()
+            device.findObject(By.res("phone-player"))
+        }
+        if (player != null) {
             trace("music: the phone player")
             device.waitForIdle()
             device.pressBack()
@@ -156,7 +173,7 @@ class BaselineProfileGenerator {
         val list = waitFor { device.findObject(By.res("radio-list"))?.findObject(By.scrollable(true)) ?: device.findObject(By.res("radio-list")) }
         if (list != null) passOver {
             trace("radio: the stations")
-            list.setGestureMargin(device.displayWidth / 5)
+            list.insideTheBars(device)
             list.fling(Direction.DOWN)
         } else {
             device.missing("radio-list")
@@ -184,6 +201,7 @@ class BaselineProfileGenerator {
         val TABLET = Screen("tablet", "2560x1600", 320)
         const val ITERATIONS = 6
         const val STABLE_ITERATIONS = 2
+        const val IDLE_MS = 3_000L
     }
 }
 
@@ -209,7 +227,37 @@ private fun UiDevice.missing(element: String) {
         if (!file.exists()) {
             dir.mkdirs()
             dumpWindowHierarchy(file)
+            // 1.0.3: what the screen showed and what the system knew of the playback then, beside the hierarchy (which
+            // is UiAutomator's copy of the screen, and may be older than the screen)
+            try {
+                takeScreenshot(File(dir, "missing-$screenName-$element.png"))
+                File(dir, "missing-$screenName-$element-session.txt").writeText(executeShellCommand("dumpsys media_session"))
+            } catch (e: Exception) {
+                Log.w(TAG, "$screenName: missing: $element: nothing more kept: $e")
+            }
         }
+    }
+}
+
+/**
+ * 1.0.3: a list's swipes kept inside its own part of the screen. A phone's list reaches behind the bottom bar, the
+ * mini player and the system's navigation bar (the shell draws behind them): a swipe from its lower edge would start
+ * on the bar and scroll nothing.
+ */
+private fun UiObject2.insideTheBars(device: UiDevice) {
+    setGestureMargins(device.displayWidth / 5, device.displayHeight / 10, device.displayWidth / 5, device.displayHeight / 3)
+}
+
+/**
+ * 1.0.3: UiAutomator's copy of the screen forgotten, so that what it finds next is read from the app again: the copy
+ * is refreshed by the app's accessibility events, and a screen that changes much at once (a list that moved, a bar
+ * that came) has been seen to leave old rows in it. Setting the service's own settings again clears it.
+ */
+private fun UiDevice.freshScreen() {
+    passOver {
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val info = automation.serviceInfo ?: return@passOver
+        automation.serviceInfo = info
     }
 }
 

@@ -29,6 +29,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -175,8 +177,25 @@ fun <T> DenseTable(
     leading: (@Composable () -> Unit)? = null,
     /** 1.0.3 (Desktop Kit 2.3.0): the first rows arrive in turn on a phone ([rememberListAppear]); null: they are there. */
     rowAppear: ListAppear? = null,
+    /**
+     * 1.0.3: whether [leading] has something to show now. One that gets its content after the rows are on screen (the
+     * shelf's history, read once the kept list is drawn) had no height when the list was laid out: the list then takes
+     * the column titles for its first item and keeps them at the top, the leading item out of sight above them. Told
+     * here that it has come, a list still resting at its top shows it; one the user has scrolled stays where it is.
+     */
+    leadingPresent: (() -> Boolean)? = null,
 ) {
     val lead = leading.takeIf { reorder == null && !glassHeader }
+    if (lead != null && leadingPresent != null) {
+        LaunchedEffect(state, leadingPresent) {
+            snapshotFlow { leadingPresent() }.collect { present ->
+                // at its top: the leading item (0) or, while that had no height, the column titles (1)
+                if (present && state.firstVisibleItemIndex <= 1 && state.firstVisibleItemScrollOffset == 0 && !state.isScrollInProgress) {
+                    state.scrollToItem(0)
+                }
+            }
+        }
+    }
     val more = rowMoreButton && rowMenu != null
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens

@@ -57,6 +57,18 @@ class MediaRepository(private val context: Context) {
     /** 1.0.3: the Music's list [read] for [scope], kept for the next start. */
     suspend fun keepMusic(scope: String, read: MusicRead) = withContext(Dispatchers.IO) { MusicSnapshot.save(context, scope, read) }
 
+    /**
+     * 1.0.3: the tracks played last as they were kept on the device ([RecentKept]), found in the kept list of
+     * the Music; null when no list was kept (nothing to find them in), empty when no history was.
+     */
+    suspend fun keptRecent(): List<MediaWrapper>? = withContext(Dispatchers.IO) {
+        val music = MusicSnapshot.read(context, musicScope())?.media ?: return@withContext null
+        RecentKept.tracks(RecentKept.read(context), music)
+    }
+
+    /** 1.0.3: [tracks], the history just read, kept for the next start's shelf. */
+    suspend fun keepRecent(tracks: List<MediaWrapper>) = withContext(Dispatchers.IO) { RecentKept.save(context, tracks.map { it.id }) }
+
     /** 1.0.3: [tracks] of the Music read now, with their fingerprint (made off the main thread). */
     suspend fun musicRead(): MusicRead {
         val tracks = tracks(LibrarySection.Music)

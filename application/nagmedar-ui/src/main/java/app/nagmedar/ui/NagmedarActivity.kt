@@ -34,6 +34,7 @@ import app.nagmedar.ui.input.isMediaOrSubtitleType
 import app.nagmedar.ui.library.LibraryWatch
 import app.nagmedar.ui.library.MusicSnapshot
 import app.nagmedar.ui.library.NewDrives
+import app.nagmedar.ui.library.RecentKept
 import app.nagmedar.ui.notify.RemovedChannels
 import app.nagmedar.ui.perf.StartupPerf
 import app.nagmedar.ui.podcast.PodcastCenter
@@ -83,8 +84,14 @@ class NagmedarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        // 1.0.3: the Music's list kept from the last start is read while the window sets up, for its first frames
-        if (Build.FINGERPRINT != "robolectric") lifecycleScope.launch(Dispatchers.IO) { MusicSnapshot.preload(applicationContext) }
+        // 1.0.3: the Music's list kept from the last start is read while the window sets up, for its first frames;
+        // the phone's shelf of the tracks played last with it (the small file first: the list's first frame asks for both)
+        if (Build.FINGERPRINT != "robolectric") {
+            lifecycleScope.launch(Dispatchers.IO) {
+                RecentKept.preload(applicationContext)
+                MusicSnapshot.preload(applicationContext)
+            }
+        }
         if (savedInstanceState == null) {
             destination = intent?.getStringExtra(NAGMEDAR_EXTRA_DESTINATION)
             openPodcastOf(intent)

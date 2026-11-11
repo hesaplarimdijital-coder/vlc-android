@@ -2237,6 +2237,14 @@ class Smoke:
             # a cold start with the glass on: its first frames, read as soon as the window has drawn
             rel = self.cold_start()
             nodes = self.step("Glass B: a cold start", wait=1.0)
+            # 1.0.3: the tracks played last are kept with the list: the phone's shelf is over the rows from the start
+            # (the history, read after the kept list was drawn, used to leave it out of sight above the column titles)
+            shelf = self.by_id(nodes, "recent-shelf")
+            rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track")
+                    and not any(self.inside(n, x.b) for x in shelf)]
+            self.check("a cold start shows the shelf of the tracks played last over the Music's rows",
+                       bool(shelf) and bool(rows) and shelf[0].b[3] <= min(n.b[1] for n in rows),
+                       "shelf %s, first row %s" % (shelf[0].b if shelf else None, min((n.b[1] for n in rows), default=None)))
             bar = self.glass_boxes(nodes)["bar"]
             first = self.region(rel, bar, w) if bar and rel else None
             cold = self.glass_read(nodes, "cold start")

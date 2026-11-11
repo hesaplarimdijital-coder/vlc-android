@@ -99,6 +99,7 @@ import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.MediaSharing
 import app.nagmedar.ui.library.MusicRead
 import app.nagmedar.ui.library.MusicSnapshot
+import app.nagmedar.ui.library.RecentKept
 import app.nagmedar.ui.library.ScanState
 import app.nagmedar.ui.library.ShelfTitle
 import app.nagmedar.ui.library.TrackCard
@@ -329,13 +330,27 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     // window. Read on its own, off the main thread, again whenever the history changes while the screen is open; never
     // part of the library, which a new history would otherwise make again
     val access = LocalLibraryAccess.current
-    val recent = rememberRead<List<MediaWrapper>>(repository.lastRead, "recent", access?.media, access?.folders, access?.scopes) {
-        value = repository.recentAudio()
-        repository.historyChanges().collect { value = repository.recentAudio() }
+    // 1.0.3: with the kept list on screen in the first frames, the history's read would come after the rows: the tracks
+    // played last are kept too ([RecentKept]) and found in the kept list, so the shelf is there with it from the start
+    val recent = rememberRead<List<MediaWrapper>>(
+        repository.lastRead, "recent", access?.media, access?.folders, access?.scopes,
+        kept = { RecentKept.cached()?.let { ids -> MusicSnapshot.cached(repository.musicScope())?.let { RecentKept.tracks(ids, it.media) } } },
+    ) {
+        // the first frame came before the kept files were read: the kept shelf as soon as they are
+        if (value == null) repository.keptRecent()?.let { value = it }
+        suspend fun load() {
+            val fresh = repository.recentAudio()
+            value = fresh
+            repository.keepRecent(fresh)
+        }
+        load()
+        repository.historyChanges().collect { load() }
     }
     val compact = currentWidthClass() == WidthClass.Compact
     // on a phone the shelf is the list's first item, scrolling away with it; it alone reads (and follows) the history
     val shelf: (@Composable () -> Unit)? = if (compact) remember { @Composable { RecentShelf(recent.value.orEmpty()) } } else null
+    // 1.0.3: whether the shelf has tracks now, for the list: one that comes after the rows is shown, not left above them
+    val shelfPresent: (() -> Boolean)? = if (compact) remember { { !recent.value.isNullOrEmpty() } } else null
     // a wide window's Recent view; the same empty list on a phone, so that a new history recomposes nothing there
     val recentKeys = if (compact) emptyList() else recent.value.orEmpty().let { list -> remember(list) { list.mapNotNull { it.uri?.toString() } } }
     val tech by TrackTechIndex.tech.collectAsState()
@@ -387,7 +402,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
         MusicContent(library, scan, onAddFolder) { known ->
             MusicBrowser(
                 known, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
-                stats = stats, recent = recentKeys, shelf = shelf,
+                stats = stats, recent = recentKeys, shelf = shelf, shelfPresent = shelfPresent,
             )
         }
     }
@@ -713,6 +728,7 @@ private class HeldGroups {
  *
  * 1.0: the Recent view lists [recent] (the uris played last, newest first), which is not part of [library]; on a phone
  * [shelf] (the recently played) is the first item of the list while no group is open, and scrolls away with it.
+ * 1.0.3: [shelfPresent] says whether it has tracks to show now (it may get them after the rows are on screen).
  */
 @Composable
 fun MusicBrowser(
@@ -727,6 +743,7 @@ fun MusicBrowser(
     stats: Map<String, TrackStats> = emptyMap(),
     recent: List<String> = emptyList(),
     shelf: (@Composable () -> Unit)? = null,
+    shelfPresent: (() -> Boolean)? = null,
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
@@ -830,7 +847,10 @@ fun MusicBrowser(
                 TrackPane(group, tracks, state, groupActions, showBack = true, stats, selection)
             }
             !grouped || open != null -> if (open != null) {
-                TrackPane(open, shown, state, openActions, showBack = grouped, stats, selection, leading = phoneShelf.takeIf { !grouped })
+                TrackPane(
+                    open, shown, state, openActions, showBack = grouped, stats, selection,
+                    leading = phoneShelf.takeIf { !grouped }, leadingPresent = shelfPresent.takeIf { !grouped && phoneShelf != null },
+                )
             }
             else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize(), rowPadding = dimens.pagePadding - 12.dp, leading = phoneShelf)
         }
@@ -1052,6 +1072,8 @@ private fun TrackPane(
     selection: MultiSelection,
     /** A phone's shelf over the rows, scrolling away with them. */
     leading: (@Composable () -> Unit)? = null,
+    /** 1.0.3: whether [leading] has something to show now ([DenseTable]'s). */
+    leadingPresent: (() -> Boolean)? = null,
 ) {
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
@@ -1156,6 +1178,7 @@ private fun TrackPane(
             glassHeader = !compact,
             onExtendSelection = if (compact) null else ({ track, delta -> selection.extend(track.uri, keys, delta) }),
             leading = leading,
+            leadingPresent = leadingPresent,
             rowAppear = appear,
         )
     }

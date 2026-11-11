@@ -69,6 +69,8 @@ if [ -n "$MUSIC" ] && [ -d "$MUSIC" ]; then
     echo "Müzik: $(ls "$MUSIC" | wc -l) dosya"
 fi
 
+# 1.0.3: room for the whole run's log (the playback's lines beside the generator's steps)
+adb logcat -G 16M 2>/dev/null || true
 adb logcat -c 2>/dev/null || true
 # earlier runs' files would be merged into this one's
 adb shell rm -rf "/sdcard/Android/media/$TESTS" 2>/dev/null || true
@@ -82,6 +84,10 @@ adb shell wm size reset 2>/dev/null || true
 adb shell wm density reset 2>/dev/null || true
 
 adb logcat -d -s NagmedarProfile:V | tr -d '\r' > "$OUT/steps.txt" || true
+# 1.0.3: what the app said beside the steps (the playback's start and end, a crash, an ANR), for a step that was missed
+adb logcat -d -v time 2>/dev/null | tr -d '\r' \
+    | grep -a -E 'NagmedarProfile|AndroidRuntime|FATAL EXCEPTION|ANR in|PlaybackService|PlaylistManager|NagmedarPerf|ForegroundService|Force stopping|am_kill|Killing ' \
+    | tail -n 3000 > "$OUT/app-log.txt" || true
 
 # the three tests' profiles in one, each rule once, the cold start's first (its test writes only a
 # startup profile, whose rules belong to the Baseline Profile too); the startup profile from the
@@ -103,7 +109,7 @@ STARTUP=$( [ -f "$DEST/startup-prof.txt" ] && wc -l < "$DEST/startup-prof.txt" |
     echo "- APK: \`$(basename "$APP_APK")\`"
     echo "- rules: $RULES ($APP_RULES of Nağmedar's and VLC's own code), startup profile: $STARTUP"
     echo "- tests: $(grep -E '^(OK|FAILURES|Tests run)' "$OUT/instrument.txt" | tr '\n' ' ')"
-    echo "- screens missing an awaited element: $(find "$OUT/device" -name 'missing-*.xml' -exec basename {} .xml \; | sort | tr '\n' ' ')"
+    echo "- screens missing an awaited element: $(find "$OUT/device" -name 'missing-*.xml' -exec basename {} .xml \; | sort | tr '\n' ' ') (each with its screenshot and the system's media sessions beside it; app-log.txt has the app's lines)"
     echo
     echo "Steps reached (logcat NagmedarProfile):"
     echo

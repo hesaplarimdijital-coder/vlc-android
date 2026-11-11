@@ -17,6 +17,7 @@ Arabada sekmeler, hemen açılan müzik listesi, Desktop Kit 2.3'ün hareketi, t
 
 ### Kütüphane
 - Müzik listesi hemen açılır: uygulama her açılışta bütün klasörleri yeniden dolaşıyor (“Medya klasörleri aranıyor”, “Kütüphane taranıyor”), liste ancak ondan sonra geliyordu. Liste artık cihazda saklanır ve ilk karelerde çizilir; arkasından yapılan okuma onu yalnız parçalar (etiketleri de) değiştiyse yeniler. Bilinen bir liste hiçbir zaman “Kütüphane yükleniyor…” durumuna dönmez.
+- Telefonda “Son çalınan müzik” rafı da listeyle birlikte saklanır ve ilk karelerde listenin başındadır. Geçmiş listeden sonra okunduğu için raf, sütun başlıklarının üstünde görünmeden kalıyordu (emülatör yürüyüşünün ekran görüntülerinde görüldü); listeden sonra gelen bir raf, liste hâlâ en baştaysa gösterilir, kaydırılmış bir liste yerinden oynamaz.
 - Tarama bir kez: sıradan bir açılış yalnız Android'in medya dizinine bakar (ses dosyalarının sayısı ve en yeni değişiklik). Klasörler ancak dizin değiştiyse ya da son bakıştan beri bir gün geçtiyse, o zaman da sessizce (tarama şeridi ve ilerleme bildirimi olmadan) gözden geçirilir. Klasör eklemek ve “Kütüphaneyi yeniden tara” ilerlemesini eskisi gibi gösterir.
 - Değişiklikler kendiliğinden gelir: uygulama açıkken cihaza kopyalanan bir albüm birkaç saniyede listeye girer, silinen dosya listeden kalkar.
 - Sistemin seçicisiyle seçilmiş klasörlerin dökümü cihazda saklanır, açılışta hemen gösterilir ve her açılışta bir kez güncellenir (yeni, değişen, silinen); o an ulaşılamayan bir klasör parçalarını korur.
@@ -74,12 +75,12 @@ Arabada sekmeler, hemen açılan müzik listesi, Desktop Kit 2.3'ün hareketi, t
 - VLC'nin Android TV arayüzü ve film bilgisi modülleri (`television`, `moviepedia`) depodan çıktı; yalnız onların kullandığı kütüphaneler, 62 görsel ve 52 metin de. Hakkında'daki lisans listesi 73'ten 71'e indi. Film bilgisinin eski veritabanı bir kez silinir.
 - Desktop Kit 2.3.0'ın platformu: Compose 1.12 (BOM 2026.09.00), Kotlin 2.4.20, AGP 9.4.1, Gradle 9.8.2, navigation-compose 2.10.2, Haze 2.0.1; Java 17 bayt kodu.
 - Veritabanı 24'e geçer: ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar yerinde kalır.
-- Baseline Profile yeni kodla yeniden üretildi.
+- Baseline Profile yeni kodla yeniden üretildi. Üreticinin telefondaki yolu düzeltildi: liste artık çubukların arkasına uzandığından kaydırmaları alt çubukta başlıyor, mini oynatıcıyı bulamıyor ve telefonun oynatıcısını açmadan geçiyordu; kaydırmalar listenin içinde kalır, ekran her bakışta yeniden okunur, bulunamayan bir öğenin ekran görüntüsü ve uygulamanın günlüğü kanıt dalına yazılır.
 - APK 88,2 MB'den yaklaşık 97 MB'ye büyüdü: Android 14'ten başlayan bir derlemede kod (dex) APK'nın içinde sıkıştırılmadan durur; karşılığında Android onu kurarken ayrıca açıp kopyalamaz.
 
 ### Test
 - Emülatör yürüyüşü her Android sürümünde iki işe bölündü (tablet işi: tablet, iş istasyonu, Türkçe telefon; telefon işi: İngilizce telefon, sizin telefonunuzdaki gibi üç düğmeli gezinmeyle): iş başına yürüyüş 47–50 dakika yerine 25–31 dakika sürer. Sistemin kendi “yanıt vermiyor” pencereleri kaydedilip geçilir; uygulamanınki çalışmayı düşürür.
-- Yürüyüşün yeni denetimleri: kişisel derlemede Android Auto'nun ağacı okunur (dört sekme, “Abone ol”, Keşfet'in üç listesi, Radyo'nun yedi listesi, favori düğmesi); uygulama kapatılıp açılınca Müzik listesi tarama görünmeden gelmelidir; alt çubuğun rengi üç düğmenin arkasında sürmelidir; telefonun alt camı bulanık çizilmeli, üst çubuk renk değiştirmemelidir.
+- Yürüyüşün yeni denetimleri: kişisel derlemede Android Auto'nun ağacı okunur (dört sekme, “Abone ol”, Keşfet'in üç listesi, Radyo'nun yedi listesi, favori düğmesi); uygulama kapatılıp açılınca Müzik listesi tarama görünmeden, “Son çalınan müzik” rafı da satırların üstünde gelmelidir; alt çubuğun rengi üç düğmenin arkasında sürmelidir; telefonun alt camı bulanık çizilmeli, üst çubuk renk değiştirmemelidir.
 - Geçişler kare kare: `MotionStripsTest` her geçişin (sayfa, oynatıcı, alt sayfa, ayrıntı, sekme, fırlatma; cam üstünde de) şeridini üretir; hareket değişiklikleri şeritlerin öncesine ve sonrasına bakılarak yapıldı.
 - 281 ekran görüntüsü referansı (1.0.2'de 267); yeni birim ve Compose testleri: Auto'nun ağacı, kütüphanenin yeniden bakma kuralı ve saklanan liste, yayların yerleşmesi, oynatıcının ve alt sayfaların kareleri, menüler, odak, sürükleme, ReplayGain, veritabanı geçişi, yerel ağ izni, widget kapakları.
 - Test ortamı yalnız ses, podcast ve radyo örnekleri üretir (yaklaşık 350 MB yerine 41 MB).
