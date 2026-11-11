@@ -23,6 +23,7 @@ Every step can be skipped with “Skip”. To see the steps again, go to Setting
 ### In the library
 - The app opens on **Music**: tracks, artists, albums, genres, composers, years and folders.
 - On a phone, the **Recently played music** shelf at the top of Music shows the tracks you played last; in a wide window the same tracks are the toolbar's **Recently played** view.
+- The library is scanned once: on later starts the Music list is there at once, and added or deleted files are picked up in the background. If a track is missing, use Settings › Library › “Rescan the library”.
 - The search box and {key:CommandPalette} search the library, the screens and the commands in one place.
 
 ### The music's folders
@@ -165,6 +166,17 @@ The Radio screen finds internet radio stations in the Radio Browser directory an
 
 > Scheduled recordings are part of a backup; the recorded audio is not. For a recording to start on the minute, allow Android's exact alarms; without them, the Recordings tab says “Scheduled recordings may start late”.
 
+## Android Auto {auto}
+
+On the car's screen Nağmedar has four tabs: Music, Podcasts, Radio and Recently played. You can also ask by voice.
+
+- **Music:** “Shuffle all music”, Albums, Artists, Genres, Playlists (smart lists too), Years, Folders and All tracks. A list plays from the track you choose and queues the rest.
+- **Podcasts:** Continue listening, My shows, New episodes and Discover. Discover has your country's popular shows, categories and other countries' lists. You can listen to the episodes of a show you do not follow, and add it with “Subscribe”.
+- **Radio:** Favourites, Recent stations, Countries, Languages, Categories, Most listened and Most liked. “More stations” at the end of a long list opens the next page; the star on a station adds it to the favourites or removes it.
+- Search results come in groups: music tracks, podcast episodes, shows, new podcasts and radio stations.
+
+> Discover's lists come from Apple Podcasts' directory and the radio lists from Radio Browser's; they are asked only when you open that list.
+
 ## Casting (Chromecast and DLNA) {cast}
 
 Send music to a Chromecast or a DLNA device (a TV, a receiver, a speaker) on the same network; libVLC does the sending.
@@ -196,7 +208,7 @@ In a wide window (DeX, an external display) Nağmedar works like a desktop app: 
 - **Menu bar:** the Media, Playback, Audio, Tools, View and Help menus, each item with its keys beside it. Pressing Alt alone, or F10, hands the keyboard to the menu bar. The Help menu has this guide and the shortcut card.
 - **Command palette** ({key:CommandPalette}): commands, screens, appearance settings and the library's tracks are searched in one box.
 - **Mouse:** a right click (or the Menu key) opens context menus; Ctrl or Shift with a click selects several items; dragging on an empty area selects with a rubber band. The mouse's back and forward buttons move between screens.
-- **Drag and drop:** dropping a file from outside plays it, dropping media on the player bar adds it to the queue.
+- **Drag and drop:** dropping a file from outside plays it, dropping media on the player bar adds it to the queue. To drag tracks out as files, hold the mouse button (or the pen) on a row for about half a second, then move; a quick press and move starts no drag.
 - **Windows:** {key:ToggleSidebar} collapses the sidebar, {key:ToggleInspector} hides or shows Music's inspector, {key:OpenInNewWindow} opens the same screen in a new window. The window's place and size are remembered.
 - **Shortcuts:** the shortcut card ({key:ShortcutList}) lists them all; to change one, click it in Settings › Keyboard shortcuts and press the new keys. There are VLC and mpv presets, export and import, and a keyboard map that shows where the keys are on a Turkish Q keyboard.
 - Settings › Input: interface density and tooltip delay.
@@ -251,6 +263,7 @@ Nağmedar has no account, no ads and no tracking. Scanning happens on the device
 - **Lyrics:** if there are no synced lyrics in the file or beside it, the track's title, artist, album and length go to lrclib.net (turn it off in Settings › Lyrics). Uploading lyrics to LRCLIB happens only if you ask for it.
 - **Covers:** if there is no cover in the file or the folder, the album's name and artist go to MusicBrainz, and the cover comes from the Cover Art Archive (turn it off in Settings › Covers).
 - **Podcasts and radio:** the word you search for goes to Podcast Index, iTunes or Radio Browser; the shows you subscribe to are read from their own servers. Radio Browser is told of each play as a “click”, and of your vote if you vote.
+- **Android Auto:** when you open Podcasts › Discover, the code of the country whose list you ask for goes to Apple's podcast charts; a show you do not follow is read from its own server when you open it. When you open the Radio lists, the country, language or category you choose goes to Radio Browser.
 - **Scrobbling:** only if you sign in, the tracks you play go to Last.fm and ListenBrainz.
 - **Inside the same network:** casting and remote access talk only to devices on this network.
 - **Passwords and tokens:** server passwords, the ListenBrainz token and the Last.fm session key are encrypted with an Android Keystore key; the Last.fm password is never kept.

@@ -2,6 +2,87 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.3 (12 Kasım 2026)
+
+Arabada sekmeler, hemen açılan müzik listesi, Desktop Kit 2.3'ün hareketi, telefonun alt kısmında tek cam.
+
+### Android Auto
+- Sekmeler geri geldi: kişisel sürümde Android Auto yalnız aramayı gösteriyordu. Sekmelerin kök kimliği uygulamanın kimliğinden üretiliyordu ve kişisel sürümün iki parçası onu iki ayrı biçimde yazıyordu (`//app.nagmedar/r` ve `//app.nagmedar.debug/r`); kök boş dönüyor, Auto'ya yalnız arama kalıyordu. Kimlik artık her derlemede aynıdır; Auto'nun önceden sakladığı kimlikler de açılır. Dört sekme: Müzik, Podcast, Radyo, Son çalınanlar.
+- Müzik: ilk satır “Tüm müziği karıştırarak çal”; altında Albümler, Sanatçılar, Türler (“Türü yok” sonda), Çalma listeleri (akıllı listeler de, “Akıllı liste” alt yazısıyla), Yıllar, Klasörler ve Tüm parçalar (A–Z, baş harflerine göre sayfalarla). Her liste seçilen parçadan çalar, kalanını sıraya koyar.
+- Podcast: Devam eden bölümler (en son dinlenen başta), Programlarım (eski adı “Abonelikler”), Yeni bölümler ve Keşfet. Keşfet'te Popüler programlar (cihazın ülkesinin listesi), Kategoriler ve Ülkeler (55 ülke; kendi ülkeniz başta, sonra adına göre) vardır; listeler Apple Podcasts'in herkese açık rehberinden gelir, anahtar gerektirmez. Abone olunmamış bir program “Abone ol” satırı ve yayınından okunan bölümleriyle açılır; bölüm abone olmadan da çalar. “Abone ol” (satır ya da programın kutucuğundaki düğme) programı ekler, nasıl gittiğini söyler (“… eklendi”), program hemen Programlarım'da görünür.
+- Radyo: Favoriler, Son dinlenenler, Ülkeler, Diller, Kategoriler, En çok dinlenenler, En çok beğenilenler. Ülkeler radyo sayılarıyla gelir, cihazın ülkesi başta; Diller'de uygulamanın dili başta. Bir ülkenin, dilin ya da kategorinin radyoları en çok dinlenenle başlar ve yüzer yüzer gelir; son satır “Daha fazla radyo” sonraki sayfayı açar. Radyodaki yıldız “Favorilere ekle” ya da “Favorilerden çıkar”dır: “… favorilere eklendi” der, Favoriler hemen yenilenir.
+- Arama gruplu: Müzik parçaları, Podcast bölümleri, Programlar, Yeni podcastler (abone olmadıklarınız, en çok 10), Radyo istasyonları. Sesle arama eskisi gibi çalışır (“… çal”, “… podcast'ini çal”, “… radyosunu aç”).
+- Rehbere ulaşılamıyorsa, rehber yoğunsa ya da liste boşsa liste bunu kendi satırıyla söyler (“Podcast rehberine şu an ulaşılamıyor”, “Radyo rehberi yoğun. Bir dakika sonra yeniden deneyin.”).
+- Kullanıcı rehberinde yeni “Android Auto” bölümü; Gizlilik bölümü Keşfet'in ve radyo listelerinin neyi nereye sorduğunu yazar (ülkenin kodu Apple'ın podcast listelerine; seçilen ülke, dil ya da kategori Radio Browser'a). Rehber kütüphanenin bir kez tarandığını ve DeX'te parçaların basılı tutularak dışarı sürüklendiğini de anlatır.
+
+### Kütüphane
+- Müzik listesi hemen açılır: uygulama her açılışta bütün klasörleri yeniden dolaşıyor (“Medya klasörleri aranıyor”, “Kütüphane taranıyor”), liste ancak ondan sonra geliyordu. Liste artık cihazda saklanır ve ilk karelerde çizilir; arkasından yapılan okuma onu yalnız parçalar (etiketleri de) değiştiyse yeniler. Bilinen bir liste hiçbir zaman “Kütüphane yükleniyor…” durumuna dönmez.
+- Tarama bir kez: sıradan bir açılış yalnız Android'in medya dizinine bakar (ses dosyalarının sayısı ve en yeni değişiklik). Klasörler ancak dizin değiştiyse ya da son bakıştan beri bir gün geçtiyse, o zaman da sessizce (tarama şeridi ve ilerleme bildirimi olmadan) gözden geçirilir. Klasör eklemek ve “Kütüphaneyi yeniden tara” ilerlemesini eskisi gibi gösterir.
+- Değişiklikler kendiliğinden gelir: uygulama açıkken cihaza kopyalanan bir albüm birkaç saniyede listeye girer, silinen dosya listeden kalkar.
+- Sistemin seçicisiyle seçilmiş klasörlerin dökümü cihazda saklanır, açılışta hemen gösterilir ve her açılışta bir kez güncellenir (yeni, değişen, silinen); o an ulaşılamayan bir klasör parçalarını korur.
+- Ayarlar › Kütüphane'de yeni düğme: “Kütüphaneyi yeniden tara” (bir parça eksik görünürse).
+- Güncellemeden sonraki ilk açılışta saklanmış liste henüz yoktur: liste bir kez eskisi gibi okunur, sonraki açılışlarda hemen gelir.
+
+### Hareket
+- Yaylar yerine varınca durur: geçişler görünürde bittikten sonra 300–350 ms daha çalışıyordu (eşiği verilmeyen yay hedefe pikselin yüzde biri kalana kadar sürüyordu; artık yarım pikselde durur). Testin kare şeritlerinde sayfa açma ve geri 752 ms yerine 400 ms'de, oynatıcının açılışı 736 ms yerine 400 ms'de, kapanışı 752 ms yerine 416 ms'de duruyor; alt sayfa yolunun son yüzde birinde sıçramıyor.
+- Oynatıcı tek parça: telefonda büyük oynatıcı mini oynatıcının kartının kendisinden büyür. Kartın rengi sayfanın rengine döner, köşeleri yolda yuvarlak kalıp sonunda düzleşir, karartı onunla koyulaşır, alt çubuk altına itilir. Kapak ve parçanın adı karttaki yerinden oynatıcıdaki yerine uçar, kapanırken geri döner. Karttaki düğmeler yolun ilk çeyreğinde solar, sonra yerlerinde değildir (dokunulmaz, ekran okuyucu okumaz); oynatıcının düğmeleri yolun son kısmında gelir.
+- Oynatıcı kartın durduğu yerden açılır: çubuklar kaydırmayla gizlenmişken mini oynatıcıya dokunmak artık önce çubukları geri getirmez (kart 64 dp zıplıyordu); oynatıcı kartın o anki yerinden açılır, kapanınca oraya iner.
+- Ayrıntı derinlikte açılır: telefonda bir albüm, sanatçı, tür, çalma listesi, podcast programı ya da bölüm açılınca sayfa kenardan hafifçe içeri kayarak belirir, liste arkasında %95'e çekilip solar; Geri aynı yoldan döner, liste kaldığı yerde durur. Müzik'in grupları ve çalma listeleri önceden telefonda hareketsiz değişiyordu. Öngörülü geri hareketinde (hareketle gezinme) ayrıntı parmakla küçülür, arkasında liste gerçekten durur; bırakınca kalan yol parmağın olduğu yerden oynar, vazgeçince her şey yerine döner. Dokunduktan hemen sonra Geri'ye basmak sıçratmaz, yolu geri oynatır. Podcast'in kapağı satırından (ya da kutucuğundan) sayfanın başlığına uçar.
+- Satırlar sırayla gelir: bir liste ilk göründüğünde ilk sekiz satırı 15 ms arayla, hafifçe yükselerek belirir (Müzik'in grupları ve tabloları, programlar ve bölümler, radyolar, çalma listeleri); ayrıntıdan dönülen liste yeniden gelmez.
+- Fırlatılan alt sayfa hızını korur: aşağı atılan bir ⋯ sayfası ya da Sıradaki parmağın hızıyla yoluna devam eder ve ekrandan çıkınca kapanır; 1.0.2'de bırakılınca bir an durup sonra kapanıyordu. Açılış ve kapanış tek, sıkı bir yayla (352 ms'de yerinde; 400 ms'ydi). Çekerken kapanma eşiği (yüksekliğin üçte biri) geçildikçe hafif bir titreşim gelir.
+- Sekme değişiminde (Müzik → Podcast) yeni ekranın %96'dan büyümesi solmasıyla birlikte başlar; önceden ekran daha görünmezken bitiyordu.
+- Sekmeler arası öngörülü geri (yalnız hareketle gezinmede): başka bir sekmeden geri kaydırınca sekme parmakla %90'a doğru küçülür, Müzik arkasında belirir; bırakınca tamamlanır, vazgeçince geri gelir. Üç düğmeli gezinmede, tablette ve DeX'te Geri eskisi gibidir.
+- Vurgu rengi değişirken (parça değişince kapağın rengine geçiş) yalnız rengi kullanan yerler yeniden kurulur; geçiş sürerken liste kaydırması takılmaz. Ekolayzer sayfası çubuklar kayarken her karede yeniden ölçülmez.
+- “Animasyonları kaldır” açıkken bunların hepsi bir anda olur: oynatıcının açılışı, kapanışı ve Geri'yle küçülmesi, ayrıntı, satırların gelişi, sekme hareketi.
+- Tablet ve DeX pencereleri bugünkü hareketini korur.
+
+### Telefonun alt kısmı
+- Tek cam (kararınız, 6 Kasım: B): telefonda mini oynatıcının kartı, alt çubuk ve sistem düğmelerinin arkasındaki bant tek bir buzlu camın üstündedir; listeler ve kapaklar altından bulanık geçer. Üst çubuk opaktır, dokununca ve kaydırınca renk değiştirmez; menüler, alt sayfalar ve pencereler opaktır; tablet ve DeX değişmedi. Pil tasarrufunda ve “Animasyonları kaldır” açıkken cam opak çizilir. Cam, kartın yazıları (başlık, süreler, sanatçı satırı) beyaz ya da siyah bir kapağın üstünde de okunacak kadar koyudur (en az 4,5:1). Büyük oynatıcı ayaktayken altında cam çizilmez.
+- Alt çubuk sistem düğmelerinin arkasına uzanır: üç düğmenin (ya da hareket çizgisinin) arkasında ayrı renkte bir şerit kalmaz, alt çubuğun rengi oraya kadar sürer. Çubuklar kaydırmayla gizlenince düğmelerin arkasındaki bant kalır, üstünde ince bir çizgi belirir; klavye açıkken bant yoktur; ilk açılışta altta boşluk görünmez. Listelerin, Ayarlar'ın, alt sayfaların, oynatıcının ve Sıradaki'nin son satırı ve düğmeleri sistem düğmelerinin üstünde durur.
+- En büyük yazı boyutunda alt çubuk yükselir; sığmayan etiket üç noktayla biter.
+- TalkBack ve Tab sırası: üst çubuk, içerik, oynatıcı, en son alt çubuk.
+
+### Oynatıcı
+- Tablette büyük oynatıcı aşağı çekilince kapanır: alt sayfalarla aynı kuralla, kendi başına sürüklenmeyen her yerinden; sözler en üstteyken aşağı çekmek de kapatır (kaydırılmışlarsa önce başa dönerler).
+- Süresi bilinmeyen dosya: kütüphanenin süresini bilmediği bir dosya (klasöründen çalınan bir dosya gibi) ilerleme çubuğu yürürken yalnız “0:00” gösteriyordu. Çubuklar, telefonun ve tabletin oynatıcısı ve “Şimdi çalıyor” bölmesi artık oynatıcının öğrendiği süreyi alır: zaman çizgisi bütünüyle görünür ve sarar. Hiçbir yerde süresi olmayan bir yayında yalnız geçen süre yazar.
+- Açılışın ilk karesi: zaman çizgisi son okunan yerden başlar; oynatıcı açılırken bir an “0:00 / −4:18” görünmez.
+- Duraklatınca ana iş parçacığı diske gitmez: “kaldığı yerden sürdür” kaydı kapağın saklanan dosyasına duraklatma anında, ana iş parçacığında bakıyordu (emülatör yürüyüşünün yakaladığı bir disk okuması); artık arka planda bakar.
+
+### Dokunma, fare ve klavye
+- Menüler: kapanırken yerinde solar (satırın köşesine sıçramaz); dışına tıklamak ya da dokunmak yalnız kapatır; dışına sağ tık kapatır ve aynı tıkla imlecin altındakinin menüsünü açar; Esc kapatır. Pencerenin altına yakın bir düğmenin menüsü (Sırala gibi) düğmenin üstüne açılır; telefonda menü dokunulan noktadan büyür.
+- Basma: telefonda basılan satır ve düğme hafifçe çöküp yaylanır. Farede üzerine gelme ve basma rengi aynı karede değişir (seçim rengi yumuşak geçmeyi sürdürür); solan renkler griye dönmeden yalnız saydamlaşır.
+- Titreşim (yalnız dokunmayla): anahtar, onay kutusu, filtre çipi ve bölmeli seçim değişince hafif bir tık.
+- Geri al çubukları ve kısa haberler telefonda yana atılınca parmağın hızıyla gider; TalkBack açıkken sistemin önerdiği süre kadar kalır.
+- Seçim: parmağın dokunuşu çalar, farenin tıklaması seçer (uzun basıştaki “Seç” duruyor); Geri yapılmakta olan seçimi temizler (Müzik ve Çalma listeleri).
+- Klavye katmanların arkasına geçmez: büyük oynatıcı, Sıradaki, sözler ya da görselleştirici açıkken Tab arkadaki sayfaya gitmez, Ctrl+A ve sayfanın öteki kısayolları arkadaki listeye ulaşmaz. Bir alt sayfa, komut paleti ya da pencereyi kaplayan bir sayfa kapanınca odak, açılmadan önce durduğu düğmeye döner.
+- Alanlar ve kaydırıcılar: metin alanlarında temizle düğmesi ve hata satırı (TalkBack alanın hatası olarak okur); ağ formu ile alarmın saat ve dakika alanları uygulamanın kendi alanını kullanır. Kaydırıcılar TalkBack'te adı ve değeriyle okunur (“Ses düzeyi, %40”; ekolayzer, perde, denge, alarmın sesi).
+- Açık temada menü çubuğunun arama alanı ve tuş etiketleri çerçevelidir.
+
+### Tablet ve DeX
+- Touchpad ve fare: klavye kapağının touchpad'i açılıp kapatılınca, bir fare takılıp çıkarılınca ya da uykudan uyanınca satır sıklığı ona göre değişir; kapalı aygıtlar sayılmaz, klavyenin öteki değişiklikleri (dil, tuş düzeni) görünümü değiştirmez.
+- Sürükle bırak: parçaları dosya olarak sürüklemek (Dosyalarım'a, başka bir pencereye, oynatıcı çubuğuna) Samsung'un Dosyalarım'ındaki gibi başlar: fare (kapağın touchpad'i de) ya da kalem, satırın üstünde sistemin basılı tutma süresi kadar (yaklaşık yarım saniye) durup sonra hareket etmelidir. Hızlı bir basıp çekme sürükleme başlatmaz, yavaş bir tık tık olarak kalır. Sürüklerken imlecin üstünde bir kart gider: parçanın adı; birkaç parçada “12 parça” ve vurgu renginde sayı. Parmakta uzun basış eskisi gibi menüyü açar.
+- Başlık çubuğu: sistemin pencere başlığında uygulamanın çipini gösterdiği yerde (DeX, masaüstü pencereleri) menü çubuğu logosunu ve “Nağmedar” yazısını yinelemez, menüleriyle başlar.
+- Ayrıntı panelinde ReplayGain: Etiketler sekmesi “Parça kazancı”, “Parça tepesi”, “Albüm kazancı” ve “Albüm tepesi” satırlarını gösterir (“−6,6 dB”, “0,988 · −0,1 dBFS”; etiketi olmayan dosyada “—”). Güncellemeden sonra her dosyanın başlığı arka planda bir kez yeniden okunur; bu sürerken liste ve öteki sütunlar dolu kalır.
+
+### Android 17
+- Arka planda ses: Android 17 sesi, ses odağını ve ses düzeyini yalnız görünen bir pencereye ya da çalışan bir ön plan hizmetine verir. Oynatma hizmeti artık motor çalmadan ve odak istemeden önce ön plana geçer: duraklatılmışken kulaklığın düğmesinden, kilit ekranından, Android Auto'dan ya da widget'tan sürdürmek sessiz kalmaz. Alarm, ses düzeyini hizmet ön plandayken yükseltir.
+- Widget: kapak, yerinin boyutunda (96 dp) bir kare olarak gönderilir ve Android 17'nin widget'lara koyduğu bellek sınırını aşmaz; sistem bir güncellemeyi reddederse yer tutucuyla yeniden gönderilir.
+- Yerel ağ izni hazır, şimdilik kapalı: Android 17'yi hedefleyen bir derleme Kaynaklar › Ağ'da, Yayınla…'da, uzaktan erişimde ve yerel ağdaki bir radyo ya da akış adresinde “Yakındaki cihazlar” iznini bir kez sorar; reddedilirse nedenini, “İzin ver”i ya da “Ayarları aç”ı gösterir; alarm kilit ekranında kendi sayfasıyla çalar. Bu sürüm Android 16'yı hedeflemeyi sürdürür (targetSdk 36): izin sorulmaz, ağ kaynakları eskisi gibi açılır. Hedefi 37'ye çıkarmak tek satırdır ve CI'da Android 17 emülatöründe denendi; karar sizindir.
+
+### Altyapı
+- Android 14 ve sonrası (minSdk 34): iki cihazınız da Android 17'de olduğundan en düşük sürüm 14'e çekildi.
+- VLC'nin Android TV arayüzü ve film bilgisi modülleri (`television`, `moviepedia`) depodan çıktı; yalnız onların kullandığı kütüphaneler, 62 görsel ve 52 metin de. Hakkında'daki lisans listesi 73'ten 71'e indi. Film bilgisinin eski veritabanı bir kez silinir.
+- Desktop Kit 2.3.0'ın platformu: Compose 1.12 (BOM 2026.09.00), Kotlin 2.4.20, AGP 9.4.1, Gradle 9.8.2, navigation-compose 2.10.2, Haze 2.0.1; Java 17 bayt kodu.
+- Veritabanı 24'e geçer: ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar yerinde kalır.
+- Baseline Profile yeni kodla yeniden üretildi.
+
+### Test
+- Emülatör yürüyüşü her Android sürümünde iki işe bölündü (tablet işi: tablet, iş istasyonu, Türkçe telefon; telefon işi: İngilizce telefon, sizin telefonunuzdaki gibi üç düğmeli gezinmeyle): iş başına yürüyüş 47–50 dakika yerine 25–31 dakika sürer. Sistemin kendi “yanıt vermiyor” pencereleri kaydedilip geçilir; uygulamanınki çalışmayı düşürür.
+- Yürüyüşün yeni denetimleri: kişisel derlemede Android Auto'nun ağacı okunur (dört sekme, “Abone ol”, Keşfet'in üç listesi, Radyo'nun yedi listesi, favori düğmesi); uygulama kapatılıp açılınca Müzik listesi tarama görünmeden gelmelidir; alt çubuğun rengi üç düğmenin arkasında sürmelidir; telefonun alt camı bulanık çizilmeli, üst çubuk renk değiştirmemelidir.
+- Geçişler kare kare: `MotionStripsTest` her geçişin (sayfa, oynatıcı, alt sayfa, ayrıntı, sekme, fırlatma; cam üstünde de) şeridini üretir; hareket değişiklikleri şeritlerin öncesine ve sonrasına bakılarak yapıldı.
+- 281 ekran görüntüsü referansı (1.0.2'de 267); yeni birim ve Compose testleri: Auto'nun ağacı, kütüphanenin yeniden bakma kuralı ve saklanan liste, yayların yerleşmesi, oynatıcının ve alt sayfaların kareleri, menüler, odak, sürükleme, ReplayGain, veritabanı geçişi, yerel ağ izni, widget kapakları.
+- Test ortamı yalnız ses, podcast ve radyo örnekleri üretir (yaklaşık 350 MB yerine 41 MB).
+
 ## 1.0.2 (30 Ekim 2026)
 
 Tabletteki çubuğun telefona gelişi, tablette büyük oynatıcı, Whisper'sız podcastler.

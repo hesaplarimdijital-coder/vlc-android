@@ -7,22 +7,24 @@ Nağmedar 1.0 yalnızca sizin iki cihazınız (Galaxy S24, Galaxy Tab S11 Ultra;
 - release kodudur: R8 kodu küçültür ve iyileştirir, kullanılmayan kaynakları atar; Baseline Profile içindedir (ilk açılışta ve kaydırırken JIT beklemez), hata ayıklanamaz ve profillenemez;
 - yüklü debug derlemesinin kimliğini taşır: uygulama kimliği `app.nagmedar.debug`, depodaki ortak debug anahtarıyla imzalı. Bu yüzden onun **üzerine güncelleme olarak** kurulur; kütüphane, ayarlar, podcast abonelikleri, çalma listeleri ve indirilenler yerinde kalır;
 - başlatıcıda adı yalnızca “Nağmedar”dır;
+- Android 14 ve sonrasına kurulur (1.0.3'ten beri `minSdk 34`);
 - Last.fm scrobble'ı ve Podcast Index araması API anahtarı olmadığından kapalı kalır; uygulama bunu kendi uyarısıyla söyler.
 
 ### Sürüm numaraları
 
-Kök `build.gradle`: `versionName = '1.0.2'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010002. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
+Kök `build.gradle`: `versionName = '1.0.3'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010003. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
 
 | Derleme | versionName | versionCode |
 | --- | --- | --- |
 | Cihazlarınızdaki CI debug derlemesi (arm64, bölünmemiş) | 0.1.0 | 14000100 |
 | Kişisel sürüm 1.0.0, arm64 | 1.0.0 | 14010006 |
 | Kişisel sürüm 1.0.1, arm64 | 1.0.1 | 14010007 |
-| Kişisel sürüm 1.0.2, arm64 | 1.0.2 | **14010008** |
-| Kişisel sürüm 1.0.2, x86_64 (yalnızca CI emülatörü) | 1.0.2 | 14010010 |
-| 1.0.2'den derlenen debug | 1.0.2 | 14010002 |
+| Kişisel sürüm 1.0.2, arm64 | 1.0.2 | 14010008 |
+| Kişisel sürüm 1.0.3, arm64 | 1.0.3 | **14010009** |
+| Kişisel sürüm 1.0.3, x86_64 (yalnızca CI emülatörü) | 1.0.3 | 14010011 |
+| 1.0.3'ten derlenen debug | 1.0.3 | 14010003 |
 
-Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.2 kuruluyken aynı sürümden bir debug derlemesi (14010002) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.3: 4010003, kişisel APK'sı 14010009). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
+Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.3 kuruluyken aynı sürümden bir debug derlemesi (14010003) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.4: 4010004, kişisel APK'sı 14010010). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
 
 ### Bir kez: teslim anahtarı
 
@@ -44,14 +46,14 @@ CI APK'yı sizin teslim anahtarınızın açık yarısıyla ([`delivery.pub`](de
    git fetch origin ci/personal-release
    git worktree add /tmp/nagmedar-teslim origin/ci/personal-release
    cat /tmp/nagmedar-teslim/README.md
-   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.2.apk
+   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.3.apk
    git worktree remove /tmp/nagmedar-teslim
    ```
 
    Betik APK'nın SHA-256'sını zarftakiyle karşılaştırır; tutmazsa dosyayı siler.
-4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.2.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
+4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.3.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
 
-Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. 1.0.2'ye güncellemede veritabanı 23'e geçer (yalnız Whisper'ın sütunları çıkar; programlar, bölümler, dinleme yerleri ve indirmeler kalır) ve Whisper'ın bekleyen işleri, indirilmiş modelleri ve ürettiği dökümler bir kez silinir; yayınların kendi dökümlerine dokunulmaz. Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır (1.0.2, 1.0.1, 1.0.0).
+Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. 1.0.2'ye güncellemede veritabanı 23'e geçer (yalnız Whisper'ın sütunları çıkar; programlar, bölümler, dinleme yerleri ve indirmeler kalır) ve Whisper'ın bekleyen işleri, indirilmiş modelleri ve ürettiği dökümler bir kez silinir; yayınların kendi dökümlerine dokunulmaz. 1.0.3'e güncellemede veritabanı 24'e geçer (ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar kalır) ve her müzik dosyasının başlığı ReplayGain değerleri için arka planda bir kez yeniden okunur; film bilgisinin 0.5'ten kalan veritabanı silinir. Müzik listesi ilk açılışta bir kez eskisi gibi okunur ve cihazda saklanır; sonraki açılışlarda hemen gelir, kütüphane her açılışta yeniden taranmaz (Ayarlar › Kütüphane › “Kütüphaneyi yeniden tara” elle tarar). Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır (1.0.3, 1.0.2, 1.0.1, 1.0.0).
 
 ### R8 ve kurallar
 
@@ -60,7 +62,7 @@ R8 bütün release türü derlemelerde açıktır (release, signedRelease, bench
 - Adlar değiştirilmez (`-dontobfuscate`): cihazdaki bir çökme kaydı eşleme dosyası olmadan okunur (CI'dan şifreli APK'dan başka bir şey çıkmaz) ve debug derlemesinin adla yazdığı şeyler (WorkManager'ın iş sınıfları, Moshi'nin JSON alanları, bekleyen alarmlardaki Parcelable'lar) güncellemeden sonra da aynı okunur. R8 yine de kullanılmayanı atar, satır içine alır ve iyileştirir.
 - libVLC (`org.videolan.libvlc.**`) ve medya kütüphanesi (`org.videolan.medialibrary.**`, yerel koddan kurulan sınıflarıyla) bütünüyle korunur: JNI adları silinirse uygulama ancak çalışırken çöker.
 - Müzik motorunun (`app.nagmedar.audio.NativeAudio`, olay ve ilerleme geri çağrıları) ve laboratuvarın (`app.nagmedar.lab.NativeLab`: medya incelemesi, USB ses) yerel yöntemleri ve yerel koddan adıyla çağrılan arayüzleri.
-- Oynatma hizmetinin adıyla bulduğu gözlemciler, WorkManager'ın işçileri, Moshi'nin yansımayla okuduğu sınıfların alanları (ayar yedeği, ekolayzer dışa aktarımı, uzaktan erişimin JSON'u ve oturumları, lisanslar), Retrofit'in arayüzleri, Ktor'un Netty motoru, Parcelable ve Serializable sınıfları.
+- Oynatma hizmetinin adıyla bulduğu gözlemciler, WorkManager'ın işçileri, Moshi'nin yansımayla okuduğu sınıfların alanları (ayar yedeği, ekolayzer dışa aktarımı, uzaktan erişimin JSON'u ve oturumları, lisanslar), Ktor'un Netty motoru, Parcelable ve Serializable sınıfları.
 - Room, WorkManager, Media3, Compose, OkHttp ve androidx kitaplıkları kendi kurallarını getirir.
 - Kaynak küçültücü uzaktan erişim sayfasının adıyla istediği simgeleri korur (`application/app/src/main/res/raw/nagmedar_keep.xml`).
 
@@ -68,19 +70,28 @@ CI'ın “Uygulama · release” bacağı her itmede arm64 kişisel derlemeyi ve
 
 ```sh
 gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches \
-  -f ref=master -f 'inputs[build]=personal'
+  -f ref=master -f 'inputs[build]=personal' -f 'inputs[api_levels]=35,37.0'
 ```
+
+1.0.3'ten beri yürüyüş her Android sürümünde iki iştir: tablet işi (tablet, iş istasyonu, Türkçe telefon) ve telefon işi (İngilizce telefon, üç düğmeli gezinme; kişisel derlemede Android Auto'nun ağacı da okunur). “Emülatör · özet” işi ikisinin sonucunu tek satırda toplar. Kanıtlar (rapor, ekran görüntüleri, StrictMode kaydı) `ci/emulator[-api<sürüm>][-personal]-<tablet|phone>` dallarına yazılır: debug ve API 35 için `ci/emulator-tablet` ile `ci/emulator-phone`, kişisel derleme ve Android 17 için `ci/emulator-api37.0-personal-tablet` ile `ci/emulator-api37.0-personal-phone`.
 
 ### Android 17 (API 37)
 
-Uygulama Android 17'nin SDK'sıyla derlenir (`compileSdk 37`; AGP 9.1.1 API 37'yi destekleyen ilk sürümdür), ama davranışı Android 16'nınkidir (`targetSdk 36`). Android 17'yi hedeflemek şunları getirir ve şimdilik karşılanmadıkları için hedef 36'da kaldı:
+Uygulama Android 17'nin SDK'sıyla derlenir (`compileSdk 37`), ama davranışı Android 16'nınkidir (`targetSdk 36`). 1.0.3, Android 17'yi hedeflemenin getirdiklerini hazırladı; hedefi yükseltmek sizin kararınızdır ve verilene kadar hedef 36'da kalır.
 
-- **Yerel ağ izni** (`ACCESS_LOCAL_NETWORK`, çalışma zamanında istenir): olmadan Ağ kaynakları (SMB, NFS, UPnP/DLNA, WebDAV), yayınlama ve uzaktan erişim yerel ağa ulaşamaz. Uygulama bu izni henüz istemiyor.
-- **Arka planda ses**: arka planda çalma, ses odağı ve ses düzeyi yalnızca çalışan bir ön plan hizmetiyle; alarmın sesi için tam zamanlı alarm izni ve `USAGE_ALARM` gerekir. Oynatma hizmeti ön plandadır, ama Uyku ve alarm özelliği ile radyo kaydı ayrıca denenmeli.
-- **Widget bit eşlem sınırı**: ana ekran widget'ının kapak resmi `6 × genişlik × yükseklik` baytı geçerse güncelleme reddedilir; kapaklar buna göre küçültülmeli.
-- Ayrıca: büyük ekranda yön ve boyut kısıtlarından çıkış yok (uygulama zaten her yöne ve boyuta uyuyor), Certificate Transparency varsayılan (radyo akışlarının HTTPS sunucuları), `System.load()` ile yüklenen kitaplıkların salt okunur olması (Nağmedar kitaplıklarını APK'dan yükler), statik `final` alanlara yazılamaması (JNI dahil), RFCOMM okumalarının `-1` dönmesi (Nağmedar Bluetooth soketi kullanmaz).
+Hedeften bağımsız olarak, Android 17'li cihazda bugün de geçerli olanlar (1.0.3'te karşılandı):
 
-Bunlar karşılanınca `build.gradle` dosyasında `targetSdkVersion = 37` ve `settings.gradle` dosyasında `targetSdk = 37` yapılır. Emülatör iş akışı Android 17 imajında da yürür: `-f 'inputs[api_levels]=35,37.0'` (kanıtlar `ci/emulator-api37.0` dalında).
+- **Arka planda ses**: Android 17 sesi, ses odağını ve ses düzeyini yalnızca görünen bir pencereye ya da çalışan bir ön plan hizmetine verir. Oynatma hizmeti motor çalmadan ve odak istemeden önce ön plana geçer (kulaklık düğmesi, kilit ekranı, Android Auto ve widget'tan sürdürme); alarm ses düzeyini hizmet ön plandayken yükseltir.
+- **Widget bit eşlem sınırı**: ana ekran widget'ının kapağı yerinin boyutunda (96 dp) kare olarak gönderilir, `6 × genişlik × yükseklik` baytı geçmez; reddedilen güncelleme yer tutucuyla yeniden gönderilir.
+
+Yalnızca hedef 37 olunca devreye girenler (kod hazır, 36'da kapalı):
+
+- **Yerel ağ izni** (`ACCESS_LOCAL_NETWORK`, sistemde “Yakındaki cihazlar”): yalnızca 37'yi hedefleyen derleme bildirir (36'da bildirmek Android 17'de yerel ağı keserdi). Kaynaklar › Ağ, Yayınla…, Ayarlar › Uzaktan erişim ve yerel ağdaki bir radyo ya da akış adresi izni bir kez sorar; reddedilince sayfa nedenini ve “İzin ver”i, kalıcı reddedilince “Ayarları aç”ı gösterir.
+- **Alarm**: kilit ekranında alarm sayfasıyla çalar (tam ekran bildirim); telefon kullanılırken sesli bir bildirim gelir, dokununca müzik başlar.
+- Bilinen eksikler: uygulama arka plandayken ve hiçbir şey çalmıyorken uzaktan erişimden verilen “oynat” komutu sessiz kalabilir; kullanıcı rehberine izin ve alarm sayfası bölümleri eklenmeli.
+- Ayrıca (uygulamayı etkilemeyenler): büyük ekranda yön ve boyut kısıtlarından çıkış yok (uygulama zaten her yöne ve boyuta uyuyor), Certificate Transparency varsayılan (radyo akışlarının HTTPS sunucuları), `System.load()` ile yüklenen kitaplıkların salt okunur olması (Nağmedar kitaplıklarını APK'dan yükler), statik `final` alanlara yazılamaması (JNI dahil), RFCOMM okumalarının `-1` dönmesi (Nağmedar Bluetooth soketi kullanmaz).
+
+Hedefi yükseltmek: `settings.gradle` dosyasında `targetSdk = 37` (ve `build.gradle` dosyasında `targetSdkVersion = 37`). Bu hâliyle CI'da derlendi ve Android 17 emülatöründe yürüdü (PR #109'daki 552998d0: debug ve kişisel derleme, telefon ve tablet). Emülatör iş akışı Android 17 imajında her sürümde yürür: `-f 'inputs[api_levels]=35,37.0'`.
 
 ## İmzalı sürüm (S-1503, şimdilik kullanılmıyor)
 

@@ -23,6 +23,7 @@ Her adım “Atla” ile geçilir. Adımları yeniden görmek için Ayarlar › 
 ### Kütüphanede
 - Uygulama **Müzik** sayfasıyla açılır: parçaları, sanatçıları, albümleri, türleri, besteci ve yıllara göre ve klasörler olarak gösterir.
 - Telefonda Müzik sayfasının üstündeki **Son çalınan müzik** rafı en son çaldığınız parçaları gösterir; geniş pencerede aynı parçalar araç çubuğundaki **Son çalınanlar** görünümündedir.
+- Kütüphane bir kez taranır: sonraki açılışlarda Müzik listesi hemen gelir, eklenen ve silinen dosyalar arka planda alınır. Bir parça eksik görünürse Ayarlar › Kütüphane › “Kütüphaneyi yeniden tara”.
 - Ara kutusu ya da {key:CommandPalette} kütüphaneyi, ekranları ve komutları tek yerden arar.
 
 ### Müziğin klasörleri
@@ -165,6 +166,17 @@ Radyo ekranı internet radyolarını Radio Browser rehberinden bulur ve kayda al
 
 > Zamanlanmış kayıtlar yedeğe girer, kaydedilen sesler girmez. Kaydın dakikasında başlaması için Android'in tam alarm iznini verin; izin yoksa Kayıtlar sekmesi “Zamanlanmış kayıtlar geç başlayabilir” der.
 
+## Android Auto {auto}
+
+Arabanın ekranında Nağmedar dört sekmeyle görünür: Müzik, Podcast, Radyo ve Son çalınanlar. Sesle de istenir: “… çal”, “… podcast'ini çal”, “… radyosunu aç”.
+
+- **Müzik:** “Tüm müziği karıştırarak çal”, Albümler, Sanatçılar, Türler, Çalma listeleri (akıllı listeler de), Yıllar, Klasörler ve Tüm parçalar. Bir liste seçtiğiniz parçadan çalar, kalanını sıraya koyar.
+- **Podcast:** Devam eden bölümler, Programlarım, Yeni bölümler ve Keşfet. Keşfet'te ülkenizin popüler programları, kategoriler ve öteki ülkelerin listeleri vardır. Abone olmadığınız bir programın bölümlerini dinleyebilir, “Abone ol” ile ekleyebilirsiniz.
+- **Radyo:** Favoriler, Son dinlenenler, Ülkeler, Diller, Kategoriler, En çok dinlenenler ve En çok beğenilenler. Uzun bir listenin sonundaki “Daha fazla radyo” sonraki sayfayı açar; radyodaki yıldız onu favorilere ekler ya da çıkarır.
+- Arama sonuçları gruplu gelir: müzik parçaları, podcast bölümleri, programlar, yeni podcastler ve radyo istasyonları.
+
+> Keşfet'in listeleri Apple Podcasts'in, radyo listeleri Radio Browser'ın rehberinden gelir; yalnızca o listeyi açtığınızda sorulur.
+
 ## Yayınlama (Chromecast ve DLNA) {cast}
 
 Müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hoparlör) gönderin; gönderen libVLC'dir.
@@ -196,7 +208,7 @@ Geniş pencerede (DeX, harici ekran) Nağmedar masaüstü gibi çalışır: üst
 - **Menü çubuğu:** Medya, Oynatma, Ses, Araçlar, Görünüm ve Yardım menüleri; her öğenin yanında tuşu yazar. Alt'a tek başına ya da F10'a basınca klavye menü çubuğuna geçer. Yardım menüsünde bu rehber ve kısayol kartı vardır.
 - **Komut paleti** ({key:CommandPalette}): komutlar, ekranlar, görünüm ayarları ve kütüphanedeki parçalar tek kutuda aranır.
 - **Fare:** sağ tık (ya da Menü tuşu) bağlam menüleri açar; Ctrl ve Shift ile tıklamak birden çok öğe seçer; boş yerde sürükleyerek lastik bantla seçersiniz. Fare geri ve ileri tuşları ekranlar arasında gezinir.
-- **Sürükle ve bırak:** dışarıdan dosya bırakmak oynatır, medyayı oynatıcı çubuğuna bırakmak sıraya ekler.
+- **Sürükle ve bırak:** dışarıdan dosya bırakmak oynatır, medyayı oynatıcı çubuğuna bırakmak sıraya ekler. Parçaları dosya olarak dışarı sürüklemek için fareyle (ya da kalemle) satırın üstünde yaklaşık yarım saniye basılı tutun, sonra çekin; hızlı bir basıp çekme sürükleme başlatmaz.
 - **Pencere:** {key:ToggleSidebar} kenar çubuğunu daraltır, {key:ToggleInspector} Müzik'in ayrıntı panelini gizler ya da gösterir, {key:OpenInNewWindow} aynı ekranı yeni pencerede açar. Pencerenin yeri ve boyutu hatırlanır.
 - **Kısayollar:** kısayol kartı ({key:ShortcutList}) hepsini listeler; değiştirmek için Ayarlar › Klavye kısayolları'nda bir tuşa tıklayıp yenisine basın. VLC ve mpv ön ayarları, dışa ve içe aktarma ve Türkçe Q klavyede tuşların yerini gösteren bir klavye haritası vardır.
 - Ayarlar › Giriş: arayüz yoğunluğu ve ipucu gecikmesi.
@@ -251,6 +263,7 @@ Nağmedar'da hesap, reklam ve izleme yoktur. Taramalar cihazda yapılır, medyan
 - **Sözler:** dosyada ve yanında zamanlı söz yoksa parçanın adı, sanatçısı, albümü ve süresi lrclib.net'e gider (Ayarlar › Sözler'den kapatılır). Sözü LRCLIB'e yüklemek yalnızca siz isterseniz olur.
 - **Kapaklar:** dosyada ve klasörde kapak yoksa albümün adı ve sanatçısı MusicBrainz'e, kapak için Cover Art Archive'a gider (Ayarlar › Kapaklar'dan kapatılır).
 - **Podcastler ve radyo:** aradığınız sözcük Podcast Index'e, iTunes'a ya da Radio Browser'a gider; abone olduğunuz yayınlar kendi sunucularından okunur. Radio Browser'a her çalmada bir “tıklama” bildirilir, oy verirseniz oy gider.
+- **Android Auto:** Podcast › Keşfet'i açınca listesini istediğiniz ülkenin kodu Apple'ın podcast listelerine gider; abone olmadığınız bir program açılınca yayını kendi sunucusundan okunur. Radyo'nun listelerini açınca seçtiğiniz ülke, dil ya da kategori Radio Browser'a gider.
 - **Scrobble:** yalnızca giriş yaparsanız, çaldığınız parçalar Last.fm ve ListenBrainz'e gider.
 - **Aynı ağ içinde:** yayınlama ve uzaktan erişim yalnızca bu ağdaki cihazlarla konuşur.
 - **Parolalar ve belirteçler:** sunucu parolaları, ListenBrainz belirteci ve Last.fm oturum anahtarı Android Keystore'un anahtarıyla şifrelenir; Last.fm parolası hiç saklanmaz.
