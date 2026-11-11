@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.MusicScreenshotTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:34:17.515Z" hostname="runnervmwuk1x" time="1.433">
+  <properties/>
+  <testcase name="phonePlayer" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.12"/>
+  <testcase name="ratingWindow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.091"/>
+  <testcase name="lyricsDex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.167"/>
+  <testcase name="phonePlayerNarrow" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.158"/>
+  <testcase name="dex" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.123"/>
+  <testcase name="phonePlayerOledEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.107"/>
+  <testcase name="phonePlayerSideways" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.121"/>
+  <testcase name="phonePlayerLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.109"/>
+  <testcase name="dexLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.135"/>
+  <testcase name="tabletLight" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.087"/>
+  <testcase name="tabletGenres" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.096"/>
+  <testcase name="phoneEnglish" classname="app.nagmedar.ui.screenshots.MusicScreenshotTest" time="0.114"/>
+  <system-out><![CDATA[FocusRelatedWarning: 
+   FocusRequester is not initialized. Here are some possible fixes:
+
+   1. Remember the FocusRequester: val focusRequester = remember { FocusRequester() }
+   2. Did you forget to add a Modifier.focusRequester() ?
+   3. Are you attempting to request focus during composition? Focus requests should be made in
+   response to some event. Eg Modifier.clickable { focusRequester.requestFocus() }
+
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.ComponentRulesTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:21.051Z" hostname="runnervmwuk1x" time="0.01">
+  <properties/>
+  <testcase name="aMovedMenuGrowsFromThePointItWasOpenedAt" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.005"/>
+  <testcase name="aSwipedNoticeCarriesOnOnAPhoneAndGoesWhereItIsWiderUp" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="aMenuThatFitsOpensUnderItsButtonAndGrowsFromItsTopLeft" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="backClearsASelectionBeingMade" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.001"/>
+  <testcase name="theClickModifiersForgetThePressOnceRead" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="aFingersTapOpensAMouseClickSelectsWhateverTheLayout" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="aPhonesPressGoesThreeQuartersAsDeep" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.003"/>
+  <testcase name="aDropDownNearTheBottomOpensAboveItsButton" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="theMenusPlaceStaysWithItsOpeningAndEachOpeningIsNew" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="aMenuAtAPointNearTheBottomOpensAboveThePoint" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.0"/>
+  <testcase name="theScreensCommandsAreSilentWhileCovered" classname="app.nagmedar.ui.components.ComponentRulesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

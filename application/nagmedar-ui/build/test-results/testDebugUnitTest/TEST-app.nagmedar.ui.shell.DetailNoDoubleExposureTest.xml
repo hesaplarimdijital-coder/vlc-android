@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:34:42.944Z" hostname="runnervmwuk1x" time="2.494">
+  <properties/>
+  <testcase name="onAPhoneABackGestureGivenUpSpringsBackOpaque" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.248"/>
+  <testcase name="onAPhoneTheDetailSlidesInOpaqueOverTheDarkeningListAndOutAgain" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.509"/>
+  <testcase name="widerUpTheSharedAxisFadesInTurn" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.422"/>
+  <testcase name="onAPhoneTheBackGestureShrinksTheOpaqueDetailOverTheDimmedList" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.354"/>
+  <testcase name="onAPhoneAnOpeningTurnedAroundStaysOpaque" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.286"/>
+  <testcase name="onAPhoneWithACardTheScreensFadeThroughNotOverEachOther" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.672"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

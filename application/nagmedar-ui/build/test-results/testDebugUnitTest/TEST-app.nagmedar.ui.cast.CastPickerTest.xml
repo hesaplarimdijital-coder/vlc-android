@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.cast.CastPickerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:20.591Z" hostname="runnervmwuk1x" time="0.454">
+  <properties/>
+  <testcase name="onceAndroidNoLongerAsksTheSettingsOpen" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.063"/>
+  <testcase name="withoutTheLocalNetworkPermissionItSaysWhyAndAsks" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.049"/>
+  <testcase name="theDeviceCastToIsMarked" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.049"/>
+  <testcase name="whatCannotBeCastIsSaid" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.044"/>
+  <testcase name="nothingFoundSaysWhatToCheck" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.068"/>
+  <testcase name="theKeyboardChoosesWithEnter" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.067"/>
+  <testcase name="aDeviceIsChosenAndThisDeviceTakesItBack" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.063"/>
+  <testcase name="searching" classname="app.nagmedar.ui.cast.CastPickerTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.ReplayGainTagsTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:47.143Z" hostname="runnervmwuk1x" time="0.394">
+  <properties/>
+  <testcase name="taggedScreenshot" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.076"/>
+  <testcase name="aRowOfAnEarlierProbeKeepsItsTechAndWaitsForTheTags" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.02"/>
+  <testcase name="aFileNotReadForThemYetShowsNoRows" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.032"/>
+  <testcase name="gainsAndPeaksAreWordedAsTheTypographyAsks" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.021"/>
+  <testcase name="untaggedScreenshot" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.086"/>
+  <testcase name="whatTheFileHasNotIsADash" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.023"/>
+  <testcase name="anUntaggedFileShowsDashes" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.035"/>
+  <testcase name="theTagsTabShowsTheGainsAndPeaks" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.059"/>
+  <testcase name="inEnglish" classname="app.nagmedar.ui.music.ReplayGainTagsTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

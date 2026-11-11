@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.PointerDevicesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:34.559Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="theCoversOtherChangesLeaveTheDensityAlone" classname="app.nagmedar.ui.input.PointerDevicesTest" time="0.001"/>
+  <testcase name="theTouchpadSwitchedOffAndOnAgain" classname="app.nagmedar.ui.input.PointerDevicesTest" time="0.0"/>
+  <testcase name="aMouseComesAndGoes" classname="app.nagmedar.ui.input.PointerDevicesTest" time="0.0"/>
+  <testcase name="aDeviceSwitchedOffAtTheStartDoesNotCount" classname="app.nagmedar.ui.input.PointerDevicesTest" time="0.0"/>
+  <testcase name="aMouseThatWakesUpCountsFromThen" classname="app.nagmedar.ui.input.PointerDevicesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

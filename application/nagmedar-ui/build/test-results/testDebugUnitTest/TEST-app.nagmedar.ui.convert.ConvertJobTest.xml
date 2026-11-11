@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.convert.ConvertJobTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:28.994Z" hostname="runnervmwuk1x" time="0.123">
+  <properties/>
+  <testcase name="theStoresFolderIsAskedForAtTheFirstReadNotWhenItIsMade" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.027"/>
+  <testcase name="theChoicesForTheNextTime" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.021"/>
+  <testcase name="aSummaryReadBack" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.023"/>
+  <testcase name="theStoreKeepsAJobUntilItIsPutAway" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.016"/>
+  <testcase name="whatTheLibraryShows" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.017"/>
+  <testcase name="aJobReadBack" classname="app.nagmedar.ui.convert.ConvertJobTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

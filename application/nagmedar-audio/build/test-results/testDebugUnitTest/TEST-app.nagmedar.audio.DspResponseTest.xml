@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.DspResponseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:29:40.037Z" hostname="runnervmwuk1x" time="0.151">
+  <properties/>
+  <testcase name="bandsBeyondTheOutputDoNothing" classname="app.nagmedar.audio.DspResponseTest" time="0.035"/>
+  <testcase name="theAutomaticPreamp" classname="app.nagmedar.audio.DspResponseTest" time="0.05"/>
+  <testcase name="vlcsPresetsOnTwentyBands" classname="app.nagmedar.audio.DspResponseTest" time="0.029"/>
+  <testcase name="theModelsResponse" classname="app.nagmedar.audio.DspResponseTest" time="0.019"/>
+  <testcase name="theGainsAndTheBypass" classname="app.nagmedar.audio.DspResponseTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

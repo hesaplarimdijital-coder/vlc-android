@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:34:25.400Z" hostname="runnervmwuk1x" time="0.871">
+  <properties/>
+  <testcase name="phoneNoFavourites" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.111"/>
+  <testcase name="phoneFavouritesEnglish" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.152"/>
+  <testcase name="dexSearchWithTheStrip" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.148"/>
+  <testcase name="dexImportedEnglish" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.11"/>
+  <testcase name="tabletNothingImportedEnglish" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.085"/>
+  <testcase name="phoneImported" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.142"/>
+  <testcase name="tabletRecent" classname="app.nagmedar.ui.screenshots.RadioListsScreenshotTest" time="0.12"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

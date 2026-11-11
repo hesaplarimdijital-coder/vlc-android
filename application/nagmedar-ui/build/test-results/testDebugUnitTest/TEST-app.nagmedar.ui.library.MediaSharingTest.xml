@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.MediaSharingTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:33:35.217Z" hostname="runnervmwuk1x" time="0.044">
+  <properties/>
+  <testcase name="aDocumentIsSentAsItIs" classname="app.nagmedar.ui.library.MediaSharingTest" time="0.017"/>
+  <testcase name="aFileGoesThroughTheProvider" classname="app.nagmedar.ui.library.MediaSharingTest" time="0.014"/>
+  <testcase name="severalGoTogether" classname="app.nagmedar.ui.library.MediaSharingTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

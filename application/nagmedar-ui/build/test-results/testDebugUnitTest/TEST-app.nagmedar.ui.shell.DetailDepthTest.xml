@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.DetailDepthTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-11T22:34:42.675Z" hostname="runnervmwuk1x" time="0.249">
+  <properties/>
+  <testcase name="withReducedMotionTheDetailSimplyAppears" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.03"/>
+  <testcase name="theBackGestureSeeksTheClosingWithTheListBehindAndCancelRestoresIt" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.026"/>
+  <testcase name="aGestureGivenUpPutsTheCoverBackAndASecondOneStillCloses" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.03"/>
+  <testcase name="theCoverFliesFromTheRowToItsPlaceInTheDetail" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.042"/>
+  <testcase name="aPhonesDetailComesFromTheEndOverTheSinkingList" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.025"/>
+  <testcase name="aChangeOfMindRunsTheWayBackFromWhereItIs" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.03"/>
+  <testcase name="aListScrolledAtRestIsMeasuredOnceAFrame" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.04"/>
+  <testcase name="aDetailKeptAfterBackRunsTheGestureBack" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
