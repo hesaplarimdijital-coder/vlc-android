@@ -257,3 +257,176 @@ PR A ready: #74 ee7d6785 (all CI jobs green; screenshots 251 same — Robolectri
   keyboard; full player, Sıradaki, lyrics, visualiser, ⋯ sheets reach behind the buttons, controls above them; first launch
   without a gap; buttons dark on light theme; Tab S11: chrome colour behind the taskbar/buttons; 200 % text: bar grows,
   labels end in "…"; TalkBack: top bar → content → mini player → bottom bar.
+
+### Part 4 (tablet and DeX) — final report, 6 Nov 01:30
+```
+BRANCH: story/tablet-dex   PR: #107 (draft)   HEAD: ff8ce1c3 (master 3c7d7524 merged)   CI: green (281 screenshots same)
+STORIES:
+- #20 density follows the cover's touchpad on/off and a waking mouse; only enabled devices count — done
+- #16 drag after the touch-and-hold delay plus movement (slow click stays a click); card with label and accent count — done
+- #17 DeX app chip: menu bar hides brand and "Nağmedar" — done
+- #67 sidebar footer badge — done
+- Inspector ReplayGain: track/album gain and peak, "—" when absent — done (database 24, probe version 2)
+COMMITS: ab6f1771 touchpad; 29bae5a7 drag; 51aed9c7 chip, badge; ea4d089a chip direction; 5e83c594 ReplayGain; 37929c00 native sandbox; 0f713e47 schema 24; 8a36cc81 inspector shots; 5da76cf1, 8e5a3ecf Screenshots; merges b5e798ba, fa8f298b, ff8ce1c3
+TESTS ADDED: input/PointerDevicesTest, input/DragStartTest, shell/SidebarBadgeTest, music/ReplayGainTagsTest; CaptionBarTest (+3), NagmedarDatabaseTest (23→24)
+SCREENSHOTS: new drag-card-{one,many}-{dark,light}, caption-dex-chip-light, inspector-replaygain-dex-dark, inspector-replaygain-dex-light-en; changed music-dex-light (ReplayGain row, the only change against master's rendering)
+WALKS: 8/8 green on 8a36cc81 and 8e5a3ecf (debug + personal, API 35 + 37.0); ff8ce1c3 adds only master's shell chrome, not walked again.
+DEVICE CHECKS:
+- [ ] Klavye kapağının touchpad'ini kapatın: dokunma boyutlarına geçmeli; açınca imleç boyutlarına dönmeli; klavye düzeni değişince boyut değişmemeli.
+- [ ] Uyuyan bir fareyi oynatın: imleç boyutlarına geçmeli.
+- [ ] DeX'te bir parçayı touchpad'le ve fareyle yarım saniye basılı tutup sürükleyin: başlıklı kart (çoklu seçimde "N parça" ve vurgu renkli sayı) çıkmalı; Dosyalarım'a ve çalar çubuğuna bırakılabilmeli.
+- [ ] Hızlı basıp sürüklemek hiçbir şey başlatmamalı; yavaş tıklama satırı seçmeli.
+- [ ] DeX başlık çubuğunda uygulama çipi görünürken menü çubuğunda logo ve "Nağmedar" olmamalı.
+- [ ] Ayrıntı panelinde etiketli parçada Parça/Albüm kazancı ve tepesi, etiketsizde "—" görünmeli.
+- [ ] Güncellemeden sonraki ilk açılışta kütüphane arka planda bir kez yeniden okunurken liste akıcı kalmalı.
+DEVIATIONS / OPEN ISSUES: NavDrop and #14 Ctrl+Enter (optional) not done; NavDrop needs SidebarItem/NagmedarShell edits beyond this part's lines. Database 24: renumber if another branch takes it. Probe version 2 re-reads every file's header once after updating. No Settings badge is supplied yet (wiring only).
+NOTES FOR THE NEXT STORY: $ORCH/notes/kit-port.md "## 2.3 port — Part 4 (tablet and DeX)".
+```
+
+## 2.3 port — Part 2b-2a (detail and lists) (story/detail-lists, PR #106) - NOTES FOR THE NEXT STORY
+- shell/DetailTransition.kt, phone (MotionTier.Gesture): `DetailDepth` (SHIFT 0.12, LIST_SCALE 0.95, GESTURE_LIST_SCALE 0.94,
+  GESTURE_END 0.85, WAY_OUT 0.4, COMMIT_MS 220; pure `gestureFrame(fraction)`), internal `DepthState` (a
+  `SeekableTransitionState<Boolean>`: gestureClose, swipeEdge, undoing, runningBack, dropped, withCard, cards; `drive`,
+  `stand`, `undo`, the layers), `rememberDepth(open)` (rememberTransition + animateFloat: detailShift on `NagMotion.open(FRACTION)`,
+  fades/scale on the kit's tweens), `DepthBackHandler` (seekTo(progress × 0.85); let go → onBack, the rest from where the
+  finger was; a kept detail or a cancel → `undo`, a run back), `DepthHost` (movableContentOf; `SharedTransitionLayout`
+  only while `moving` and not while a finger closes the detail: lookahead never at rest),
+  `DepthSide`, `placeDepth`. Wide windows: `DetailMotion`/`DetailMotionState` as before (+ `stand()`), the depth stands
+  aside without holding them up (`launch { depth.stand() }`).
+- `moving` must read only observable state: `undoing?.isActive` (the kit's) left the host in the layout after a cancelled
+  gesture with stale side transitions (the strips showed the detail's cover stuck at the row's place) → `runningBack`.
+- Decided against the kit: shared elements fly on a tap's way (open, back arrow, three-button Back, a change of mind's run
+  back) but not during a Back gesture, its commit or its cancel: the kit 2.3.0's own strips show the cover parked at the
+  list's place through the gesture and jumping back after a cancel; here the cover shrinks with the detail.
+- New params: `DetailTransition(sharedElements = false)`, `ListDetailPanes(sharedElements = false)` (its phone branch has the
+  depth too). Public modifiers `detailSharedElement(key, shape)`, `detailSharedBounds(key)`, `detailSharedCard(key, shape)`:
+  `LocalDetailSharedScopes` is dynamic (only marked elements recompose), provided only by a phone's transition with
+  sharedElements while it moves; an inner transition without sharedElements passes the outer's through (the podcast page
+  inside ListDetailPanes, the episode DetailTransition inside it).
+- On the phone the detail box is opaque (`colors.background`): the list is behind it during the gesture.
+- Users: PodcastsContent (keys `podcastCoverKey/podcastCardKey`, PodcastScreen.kt; row/tile covers, tile = card, PageTop's
+  Row = header card + cover), MusicBrowser (Compact + grouped → DetailTransition; `ClosingOrder` keeps the shown order while
+  closing; Medium/Expanded-with-inspector keep the old BackHandler swap), PlaylistsBrowser (Compact → DetailTransition, the
+  PageHeader is in the list side; Medium keeps the swap).
+- components/ListAppear.kt: `rememberListAppear(keys)`, `Modifier.listAppear(appear, index)` (layer removed once arrived:
+  references unchanged), `DenseTable(rowAppear)`. Keys: Music GroupList(view), TrackPane(view, group), podcast list/grid,
+  PodcastPageView(feed, loading), Radio StationList(tab), PlaylistOverview(layout), PlaylistTable(openId), SmartPane(id, loading).
+- Tests: shell/DetailDepthTest (depth open, Back + cancel, kept detail, change of mind, cover flight, cancelled-gesture cover
+  regression, reduced motion, lookahead cost), shell/DetailMotionTest (+3 gesture frames), components/ListAppearTest;
+  motion/MotionStripsTest + detail-open, detail-back, detail-back-cancelled (the real Podcast page), album-open,
+  album-turn-around, list-appear (the real Music browser).
+- Seen in the strips, not changed: the first visible frame after a tap comes ~3 frames later (SeekableTransitionState.animateTo:
+  a frame, a composition, a start frame) — the kit's own strip shows the same; a plain updateTransition for taps (seekable only
+  for the gesture) would win 1-2 frames.
+- Status (6 Nov 02:17): PR #106 draft, HEAD 38d0aa8c (master 3c7d7524 merged); CI all green (274 screenshots same); walks of
+  38d0aa8c green: debug 42118189780 and personal 42118201284, API 35 and 37.0, tablet and phone (0 app crash, 0 checks failed;
+  system gms ANRs only recorded). Strips looked at: $SCRATCH/agents/detail-lists/strips{1,2,3}/ (3 = final).
+
+## 2.3 port — Part 2b-2b (player motion) (story/player-motion, PR #108, landed with the train) - NOTES FOR THE NEXT STORY
+
+- components/ExpandablePlayer.kt, one surface (#52) from the app's card: `PlayerCard(horizontal, vertical, corner)` (PlayerBar
+  passes `compactPlayerCard()` = 8 dp, 6 dp, `floatingPlayerCorner` — new internal getter in shell/NagmedarShell.kt beside
+  `floatingPlayerCard()`); pure `PlayerSurface.bounds/radius/fill` (the card at 0, the window at 1, only growing; corners
+  max(card·(1−p), 16 dp·4p(1−p)); fill lerp(surfaceRaised → background)); the card's rule fades over MINI_FADE.
+  Glass B (the user's choice, story/glass-b): with the strip on the shell's bottom glass, shell/ChromeGlass.kt's new
+  `LocalBottomGlassSurface` (the shell's `bottomGlass` factory, provided in the player slot beside LocalOnBottomGlass) is
+  drawn under the surface while p < 1 (derived `glassOn`) and the page's colour comes over it with alpha p; open, no glass.
+  TestShell(chromeGlass = …) runs either; PlayerMotionTest and the strips (*-glass) cover Bottom and Solid. Constants `SHEET_OUT` 0.001, `MINI_FADE` 0.25, `MINI_GONE` 0.3, `FULL_FROM` 0.6 (internal). The
+  surface clips only while p < 1 or under Back: at rest PhonePlayer's backdrop goes on under the status bar.
+- The strip's copy in the sheet is composed with the full player all the time (no composition on the first frame), placed
+  while p < MINI_GONE or until it has drawn once (`PlayerFlight.miniDrawn`); `inPlayerSheetStrip` (internal composable
+  getter): CompactTransportBar draws no card there (the sheet is its card) and ProgressTimeline does not glide in it.
+- `Modifier.playerSharedElement(key, shape)` + `PlayerShared { Artwork, Title }`: NowPlayingWords' artwork Box and title Text
+  (bars), PhonePlayer's Stage artwork Box and TitleRow title. `PlayerFlight` (internal) keeps one `Copy` per element instance
+  and flies the last one drawn on each side (a title cross-fading to the next track's has two); entries are fixed keys, never
+  removed. A no-op outside the phone's sheet (tablet big player, screenshots).
+- Springs: a tap's expand()/collapse() = `NagMotion.fade(tier, spring(0.9, 500, PIXEL))` (ExpandablePlayerState.settle);
+  a finger's release keeps playerFlingBehavior (gesture spring). Back: shrink = backProgress·p, let go when the collapse
+  animation ends (snap if landed). PlayerSheetScope.nestedScroll gained onPostFling (#57 kept, #66's fling).
+- #48: `ExpandablePlayerState.measureAnchor` hook, called by expand() and collapse(); the anchor = where the strip is drawn
+  (layer slide included), measured on each Press (Initial pass, watched only) and followed while the sheet is out
+  (snapshotFlow of `restTop + host.navigationOffset()`); ShellScroll.showBars() and ShellOverlayHost.onExpandStart are gone,
+  `ShellOverlayHost.navigationOffset` stays (re-documented). MotionTierTest's showBars test removed.
+- WindowPlayer: `player: @Composable (Modifier) -> Unit` (NagmedarApp + test BigPlayerWindow updated); pulled as QueuePage is
+  (`rememberSheetDrag` + `sheetDrag`, translationY = drag.offset, reset on open, `covers` needs !drag.pulled): a third of the
+  height or 800 dp/s closes. PhonePlayer lost `drop`, `pullDown`, CLOSE/CLOSE_FLING; its Stage takes only sideways swipes.
+- ProgressTimeline: `rememberSmoothProgress(progress, lengthMs)` starts at the latest reading (no "0:00 / −4:18" on a copy's
+  first frame); `elapsed: (() -> Long)?` = a length nobody knows shows the time played alone (read on the clock's second while
+  playing and drawn), no thumb, no seek, Indeterminate for TalkBack. `playbackPositionMs()` (internal) is passed by SeekRow,
+  PhonePlayer and NowPlayingPanel; EpisodeDetailView does not (its timeline can be of an episode that is not playing).
+- PlayerBars.kt `rememberPlayingLength(media, playing)` (internal): the library's length, else the engine's
+  (`PlaybackService.length` for its current media, read every 500 ms until read the same twice, max 20 readings, not for
+  streams). Used by rememberPlayerBarInfo, PhonePlayerHost, NowPlayingPanel's host. Files played from a folder (no library
+  length, e.g. the walk's tone.mp3) now have their whole timeline.
+- Walk lesson: several timelines each ticking on their own second (unaligned 1 Hz content changes) kept `uiautomator dump`
+  from ever seeing a still second while the tablet's big player was open over the bar: the workstation's "the bar's open
+  button opens the big player" failed on every tablet job. Anything that changes text once a second should change on the
+  shared readings (or on the clock's second), not on its own timer.
+- Tests: components/PlayerMotionTest, music/WindowPlayerPullTest; motion/MotionStripsTest uses the bar's card and flying
+  elements, + player-tap-bars-hidden, player-collapse-bars-hidden.
+
+## 2.3 port — Part 2b-2c (sheets and Back) (story/sheets-back, PR #110, landed with the train) - NOTES FOR THE NEXT STORY
+
+- components/Sheets.kt `SheetDrag` (API kept: `rememberSheetDrag(onClose)`, `offset`, `pulled`, `pull`, `release`, `reset`,
+  `nestedScroll`, `Modifier.sheetDrag`): `SheetDragRules.carriesOut(tier)` (Gesture only): let go to close on a phone it runs
+  `carryOut(velocity)` = `animate(offset → height, NagMotion.gesture(PIXEL), finger's velocity)` and calls onClose when
+  `value >= height - PIXEL`, setting `carriedOut` (snapshot state, cleared by reset()). GlassBottomSheet's LaunchedEffect(visible):
+  visible → reset + progress to 1 on `sheetWay(tier, timed)`; `drag.carriedOut` → `progress.snapTo(0)`; else progress to 0
+  from where it is. Timed/Reduced: onClose at once, as 1.0.2.
+- `sheetWay(tier, timed)` (internal): Gesture = spring(0.92, 800, FRACTION) both ways, Timed = the tween, Reduced = snap.
+  The sheet stays placed by its graphicsLayer (the kit moved to `offset {}` only for Haze's blur; the app is Solid).
+- Haptic: `SheetDrag.onThreshold` (rememberSheetDrag wires `rememberNagHaptics().threshold()`, touch only): one tick each time a
+  pull crosses height/3 downward (`armed`; a new press re-arms from where the sheet is via the `held` setter).
+- QueuePage: the drag is hoisted out of AnimatedVisibility (QueuePage level); exit = `ExitTransition.None` when
+  `drag.carriedOut`, else `motion.sheetExit()`; `LaunchedEffect(open) { if (open) drag.reset() }`.
+- #31: `ActionGroupList`/`SheetActionRow` (MoreSheet's rows): an item with `checked` = `toggleable(role = Switch)` row with
+  `SwitchTrack(checked)` at its end (components/Choice.kt, the track+thumb taken out of NagSwitch, pixels unchanged); tap
+  toggles (NagHaptics.toggle) and does not dismiss. MoreSheet's content captures `shown = held.groups` so an open sheet shows a
+  flipped switch. MenuPopup and MenuSheet (menus, also radio-like `checked` lists: sort orders, views) keep the check mark.
+  No MoreSheet of the app has a checked item today (infrastructure + tests).
+- #63: components/Interaction.kt `FocusMemory` (last 8 focused controls, WeakReferences; `current()` = latest still attached
+  and focused), `FocusMemoryNode` (FocusEvent + FocusRequester + CompositionLocalConsumer; `restore()` launches requestFocus
+  on the control's own node scope), `Modifier.focusMemory()` (internal) in `nagClickable`, NagSwitch, NagCheckbox, sheet
+  switch rows. `ShellOverlayHost.focusMemory`. `ReturnFocusOnClose(host, open)` (Sheets.kt) in GlassBottomSheet (restores at
+  close); `blockInputBelow()` captures at composition and restores when the page leaves (QueuePage, WindowPlayer, full-screen
+  lyrics/visualiser, lyrics editor: after their exit animation). The palette is a NagDialog window: the main window keeps its
+  focus by itself (test). Text fields have no focusMemory yet (the kit's Forms.kt has it).
+- #59: NagmedarShell: `edgeBack` = `WindowInsets.systemGestures` left or right > 0 (gesture navigation's Back edges; 0 with
+  three buttons and in Robolectric unless dispatched); the tab-root `BackHandler` is disabled when
+  `NavRules.tabBackFollowsFinger(kind, edgeBack)` (BottomBar && edgeBack), so NavHost's own predictive handler pops
+  [Müzik, tab] with `predictivePopEnter/Exit` = `tabBackEnter/tabBackExit` when `NavRules.tabBack(from, to, kind)`
+  (scaleIn 0.94 + fadeIn, Standard, 300 ms; scaleOut 0.9 + slide away from the swipe edge width/20 linear + fadeOut in the last
+  tenth); other predictive pops keep Part 1's page pops. Reduced → None. Three-button Back, rail and sidebar: today's
+  BackHandler → `navigator.backToStart()` (switchTab: the tab's state saved). With gesture navigation the pop does not save the
+  left tab's state (navigation's own pop, as the kit). Tests dispatch `WindowInsetsCompat.Type.systemGestures()` insets.
+- Today's three-button Back to Müzik (and the Müzik tab from another tab) is navigation's popUpTo = a pop (ComposeNavigator
+  .isPop) → the shell's popEnter/popExit with lastMove = Tab → the page-pop slide, not the fade-through (strip tab-back).
+  Kept (prompt: "today's motion"); one-line change if the user wants the fade-through there.
+
+## Glass B (the user's decision) (story/glass-b, PR #111, landed with the train) - NOTES FOR THE NEXT STORY
+
+- The user's decision of 6 Nov 01:05 ("B olsun"): on a phone (NavKind.BottomBar) the mini player's card, the bottom bar and
+  the band behind the system's buttons lie on the shell's one bottom glass; the top bar opaque, never changing colour; menus,
+  sheets, dialogs solid (shell `glass = false` stays); tablets/DeX unchanged. Fallbacks: battery saver and "Animasyonları
+  kaldır" -> GlassMode.Solid (the glass's solid = chrome colour; the card then shows the chrome, outlined by its border);
+  no hardware acceleration -> Translucent (Robolectric too).
+- shell/ChromeGlass.kt: `ChromeGlass.Product = Bottom`; `DebugChrome.glass` starts there; non-debuggable (personal) never
+  leaves it; a debuggable build still switches to Solid/Kit with `app.nagmedar.debug.CHROME_GLASS` (walk pass `glass`).
+  NagmedarShell's default `chromeGlass = ChromeGlass.Product`; TestShell(chromeGlass = ChromeGlass.Product) (tests follow
+  the product; pass ChromeGlass.Solid for A).
+- theme/Glass.kt: `GlassThickness.Thick` (tint 0.88 dark/OLED, 0.90 light, 28 dp blur) is the bottom glass's material
+  (NagmedarShell `NagGlass.chrome(colors, GlassThickness.Thick)`): every text tone on the card (title text, times
+  textSecondary, artist line textTertiary) >= 4.5:1 over white and black covers; accentText (seek time while dragging,
+  "Canlı yayın") >= 4.5:1 over bright covers (GlassTest.theBottomChromesWordsOverAnyCover). Regular (0.80-0.86) failed:
+  textTertiary 3.6-3.9:1 over white (dark) / black (light). Known: light theme over a near-black cover, Amber/Green
+  accentText ~4.1:1.
+- The bottom glass is not drawn while the expanded player or a window page covers the window: `graphicsLayer { alpha }`
+  in NagmedarShell's glassSurface (expandProgress >= 1 || windowCovered); the hazeBlur stays attached (no re-attach).
+- Haze 2.0.1 run-time artefact (glass empty, rows sharp under the card until the page redraws): `glassSource()` (now
+  @Composable) and the Blur branch of `Modifier.glass` draw once more two frames after they start (`drawnAgain`).
+- Walk: phone-en `glass_b_check()` after phone_player (animations off -> opaque card == bar; animations on -> run-time
+  switch over search covers, moved, cold start: card/bar strips spread <= 40 (no sharp rows), card != opaque, changes as
+  the list moves). prepare_media pushes a bright `cover.jpg` into /sdcard/Music/nagmedar-walk/. Helpers: `cover_image`,
+  `region`, `glass_boxes`, `glass_read`, `blurred`, `differs`, `search_results`, `cold_start(route)`. On-demand pass
+  `glass-b` (evidence ci/emulator-glass-b, glass-b/README.md): cold start into each route (launcher extra
+  `nagmedar_destination`), first frames + settled, then pages with the mini player and moved lists, Sıradaki, full player.

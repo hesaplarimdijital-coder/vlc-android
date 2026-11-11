@@ -53,3 +53,10 @@ print or copy `delivery.key` anywhere but `decrypt.sh`.
 Paths in the notes and the log were the old session's: `$SCRATCH`, `$ORCH`, `$REPO`, `$WT`, `$KIT` (the desktop-kit
 clone) stand for them. The stub Kotlin toolchain for local test compilation (`$SCRATCH/kt`) is not handed over; CI
 compiles and runs every test.
+
+## The 1.0.3 session (4 – 12 Nov 2026)
+`orch/LOG.md` has it day by day. New since the handover above: `orch/watch_sha.sh <sha> [minutes]` (waits for every CI
+job and emulator walk of a commit, re-runs once the walk jobs that died in the runner's setup, prints the summaries and
+the failures), `orch/prompts/` of the Desktop Kit 2.3.0 port's parts, `orch/notes/kit-2.3-map.md` (the 67 rows of the
+port) and the parts' notes in `orch/notes/kit-port.md`. `AGENT_BRIEF.md` section 0000 holds this session's rules
+(minSdk 34, glass B, the split walk, the attribution lines).

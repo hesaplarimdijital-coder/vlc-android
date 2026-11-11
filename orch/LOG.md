@@ -481,3 +481,60 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   product incl. the personal build; top bar/menus/sheets/dialogs opaque; tablets unchanged; fallbacks opaque; references
   updated; one walk check). player-motion told (#52 starts from the card on the glass; page glass off when up);
   sheets-back told (sheets opaque above the glass). Doc decision row updated.
+- 01:40 tablet-dex done: PR #107 ff8ce1c3 (master 3c7d7524 merged), CI green (281 refs same, music-dex-light changed by the
+  ReplayGain row): touchpad on/off density, hold-to-drag with a card + count, caption chip hides brand/title, sidebar
+  footer badge, inspector ReplayGain/peak (DB 24, probe version 2 → one background header re-read after update). Not done:
+  NavDrop, palette Ctrl+Enter (optional). Walks of 8e5a3ecf green; dispatched debug 35/37.0 + personal 35 on ff8ce1c3
+  (bw5wip04k) before landing. NOTE: DB is 24 on this branch — any other DB change must renumber.
+- 02:10 PR #106 detail-lists landed: master 38d0aa8c (phone detail depth 12 %/95 %, seekable Back with the list behind,
+  run back on a change of mind, podcast cover flies, lookahead only while moving, rows arrive in turn on Music/Podcast/
+  Radio/Playlists; Music groups and Playlists open in depth; 274 refs same; walks green). #107 tablet-dex must now merge
+  master (orchestrator does it after its running walks).
+- 02:45 #107 walks on ff8ce1c3: personal green; debug API 35 phone job "no report" (emulator setup failed, infra), the
+  other debug jobs green. Merged master 38d0aa8c into story/tablet-dex myself → f563f515, pushed; CI + debug 35/37.0 +
+  personal walks dispatched (bxpgdxhg9). Land when green.
+
+## 6 Nov ~03:00 — fourth container restart
+- Lost (all had pushed; nothing of value lost): android17 (3d0a8733 done, report draft agents/android17/report.md; 37 proven
+  on 552998d0, walks green), player-motion (eecfecb9: all scope done; fixing the tablet walk "open player" failure =
+  unknown-length timelines ticking so the dump never idles → rememberPlayingLength + second-aligned ticks), sheets-back
+  (6d4dec24: done; walks of efbdef9a all green), glass-b (3ab6f2ec: done; 63/63 glass-b checks; notes/report not written).
+- Walk infra: since ~23:00 UTC many jobs die in setup: sdkmanager "Error reading Zip content from a SeekableByteChannel"
+  (system image or NDK download) → "the walk produced no report". Not the app. New $ORCH/watch_sha.sh re-runs such jobs once.
+- 03:30 MERGE TRAIN: story/train-1 = master 38d0aa8c + tablet-dex (#107) + android17 (#109) + sheets-back (#110) + glass-b
+  (#111) + player-motion (#108), conflicts only in TestShell (keep ChromeGlass.Product) and MotionStripsTest (both strip
+  sets). HEAD 26cae55d, PR #112, DB 24. Walks dispatched debug 35/37.0 + personal 35/37.0; watcher b62voacpb. If green:
+  merge.sh train-1 → the five PRs are marked merged. Then: CI cache for system images/NDK (infra), release 1.0.3.
+- 05:30 train 26cae55d: CI green (app jobs); walks: phone jobs all green, ALL tablet jobs (debug/personal, 35/37.0) failed
+  "workstation: the bar's open button opens the big player". Cause (from report.json step seconds + shots): while something
+  plays each step's dump takes ~15 s instead of ~6.5 (ticking timeline; pre-existing, phone steps too); player-motion now
+  shows tone.mp3's real 30 s length so its time ticks → tone ended two steps after it started → no transport bar to tap.
+  Fix on the train: b3165350 "Walk: a five-minute test tone" (emulator.yml ffmpeg duration=300, mono 32k). Re-dispatched
+  walks; watcher bn7nxcg4n. watch_sha.sh infra match tightened (only "Error reading Zip content" and the real
+  "##[error]the walk produced no report"; the old match re-ran real failures once).
+  Later improvement: dumps wait ~10 s for idle while music plays → a faster dump would cut the walk by ~10 min.
+- 06:10 train b3165350: CI green; the big-player check now passes; phone jobs green; tablet jobs failed only "phone-tr:
+  rotated, the folder is still open": the 5-min tone still plays in phone-tr, the phone turned sideways (1280×576) puts the
+  floating player over the device table's last rows, tone.mp3's row not in the dump though the trail reads
+  "Dahili depolama › Music". Walk fix ca51919a: Home/rotation checks accept the trail ending in the folder. Walks
+  dispatched; watcher b4i6yen4h.
+- 07:10 train ca51919a: CI green; personal walks 35/37.0 all 4 jobs green; debug 37.0 both green; debug 35 phone green;
+  debug 35 tablet FAILED "workstation: after 'By size' the drive still lists its folders" (1 of 4 tablet runs; its evidence
+  overwritten); PR walk: walk passed but the evidence push lost a ref-lock race with the dispatched run. Cause of the
+  flake: the 5-min tone still playing → 15 s dumps → wait_for(5 s) had one read. Fix 8d9e266f: pause the tone (keyevent
+  127) after the play/big-player checks; sort wait 10 s; evidence push retried 3×. Walks dispatched; watcher bfbu1itq4.
+
+## 11 Nov (after a five-day gap; the container had restarted, scratch/clones/worktrees/delivery key intact)
+- 22:36 TR "Devam et." master 38d0aa8c; train 8d9e266f: app CI green, personal walks 35/37.0 green, phone jobs green; only
+  the DEBUG tablet jobs red: StrictMode DiskReadViolation at CoverStore.kept ← CoverObserver.coverFor ← CoverHook.file ←
+  PlaylistManager.saveCurrentMedia ← pause (a real app finding the walk's new media-key pause exposed; a miss is
+  remembered for a minute only). Fix 7cfbc735 on the train: saveCurrentMedia writes title/artist/location at once and
+  looks for the kept cover on Dispatchers.IO (resumeThumbTurn guards the order). Attribution is now "Claude Fable 5.2"
+  (AGENT_BRIEF updated). Walks dispatched (debug 37.0; personal 35,37.0); watcher bic7mt0k8.
+- Notes of the three agents that died before writing them (player-motion, sheets-back, glass-b) appended to
+  notes/kit-port.md from their drafts.
+- 22:45 Baseline Profile generation dispatched on the train's code (run 43089404063).
+- Release branch story/release-1.0.3 (worktree $WT/release-1.0.3) from 7cfbc735: version 4010003 / '1.0.3', CHANGELOG 1.0.3
+  (Turkish, from the 16 PR bodies in $SCRATCH/release-1.0.3/prs), buildsystem/release/README.md (numbers, update
+  paragraph, walk split + evidence branches, Android 17 section rewritten). Not pushed until the train is green and the
+  profile is in. Then: release_chain.sh release-1.0.3 <sha> 1.0.3.

@@ -9,7 +9,7 @@ master yourself.
 
 - **Attribution (replaces §2.5):** commits end with exactly these two lines (after a blank line):
   ```
-  Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+  Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
   Claude-Session: https://claude.ai/code/session_01CCjCQf9dHq1sPdX5uoz8qa
   ```
   PR bodies end with:
@@ -169,7 +169,7 @@ master yourself.
    (grep `S-005`).
 5. Commits end with exactly these two lines (after a blank line):
    ```
-   Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+   Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
    Claude-Session: https://claude.ai/code/session_01Lvh4tsdhXUadwhZpYnRA5K
    ```
    PR bodies end with:

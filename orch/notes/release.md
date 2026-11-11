@@ -53,3 +53,33 @@
   `python3 -I <script> <worktree>/buildsystem/ci/emulator_smoke.py`.
 - Test media: testmedia/ is audio, podcast and radio only (13 samples, 11 generated, ~41 MB). pgs.py and the
   dovi_tool/hdr10plus_tool/mkvtoolnix downloads are gone; numpy stays (tools/dsf.py).
+
+## Android 17 (targetSdk 37) (story/android17, PR #109) - NOTES FOR THE NEXT STORY
+- Final head targets 36 (d14a5125); the bump = settings.gradle `targetSdk = 37` (+ build.gradle ext `targetSdkVersion`,
+  unused by modules). Proof 552998d0 (37): CI run 42116915320 green; walks API 37.0 all passed with targetSdk=37:
+  debug phone 42116918569 (124 steps, 0/56), debug tablet 42118408002 (134, 0/67; the first tablet job died in
+  setup: NDK zip download), personal phone + tablet 42116923152 (125, 0/56, AutoBrowseTest OK; 134, 0/66).
+  Evidence branches ci/emulator-api37.0-* are shared with other agents' walks: cite the job logs, not the branches.
+- Local network: tools `app.nagmedar.network.LocalNetwork` (required(sdk, target) both >= 37, state(), hostOf()
+  ignores file/content/android.resource…, isLocalHost(): RFC1918, 169.254/16, 224/4, 255.255.255.255, fe80::/10,
+  fc00::/7, ff00::/8, .local/.lan/.home/.home.arpa/.internal/.localdomain, single words; not loopback, not 100.64/10).
+  Declared only when the variant targets >= 37: app/build.gradle onVariants -> flavors/targetSdk37/AndroidManifest.xml
+  (AOSP: a requested ACCESS_LOCAL_NETWORK is no longer the implicit INTERNET split grant, so declaring it at 36 would
+  block the LAN on Android 17).
+- UI: nagmedar-ui network/LocalNetworkAccess.kt (state StateFlow, prime/refresh, ask -> request taken once by the front
+  window's LocalNetworkHost (NagmedarApp, showCastPicker), Blocked -> app details; install() = notice for a LAN media;
+  rememberLocalNetworkState, localNetworkWords). LanState.NoPermission ("network-permission"; auto-asks once in Ask;
+  a tap on a local saved server asks while Android asks and opens once given; "network-unreachable" explains),
+  CastPickerView.NoPermission ("cast-permission"), RemoteAccessSection(access, onAllowLocalNetwork) ("ra-permission").
+  PlaylistManager.startIndex -> LocalNetwork.opening(ctx, uri). Pref NAGMEDAR_LOCAL_NETWORK_ASKED (not backed up).
+- Audio: PlaybackService.keepForeground() (startForegroundService + startForeground at once) from PlaylistManager.play()
+  and startIndex: the FGS exists before sound/focus (Android 17, every target). Alarms.play raises the volume after it.
+  Target 37: Alarms.ringsThroughPage -> AlarmNotification (channel nagmedar_alarm, alarm tone USAGE_ALARM, insistent,
+  full-screen intent, NotificationIds.ALARM 1007) -> AlarmActivity (over the lock screen) starts the music in
+  onResume (visible => while-in-use FGS); Settings › Alarm PageRow says what is missing.
+- Widget: PlayerWidget WidgetCovers (96 dp centred square, RGB_565 when opaque, within 6 × screen pixels, refused update
+  re-sent with the placeholder). Classic share helpers grant read explicitly (Android 18).
+- Walk: install() grants ACCESS_LOCAL_NETWORK (the feed at 10.0.2.2 is a local address).
+- Left for the bump: guide sections (permission, alarm page) once 37 ships; remote access commands while nothing plays
+  in the background may stay silent at 37 (RemoteAccessService gives no while-in-use); usesCleartextTraffic (later
+  deprecation) kept; casting still needs the permission (libVLC, no Output Switcher).
