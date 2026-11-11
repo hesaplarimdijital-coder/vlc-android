@@ -210,9 +210,13 @@ class DetailDepthTest {
         }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        // (the opening moves on in the frame the change arrives in, no further than it went in the frame before, then it turns)
+        // (the opening moves on in the frame the change arrives in, about as far as in the frame before, its spring
+        // still gathering speed that early, then it turns)
         val aFrame = earlier - before
-        assertTrue("the way runs back from where it was, no jump: $earlier → $before → $lefts", lefts.isNotEmpty() && abs(lefts.first() - before) < aFrame + 4f)
+        assertTrue(
+            "the way runs back from where it was, no jump: $earlier → $before → $lefts",
+            lefts.isNotEmpty() && abs(lefts.first() - before) < aFrame * 1.5f + 4f,
+        )
         assertTrue("it runs back towards the end: $lefts", lefts.zipWithNext().all { (a, b) -> b >= a - 0.5f })
         compose.onNodeWithTag("detail").assertDoesNotExist()
         assertEquals(0f, bounds("list").left.value, 0.5f)

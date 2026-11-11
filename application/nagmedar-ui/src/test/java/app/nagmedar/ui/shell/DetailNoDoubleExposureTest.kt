@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
+import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
@@ -50,23 +51,28 @@ class DetailNoDoubleExposureTest {
 
     private var detail by mutableStateOf<String?>(null)
 
-    private fun show(tier: MotionTier, card: Boolean = false, keep: Boolean = false) {
+    private fun show(tier: MotionTier, card: Boolean = false) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark) {
                 CompositionLocalProvider(LocalMotionTier provides tier) {
-                    DetailTransition(
-                        detail = detail,
-                        onBack = { if (!keep) detail = null },
-                        sharedElements = card,
-                        list = {
-                            Box(Modifier.fillMaxSize().background(Color.Red)) {
-                                if (card) Box(Modifier.detailSharedCard("card").size(160.dp).background(Color.Green))
+                    // on the page's colour, as every screen of the app is (the shell's frame): it is what shows in
+                    // the margins a sinking list opens and under a list that fades; the test activity's own window
+                    // is white, which under a scrim reads as red and blue at once
+                    Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
+                        DetailTransition(
+                            detail = detail,
+                            onBack = { detail = null },
+                            sharedElements = card,
+                            list = {
+                                Box(Modifier.fillMaxSize().background(Color.Red)) {
+                                    if (card) Box(Modifier.detailSharedCard("card").size(160.dp).background(Color.Green))
+                                }
+                            },
+                        ) {
+                            Column(Modifier.fillMaxSize().background(Color.Blue)) {
+                                if (card) Box(Modifier.detailSharedCard("card").fillMaxWidth().height(300.dp).background(Color.Green))
                             }
-                        },
-                    ) {
-                        Column(Modifier.fillMaxSize().background(Color.Blue)) {
-                            if (card) Box(Modifier.detailSharedCard("card").fillMaxWidth().height(300.dp).background(Color.Green))
                         }
                     }
                 }

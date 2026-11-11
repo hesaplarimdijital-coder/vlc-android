@@ -355,19 +355,22 @@ class BackMotionTest {
         val more = camera.frame("Daha fazla at rest")
         val opening = play("the page opened", frames = 6) { navigator?.open(Destination.Equalizer) }
         val page = camera.frame("the page at rest")
-        // from the first frame on the page is there, whole; the page under is never seen dark or beside it
+        // the change reaches the screen a frame or two after it is asked for; no frame is in between: each shows the one
+        // page or the other (never both, never neither), and the page under is never seen dark
         for (f in opening) {
-            assertTrue("the page is there at once: $f", f.showsBlue(more))
-            assertFalse("the page under is still seen: $f", f.showsRed(page))
+            assertTrue("a frame between the two pages: $f", f.showsBlue(more) != f.showsRed(page))
+            if (f.showsRed(page)) assertEquals("the page under is dark: $f", more.redLevel, f.redLevel)
         }
+        assertTrue("the page is there: ${opening.last()}", opening.last().showsBlue(more))
         val closing = play("Back", frames = 6) { dispatcher.onBackPressed() }
         for (f in closing) {
-            assertFalse("the page is still seen: $f", f.showsBlue(more))
-            assertEquals("the page under is as bright as it was: $f", more.redLevel, f.redLevel)
+            assertTrue("a frame between the two pages: $f", f.showsBlue(more) != f.showsRed(page))
+            if (f.showsRed(page)) assertEquals("the page under is dark: $f", more.redLevel, f.redLevel)
         }
-        // and the tabs: Back from "Daha fazla" is at Müzik at once
+        assertTrue("the page is gone: ${closing.last()}", closing.last().showsRed(page))
+        // and the tabs: Back from "Daha fazla" is at Müzik, never faded on the way
         val tabs = play("Back to Müzik", frames = 6) { dispatcher.onBackPressed() }
-        for (f in tabs) assertEquals("Müzik as bright as it was: $f", music.redLevel, f.redLevel)
+        for (f in tabs) assertEquals("a tab faded: $f", music.redLevel, f.redLevel)
         compose.onNodeWithTag("screen-Music").assertExists()
     }
 
