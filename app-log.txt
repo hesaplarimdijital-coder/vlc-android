@@ -1,0 +1,445 @@
+11-11 22:36:18.208 D/AndroidRuntime( 3390): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 22:36:18.215 I/AndroidRuntime( 3390): Using default boot image
+11-11 22:36:18.215 I/AndroidRuntime( 3390): Leaving lock profiling enabled
+11-11 22:36:18.361 D/AndroidRuntime( 3390): Calling main entry com.android.commands.am.Am
+11-11 22:36:18.369 I/ActivityManager(  570): Force stopping app.nagmedar.macrobenchmark appid=10210 user=0: start instr
+11-11 22:36:20.868 I/VersionMigration( 3454): Migrating to Version 7: migrate PlaylistManager PLAYLIST_REPEASE_MODE_KEY to PLAYLIST_VIDEO_REPEAT_MODE_KEY and PLAYLIST_AUDIO_REPEAT_MODE_KEY
+11-11 22:36:24.220 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:36:24.774 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10136; uidState: RCVR; uidBFSL: n/a; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService (has extras) }; code:BACKGROUND_FGS_PERMISSION; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:36:24.834 W/ActivityManager(  570): Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+11-11 22:36:24.838 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10136 does not have any types
+11-11 22:36:24.862 W/ActivityManager(  570): Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+11-11 22:36:24.862 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10136; uidState: FGS ; uidBFSL: n/a; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService }; code:BACKGROUND_FGS_PERMISSION; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:1; bindFromPackage:null: isBindService:false] (Called on SHORT_SERVICE)
+11-11 22:36:25.613 I/NagmedarPerf( 3454): music_list ms=6230 tracks=0 kept=false
+11-11 22:36:28.944 W/ActivityManager(  570): Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+11-11 22:36:28.953 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10136; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService }; code:PROC_STATE_FGS; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:1; bindFromPackage:null: isBindService:false] (Called on SHORT_SERVICE)
+11-11 22:36:31.910 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10136 has no types!
+11-11 22:36:33.333 I/AiAiCaptions( 1419): Enable com.google.android.apps.miphone.aiai.captions.CaptionsForegroundService
+11-11 22:36:39.200 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:36:43.246 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4260
+11-11 22:36:43.248 I/ActivityManager(  570): Killing 3454:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 4260
+11-11 22:36:43.980 W/system_server(  570): Long monitor contention with owner PackageManager (627) at int com.android.server.am.ActivityManagerService$LocalService.broadcastIntent(android.content.Intent, android.content.IIntentReceiver, java.lang.String[], boolean, int, int[], java.util.function.BiFunction, android.os.Bundle)(ActivityManagerService.java:19191) waiters=0 in boolean com.android.server.am.ActivityManagerService$LocalService.hasForegroundServiceNotification(java.lang.String, int, java.lang.String) for 139ms
+11-11 22:36:46.134 I/NagmedarPerf( 4275): music_list ms=2682 tracks=64 kept=true
+11-11 22:36:47.053 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:36:47.255 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:36:48.951 I/ActivityManager(  570): Killing 3325:com.google.android.settings.intelligence/u0a140 (adj 0): change com.google.android.settings.intelligence
+11-11 22:36:52.050 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:36:56.395 I/NagmedarProfile( 3407): tablet: subscribed to http://10.0.2.2:8765/feed.xml
+11-11 22:36:57.871 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:36:57.882 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4551
+11-11 22:36:57.892 I/ActivityManager(  570): Killing 4275:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 4551
+11-11 22:36:57.917 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:36:58.627 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10152 does not have any types
+11-11 22:36:59.523 W/system_server(  570): Long monitor contention with owner binder:570_14 (1828) at android.app.ContentProviderHolder com.android.server.am.ContentProviderHelper.getContentProviderImpl(android.app.IApplicationThread, java.lang.String, android.os.IBinder, int, java.lang.String, java.lang.String, boolean, int)(ContentProviderHelper.java:648) waiters=3 in android.app.ActivityManagerInternal$ServiceNotificationPolicy com.android.server.am.ActivityManagerService$LocalService.applyForegroundServiceNotification(android.app.Notification, java.lang.String, int, java.lang.String, int) for 350ms
+11-11 22:37:00.509 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10152 has no types!
+11-11 22:37:01.151 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:01.151 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:01.167 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4653
+11-11 22:37:01.167 I/ActivityManager(  570): Killing 4618:app.nagmedar.benchmark/u0a209 (adj 905): stop app.nagmedar.benchmark due to from pid 4653
+11-11 22:37:03.844 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:03.907 I/NagmedarPerf( 4667): music_list ms=2535 tracks=64 kept=true
+11-11 22:37:04.031 I/NagmedarPerf( 4667): startup cold_ms=2472
+11-11 22:37:04.566 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:04.699 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10152 does not have any types
+11-11 22:37:08.477 I/AiAiCaptions( 1419): Would enable com.google.android.apps.miphone.aiai.captions.CaptionsForegroundService but already enabled
+11-11 22:37:09.500 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10152 has no types!
+11-11 22:37:10.589 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:10.605 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4867
+11-11 22:37:10.607 I/ActivityManager(  570): Killing 4667:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 4867
+11-11 22:37:15.836 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:37:15.836 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:15.847 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 4985
+11-11 22:37:18.076 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:18.142 I/NagmedarPerf( 4999): music_list ms=2067 tracks=64 kept=true
+11-11 22:37:18.276 I/NagmedarPerf( 4999): startup cold_ms=2004
+11-11 22:37:18.761 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:24.661 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:24.673 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5279
+11-11 22:37:24.673 I/ActivityManager(  570): Killing 4999:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5279
+11-11 22:37:27.786 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:37:27.786 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:27.795 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5335
+11-11 22:37:28.413 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:29.845 I/NagmedarPerf( 5349): music_list ms=1885 tracks=64 kept=true
+11-11 22:37:30.052 I/NagmedarPerf( 5349): startup cold_ms=1896
+11-11 22:37:31.296 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:36.318 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:36.327 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5488
+11-11 22:37:36.329 I/ActivityManager(  570): Killing 5349:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5488
+11-11 22:37:38.743 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:37:38.743 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:38.753 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5545
+11-11 22:37:40.181 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:40.202 I/NagmedarPerf( 5560): music_list ms=1023 tracks=64 kept=true
+11-11 22:37:40.286 I/NagmedarPerf( 5560): startup cold_ms=1014
+11-11 22:37:40.375 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:40.462 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:40.464 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:40.465 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:40.465 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:46.585 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:46.595 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5650
+11-11 22:37:46.596 I/ActivityManager(  570): Killing 5560:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5650
+11-11 22:37:48.614 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:37:48.614 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:48.623 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5714
+11-11 22:37:49.711 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:49.738 I/NagmedarPerf( 5728): music_list ms=986 tracks=64 kept=true
+11-11 22:37:49.841 I/NagmedarPerf( 5728): startup cold_ms=966
+11-11 22:37:50.025 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:55.994 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:56.003 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5814
+11-11 22:37:56.004 I/ActivityManager(  570): Killing 5728:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5814
+11-11 22:37:58.110 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:37:58.110 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:37:58.120 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5871
+11-11 22:37:58.363 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:37:59.262 I/NagmedarPerf( 5885): music_list ms=1020 tracks=64 kept=true
+11-11 22:37:59.366 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:37:59.381 I/NagmedarPerf( 5885): startup cold_ms=1014
+11-11 22:38:05.683 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:38:05.693 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 5965
+11-11 22:38:05.693 I/ActivityManager(  570): Killing 5885:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 5965
+11-11 22:38:07.964 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:38:07.978 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6034
+11-11 22:38:10.186 I/NagmedarPerf( 6074): music_list ms=1884 tracks=64 kept=true
+11-11 22:38:10.716 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:38:11.087 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:38:27.468 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6219
+11-11 22:38:27.469 I/ActivityManager(  570): Killing 6074:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 6219
+11-11 22:38:29.916 I/NagmedarPerf( 6232): music_list ms=2127 tracks=64 kept=true
+11-11 22:38:30.653 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:38:30.831 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:38:32.724 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:38:32.736 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6323
+11-11 22:38:32.737 I/ActivityManager(  570): Killing 6232:app.nagmedar.benchmark/u0a209 (adj 700): stop app.nagmedar.benchmark due to from pid 6323
+11-11 22:38:34.197 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:38:34.197 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:38:34.210 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6426
+11-11 22:38:34.213 I/ActivityManager(  570): Killing 6398:app.nagmedar.benchmark/u0a209 (adj 905): stop app.nagmedar.benchmark due to from pid 6426
+11-11 22:38:37.754 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:38:37.776 I/NagmedarPerf( 6442): music_list ms=2969 tracks=64 kept=true
+11-11 22:38:37.877 I/NagmedarPerf( 6442): startup cold_ms=2894
+11-11 22:38:38.493 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:38:40.005 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:38:55.351 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:38:55.397 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:38:56.170 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:38:56.242 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:38:56.242 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:38:56.244 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:38:56.244 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:38:57.298 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:38:59.702 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:38:59.968 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:39:05.183 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:39:16.402 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:39:16.534 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6741
+11-11 22:39:16.537 I/ActivityManager(  570): Killing 6442:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 6741
+11-11 22:39:20.387 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:39:20.387 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:39:20.396 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 6799
+11-11 22:39:22.002 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:39:22.045 I/NagmedarPerf( 6813): music_list ms=1452 tracks=64 kept=true
+11-11 22:39:22.174 I/NagmedarPerf( 6813): startup cold_ms=1301
+11-11 22:39:22.364 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:39:24.563 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:39:39.918 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:39:39.962 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:39:40.668 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:39:40.702 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:39:40.705 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:39:40.707 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:39:40.707 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:39:41.956 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:39:44.869 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:39:45.030 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:39:49.586 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:40:00.814 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:40:01.005 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7087
+11-11 22:40:01.006 I/ActivityManager(  570): Killing 6813:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 7087
+11-11 22:40:04.640 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:40:04.640 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:40:04.648 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7153
+11-11 22:40:06.097 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:40:06.123 I/NagmedarPerf( 7167): music_list ms=1280 tracks=64 kept=true
+11-11 22:40:06.143 I/NagmedarPerf( 7167): startup cold_ms=1179
+11-11 22:40:07.353 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:40:08.694 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:40:24.037 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:40:24.073 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:40:24.740 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:40:24.755 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:40:24.755 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:40:24.757 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:40:24.757 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:40:26.086 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:40:28.701 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:40:28.936 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:40:33.783 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:40:45.074 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:40:45.224 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7460
+11-11 22:40:45.227 I/ActivityManager(  570): Killing 7167:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 7460
+11-11 22:40:49.164 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:40:49.164 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:40:49.173 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7531
+11-11 22:40:49.797 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:40:51.771 I/NagmedarPerf( 7545): music_list ms=2406 tracks=64 kept=true
+11-11 22:40:51.855 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:40:51.878 I/NagmedarPerf( 7545): startup cold_ms=2030
+11-11 22:40:53.833 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:41:09.188 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:41:09.224 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:41:09.795 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:41:09.921 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:09.952 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:09.958 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:09.964 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:09.964 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:11.199 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:41:14.198 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:41:14.484 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:41:18.883 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:41:30.196 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:41:30.296 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7829
+11-11 22:41:30.298 I/ActivityManager(  570): Killing 7545:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 7829
+11-11 22:41:33.974 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:41:33.974 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:41:33.982 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 7888
+11-11 22:41:36.607 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:41:36.628 I/NagmedarPerf( 7902): music_list ms=2352 tracks=64 kept=true
+11-11 22:41:36.676 I/NagmedarPerf( 7902): startup cold_ms=1713
+11-11 22:41:37.217 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:41:38.596 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:41:53.972 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:41:54.012 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:41:54.446 W/ForegroundServiceTypeLoggerModule(  570): Logger should be tracking FGS types correctly for UID 10209 in package app.nagmedar.benchmark
+11-11 22:41:54.532 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:41:54.720 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:54.759 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:54.759 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:54.762 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:54.762 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:41:55.702 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:41:58.640 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:41:58.874 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:42:03.258 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:42:14.751 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:42:14.820 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8159
+11-11 22:42:14.821 I/ActivityManager(  570): Killing 7902:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 8159
+11-11 22:42:18.530 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:42:18.530 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:42:18.544 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8219
+11-11 22:42:22.708 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:42:22.744 I/NagmedarPerf( 8233): music_list ms=2612 tracks=64 kept=true
+11-11 22:42:22.803 I/NagmedarPerf( 8233): startup cold_ms=1746
+11-11 22:42:23.321 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:42:24.823 I/NagmedarProfile( 3407): tablet: music: the table
+11-11 22:42:40.178 I/NagmedarProfile( 3407): tablet: music: a tap at 711,1006
+11-11 22:42:40.204 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:42:40.636 W/ForegroundServiceTypeLoggerModule(  570): Logger should be tracking FGS types correctly for UID 10209 in package app.nagmedar.benchmark
+11-11 22:42:40.854 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:42:40.953 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:42:40.983 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:42:40.983 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:42:40.989 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:42:40.989 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:42:42.459 I/NagmedarProfile( 3407): tablet: music: the phone player
+11-11 22:42:45.125 I/NagmedarProfile( 3407): tablet: podcasts: the podcast's page
+11-11 22:42:45.310 I/NagmedarProfile( 3407): tablet: podcasts: the episode's page
+11-11 22:42:49.413 I/NagmedarProfile( 3407): tablet: radio: the stations
+11-11 22:43:00.612 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:43:00.630 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8421
+11-11 22:43:00.634 I/ActivityManager(  570): Killing 8233:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 8421
+11-11 22:43:05.060 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:43:05.104 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8479
+11-11 22:43:07.091 I/NagmedarPerf( 8514): music_list ms=1510 tracks=64 kept=true
+11-11 22:43:07.247 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:43:07.515 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:43:21.506 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8586
+11-11 22:43:21.507 I/ActivityManager(  570): Killing 8514:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 8586
+11-11 22:43:22.910 I/NagmedarPerf( 8597): music_list ms=1296 tracks=64 kept=true
+11-11 22:43:23.503 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:43:23.603 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:43:24.765 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:43:24.800 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8686
+11-11 22:43:24.801 I/ActivityManager(  570): Killing 8597:app.nagmedar.benchmark/u0a209 (adj 200): stop app.nagmedar.benchmark due to from pid 8686
+11-11 22:43:26.030 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:43:26.030 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:43:26.039 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 8781
+11-11 22:43:26.040 I/ActivityManager(  570): Killing 8754:app.nagmedar.benchmark/u0a209 (adj 0): stop app.nagmedar.benchmark due to from pid 8781
+11-11 22:43:28.912 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:43:29.022 I/NagmedarPerf( 8801): music_list ms=1675 tracks=64 kept=true
+11-11 22:43:29.087 I/NagmedarPerf( 8801): startup cold_ms=1515
+11-11 22:43:29.196 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:43:30.819 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:43:46.231 I/NagmedarProfile( 3407): phone: music: a tap at 184,1686
+11-11 22:43:46.254 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:43:46.863 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:43:47.004 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:43:47.102 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:43:47.102 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:43:47.104 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:43:47.104 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:43:47.868 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:43:50.716 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:43:50.854 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:43:55.786 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:44:07.008 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:44:07.065 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9075
+11-11 22:44:07.066 I/ActivityManager(  570): Killing 8801:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 9075
+11-11 22:44:10.045 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:44:10.045 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:44:10.055 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9133
+11-11 22:44:10.332 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:44:11.066 I/NagmedarPerf( 9147): music_list ms=870 tracks=64 kept=true
+11-11 22:44:11.112 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:44:11.118 I/NagmedarPerf( 9147): startup cold_ms=858
+11-11 22:44:12.764 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:44:28.200 I/NagmedarProfile( 3407): phone: music: a tap at 184,1444
+11-11 22:44:28.236 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:44:28.699 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:44:28.869 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:44:28.895 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:44:28.896 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:44:28.914 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:44:28.914 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:44:29.692 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:44:32.459 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:44:32.605 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:44:37.177 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:44:48.405 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:44:48.430 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9447
+11-11 22:44:48.432 I/ActivityManager(  570): Killing 9147:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 9447
+11-11 22:44:52.074 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:44:52.074 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:44:52.083 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9508
+11-11 22:44:52.414 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:44:53.213 I/NagmedarPerf( 9522): music_list ms=998 tracks=64 kept=true
+11-11 22:44:53.238 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:44:53.242 I/NagmedarPerf( 9522): startup cold_ms=1012
+11-11 22:44:53.560 W/TimedProcessReaper( 1362): Killing process to refresh configuration
+11-11 22:44:54.970 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:45:09.476 W/TimedProcessReaper( 3501): Killing process to refresh configuration
+11-11 22:45:10.874 I/NagmedarProfile( 3407): phone: music: a tap at 184,1331
+11-11 22:45:10.903 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:45:11.330 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:45:11.521 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:11.553 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:11.555 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:11.556 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:11.556 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:12.311 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:45:14.953 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:45:15.065 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:45:19.582 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:45:30.846 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:45:30.876 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9845
+11-11 22:45:30.877 I/ActivityManager(  570): Killing 9522:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 9845
+11-11 22:45:36.087 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:45:36.087 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:45:36.100 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 9942
+11-11 22:45:36.502 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:45:37.329 I/NagmedarPerf( 9956): music_list ms=1090 tracks=64 kept=true
+11-11 22:45:37.355 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:45:37.364 I/NagmedarPerf( 9956): startup cold_ms=1076
+11-11 22:45:37.631 W/TimedProcessReaper( 3515): Killing process to refresh configuration
+11-11 22:45:39.084 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:45:52.229 I/ActivityManager(  570): Killing 4347:com.google.android.settings.intelligence/u0a140 (adj 975): empty #17
+11-11 22:45:52.230 I/ActivityManager(  570): Killing 2227:com.google.android.tts/u0a165 (adj 985): empty #18
+11-11 22:45:52.230 I/ActivityManager(  570): Killing 1100:com.android.settings/1000 (adj 985): empty #19
+11-11 22:45:52.231 I/ActivityManager(  570): Killing 3245:com.google.android.configupdater/u0a135 (adj 995): empty #20
+11-11 22:45:52.231 I/ActivityManager(  570): Killing 1774:android.process.media/u0a95 (adj 995): empty #21
+11-11 22:45:52.232 I/ActivityManager(  570): Killing 4079:com.google.android.webview:webview_apk/u0a151 (adj 999): empty #22
+11-11 22:45:52.232 I/ActivityManager(  570): Killing 4025:com.google.android.webview:webview_service/u0a151 (adj 999): empty #23
+11-11 22:45:52.232 I/ActivityManager(  570): Killing 3552:com.google.android.healthconnect.controller/u0a194 (adj 999): empty #24
+11-11 22:45:52.233 I/ActivityManager(  570): Killing 2512:com.google.android.cellbroadcastreceiver/u0a185 (adj 999): empty #25
+11-11 22:45:52.233 I/ActivityManager(  570): Killing 3013:com.android.traceur/u0a126 (adj 999): empty #26
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 1549:com.android.providers.calendar/u0a100 (adj 999): empty #27
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 2747:com.android.externalstorage/u0a104 (adj 999): empty #28
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3312:com.google.android.ondevicepersonalization.services/u0a187 (adj 999): empty #29
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3267:com.google.android.federatedcompute/u0a188 (adj 999): empty #30
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3213:com.android.shell/2000 (adj 999): empty #31
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3150:com.android.dynsystem:dynsystem/1000 (adj 999): empty #32
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 2837:com.google.android.packageinstaller/u0a101 (adj 999): empty #33
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3121:com.android.dynsystem/1000 (adj 999): empty #34
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 3090:com.android.camera2/u0a156 (adj 999): empty #35
+11-11 22:45:52.237 I/ActivityManager(  570): Killing 2471:com.android.imsserviceentitlement/u0a137 (adj 999): empty #36
+11-11 22:45:52.238 I/ActivityManager(  570): Killing 2709:com.android.managedprovisioning/u0a102 (adj 999): empty #37
+11-11 22:45:52.240 I/ActivityManager(  570): Killing 3058:com.google.android.onetimeinitializer/u0a128 (adj 999): empty #38
+11-11 22:45:52.241 I/ActivityManager(  570): Killing 2559:com.android.carrierdefaultapp/u0a112 (adj 999): empty #39
+11-11 22:45:52.241 I/ActivityManager(  570): Killing 2540:com.android.cellbroadcastreceiver/u0a109 (adj 999): empty #40
+11-11 22:45:52.241 I/ActivityManager(  570): Killing 1652:com.android.carrierconfig/u0a178 (adj 999): empty #41
+11-11 22:45:52.241 I/ActivityManager(  570): Killing 1703:com.android.keychain/1000 (adj 999): empty #42
+11-11 22:45:52.243 I/ActivityManager(  570): Killing 1532:com.google.android.googlesdksetup/u0a170 (adj 999): empty #43
+11-11 22:45:52.243 I/ActivityManager(  570): Killing 1843:com.android.localtransport/1000 (adj 999): empty #44
+11-11 22:45:52.243 I/ActivityManager(  570): Killing 1498:com.android.printspooler/u0a127 (adj 999): empty #45
+11-11 22:45:52.244 I/ActivityManager(  570): Killing 1102:com.android.bluetooth/1002 (adj 999): empty #46
+11-11 22:45:54.416 I/NagmedarProfile( 3407): phone: music: a tap at 184,1331
+11-11 22:45:54.454 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:45:54.937 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:45:55.068 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:55.094 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:55.095 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:55.097 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:55.098 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:45:55.895 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:45:59.472 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:45:59.702 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:46:04.036 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:46:15.203 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:46:15.250 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 10271
+11-11 22:46:15.251 I/ActivityManager(  570): Killing 9956:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 10271
+11-11 22:46:18.307 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:46:18.307 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:46:18.315 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 10331
+11-11 22:46:19.294 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:46:19.314 I/NagmedarPerf(10345): music_list ms=874 tracks=64 kept=true
+11-11 22:46:19.357 I/NagmedarPerf(10345): startup cold_ms=846
+11-11 22:46:19.770 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:46:21.011 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:46:36.346 I/NagmedarProfile( 3407): phone: music: a tap at 184,1331
+11-11 22:46:36.370 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:46:36.794 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:46:36.970 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:46:36.994 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:46:36.994 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:46:36.998 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:46:37.000 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:46:37.702 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:46:40.468 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:46:40.867 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:46:45.638 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:46:56.946 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:46:57.043 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 10612
+11-11 22:46:57.044 I/ActivityManager(  570): Killing 10345:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 10612
+11-11 22:46:59.854 D/Benchmark( 3407): Killing package app.nagmedar.benchmark
+11-11 22:46:59.854 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:46:59.862 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 10668
+11-11 22:47:00.246 W/ForegroundServiceTypeLoggerModule(  570): Foreground service start for UID: 10209 does not have any types
+11-11 22:47:00.914 I/NagmedarPerf(10682): music_list ms=939 tracks=64 kept=true
+11-11 22:47:00.945 W/ForegroundServiceTypeLoggerModule(  570): FGS stop call for: 10209 has no types!
+11-11 22:47:00.957 I/NagmedarPerf(10682): startup cold_ms=942
+11-11 22:47:01.241 I/PhenotypeProcessReaper( 2008): Killing process to refresh experiment configuration
+11-11 22:47:02.650 I/NagmedarProfile( 3407): phone: music: the table
+11-11 22:47:17.972 I/NagmedarProfile( 3407): phone: music: a tap at 184,1331
+11-11 22:47:18.003 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+11-11 22:47:18.337 W/ForegroundServiceTypeLoggerModule(  570): Logger should be tracking FGS types correctly for UID 10209 in package app.nagmedar.benchmark
+11-11 22:47:18.394 I/ActivityManager(  570): Background started FGS: Allowed [callingPackage: app.nagmedar.benchmark; callingUid: 10209; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=app.nagmedar.benchmark/org.videolan.vlc.PlaybackService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<MediaSessionRecord:android.support.v4.media.session.command.GET_EXTRA_BINDER,reasonCode:MEDIA_SESSION_CALLBACK,duration:10000,callingUid:1000>; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+11-11 22:47:18.589 D/MediaResumeListener(  924): Testing if we can connect to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:47:18.606 D/ResumeMediaBrowser(  924): Service connected for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:47:18.606 D/MediaResumeListener(  924): Connected to ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:47:18.608 D/ResumeMediaBrowser(  924): Child found but not playable for ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:47:18.608 E/MediaResumeListener(  924): Cannot resume with ComponentInfo{app.nagmedar.benchmark/org.videolan.vlc.PlaybackService}
+11-11 22:47:19.372 I/NagmedarProfile( 3407): phone: music: the phone player
+11-11 22:47:22.123 I/NagmedarProfile( 3407): phone: podcasts: the podcast's page
+11-11 22:47:22.241 I/NagmedarProfile( 3407): phone: podcasts: the episode's page
+11-11 22:47:26.147 I/NagmedarProfile( 3407): phone: radio: the stations
+11-11 22:47:37.346 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:47:37.387 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 10964
+11-11 22:47:37.390 I/ActivityManager(  570): Killing 10682:app.nagmedar.benchmark/u0a209 (adj 50): stop app.nagmedar.benchmark due to from pid 10964
+11-11 22:47:40.863 D/Benchmark( 3407): Killing process app.nagmedar.benchmark
+11-11 22:47:40.871 I/ActivityManager(  570): Force stopping app.nagmedar.benchmark appid=10209 user=0: from pid 11018
+11-11 22:47:41.072 I/ActivityManager(  570): Force stopping app.nagmedar.macrobenchmark appid=10210 user=0: finished inst
+11-11 22:47:41.076 I/AndroidRuntime( 3390): VM exiting with result code 0.
+11-11 22:47:41.082 I/ActivityManager(  570): Killing 3407:app.nagmedar.macrobenchmark/u0a210 (adj 0): stop app.nagmedar.macrobenchmark due to finished inst

@@ -1,0 +1,111 @@
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+app.nagmedar.macrobenchmark.BaselineProfileGenerator:
+INSTRUMENTATION_STATUS: test=startup
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_startup-startup-prof.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_startup-startup-prof.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_startup-startup-prof-2026-11-11-22-38-07.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_startup-startup-prof-2026-11-11-22-38-07.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: android.studio.display.benchmark=BaselineProfileGenerator_startup
+Total run time Ns: 70581756035.
+Baseline profile [results](file://BaselineProfileGenerator_startup-startup-prof-2026-11-11-22-38-07.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_startup-startup-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark=BaselineProfileGenerator_startup
+Total run time Ns: 70581756035.
+Baseline profile [results](file://BaselineProfileGenerator_startup-startup-prof-2026-11-11-22-38-07.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_startup-startup-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark.outputDirPath=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=startup
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=tablet
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_tablet-baseline-prof.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_tablet-baseline-prof.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_tablet-baseline-prof-2026-11-11-22-43-04.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_tablet-baseline-prof-2026-11-11-22-43-04.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: android.studio.display.benchmark=BaselineProfileGenerator_tablet
+Total run time Ns: 272294804129.
+Baseline profile [results](file://BaselineProfileGenerator_tablet-baseline-prof-2026-11-11-22-43-04.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_tablet-baseline-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark=BaselineProfileGenerator_tablet
+Total run time Ns: 272294804129.
+Baseline profile [results](file://BaselineProfileGenerator_tablet-baseline-prof-2026-11-11-22-43-04.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_tablet-baseline-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark.outputDirPath=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=tablet
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=phone
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_phone-baseline-prof.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_phone-baseline-prof.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: additionalTestOutputFile_BaselineProfileGenerator_phone-baseline-prof-2026-11-11-22-47-40.txt=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_phone-baseline-prof-2026-11-11-22-47-40.txt
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: android.studio.display.benchmark=BaselineProfileGenerator_phone
+Total run time Ns: 256097487647.
+Baseline profile [results](file://BaselineProfileGenerator_phone-baseline-prof-2026-11-11-22-47-40.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_phone-baseline-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark=BaselineProfileGenerator_phone
+Total run time Ns: 256097487647.
+Baseline profile [results](file://BaselineProfileGenerator_phone-baseline-prof-2026-11-11-22-47-40.txt)
+
+To copy the profile use:
+adb -e pull "/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark/BaselineProfileGenerator_phone-baseline-prof.txt" .
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark.outputDirPath=/storage/emulated/0/Android/media/app.nagmedar.macrobenchmark
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: class=app.nagmedar.macrobenchmark.BaselineProfileGenerator
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=phone
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 682.001
+
+OK (3 tests)
+
+
+INSTRUMENTATION_CODE: -1

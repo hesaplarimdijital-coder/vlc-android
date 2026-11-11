@@ -1,0 +1,74 @@
+--------- beginning of main
+11-11 22:36:56.395  3407  3429 I NagmedarProfile: tablet: subscribed to http://10.0.2.2:8765/feed.xml
+11-11 22:38:40.005  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:38:55.351  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:38:57.298  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:38:59.702  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:38:59.968  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:39:05.183  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:39:24.563  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:39:39.918  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:39:41.956  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:39:44.869  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:39:45.030  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:39:49.586  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:40:08.694  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:40:24.037  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:40:26.086  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:40:28.701  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:40:28.936  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:40:33.783  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:40:53.833  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:41:09.188  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:41:11.199  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:41:14.198  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:41:14.484  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:41:18.883  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:41:38.596  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:41:53.972  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:41:55.702  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:41:58.640  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:41:58.874  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:42:03.258  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:42:24.823  3407  3429 I NagmedarProfile: tablet: music: the table
+11-11 22:42:40.178  3407  3429 I NagmedarProfile: tablet: music: a tap at 711,1006
+11-11 22:42:42.459  3407  3429 I NagmedarProfile: tablet: music: the phone player
+11-11 22:42:45.125  3407  3429 I NagmedarProfile: tablet: podcasts: the podcast's page
+11-11 22:42:45.310  3407  3429 I NagmedarProfile: tablet: podcasts: the episode's page
+11-11 22:42:49.413  3407  3429 I NagmedarProfile: tablet: radio: the stations
+11-11 22:43:30.819  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:43:46.231  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1686
+11-11 22:43:47.868  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:43:50.716  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:43:50.854  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:43:55.786  3407  3429 I NagmedarProfile: phone: radio: the stations
+11-11 22:44:12.764  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:44:28.200  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1444
+11-11 22:44:29.692  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:44:32.459  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:44:32.605  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:44:37.177  3407  3429 I NagmedarProfile: phone: radio: the stations
+11-11 22:44:54.970  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:45:10.874  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1331
+11-11 22:45:12.311  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:45:14.953  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:45:15.065  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:45:19.582  3407  3429 I NagmedarProfile: phone: radio: the stations
+11-11 22:45:39.084  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:45:54.416  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1331
+11-11 22:45:55.895  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:45:59.472  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:45:59.702  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:46:04.036  3407  3429 I NagmedarProfile: phone: radio: the stations
+11-11 22:46:21.011  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:46:36.346  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1331
+11-11 22:46:37.702  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:46:40.468  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:46:40.867  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:46:45.638  3407  3429 I NagmedarProfile: phone: radio: the stations
+11-11 22:47:02.650  3407  3429 I NagmedarProfile: phone: music: the table
+11-11 22:47:17.972  3407  3429 I NagmedarProfile: phone: music: a tap at 184,1331
+11-11 22:47:19.372  3407  3429 I NagmedarProfile: phone: music: the phone player
+11-11 22:47:22.123  3407  3429 I NagmedarProfile: phone: podcasts: the podcast's page
+11-11 22:47:22.241  3407  3429 I NagmedarProfile: phone: podcasts: the episode's page
+11-11 22:47:26.147  3407  3429 I NagmedarProfile: phone: radio: the stations
