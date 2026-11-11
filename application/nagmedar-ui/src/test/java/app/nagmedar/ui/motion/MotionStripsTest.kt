@@ -221,7 +221,10 @@ class MotionStripsTest {
         strip("tab-switch") { navigator?.selectTab(Destination.Podcasts) }
     }
 
-    /** A page opened from a page (the equaliser from "Daha fazla"): it slides in from the end edge over the one it leaves. */
+    /**
+     * A page opened from a page (the equaliser from "Daha fazla"): opaque, it slides in from the end edge over the one
+     * it leaves, which sinks in its place and darkens under a scrim (1.0.3, Desktop Kit 2.4.0).
+     */
     @Test
     fun pagePush() {
         shell()
@@ -230,7 +233,7 @@ class MotionStripsTest {
         strip("page-push") { navigator?.open(Destination.Equalizer) }
     }
 
-    /** Back from that page: it leaves over the end edge, the page under it comes back. */
+    /** Back from that page: it leaves over the end edge, the page under it rises in its place out of the scrim. */
     @Test
     fun pagePop() {
         shell()
@@ -242,8 +245,8 @@ class MotionStripsTest {
     }
 
     /**
-     * Back (the key, three-button navigation's Back) on another tab's first page: to Müzik as it was left, with
-     * the motion it had before the predictive gesture between tabs came (1.0.3).
+     * Back (the key, three-button navigation's Back) on another tab's first page: to Müzik as it was left, fading
+     * through as a tab chosen does (1.0.3: it slid away sideways as a page's Back does, Müzik coming in beside it).
      */
     @Test
     fun tabBack() {
@@ -595,12 +598,25 @@ class MotionStripsTest {
 
     private val albumKey by lazy { library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key }
 
-    /** An album opened from the albums: its tracks come in from 12 % over the sinking albums and arrive in turn. */
+    /**
+     * An album opened from the albums: opaque, it slides in from the end edge over the albums, which sink and darken
+     * under a scrim (1.0.3, Desktop Kit 2.4.0); its tracks arrive in turn.
+     */
     @Test
     fun albumOpen() {
         val state = MusicBrowserState(view = MusicView.Albums)
         musicShell(state)
         strip("album-open") { state.group = albumKey }
+    }
+
+    /** Back from an open album (the Back button): it slides out over the end edge, the albums rise out of the scrim. */
+    @Test
+    fun albumClose() {
+        val state = MusicBrowserState(view = MusicView.Albums)
+        musicShell(state)
+        compose.runOnIdle { state.group = albumKey }
+        compose.waitForIdle()
+        strip("album-close") { compose.activity.onBackPressedDispatcher.onBackPressed() }
     }
 
     /** Back right after the tap: the way is run back from where it was, the albums rise again. */

@@ -169,38 +169,80 @@ fun NagmedarShell(
     val currentRtl by rememberUpdatedState(rtl)
     // a page opened from a page slides in over it and Back slides it away; tabs fade through; a desktop cross-fades still
     val paged: () -> Boolean = remember(navigator) { { currentKind != NavKind.Sidebar } }
+    // 1.0.3 (Desktop Kit 2.4.0): which page lies under the one moving over it, and which tab the Back gesture is
+    // leaving, told to the pages ([ShellPage]: the one sinks and darkens, the other rounds its corners). Written
+    // as navigation asks for the transitions: it keeps the pages' z-order itself
+    val pages = remember(navigator) { ShellPages() }
+    val reducedNow: () -> Boolean = { currentMotion.reduced || currentTier == MotionTier.Reduced }
+    // 1.0.3: a pop between tabs (Back from another tab's first page, the Müzik tab chosen) fades through as a tab
+    // chosen does; every other pop is a page's Back
+    val tabPop: AnimatedContentTransitionScope<NavBackStackEntry>.() -> Boolean = remember(navigator) {
+        {
+            NavRules.tabPop(
+                Destination.fromRoute(initialState.destination.route),
+                Destination.fromRoute(targetState.destination.route),
+                currentKind,
+                navigator.moveFrom(initialState.id),
+            )
+        }
+    }
+    val pushed: () -> Boolean = remember(navigator) { { paged() && navigator.lastMove == NavMove.Open } }
     val enter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember(navigator) {
         {
-            if (paged() && navigator.lastMove == NavMove.Open) currentMotion.pageEnter(currentTier, currentRtl)
-            else currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+            if (pushed()) {
+                pages.over(initialState.id)
+                currentMotion.pageEnter(currentTier, currentRtl)
+            } else {
+                pages.tabs()
+                currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+            }
         }
     }
     val exit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember(navigator) {
         {
-            if (paged() && navigator.lastMove == NavMove.Open) currentMotion.pageExit(currentTier, currentRtl)
-            else currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+            // the page under stays where it is, whole, until the page over it has arrived: its surface sinks and darkens it
+            if (pushed()) {
+                pages.over(initialState.id)
+                if (reducedNow()) ExitTransition.None else ExitTransition.KeepUntilTransitionsFinished
+            } else {
+                pages.tabs()
+                currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+            }
         }
     }
-    // every pop is Back from a page (the key, the gesture, the arrow) but a tab chosen again, which goes to its first page
+    // a page's Back: the page leaves over the end edge, the one under it, in its place, rises out of the scrim
     val popEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = remember(navigator) {
         {
-            if (paged() && navigator.lastMove != NavMove.Reselect) currentMotion.pagePopEnter(currentTier, currentRtl)
-            else currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+            if (paged() && !tabPop(this)) {
+                pages.over(targetState.id)
+                EnterTransition.None
+            } else {
+                pages.tabs()
+                currentMotion.screenEnter(desktop = currentKind == NavKind.Sidebar, initialScale = screenScale(currentKind), tier = currentTier)
+            }
         }
     }
     val popExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = remember(navigator) {
         {
-            if (paged() && navigator.lastMove != NavMove.Reselect) currentMotion.pagePopExit(currentTier, currentRtl)
-            else currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+            if (paged() && !tabPop(this)) {
+                pages.over(targetState.id)
+                currentMotion.pagePopExit(currentTier, currentRtl)
+            } else {
+                pages.tabs()
+                currentMotion.screenExit(desktop = currentKind == NavKind.Sidebar, tier = currentTier)
+            }
         }
     }
     // 1.0.3: the predictive Back gesture seeks the same pops with the finger, as navigation 2.8 did; 2.10 would
     // otherwise play its own (the page shrinking to 70 %). Between the phone's tabs (Desktop Kit 2.3) its own:
     // the tab left shrinks toward 90 % with the finger, leaning away from the edge the swipe came from, and
-    // Müzik rises behind it from 94 % ([tabBackEnter], [tabBackExit])
-    val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.() -> Boolean = remember(navigator) {
-        {
-            currentKind == NavKind.BottomBar && NavRules.tabBack(
+    // Müzik rises behind it from 94 % ([tabBackEnter], [tabBackExit]). The Back button is no swipe (Desktop Kit
+    // 2.4.0): since Android 16 a press of the three buttons' Back or of a hardware Back key starts a predictive
+    // Back too, with no edge ([BackEventCompat.EDGE_NONE]), which navigation plays through on the release: it
+    // gets the plain pops, the tabs' fade-through and the pages' slide
+    val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> Boolean = remember(navigator) {
+        { edge ->
+            edge != BackEventCompat.EDGE_NONE && currentKind == NavKind.BottomBar && NavRules.tabBack(
                 Destination.fromRoute(initialState.destination.route),
                 Destination.fromRoute(targetState.destination.route),
                 currentKind,
@@ -208,9 +250,27 @@ fun NagmedarShell(
         }
     }
     val predictivePopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> EnterTransition =
-        remember(popEnter, tabBack) { { _ -> if (tabBack(this)) tabBackEnter(currentMotion, currentTier) else popEnter(this) } }
+        remember(popEnter, tabBack) {
+            { edge ->
+                if (tabBack(this, edge)) {
+                    pages.gesture(initialState.id)
+                    tabBackEnter(currentMotion, currentTier)
+                } else {
+                    popEnter(this)
+                }
+            }
+        }
     val predictivePopExit: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> ExitTransition =
-        remember(popExit, tabBack) { { edge -> if (tabBack(this)) tabBackExit(currentMotion, currentTier, edge) else popExit(this) } }
+        remember(popExit, tabBack) {
+            { edge ->
+                if (tabBack(this, edge)) {
+                    pages.gesture(initialState.id)
+                    tabBackExit(currentMotion, currentTier, edge)
+                } else {
+                    popExit(this)
+                }
+            }
+        }
     // the bottom bar is not laid out while the keyboard is up: the content reaches down to it. The
     // keyboard must also take room, as isImeVisible reads true until the first insets arrive
     val imeVisible = WindowInsets.isImeVisible
@@ -404,7 +464,7 @@ fun NagmedarShell(
                             predictivePopExitTransition = predictivePopExit,
                         ) {
                             Destination.entries.forEach { destination ->
-                                composable(destination.route) {
+                                composable(destination.route) { pageEntry ->
                                     // another tab's first page: Back goes to Müzik as it was left. First in the page, so
                                     // what the page opens (a detail, a selection) takes Back before it; not while the
                                     // phone's player, whose handler is older, is open over it. 1.0.3: nor on a phone with
@@ -417,8 +477,16 @@ fun NagmedarShell(
                                             navigator.backToStart()
                                         }
                                     }
-                                    ShellScreenFrame(metrics, scroll, bars = !NavRules.hidesBars(destination, currentKind)) {
-                                        currentScreen(destination, navigator)
+                                    ShellPage(
+                                        transition,
+                                        paged = paged(),
+                                        under = pages.under == pageEntry.id,
+                                        leaving = pages.leaving == pageEntry.id,
+                                        tier = currentTier,
+                                    ) {
+                                        ShellScreenFrame(metrics, scroll, bars = !NavRules.hidesBars(destination, currentKind)) {
+                                            currentScreen(destination, navigator)
+                                        }
                                     }
                                 }
                             }

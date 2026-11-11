@@ -65,6 +65,15 @@ object NavRules {
     fun tabBack(from: Destination, to: Destination, kind: NavKind): Boolean = to == Destination.Music && backToStart(from, kind)
 
     /**
+     * 1.0.3: a pop that changes tabs, which fades through as a tab chosen does rather than playing a page's Back:
+     * Back from another tab's first page to Müzik ([tabBack]: the three-button Back, a hardware Back key, Esc), or
+     * a tab chosen by the navigator ([move] [NavMove.Tab] or [NavMove.Reselect]: the Müzik tab from anywhere, a
+     * tab's first page again). [move] is null for a pop the navigator did not make (the system's Back on a page).
+     */
+    fun tabPop(from: Destination, to: Destination, kind: NavKind, move: NavMove?): Boolean =
+        tabBack(from, to, kind) || move == NavMove.Tab || move == NavMove.Reselect
+
+    /**
      * 1.0.3 (Desktop Kit 2.3): Back from another tab's first page follows the finger (the navigation plays it with
      * the gesture, back to Müzik) on a phone with gesture navigation ([edgeBack]: the window's side edges take
      * the Back gesture). Three-button navigation's Back, and every Back wider up, the shell takes as before.
@@ -100,6 +109,20 @@ class ShellNavigator(private val navController: NavHostController) {
     /** How the last change was made; the shell's transitions read it. */
     var lastMove: NavMove = NavMove.Tab
         private set
+
+    /** The id of the back stack entry on screen when the navigator last moved ([moveFrom]). */
+    private var movedFrom: String? = null
+
+    /**
+     * 1.0.3: how the navigator left the back stack entry [entryId] ([lastMove]); null when a transition from it
+     * is not the navigator's (the system's Back popping a page leaves [lastMove] as it was).
+     */
+    fun moveFrom(entryId: String): NavMove? = if (entryId == movedFrom) lastMove else null
+
+    private fun moving(move: NavMove) {
+        lastMove = move
+        movedFrom = navController.currentBackStackEntry?.id
+    }
 
     /** The route on screen. */
     val currentRoute: String? get() = navController.currentDestination?.route
@@ -146,12 +169,12 @@ class ShellNavigator(private val navController: NavHostController) {
     private fun switchTab(destination: Destination) {
         if (destination == tab) {
             if (currentRoute != destination.route) {
-                lastMove = NavMove.Reselect
+                moving(NavMove.Reselect)
                 navController.popBackStack(destination.route, inclusive = false)
             }
             return
         }
-        lastMove = NavMove.Tab
+        moving(NavMove.Tab)
         navController.navigate(destination.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true
@@ -163,11 +186,11 @@ class ShellNavigator(private val navController: NavHostController) {
         if (currentRoute == destination.route) return
         if (inStack(destination)) {
             // opened before on this stack (the guide and the card of keys lead to each other): back to it
-            lastMove = NavMove.Back
+            moving(NavMove.Back)
             navController.popBackStack(destination.route, inclusive = false)
             return
         }
-        lastMove = NavMove.Open
+        moving(NavMove.Open)
         navController.navigate(destination.route) { launchSingleTop = true }
     }
 
@@ -184,7 +207,7 @@ class ShellNavigator(private val navController: NavHostController) {
             }
             navController.previousBackStackEntry == null -> false
             else -> {
-                lastMove = NavMove.Back
+                moving(NavMove.Back)
                 navController.popBackStack()
             }
         }

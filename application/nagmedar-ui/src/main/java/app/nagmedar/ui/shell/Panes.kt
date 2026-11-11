@@ -128,8 +128,9 @@ private const val DIVIDER = "divider"
  * it, the details come and go on the shared axis of [DetailMotion] and Back is the predictive
  * gesture (Desktop Kit 0.2.0). The pane keeps its content while it closes.
  *
- * 1.0.3 (Desktop Kit 2.3.0): in a phone's window the details open in depth ([DetailDepth]) as a
- * [DetailTransition]'s do, Back seeks their closing with the list behind them, and with
+ * 1.0.3 (Desktop Kit 2.3.0 and 2.4.0): in a phone's window the details open in depth ([DetailDepth]) as a
+ * [DetailTransition]'s do (opaque, sliding in over the list, which sinks and darkens under a scrim), Back
+ * seeks their closing with the list behind them, and with
  * [sharedElements] what the list and the details mark ([detailSharedElement], [detailSharedCard])
  * flies between them.
  */
@@ -204,6 +205,7 @@ fun <K : Any> ListDetailPanes(
                         propagateMinConstraints = true,
                     ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
                     if (shown != null) {
+                        if (phone && animated) DepthScrim(depth, Modifier.layoutId(DEPTH_SCRIM))
                         Box(
                             Modifier
                                 .layoutId(DETAIL)
@@ -257,8 +259,12 @@ fun <K : Any> ListDetailPanes(
                 } else {
                     // once the details cover the area the list is neither measured, drawn nor read out, but stays composed
                     val list = if (detailM != null && listCovered) null else listM.measure(Constraints.fixed(w, h))
+                    // the list's darkening under a phone's details (Desktop Kit 2.4.0), there while the list is
+                    val scrim = if (list == null) null else measurables.firstOrNull { it.layoutId == DEPTH_SCRIM }?.measure(Constraints.fixed(w, h))
                     val pane = detailM?.measure(Constraints.fixed(w, h))
-                    layout(w, h) { if (phone) placeDepth(depth, list, pane, w, direction) else placeListAndDetail(state, list, pane, w, direction) }
+                    layout(w, h) {
+                        if (phone) placeDepth(depth, list, scrim, pane, w, direction) else placeListAndDetail(state, list, pane, w, direction)
+                    }
                 }
             }
         }

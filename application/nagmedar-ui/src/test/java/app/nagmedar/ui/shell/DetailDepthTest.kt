@@ -45,10 +45,11 @@ import org.robolectric.annotation.GraphicsMode
 import kotlin.math.abs
 
 /**
- * 1.0.3 (Desktop Kit 2.3.0's DetailTransition tests): a phone's detail opens in depth over its list, the
- * predictive Back gesture seeks its closing with the list really behind it, a change of mind runs the way
- * back, the cover flies between the row and the detail, a list scrolled at rest has no lookahead pass, and
- * with reduced motion the detail simply appears.
+ * 1.0.3 (Desktop Kit 2.3.0's DetailTransition tests, with 2.4.0's way in): a phone's detail slides in from the
+ * end edge over its sinking list, the predictive Back gesture seeks its closing with the list really behind it,
+ * a change of mind runs the way back, the cover flies between the row and the detail, a list scrolled at rest
+ * has no lookahead pass, and with reduced motion the detail simply appears. What the frames look like (both
+ * screens opaque, the list dark under a scrim) is [DetailNoDoubleExposureTest]'s.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -104,11 +105,14 @@ class DetailDepthTest {
         show()
         compose.mainClock.autoAdvance = false
         compose.runOnIdle { detail = "Albüm" }
-        repeat(4) { frame() }
-        // on its way: from the end edge, not yet in place, short of 12 % of the width; the list sinks under it
+        repeat(2) { frame() }
+        // its first frames: from the end edge itself, all of its width away (Desktop Kit 2.3.0's came 12 % of it, fading)
+        val first = bounds("detail")
+        assertTrue("the detail comes from the end edge: ${first.left}", first.left > 300.dp)
+        repeat(3) { frame() }
+        // on its way: over the list, not yet in place; the list sinks under it
         val early = bounds("detail")
-        assertTrue("the detail comes from the end: ${early.left}", early.left > 0.5.dp)
-        assertTrue("from no further than 12 %: ${early.left}", early.left < (411 * DetailDepth.SHIFT + 1).dp)
+        assertTrue("the detail is on its way: ${early.left}", early.left > 0.5.dp && early.left < first.left)
         val list = bounds("list")
         assertTrue("the list sinks under it: ${list.right - list.left}", list.right - list.left < 410.dp)
         repeat(40) { frame() }
@@ -185,9 +189,11 @@ class DetailDepthTest {
         show()
         compose.mainClock.autoAdvance = false
         compose.runOnIdle { detail = "Albüm" }
-        repeat(5) { frame() }
+        repeat(4) { frame() }
+        val earlier = place("detail")!!.first
+        frame()
         val before = place("detail")!!.first
-        assertTrue("on its way: $before", before > 0.5f)
+        assertTrue("on its way: $earlier → $before", before > 0.5f && before < earlier)
         // Back right after the tap
         compose.runOnIdle { detail = null }
         val lefts = mutableListOf<Float>()
@@ -197,8 +203,9 @@ class DetailDepthTest {
         }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        // (the opening moves on in the frame the change arrives in, about 8 dp at that speed, then it turns)
-        assertTrue("the way runs back from where it was, no jump: $before → $lefts", lefts.isNotEmpty() && abs(lefts.first() - before) < 12f)
+        // (the opening moves on in the frame the change arrives in, no further than it went in the frame before, then it turns)
+        val aFrame = earlier - before
+        assertTrue("the way runs back from where it was, no jump: $earlier → $before → $lefts", lefts.isNotEmpty() && abs(lefts.first() - before) < aFrame + 4f)
         assertTrue("it runs back towards the end: $lefts", lefts.zipWithNext().all { (a, b) -> b >= a - 0.5f })
         compose.onNodeWithTag("detail").assertDoesNotExist()
         assertEquals(0f, bounds("list").left.value, 0.5f)

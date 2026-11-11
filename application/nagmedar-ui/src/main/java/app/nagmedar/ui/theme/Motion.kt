@@ -189,9 +189,15 @@ class NagMotion private constructor(val reduced: Boolean) {
 
     /**
      * 1.0.1: a page opened from another (Settings from "Daha fazla", the equaliser from the player): it comes in
-     * from the end edge over the page it leaves ([pageExit]), on the shared axis. On a phone it moves on the
+     * from the end edge over the page it leaves, on the shared axis. On a phone it moves on the
      * [gesture] spring, wider windows take [LONG] on the emphasized curve; nothing moves with reduced motion.
-     * [rtl] mirrors the side. Back plays it in reverse ([pagePopEnter], [pagePopExit]), with the predictive gesture.
+     * [rtl] mirrors the side. Back plays it in reverse ([pagePopExit]), with the predictive gesture.
+     *
+     * 1.0.3 (Desktop Kit 2.4.0's list → detail): the page comes in opaque, on its own page-coloured surface (the
+     * shell's), and the page it leaves does not travel or fade: it stays where it is, sinks to [PAGE_UNDER_SCALE]
+     * and darkens under [PAGE_SCRIM] of the theme's scrim on [pageDepth], the slide's own timing, so the scrim
+     * follows this page's edge. The shell draws that depth on the page under; the transitions here only move
+     * the page on top.
      */
     fun pageEnter(tier: MotionTier, rtl: Boolean): EnterTransition {
         if (reduced || tier == MotionTier.Reduced) return EnterTransition.None
@@ -199,25 +205,23 @@ class NagMotion private constructor(val reduced: Boolean) {
         return slideInHorizontally(pageSlide(tier)) { it * end }
     }
 
-    /** The page [pageEnter] covers: it moves a quarter of the way towards the start ([PAGE_SHIFT]) and stays drawn. */
-    fun pageExit(tier: MotionTier, rtl: Boolean): ExitTransition {
-        if (reduced || tier == MotionTier.Reduced) return ExitTransition.None
-        val end = if (rtl) -1 else 1
-        return slideOutHorizontally(pageSlide(tier)) { -(it * PAGE_SHIFT).roundToInt() * end }
-    }
-
-    /** Back: the page under comes back from a quarter of the way towards the start. */
-    fun pagePopEnter(tier: MotionTier, rtl: Boolean): EnterTransition {
-        if (reduced || tier == MotionTier.Reduced) return EnterTransition.None
-        val end = if (rtl) -1 else 1
-        return slideInHorizontally(pageSlide(tier)) { -(it * PAGE_SHIFT).roundToInt() * end }
-    }
-
-    /** Back: the page leaves over the end edge. */
+    /** Back: the page leaves over the end edge, opaque, the page under it rising out of the scrim ([pageDepth]). */
     fun pagePopExit(tier: MotionTier, rtl: Boolean): ExitTransition {
         if (reduced || tier == MotionTier.Reduced) return ExitTransition.None
         val end = if (rtl) -1 else 1
         return slideOutHorizontally(pageSlide(tier)) { it * end }
+    }
+
+    /**
+     * 1.0.3: how the page under a page pushed over it ([pageEnter]) sinks and darkens, from 0 (at rest) to 1 (all
+     * the way under it), and comes back on Back: the slide's own spring or curve, so the scrim keeps to the top
+     * page's edge (a spring's way, as a share of its distance, is the same whatever it moves); at once with
+     * reduced motion.
+     */
+    fun pageDepth(tier: MotionTier): FiniteAnimationSpec<Float> = when {
+        reduced || tier == MotionTier.Reduced -> snap()
+        tier == MotionTier.Gesture -> gesture(FRACTION)
+        else -> tween(LONG, easing = Emphasized)
     }
 
     private fun pageSlide(tier: MotionTier): FiniteAnimationSpec<IntOffset> =
@@ -268,8 +272,11 @@ class NagMotion private constructor(val reduced: Boolean) {
         /** How far a page over the window travels ([detailEnter]): a tenth of the width. */
         const val DETAIL_SHIFT = 0.1f
 
-        /** How far the page under a page opened over it moves towards the start ([pageExit]): a quarter of the width. */
-        const val PAGE_SHIFT = 0.25f
+        /** What the page under a page opened over it sinks to ([pageEnter], 1.0.3: Desktop Kit 2.4.0's list under its detail). */
+        const val PAGE_UNDER_SCALE = 0.95f
+
+        /** How much of the theme's scrim darkens the page under a page opened over it, all the way under it. */
+        const val PAGE_SCRIM = 0.7f
 
         /** Where a dialog's card grows from ([dialogEnter]). */
         const val DIALOG_SCALE = 0.94f

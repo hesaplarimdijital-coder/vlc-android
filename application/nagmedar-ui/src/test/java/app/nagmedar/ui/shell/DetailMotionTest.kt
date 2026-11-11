@@ -4,7 +4,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Desktop Kit 0.2.0's list → detail transition (the shared axis), frame by frame; 1.0.3: the phone's Back gesture in depth. */
+/**
+ * Desktop Kit 0.2.0's list → detail transition (the shared axis), frame by frame; 1.0.3: the phone's Back gesture
+ * in depth, and (Desktop Kit 2.4.0) no frame with both screens part transparent.
+ */
 class DetailMotionTest {
 
     private fun assertFrame(expected: DetailFrame, actual: DetailFrame) {
@@ -54,6 +57,26 @@ class DetailMotionTest {
         }
     }
 
+    /** 1.0.3 (Desktop Kit 2.4.0): the fades come in turn; they used to overlap for 50 to 100 ms, one screen's text over the other's. */
+    @Test
+    fun theSharedAxisNeverShowsBothScreensPartTransparent() {
+        for (opening in listOf(true, false)) {
+            for (step in 0..300) {
+                val frame = DetailMotion.frame(step / 300f, opening)
+                val listPart = frame.listAlpha > 0.001f && frame.listAlpha < 0.999f
+                val detailPart = frame.detailAlpha > 0.001f && frame.detailAlpha < 0.999f
+                assertTrue("both part transparent at $step ms (opening $opening): $frame", !(listPart && detailPart))
+                // nor one fading over the other still whole: the one going away is gone before the other appears
+                assertTrue("both drawn at $step ms (opening $opening): $frame", frame.listAlpha < 0.001f || frame.detailAlpha < 0.001f)
+            }
+        }
+        // the screen going away is gone after the first third, the other comes over the rest
+        assertEquals(0f, DetailMotion.frame(1f / 3f, opening = true).listAlpha, 0.001f)
+        assertEquals(0f, DetailMotion.frame(1f / 3f, opening = true).detailAlpha, 0.001f)
+        assertEquals(0f, DetailMotion.frame(2f / 3f, opening = false).detailAlpha, 0.001f)
+        assertEquals(0f, DetailMotion.frame(2f / 3f, opening = false).listAlpha, 0.001f)
+    }
+
     @Test
     fun theBackGestureShrinksToNinetyPercent() {
         assertEquals(0.9f, DetailMotion.BACK_SCALE, 0.0001f)
@@ -62,25 +85,28 @@ class DetailMotionTest {
     }
 
     @Test
-    fun aPhonesBackGestureHasTheListBehindAndTheDetailWholeUntilLetGo() {
-        // the finger's first touch: the detail as it was, the list behind it at 94 %, still hidden
+    fun aPhonesBackGestureHasTheListDarkBehindAndTheDetailWholeUntilLetGo() {
+        // the finger's first touch: the detail as it was, the list behind it at 94 %, dark under all of its scrim
         val start = DetailDepth.gestureFrame(0f)
         assertEquals(1f, start.detailScale, 0.0001f)
-        assertEquals(1f, start.detailAlpha, 0.0001f)
         assertEquals(DetailDepth.GESTURE_LIST_SCALE, start.listScale, 0.0001f)
-        assertEquals(0f, start.listAlpha, 0.0001f)
-        // as far as the finger seeks: shrunk to 90 %, leaning and rounded the whole way, not yet on its way out
+        assertEquals(1f, start.listScrim, 0.0001f)
+        // as far as the finger seeks: shrunk to 90 %, leaning and rounded the whole way, not yet on its way out, the
+        // list still dark behind it (the shrunk detail stands out against it)
         val held = DetailDepth.gestureFrame(DetailDepth.GESTURE_END)
         assertEquals(DetailMotion.BACK_SCALE, held.detailScale, 0.0001f)
         assertEquals(1f, held.lean, 0.0001f)
         assertEquals(0f, held.out, 0.0001f)
-        assertEquals(1f, held.detailAlpha, 0.0001f)
-        // the end of the way out: gone, the list in place
+        assertEquals(1f, held.listScrim, 0.0001f)
+        // half of the way out: half out of the window, the scrim half lifted (evenly: the commit's curve shapes it in time)
+        val half = DetailDepth.gestureFrame(DetailDepth.GESTURE_END + (1f - DetailDepth.GESTURE_END) / 2f)
+        assertEquals(0.5f, half.out, 0.001f)
+        assertEquals(0.5f, half.listScrim, 0.001f)
+        // the end of the way out: all of its width away, the list in place and light
         val end = DetailDepth.gestureFrame(1f)
         assertEquals(1f, end.out, 0.0001f)
-        assertEquals(0f, end.detailAlpha, 0.0001f)
         assertEquals(1f, end.listScale, 0.0001f)
-        assertEquals(1f, end.listAlpha, 0.0001f)
+        assertEquals(0f, end.listScrim, 0.0001f)
     }
 
     @Test
@@ -91,16 +117,19 @@ class DetailMotionTest {
             assertTrue("the detail shrinks", frame.detailScale <= last.detailScale)
             assertTrue("the detail leans on", frame.lean >= last.lean)
             assertTrue("the detail goes on its way out", frame.out >= last.out)
-            assertTrue("the list rises", frame.listScale >= last.listScale && frame.listAlpha >= last.listAlpha)
+            assertTrue("the list rises, its scrim lifting", frame.listScale >= last.listScale && frame.listScrim <= last.listScrim)
             last = frame
         }
     }
 
     @Test
-    fun aPhonesDetailComesFromTwelvePercentOverAListSunkToNinetyFive() {
-        assertEquals(0.12f, DetailDepth.SHIFT, 0.0001f)
+    fun aPhonesDetailComesOverAListSunkToNinetyFiveUnderSeventyPercentOfTheScrim() {
         assertEquals(0.95f, DetailDepth.LIST_SCALE, 0.0001f)
+        assertEquals(0.7f, DetailDepth.SCRIM, 0.0001f)
         assertEquals(0.85f, DetailDepth.GESTURE_END, 0.0001f)
         assertEquals(220, DetailDepth.COMMIT_MS)
+        // with a card: gone in 90 ms, then there over 210
+        assertEquals(90, DetailDepth.FADE_OUT_MS)
+        assertEquals(210, DetailDepth.FADE_IN_MS)
     }
 }

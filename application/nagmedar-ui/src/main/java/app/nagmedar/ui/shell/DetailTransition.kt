@@ -5,6 +5,8 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Animatable
@@ -21,8 +23,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.createChildTransition
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,6 +58,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
@@ -92,6 +93,11 @@ data class DetailFrame(val listShift: Float, val listAlpha: Float, val detailShi
  * same backwards. The frames are a function of the progress (0 the list, 1 the detail) run linearly
  * over [NagMotion.LONG]; each part keeps its own curve and timing within it. A phone's window has
  * the depth of [DetailDepth] instead (1.0.3).
+ *
+ * 1.0.3 (Desktop Kit 2.4.0): the fades come in turn, as Material's shared axis has them: the screen going
+ * away is gone in the first third ([NagMotion.SHORT]) and only then the other fades in, over the rest
+ * ([NagMotion.MEDIUM]). They used to overlap (50 to 100 ms opening, 50 to 150 ms closing): two screens part
+ * transparent at once, the text of one over the other's. The slides and the lengths are as they were.
  */
 object DetailMotion {
     /** How far the parts travel: a tenth of the width. */
@@ -122,16 +128,16 @@ object DetailMotion {
                 listShift = -NagMotion.Emphasized.transform(p) * SHIFT,
                 listAlpha = 1f - NagMotion.StandardAccelerate.transform(part(t, 0f, NagMotion.SHORT.toFloat())),
                 detailShift = (1f - NagMotion.EmphasizedDecelerate.transform(p)) * SHIFT,
-                detailAlpha = NagMotion.StandardDecelerate.transform(part(t, 50f, NagMotion.MEDIUM.toFloat())),
+                detailAlpha = NagMotion.StandardDecelerate.transform(part(t, NagMotion.SHORT.toFloat(), NagMotion.MEDIUM.toFloat())),
             )
         } else {
             val c = 1f - p
             val t = c * ms
             DetailFrame(
                 listShift = -(1f - NagMotion.EmphasizedDecelerate.transform(c)) * SHIFT,
-                listAlpha = NagMotion.StandardDecelerate.transform(part(t, 50f, NagMotion.MEDIUM.toFloat())),
+                listAlpha = NagMotion.StandardDecelerate.transform(part(t, NagMotion.SHORT.toFloat(), NagMotion.MEDIUM.toFloat())),
                 detailShift = NagMotion.EmphasizedAccelerate.transform(part(t, 0f, ms - 50f)) * SHIFT,
-                detailAlpha = 1f - NagMotion.StandardAccelerate.transform(part(t, 0f, NagMotion.COLOR.toFloat())),
+                detailAlpha = 1f - NagMotion.StandardAccelerate.transform(part(t, 0f, NagMotion.SHORT.toFloat())),
             )
         }
     }
@@ -247,25 +253,35 @@ fun Modifier.detailShade(state: DetailMotionState): Modifier {
     }
 }
 
-// ------------------------------------------------------------------ the phone's depth (1.0.3, Desktop Kit 2.3.0)
+// ------------------------------------------------------------------ the phone's depth (1.0.3, Desktop Kit 2.3.0 and 2.4.0)
 
 /**
- * 1.0.3 (Desktop Kit 2.3.0, "Ayrıntı derinlikte açılır"): on a phone the detail comes in [SHIFT] of the width
- * from the end edge on the opening spring ([NagMotion.open]) and fades in at once, while the list sinks to
- * [LIST_SCALE] and fades under it; closing is the same way back, the list rising under the leaving detail.
+ * 1.0.3 (Desktop Kit 2.4.0, "Ayrıntı opak kayarak gelir"): on a phone the detail opens as Android's own list →
+ * detail does. Opaque from its first frame, it slides in from the end edge by the whole width on the opening
+ * spring ([NagMotion.open]), over the list; the list is not faded: on the same spring it sinks to [LIST_SCALE]
+ * and darkens under [SCRIM] of the theme's scrim, so the scrim keeps to the detail's edge and the list's text
+ * never shows through the detail. Closing is the same way back: the detail slides out over the end edge, the
+ * list rises out of the scrim. (Desktop Kit 2.3.0 had the detail come 12 % of the way fading in while the list
+ * faded under it: for a tenth of a second both were part transparent, one's text over the other's.)
+ *
+ * With a [detailSharedCard] the card carries the way and the rest fades through: the list is gone in
+ * [FADE_OUT_MS], only then the detail appears, over [FADE_IN_MS]; back the other way round.
  *
  * The predictive Back gesture seeks the closing up to [GESTURE_END] with the finger ([gestureFrame]): the list
- * is really there behind the detail and rises from [GESTURE_LIST_SCALE], the detail shrinks towards
- * [DetailMotion.BACK_SCALE], rounds its corners and leans away from the edge the swipe came from. Let go, the
- * rest of the way runs from where the finger left it in [COMMIT_MS]: the detail slides [WAY_OUT] of the width on
- * and fades. A swipe given up runs everything back the way it came.
+ * is really there behind the detail, dark under the scrim, and rises from [GESTURE_LIST_SCALE]; the detail
+ * shrinks towards [DetailMotion.BACK_SCALE], rounds its corners and leans away from the edge the swipe came
+ * from. Let go, the rest of the way runs from where the finger left it in [COMMIT_MS]: the detail, opaque to
+ * the end, slides on until it is out of the window while the scrim lightens. A swipe given up runs everything
+ * back the way it came.
+ *
+ * In no frame are both screens part transparent.
  */
 object DetailDepth {
-    /** How far the detail comes from: 12 % of the width, from the end edge. */
-    const val SHIFT = 0.12f
-
     /** What the list sinks to under an open detail. */
     const val LIST_SCALE = 0.95f
+
+    /** How much of the theme's scrim darkens the list all the way behind a detail. */
+    const val SCRIM = 0.7f
 
     /** Where the list rises from behind the detail while a Back gesture closes it. */
     const val GESTURE_LIST_SCALE = 0.94f
@@ -273,50 +289,54 @@ object DetailDepth {
     /** How far the finger seeks the closing; the rest is the detail's way out once let go. */
     const val GESTURE_END = 0.85f
 
-    /** How far the detail goes on its way out once the finger lets go, as a share of the width. */
-    const val WAY_OUT = 0.4f
-
     /** The way out after the finger lets go, from wherever it was. */
     const val COMMIT_MS = 220
+
+    /**
+     * Fade-through with a [detailSharedCard]: the side going away is gone after [FADE_OUT_MS], only then the one
+     * coming in appears, over [FADE_IN_MS]. The card's own content fades on the same timing.
+     */
+    const val FADE_OUT_MS = NagMotion.SHORT - 10
+    const val FADE_IN_MS = NagMotion.MEDIUM + 10
 
     /** The Back gesture's frame at [fraction] of the closing (0 the detail open, 1 the list). */
     fun gestureFrame(fraction: Float): DepthGestureFrame {
         val f = fraction.coerceIn(0f, 1f)
         val lean = (f / GESTURE_END).coerceIn(0f, 1f)
-        val out = NagMotion.EmphasizedAccelerate.transform(((f - GESTURE_END) / (1f - GESTURE_END)).coerceIn(0f, 1f))
+        // after the finger: nothing while it seeks, then the way out, evenly (the commit's own curve shapes it in time;
+        // a slide this long on an accelerating curve jumped at its end)
+        val out = ((f - GESTURE_END) / (1f - GESTURE_END)).coerceIn(0f, 1f)
         val rise = NagMotion.Standard.transform(f)
         return DepthGestureFrame(
             detailScale = 1f - (1f - DetailMotion.BACK_SCALE) * lean,
             lean = lean,
             out = out,
-            detailAlpha = 1f - out,
             listScale = GESTURE_LIST_SCALE + (1f - GESTURE_LIST_SCALE) * rise,
-            listAlpha = rise,
+            listScrim = 1f - out,
         )
     }
 }
 
-/** One frame of [DetailDepth.gestureFrame]. */
+/** One frame of [DetailDepth.gestureFrame]. The detail is opaque in every one of them, and the list is never faded. */
 @Immutable
 data class DepthGestureFrame(
     val detailScale: Float,
     /** How far the detail leans and rounds its corners: 0 to 1 of [DetailMotion.BACK_LEAN_DP] and [DetailMotion.BACK_CORNER_DP]. */
     val lean: Float,
-    /** How far the detail is on its way out: 0 to 1 of [DetailDepth.WAY_OUT]. */
+    /** How far the detail is on its way out of the window: 0 to 1 of its width. */
     val out: Float,
-    val detailAlpha: Float,
     val listScale: Float,
-    val listAlpha: Float,
+    /** How dark the list is behind the detail: 1 (all of [DetailDepth.SCRIM]) while the finger moves, lightening on the way out. */
+    val listScrim: Float,
 )
 
 /** The transition's own values of the phone's depth: what a tap's opening and closing play. */
 internal class DepthValues(
-    /** 1: [DetailDepth.SHIFT] towards the end; 0: in place. */
+    /** 1: the whole width towards the end, out of the window; 0: in place. The list's depth is the rest of it. */
     val detailShift: State<Float>,
-    val detailAlpha: State<Float>,
-    /** The detail's fade when a [detailSharedCard] carries the way: after the card. */
+    /** The detail's fade when a [detailSharedCard] carries the way: after the list has gone. */
     val cardAlpha: State<Float>,
-    val listScale: State<Float>,
+    /** The list's fade when a [detailSharedCard] carries the way: gone before the detail appears. */
     val listAlpha: State<Float>,
 )
 
@@ -396,7 +416,7 @@ internal class DepthState(open: Boolean) {
                 // let go early: the finger's part of the way is played first, quickly, then the way out
                 val rest = (DetailDepth.COMMIT_MS * (DetailDepth.GESTURE_END - seekable.fraction) / DetailDepth.GESTURE_END).roundToInt()
                 seekable.seekOn(DetailDepth.GESTURE_END, rest)
-                seekable.animateTo(false, tween(DetailDepth.COMMIT_MS, easing = NagMotion.EmphasizedAccelerate))
+                seekable.animateTo(false, tween(DetailDepth.COMMIT_MS, easing = NagMotion.Standard))
                 gestureClose = false
             }
             // a change of mind on the way (Back right after the tap, the tap again right after Back): the way is run
@@ -432,38 +452,56 @@ internal class DepthState(open: Boolean) {
         }
     }
 
-    /** The list's layer in this frame. */
+    /** The list's layer in this frame: sunk under the detail, never faded but with a card ([DepthValues.listAlpha]). */
     fun GraphicsLayerScope.listLayer() {
         if (gestureClose) {
             val frame = DetailDepth.gestureFrame(seekable.fraction)
             scaleX = frame.listScale
             scaleY = frame.listScale
-            alpha = frame.listAlpha
         } else {
             val v = values ?: return
-            scaleX = v.listScale.value
-            scaleY = v.listScale.value
-            alpha = v.listAlpha.value
+            val scale = 1f - (1f - DetailDepth.LIST_SCALE) * (1f - v.detailShift.value)
+            scaleX = scale
+            scaleY = scale
+            if (withCard) alpha = v.listAlpha.value
         }
     }
 
-    /** The detail's layer in this frame; [direction] is -1 in right-to-left layouts (the gesture's lean is the finger's). */
+    /**
+     * How dark the list is under the detail in this frame, 0 to 1 of [DetailDepth.SCRIM]: with the detail's way
+     * (the same spring: the scrim keeps to its edge), full under a finger's Back and lightening on its way out;
+     * with a card it goes with the fading list.
+     */
+    fun listScrim(): Float {
+        if (gestureClose) return DetailDepth.gestureFrame(seekable.fraction).listScrim
+        val v = values ?: return 0f
+        val depth = (1f - v.detailShift.value).coerceIn(0f, 1f)
+        return if (withCard) depth * v.listAlpha.value else depth
+    }
+
+    /**
+     * The detail's layer in this frame; [direction] is -1 in right-to-left layouts (the gesture's lean is the
+     * finger's). Opaque but with a card, where it fades in after the list has gone ([DepthValues.cardAlpha]).
+     */
     fun GraphicsLayerScope.detailLayer(widthPx: Int, direction: Float) {
         if (gestureClose) {
             val frame = DetailDepth.gestureFrame(seekable.fraction)
             val away = if (swipeEdge == BackEventCompat.EDGE_RIGHT) -1f else 1f
             scaleX = frame.detailScale
             scaleY = frame.detailScale
-            translationX = away * (DetailMotion.BACK_LEAN_DP.dp.toPx() * frame.lean + DetailDepth.WAY_OUT * widthPx * frame.out)
-            alpha = frame.detailAlpha
+            // all the way out of the window, from where it leans
+            translationX = away * (DetailMotion.BACK_LEAN_DP.dp.toPx() * frame.lean + widthPx * frame.out)
             if (frame.lean > 0f) {
                 shape = RoundedCornerShape((DetailMotion.BACK_CORNER_DP * frame.lean).dp)
                 clip = true
             }
         } else {
             val v = values ?: return
-            translationX = if (withCard) 0f else v.detailShift.value * DetailDepth.SHIFT * widthPx * direction
-            alpha = if (withCard) v.cardAlpha.value else v.detailAlpha.value
+            if (withCard) {
+                alpha = v.cardAlpha.value
+            } else {
+                translationX = v.detailShift.value * widthPx * direction
+            }
         }
     }
 }
@@ -473,34 +511,15 @@ internal class DepthState(open: Boolean) {
 internal fun rememberDepth(open: Boolean): DepthState {
     val depth = remember { DepthState(open) }
     val transition = rememberTransition(depth.seekable, label = "detailDepth")
+    // the detail's way, and with it the list's sinking and its scrim
     val detailShift = transition.animateFloat(transitionSpec = { NagMotion.open(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
-    val detailAlpha = transition.animateFloat(
-        transitionSpec = {
-            if (targetState) tween(NagMotion.MEDIUM, easing = NagMotion.StandardDecelerate) else tween(NagMotion.SHORT + 20, easing = NagMotion.StandardAccelerate)
-        },
-        label = "detailAlpha",
-    ) { if (it) 1f else 0f }
-    val cardAlpha = transition.animateFloat(
-        transitionSpec = {
-            if (targetState) {
-                tween(NagMotion.MEDIUM + 20, delayMillis = 60, easing = NagMotion.StandardDecelerate)
-            } else {
-                tween(NagMotion.SHORT + 20, easing = NagMotion.StandardAccelerate)
-            }
-        },
-        label = "cardAlpha",
-    ) { if (it) 1f else 0f }
-    val listScale = transition.animateFloat(transitionSpec = { tween(NagMotion.LONG, easing = NagMotion.Emphasized) }, label = "listScale") {
-        if (it) DetailDepth.LIST_SCALE else 1f
-    }
-    val listAlpha = transition.animateFloat(
-        transitionSpec = {
-            if (targetState) tween(NagMotion.SHORT + 60, easing = NagMotion.StandardAccelerate) else tween(NagMotion.MEDIUM, easing = NagMotion.StandardDecelerate)
-        },
-        label = "listAlpha",
-    ) { if (it) 0f else 1f }
+    // with a card the two fade through, the one going away gone before the other appears
+    val gone = tween<Float>(DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardAccelerate)
+    val appears = tween<Float>(DetailDepth.FADE_IN_MS, delayMillis = DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardDecelerate)
+    val cardAlpha = transition.animateFloat(transitionSpec = { if (targetState) appears else gone }, label = "cardAlpha") { if (it) 1f else 0f }
+    val listAlpha = transition.animateFloat(transitionSpec = { if (targetState) gone else appears }, label = "listAlpha") { if (it) 0f else 1f }
     depth.transition = transition
-    if (depth.values == null) depth.values = DepthValues(detailShift, detailAlpha, cardAlpha, listScale, listAlpha)
+    if (depth.values == null) depth.values = DepthValues(detailShift, cardAlpha, listAlpha)
     return depth
 }
 
@@ -569,10 +588,33 @@ private suspend fun <S> SeekableTransitionState<S>.seekOn(to: Float, millis: Int
     }
 }
 
-/** Places [listPlaceable] and [detailPlaceable] as the phone's [depth] has them; a covered list is left out by the caller. */
+/** The layout id of [DepthScrim] in a list and detail's layout. */
+internal const val DEPTH_SCRIM = "depthScrim"
+
+/**
+ * The darkening of the list under a phone's detail ([DepthState.listScrim], Desktop Kit 2.4.0: the list is not
+ * faded), laid over all of the list's place, the margins its sinking opens too. Drawn only: nothing recomposes
+ * as it moves.
+ */
+@Composable
+internal fun DepthScrim(depth: DepthState, modifier: Modifier = Modifier) {
+    val scrim = NagTheme.colors.scrim
+    Box(
+        modifier.drawBehind {
+            val dark = depth.listScrim()
+            if (dark > 0f) drawRect(scrim, alpha = DetailDepth.SCRIM * dark)
+        },
+    )
+}
+
+/**
+ * Places [listPlaceable] and [detailPlaceable] as the phone's [depth] has them, [scrimPlaceable] ([DepthScrim])
+ * between the two; a covered list is left out by the caller, and its scrim with it.
+ */
 internal fun Placeable.PlacementScope.placeDepth(
     depth: DepthState,
     listPlaceable: Placeable?,
+    scrimPlaceable: Placeable?,
     detailPlaceable: Placeable?,
     widthPx: Int,
     direction: Float,
@@ -582,6 +624,7 @@ internal fun Placeable.PlacementScope.placeDepth(
             listPlaceable.placeRelative(0, 0)
         } else {
             listPlaceable.placeRelativeWithLayer(0, 0) { with(depth) { listLayer() } }
+            scrimPlaceable?.placeRelative(0, 0)
         }
     }
     detailPlaceable?.placeRelativeWithLayer(0, 0) { with(depth) { detailLayer(widthPx, direction) } }
@@ -723,10 +766,14 @@ fun Modifier.detailSharedBounds(key: Any): Modifier {
  * Inside a phone's [DetailTransition] (or [ListDetailPanes]) with shared elements, the card of a list item and
  * the header of its detail (the block holding the big cover and the title) marked with the same [key] open into
  * each other (Desktop Kit 2.3.0): the card grows into the header, its corners straightening from [shape] and its
- * surface turning into the page, while the header's content fades in over the card's; on the way back the header
- * shrinks into the card's place. The detail then does not slide: it fades in after the card. A
- * [detailSharedElement] cover inside both still flies on its own, above the card. Put it first in the modifiers of
- * both. Elsewhere, and with reduced motion, nothing changes.
+ * surface turning into the page; on the way back the header shrinks into the card's place. The detail then does
+ * not slide: it fades in once the list has gone. A [detailSharedElement] cover inside both still flies on its own,
+ * above the card. Put it first in the modifiers of both. Elsewhere, and with reduced motion, nothing changes.
+ *
+ * 1.0.3 (Desktop Kit 2.4.0): the card's content fades out before the header's fades in
+ * ([DetailDepth.FADE_OUT_MS], then [DetailDepth.FADE_IN_MS]), and the card stays opaque all the way: both sides
+ * are drawn in full while they fly, the header over the card, the card's surface under everything. They used to
+ * cross-fade as wholes, the card part transparent for a moment over the list.
  */
 @Composable
 fun Modifier.detailSharedCard(key: Any, shape: CornerBasedShape = RoundedCornerShape(NagTheme.dimens.radiusCard)): Modifier {
@@ -753,22 +800,41 @@ fun Modifier.detailSharedCard(key: Any, shape: CornerBasedShape = RoundedCornerS
     val cornerPx: () -> Float = { with(density) { corner.toPx() } }
     val surface = if (list) colors.surface else colors.background
     val clip = remember(scopes) { CornerClip(cornerPx) }
+    // the content fades through: the side going away is gone within FADE_OUT_MS, only then the other appears
+    val shown = scopes.visibility.transition.animateFloat(
+        transitionSpec = {
+            if (targetState == EnterExitState.Visible) {
+                tween(DetailDepth.FADE_IN_MS, delayMillis = DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardDecelerate)
+            } else {
+                tween(DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardAccelerate)
+            }
+        },
+        label = "cardContent",
+    ) { state -> if (state == EnterExitState.Visible) 1f else 0f }
     return with(scopes.transition) {
         val state = rememberSharedContentState(key)
+        val flying = { isTransitionActive && state.isMatchFound }
+        // a surface only while this card flies (the others in the list stay as they are)
+        val surfaceWhileFlying = Modifier.drawBehind {
+            if (flying()) drawRoundRect(surface, cornerRadius = CornerRadius(cornerPx()))
+        }
+        val fading = Modifier.graphicsLayer { alpha = if (flying()) shown.value else 1f }
         this@detailSharedCard
             .sharedBounds(
                 sharedContentState = state,
                 animatedVisibilityScope = scopes.visibility,
-                enter = fadeIn(tween(NagMotion.MEDIUM + 10, delayMillis = NagMotion.SHORT - 10, easing = NagMotion.StandardDecelerate)),
-                exit = fadeOut(tween(NagMotion.SHORT - 10, easing = NagMotion.StandardAccelerate)),
+                // both sides are drawn in full while they fly, the header above the card: the card's surface stays
+                // opaque under everything, only the contents fade (below)
+                enter = EnterTransition.None,
+                exit = ExitTransition.None,
                 boundsTransform = DepthBounds,
                 resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds(ContentScale.FillWidth, Alignment.TopStart),
+                zIndexInOverlay = if (list) 0f else 0.5f,
                 clipInOverlayDuringTransition = clip,
             )
-            // a surface only while this card flies (the others in the list stay as they are)
-            .drawBehind {
-                if (isTransitionActive && state.isMatchFound) drawRoundRect(surface, cornerRadius = CornerRadius(cornerPx()))
-            }
+            // the card: an opaque surface under its fading content; the header: its page-coloured surface fading in
+            // and out with its content, over the card
+            .then(if (list) surfaceWhileFlying.then(fading) else fading.then(surfaceWhileFlying))
     }
 }
 
@@ -806,11 +872,12 @@ private class DetailHold<T : Any> {
  * neither measured, drawn nor read out. [detailKey] tells details apart; the detail's content stays
  * while it closes and shows the latest object given under its key.
  *
- * 1.0.3 (Desktop Kit 2.3.0): on a phone the detail opens in depth ([DetailDepth]), Back is the
- * gesture seeking the closing with the list really behind, and a change of mind runs the way back;
- * with [sharedElements] the elements marked with [detailSharedElement], [detailSharedBounds] and
- * [detailSharedCard] fly between the two sides (a lookahead pass only while something moves). Tablet
- * and DeX windows keep [DetailMotion]; with reduced motion the detail simply appears.
+ * 1.0.3 (Desktop Kit 2.3.0 and 2.4.0): on a phone the detail opens in depth ([DetailDepth]): opaque, it
+ * slides in over the list, which sinks and darkens under a scrim; Back is the gesture seeking the closing
+ * with the list really behind, and a change of mind runs the way back; with [sharedElements] the elements
+ * marked with [detailSharedElement], [detailSharedBounds] and [detailSharedCard] fly between the two sides
+ * (a lookahead pass only while something moves). Tablet and DeX windows keep [DetailMotion], its fades in
+ * turn; with reduced motion the detail simply appears. No frame has both screens part transparent.
  */
 @Composable
 fun <T : Any> DetailTransition(
@@ -857,7 +924,7 @@ fun <T : Any> DetailTransition(
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val covered by remember(state, depth, phone) { derivedStateOf { if (phone) depth.covered else state.covered } }
     val shared = sharedElements && phone && animated
-    // on a phone the detail is opaque: the list is behind it while the Back gesture shrinks it
+    // on a phone the detail is opaque, from its first frame to its last: the list is behind it, dark under a scrim
     val page = if (phone) Modifier.background(NagTheme.colors.background) else Modifier
     DepthHost(
         depth,
@@ -874,6 +941,7 @@ fun <T : Any> DetailTransition(
                     propagateMinConstraints = true,
                 ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
                 if (slot && shown != null) {
+                    if (phone && animated) DepthScrim(depth, Modifier.layoutId(DEPTH_SCRIM))
                     Box(Modifier.layoutId(DETAIL).then(page), propagateMinConstraints = true) {
                         DepthSide(scopes, DetailSide.Detail, depth, shared) { detailContent(shown) }
                     }
@@ -886,9 +954,14 @@ fun <T : Any> DetailTransition(
             val paneM = measurables.firstOrNull { it.layoutId == DETAIL }
             // a covered list stays composed but is not measured
             val listPlaceable = if (paneM != null && covered) null else measurables.first { it.layoutId == LIST }.measure(fixed)
+            val scrimPlaceable = if (listPlaceable == null) null else measurables.firstOrNull { it.layoutId == DEPTH_SCRIM }?.measure(fixed)
             val pane = paneM?.measure(fixed)
             layout(w, h) {
-                if (phone) placeDepth(depth, listPlaceable, pane, w, direction) else placeListAndDetail(state, listPlaceable, pane, w, direction)
+                if (phone) {
+                    placeDepth(depth, listPlaceable, scrimPlaceable, pane, w, direction)
+                } else {
+                    placeListAndDetail(state, listPlaceable, pane, w, direction)
+                }
             }
         }
     }
