@@ -60,3 +60,14 @@ job and emulator walk of a commit, re-runs once the walk jobs that died in the r
 the failures), `orch/prompts/` of the Desktop Kit 2.3.0 port's parts, `orch/notes/kit-2.3-map.md` (the 67 rows of the
 port) and the parts' notes in `orch/notes/kit-port.md`. `AGENT_BRIEF.md` section 0000 holds this session's rules
 (minSdk 34, glass B, the split walk, the attribution lines).
+
+State on 12 Nov 01:10 (Istanbul): master is 7cfbc735 (the train, PRs #107–#112). The release is the draft PR #113,
+branch `story/release-1.0.3` (version 4010003 / 14010009, CHANGELOG, guide): on top of the train it has the phone's
+shelf fix, the profile generator's fix, the folders' single back arrow, the new Back (Desktop Kit 2.4.0 and the
+kit's unmerged `fix/tab-back-button`, done by the orchestrator after the user's interrupt stopped its agent) and
+`targetSdk 37` (the user's answer "37" at 00:55). `orch/release-1.0.3/` holds the PR's body, the device checks to put
+at the top of the plan document's "1.0 cihaz testi" tab, and the stopped agent's partial diff; `orch/ux/montage.py`
+makes the before/after sheets of the Back strips. Left when this was written: CI green on the branch's head (first
+compile of the Back work pending), the screenshot references of the folders' arrow, the Baseline Profile regenerated
+on the final code, the walks (debug and personal, API 35 and 37.0), then `release_chain.sh release-1.0.3 <sha> 1.0.3`
+from outside the worktree, `tools/apkcheck.py` (now expecting targetSdk 37) and the APK sent to the user.

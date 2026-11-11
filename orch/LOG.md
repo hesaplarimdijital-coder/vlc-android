@@ -538,3 +538,57 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   (Turkish, from the 16 PR bodies in $SCRATCH/release-1.0.3/prs), buildsystem/release/README.md (numbers, update
   paragraph, walk split + evidence branches, Android 17 section rewritten). Not pushed until the train is green and the
   profile is in. Then: release_chain.sh release-1.0.3 <sha> 1.0.3.
+- 23:10 TR train 7cfbc735: app CI green (281 screenshots same), PR walks debug API 35 tablet+phone green (0 StrictMode: the
+  pause fix holds). Dispatched walks (debug 37.0, personal 35/37.0) still running at 23:37.
+- Baseline Profile of 7cfbc735 (run 43089404063, ci/baseline-profile 3f2a67b0): 42908 rules, BUT "phone: missing:
+  phone-player" 6 of 6 (platform's run had 5/6). The hierarchy left behind: no mini player 25 s after the tap; the list's
+  item slots at "shelf on top" places with the rows' contents 631 px higher (UiAutomator's copy partly old).
+  Findings: (1) since #105 the list's bounds reach behind the bars: the generator's flings (margin = width/5) start ON the
+  bottom bar; (2) REAL APP BUG seen on the walk's cold start screenshots (092: no shelf with a history): the phone's
+  "Son çalınan müzik" shelf is DenseTable's leading item; empty it has no height, LazyList skips a zero-size first item
+  when the top content padding is 0 (currentMainAxisOffset <= minOffset) → first visible item = the sticky titles (1,0);
+  the history's read now comes after the kept list is drawn (#101) → the shelf stays out of sight above the titles.
+- Fix on story/release-1.0.3 (e494603c, PR #113 draft): RecentKept (history ids kept beside MusicSnapshot, preloaded with
+  it, found in the kept list for the first frame), DenseTable(leadingPresent) → scrollToItem(0) when the leading item
+  comes while the list rests at (≤1, 0); tests RecentKeptTest, DenseTableLeadingTest; walk check at "Glass B: a cold
+  start". Generator: UiObject2.insideTheBars (margins w/5, h/10, w/5, h/3), freshScreen() (setServiceInfo clears
+  UiAutomator's cache) before each look, idle wait 3 s, missing() leaves PNG + dumpsys media_session; script keeps
+  app-log.txt (logcat -G 16M). Profile run dispatched on the release branch. Still unknown until that run: whether the
+  phone tap played at all (the shelf showed "Profile track 1.5" = the middle of the 9 phone rows).
+
+## 12 Nov (00:00–01:10 local = 21:00–22:10 UTC)
+- GitHub Actions stalled 20:18–21:03 UTC (runs queued with 0 jobs, two profile dispatches ended startup_failure, API 502s);
+  the train's summary jobs never got a runner: run 43089213646 shows "failure" only for that (all eight walk jobs success).
+  await_actions.sh written; PR #113 closed and reopened to get new runs.
+- TRAIN LANDED: master = 7cfbc735 (#107–#112). Eight walks green (debug/personal × API 35/37.0 × tablet/phone).
+- e494603c (release branch: shelf fix + generator) fully green: CI debug (281 same) + release, PR walks tablet + phone
+  (shelf check ok: "shelf (0, 447, 1080, 1078), first row 1250"), Baseline Profile run 43098853821: phone player 6/6,
+  43401 rules (ci/baseline-profile eea0fd23). NOT taken into the branch yet: regenerate on the final code.
+- User 00:03: "Geri tuşundaki efekti hala beğenmiyorum" + UI/UX test. Diagnosis from ci/shots-pr-112/motion: tab Back =
+  page-pop carousel; page pop: two pages side by side; detail (kit 2.3.0 depth) double exposure. Kit fixed all on 5 Nov:
+  2.4.0 (origin/main d583c53) and branch fix/tab-back-button (a742640, unmerged).
+- User 00:19 interrupted (asked "2.4.0'a mı geçiriyorsun"); THE INTERRUPT STOPPED THE BACK AGENT (a36151d5…, cannot be
+  resumed; its WIP diff saved at $SCRATCH/agents/back-motion/agent-wip.patch). Orchestrator did the story itself, on
+  the release branch (no separate PR): 182f7f48.
+  - shell/ShellPage.kt (ShellPages: under/leaving ids written where the transitions are chosen; the page under sinks to
+    95 % + 70 % scrim by drawWithContent on NagMotion.pageDepth; the gesture's tab rounds its corners);
+    NavRules.tabPop + ShellNavigator.moveFrom (a pop between tabs fades through; EDGE_NONE = the button → plain pops);
+    Motion: pageExit/pagePopEnter/PAGE_SHIFT gone, pageDepth, PAGE_UNDER_SCALE, PAGE_SCRIM.
+  - DetailTransition: DetailDepth (SCRIM .7, FADE_OUT_MS 90, FADE_IN_MS 210; SHIFT and WAY_OUT gone), DepthValues
+    (detailShift, cardAlpha, listAlpha), listScrim(), DepthScrim + DEPTH_SCRIM (also in Panes.ListDetailPanes),
+    gestureFrame (opaque, out linear, listScrim), commit easing Standard, detailSharedCard as kit 2.4.0,
+    DetailMotion.frame sequential (SHORT then MEDIUM).
+  - Tests: ExposureCamera/ExposureFrame (red/blue/green pixel frames), BackMotionTest, DetailNoDoubleExposureTest,
+    DetailMotionTest/DetailDepthTest updated (off-screen detail: positionInRoot, not clipped bounds), strip album-close.
+- UI/UX sweep (58 tr phone shots, tablet/workstation, phone-en): tidy; findings: hidden shelf (fixed), Bu cihaz/Ağ double
+  back arrow + folder name twice + trail not following (fixed 32417c61: components/FolderTrail.kt rememberTrailScroll,
+  trailBack = !wide && !NavRules.showsBack(dest, navKind), subtitle only when wide), two FolderAdd icons (left),
+  shortcut list rows tight on a phone with a keyboard (left).
+- User 00:21: "tablet ve telefonda oneui9 tam uyumlu olsun". Research: One UI 9 = Android 17, refinement of 8.5 (quick
+  panel media player resizable, DeX desktops + top/bottom snap, lock screen player, Now Bar supports any media session
+  app). Code audit ok: themed icon, safeDrawing, resizable + min 480x360, tests at 1280x360. Asked the user targetSdk;
+  00:55 answer "37" → eb5e8cfb (settings.gradle + build.gradle; guide tr/en: permission, alarm page; README).
+- Pushed b58f07cf at 22:01 UTC (182f7f48 Back, eb5e8cfb target 37, b58f07cf notes). First CI of all of it pending.
+- Plan doc: Kararlar targetSdk row = "Karar (12 Kasım): 37…" (rev 31). Device checks draft updated
+  ($SCRATCH/release-1.0.3/device-checks.md: Geri, Bu cihaz ve Ağ, Android 17 (hedef 37), One UI 9).
+- Montage script: $SCRATCH/ux/montage.py <before dir> <after dir> <out dir> (before = $SCRATCH/ux/strips).
