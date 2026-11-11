@@ -1,0 +1,338 @@
+1237 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3960 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3960 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3960 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3960 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3960 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3960 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3960 W/HWUI: Unknown dataspace 0
+3960 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3960 W/VLC: [000070ed1a62a4f0/13b0] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a636790/13b4] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 W/VLC: [000070ed1a62b030/13b5] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a636790/13b6] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a62a4f0/13b7] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a637e10/13b8] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a62b030/13b9] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a636790/13ba] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a62a4f0/13bb] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a637e10/13bc] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a62b030/13bd] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a636790/13be] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 W/VLC: [000070ed1a62a4f0/13bf] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a62a610/13c2] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6384d0/13c4] libvlc access: cannot insert stream filter record
+621 E/NotificationService: Package enqueue rate is 6.6323156. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+3960 W/VLC: [000070ed1a640510/13c7] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:24): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC: [000070ed1a6465d0/13cb] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:25): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC: [000070ed1a640510/13cd] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:26): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:27): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC: [000070ed1a6465d0/13d7] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6384d0/13dd] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:28): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC: [000070ed1a6465d0/13de] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a645610/13e3] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:29): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC: [000070ed1a6465d0/13e6] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6454f0/13e8] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6466f0/13ea] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6454f0/13ec] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6466f0/13ee] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a641b90/13f1] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a641cb0/13f3] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a641b90/13f5] libvlc access: cannot insert stream filter record
+3960 E/VLC: [000070ed1a641cb0/13f7] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3960 E/VLC: [000070ed3a6cec00/13f7] libvlc input: Your media can't be opened
+3960 E/VLC: [000070ed3a6cec00/13f7] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3960 W/VLC: [000070ed1a6438d0/13f8] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 E/VLC: [000070ed1a6438d0/13fa] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3960 E/VLC: [000070ed3a6cec00/13fa] libvlc input: Your media can't be opened
+3960 E/VLC: [000070ed3a6cec00/13fa] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3960 W/VLC: [000070ed1a6449b0/13fb] libvlc access: cannot insert stream filter record
+3960 W/AndroidMedialib: type=1400 audit(0.0:39): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 W/AndroidMedialib: type=1400 audit(0.0:40): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:41): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:42): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:43): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:49): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:50): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:51): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:52): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:53): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:68): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:69): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:70): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:71): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3960 W/AndroidMedialib: type=1400 audit(0.0:72): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106620 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:283 addRoot Can't add root file:///storage/emulated/0/: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id)
+3960 W/VLC: [000070ed1a64c570/24fe] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/24ff] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 W/VLC: [000070ed1a64c570/2501] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/2502] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/2503] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/2504] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/2506] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/2508] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/2509] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/250a] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/250c] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/250d] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 W/VLC: [000070ed1a64c570/250e] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/250f] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/2510] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/2511] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/2512] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/2513] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/2514] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/2515] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/2516] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/2517] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/2518] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/2519] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/251a] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/251b] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64d9b0/251c] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a6252d0/251d] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64c570/251e] libvlc access: cannot insert stream filter record
+3960 W/VLC: [000070ed1a64a4d0/251f] libvlc access: cannot insert stream filter record
+3960 E/VLC: [000070ed1a64d9b0/2520] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3960 E/VLC: [000070ed3a87b6b0/2520] libvlc input: Your media can't be opened
+3960 E/VLC: [000070ed3a87b6b0/2520] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3960 W/VLC: [000070ed1a6252d0/2521] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3960 E/VLC: [000070ed1a64c570/2522] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3960 E/VLC: [000070ed3a87b6b0/2522] libvlc input: Your media can't be opened
+3960 E/VLC: [000070ed3a87b6b0/2522] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3960 W/VLC: [000070ed1a64a4d0/2523] libvlc access: cannot insert stream filter record
+3960 W/VLC/medialibrary: [T#124160254771392] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/WindowManager: Exception thrown during dispatchAppVisibility Window{e291f77 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+621 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{13dc498 #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@7fb4351
+9825 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+9825 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+9825 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+9825 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+9825 W/HWUI: Unknown dataspace 0
+9825 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+9825 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+9825 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: -1, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9825 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+9825 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/AppOps: Noting op not finished: uid 10234 pkg app.nagmedar.debug code 154 startTime of in progress event=1794439145119
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+621 W/MR2ServiceImpl: Router record not found for the target package: app.nagmedar.debug
+1058 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9825 W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=app.nagmedar.debug
+9825 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 62292, totalDuration: 209283175, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+9825 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 62292, totalDuration: 209283175, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9825 W/FrameTracker: Missed SF frame:jankTypeLegacy: JANK_COMPOSER, jankTypeExperimental: JANK_APPLICATION, vsyncId: 64949, totalDuration: 245591273, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+9825 W/JobInfo: Requested important-while-foreground flag for job0 is ignored and takes no effect
+621 W/WindowManager: container Window{2504c65 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9825 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+9825 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 81604, totalDuration: 62418324, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+9825 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 81604, totalDuration: 62418324, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+9825 W/FrameTracker: Missed App frame:jankTypeLegacy: JANK_APPLICATION, jankTypeExperimental: JANK_APPLICATION, vsyncId: 82471, totalDuration: 179960477, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+621 W/ActivityTaskManager: Force removing ActivityRecord{233465577 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/AppOps: Operation not started: uid=10234 pkg=app.nagmedar.debug(null) op=CONTROL_AUDIO
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/AppOps: Operation not started: uid=10234 pkg=app.nagmedar.debug(null) op=CONTROL_AUDIO_PARTIAL
+621 W/AS.AudioService: AudioHardening background playback muted for app.nagmedar.debug (10234), level: partial, reason: 0, usage: USAGE_MEDIA
+1217 W/MediaPlayerList: app.nagmedar.debug is already the active player
+1217 W/MediaPlayerList: app.nagmedar.debug is already the active player
+621 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+621 E/ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ REQUEST id=200, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10234 RequestorUid: 10234 RequestorPkg: app.nagmedar.debug MatchNonThreadLocalNetworks UnderlyingNetworks: Null] ]
+1217 W/MediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+1217 W/MediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+621 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+621 W/WindowManager: Exception thrown during dispatchAppVisibility Window{a1d2da3 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+621 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{a0c6e9b #10 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@7fb4351
+14802 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+14802 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+14802 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+14802 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+14802 W/.nagmedar.debug: Verification of void kotlinx.coroutines.sync.SemaphoreKt.<clinit>() took 145.958ms (459.04 bytecodes/s) (0B arena alloc)
+14802 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+14802 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+14802 W/HWUI: Unknown dataspace 0
+14802 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+14802 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+14802 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+14802 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+14802 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+621 W/AppOps: Noting op not finished: uid 10234 pkg app.nagmedar.debug code 154 startTime of in progress event=1794439571541
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+621 W/MR2ServiceImpl: Router record not found for the target package: app.nagmedar.debug
+1058 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/VLCApplication: onTrimMemory, level: 20
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124175172526136] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160396865728] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+14802 W/VLC/medialibrary: [T#124160668610752] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+1217 W/MediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+14802 W/VLC/medialibrary: [T#124160396865728] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+14802 W/VLC/medialibrary: [T#124160375754944] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1217 W/MediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+14802 W/VLC/medialibrary: [T#124160375754944] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/VLCApplication: onTrimMemory, level: 20
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/AS.AudioService: AudioHardening background playback muted for app.nagmedar.debug (10234), level: partial, reason: 0, usage: USAGE_MEDIA
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160598843584] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=app.nagmedar.debug
+14802 W/VLC/medialibrary: [T#124160668610752] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/InteractionJankMonitor: CUJ cancelled due to timeout, CUJ=IME_INSETS_SHOW_ANIMATION
+14802 W/VLC/medialibrary: [T#124160668610752] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160668610752] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 W/WindowManager: container Window{201b2cb u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+14802 W/ImeBackCallbackProxy: Ime callback not found. Ignoring unregisterReceivedCallback. callbackId: 148172821 remaining callbacks: 0
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+14802 W/VLC/medialibrary: [T#124160394637504] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160394637504] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160394637504] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160394637504] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160660619456] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/medialibrary: [T#124160660619456] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160668610752] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/VLCApplication: onTrimMemory, level: 20
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 E/AppOps: attributionTag  not declared in manifest of app.nagmedar.debug
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/VLCApplication: onTrimMemory, level: 15
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/
+14802 W/VLC/medialibrary: [T#124160626823360] ../src/Folder.cpp:682 fromMrl Failed to get device containing an existing folder: file:///sdcard/Music/

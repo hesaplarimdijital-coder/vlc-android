@@ -1,0 +1,9 @@
+1659 s, 130 steps, pass phone-en, 0 crashes
+123 phone-en Escape ok
+124 phone-en Shortcut list (Ctrl+/) ok
+125 phone-en Settings (Ctrl+,) ok
+126 phone-en Rotated to landscape ok
+127 phone-en Rotated back ok
+128 phone-en In the background (home screen) warn
+129 phone-en Foreground again ok
+130 phone-en After a memory-trim request ok
