@@ -4,6 +4,7 @@ import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -91,11 +92,17 @@ internal fun ShellPage(
     val moving = transition.currentState != transition.targetState
     val sinks = animated && under
     val rounds = animated && leaving
-    // 0 at rest, 1 all the way under the page above
-    val depth = transition.animateFloat(transitionSpec = { motion.pageDepth(tier) }, label = "pageDepth") { state ->
+    // 0 at rest, 1 all the way under the page above. A page that does not sink (or round) gets no time for it: an
+    // animation with nowhere to go still lasts as long as its spec says, and the transition, with the page that
+    // leaves kept on screen, lasts as long as its longest animation (with reduced motion Back showed the page
+    // under 300 ms late; a desktop's cross-fade of 150 ms kept its old screen composed for 300)
+    val depth = transition.animateFloat(transitionSpec = { if (sinks) motion.pageDepth(tier) else snap() }, label = "pageDepth") { state ->
         if (sinks && state != EnterExitState.Visible) 1f else 0f
     }
-    val corner = transition.animateFloat(transitionSpec = { tween(TAB_CORNER_MILLIS, easing = LinearEasing) }, label = "tabCorner") { state ->
+    val corner = transition.animateFloat(
+        transitionSpec = { if (rounds) tween(TAB_CORNER_MILLIS, easing = LinearEasing) else snap() },
+        label = "tabCorner",
+    ) { state ->
         if (rounds && state == EnterExitState.PostExit) 1f else 0f
     }
     val round = if (!(rounds && moving)) Modifier else Modifier.graphicsLayer {
