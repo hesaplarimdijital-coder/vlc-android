@@ -55,6 +55,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -593,17 +594,19 @@ internal const val DEPTH_SCRIM = "depthScrim"
 
 /**
  * The darkening of the list under a phone's detail ([DepthState.listScrim], Desktop Kit 2.4.0: the list is not
- * faded), laid over all of the list's place, the margins its sinking opens too. Drawn only: nothing recomposes
- * as it moves.
+ * faded), laid over all of the list's place, the margins its sinking opens too. A layer whose opacity alone
+ * changes: nothing recomposes, and neither the scrim nor what is around it is drawn again as it moves.
  */
 @Composable
 internal fun DepthScrim(depth: DepthState, modifier: Modifier = Modifier) {
     val scrim = NagTheme.colors.scrim
     Box(
-        modifier.drawBehind {
-            val dark = depth.listScrim()
-            if (dark > 0f) drawRect(scrim, alpha = DetailDepth.SCRIM * dark)
-        },
+        modifier
+            .graphicsLayer {
+                alpha = (DetailDepth.SCRIM * depth.listScrim()).coerceIn(0f, 1f)
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            }
+            .background(scrim),
     )
 }
 

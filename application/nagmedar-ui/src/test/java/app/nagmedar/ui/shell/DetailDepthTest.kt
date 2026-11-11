@@ -98,6 +98,13 @@ class DetailDepthTest {
             it.left / compose.density.density to it.width / compose.density.density
         }
 
+    /**
+     * Where the node tagged [tag] starts, in dp, while it is there: its own place, also when all of it is outside
+     * the window (the bounds are clipped to what shows: nothing, at zero, for a detail still wholly beyond the edge).
+     */
+    private fun left(tag: String): Float? =
+        compose.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()?.positionInRoot?.let { it.x / compose.density.density }
+
     private fun back(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
 
     @Test
@@ -107,12 +114,12 @@ class DetailDepthTest {
         compose.runOnIdle { detail = "Albüm" }
         repeat(2) { frame() }
         // its first frames: from the end edge itself, all of its width away (Desktop Kit 2.3.0's came 12 % of it, fading)
-        val first = bounds("detail")
-        assertTrue("the detail comes from the end edge: ${first.left}", first.left > 300.dp)
+        val first = left("detail")!!
+        assertTrue("the detail comes from the end edge: $first", first > 300f)
         repeat(3) { frame() }
         // on its way: over the list, not yet in place; the list sinks under it
-        val early = bounds("detail")
-        assertTrue("the detail is on its way: ${early.left}", early.left > 0.5.dp && early.left < first.left)
+        val early = left("detail")!!
+        assertTrue("the detail is on its way: $first → $early", early > 0.5f && early < first)
         val list = bounds("list")
         assertTrue("the list sinks under it: ${list.right - list.left}", list.right - list.left < 410.dp)
         repeat(40) { frame() }
@@ -190,16 +197,16 @@ class DetailDepthTest {
         compose.mainClock.autoAdvance = false
         compose.runOnIdle { detail = "Albüm" }
         repeat(4) { frame() }
-        val earlier = place("detail")!!.first
+        val earlier = left("detail")!!
         frame()
-        val before = place("detail")!!.first
+        val before = left("detail")!!
         assertTrue("on its way: $earlier → $before", before > 0.5f && before < earlier)
         // Back right after the tap
         compose.runOnIdle { detail = null }
         val lefts = mutableListOf<Float>()
         repeat(40) {
             frame()
-            place("detail")?.let { lefts += it.first }
+            left("detail")?.let { lefts += it }
         }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()

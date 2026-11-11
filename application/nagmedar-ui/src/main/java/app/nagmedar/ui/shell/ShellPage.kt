@@ -5,6 +5,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,8 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.MotionTier
@@ -69,8 +69,11 @@ private const val TAB_CORNER_MILLIS = 300
  *   behind them). The predictive Back gesture seeks it with the finger like the rest of the transition.
  * - [leaving]: the tab the Back gesture is leaving rounds its corners to the detail's as it shrinks.
  *
- * Only on the layouts whose pages slide ([paged]: a phone, a rail); at rest, with reduced motion and on a desktop
- * nothing is added. The content sits in the same box always, so it keeps its state through every change here.
+ * Only on the layouts whose pages slide ([paged]: a phone, a rail) and only while a transition is on: the page
+ * sinks in a layer of its own (its content is drawn once, the layer alone moves) and the scrim is a layer of its
+ * own over it (its opacity alone changes), so nothing of the page is drawn or measured again as it moves. At rest, with reduced motion and
+ * on a desktop nothing is added. The content is the first thing in the same box always, so it keeps its state
+ * through every change here.
  */
 @Composable
 internal fun ShellPage(
@@ -83,9 +86,11 @@ internal fun ShellPage(
 ) {
     val motion = NagTheme.motion
     val scrim = NagTheme.colors.scrim
-    val page = NagTheme.colors.background
-    val sinks = paged && under
-    val rounds = paged && leaving && !motion.reduced && tier != MotionTier.Reduced
+    val animated = paged && !motion.reduced && tier != MotionTier.Reduced
+    // composed again on the frame a transition starts and on the one it ends
+    val moving = transition.currentState != transition.targetState
+    val sinks = animated && under
+    val rounds = animated && leaving
     // 0 at rest, 1 all the way under the page above
     val depth = transition.animateFloat(transitionSpec = { motion.pageDepth(tier) }, label = "pageDepth") { state ->
         if (sinks && state != EnterExitState.Visible) 1f else 0f
@@ -93,24 +98,34 @@ internal fun ShellPage(
     val corner = transition.animateFloat(transitionSpec = { tween(TAB_CORNER_MILLIS, easing = LinearEasing) }, label = "tabCorner") { state ->
         if (rounds && state == EnterExitState.PostExit) 1f else 0f
     }
-    val sink = if (!sinks) Modifier else Modifier.drawWithContent {
-        val d = depth.value
-        if (d <= 0f) {
-            drawContent()
-        } else {
-            // the page colour behind the margins, the page a little smaller on it, the scrim over all of it
-            drawRect(page)
-            val s = 1f - (1f - NagMotion.PAGE_UNDER_SCALE) * d
-            scale(s, s) { this@drawWithContent.drawContent() }
-            drawRect(scrim, alpha = NagMotion.PAGE_SCRIM * d)
-        }
-    }
-    val round = if (!rounds) Modifier else Modifier.graphicsLayer {
+    val round = if (!(rounds && moving)) Modifier else Modifier.graphicsLayer {
         val c = corner.value
         if (c > 0f) {
             shape = RoundedCornerShape((DetailMotion.BACK_CORNER_DP * c).dp)
             clip = true
         }
     }
-    Box(Modifier.fillMaxSize().then(round).then(sink)) { content() }
+    val sink = if (!(sinks && moving)) Modifier else Modifier.graphicsLayer {
+        val d = depth.value
+        if (d > 0f) {
+            val scale = 1f - (1f - NagMotion.PAGE_UNDER_SCALE) * d
+            scaleX = scale
+            scaleY = scale
+        }
+    }
+    Box(Modifier.fillMaxSize().then(round)) {
+        Box(Modifier.fillMaxSize().then(sink)) { content() }
+        if (sinks && moving) {
+            // a layer whose opacity alone changes: neither the scrim nor what is around it is drawn again as it moves
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        alpha = (NagMotion.PAGE_SCRIM * depth.value).coerceIn(0f, 1f)
+                        compositingStrategy = CompositingStrategy.ModulateAlpha
+                    }
+                    .background(scrim),
+            )
+        }
+    }
 }
