@@ -1617,7 +1617,8 @@ class Smoke:
         if playing:
             # pause the tone (five minutes long): while something plays each dump waits about ten seconds longer for
             # the window to go still (its time ticks), and the folder's next checks read the screen within seconds;
-            # the bar or the mini player stays, paused
+            # the bar or the mini player stays, paused. Keep it the media key, this long after the tone started: it is
+            # what found a pause's save reading the disk on the main thread (1.0.3; the StrictMode check at the end)
             self.key(127)
             time.sleep(0.5)
         # back to the drive: Back on a phone, the trail's first folder beside the places

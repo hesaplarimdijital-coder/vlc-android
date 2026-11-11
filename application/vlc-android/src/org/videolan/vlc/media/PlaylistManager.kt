@@ -942,10 +942,17 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         engine.setRate(playbackRate, false)
     }
 
+    /**
+     * 1.0.3: counts the calls of [saveCurrentMedia] that saved something (under its lock): the kept cover's path, looked
+     * for on a worker thread, is written only while nothing was saved after it.
+     */
+    private var resumeThumbTurn = 0
+
     @Synchronized
     fun saveCurrentMedia(forceVideo:Boolean = false) {
         if (settings.getBoolean(KEY_INCOGNITO, false)) return
         val media = getCurrentMedia() ?: return
+        val turn = ++resumeThumbTurn
         val isAudio = isAudioList() || forceVideo
         settings.putSingle(KEY_CURRENT_MEDIA_IS_AUDIO, isAudio)
 
@@ -972,8 +979,17 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             settings.putSingle(KEY_CURRENT_AUDIO, media.location)
             settings.putSingle(KEY_CURRENT_AUDIO_RESUME_TITLE, media.title ?: "")
             settings.putSingle(KEY_CURRENT_AUDIO_RESUME_ARTIST, media.artistName ?: "")
-            // S-1009: the widget shows Nağmedar's album cover when the service is gone too
-            settings.putSingle(KEY_CURRENT_AUDIO_RESUME_THUMB, CoverHook.file(media)?.path ?: media.artworkURL ?: "")
+            // S-1009: the widget shows Nağmedar's album cover when the service is gone too. 1.0.3: whether a cover is
+            // kept is a look at files, and a pause is saved on the main thread: a track without a cover, paused more
+            // than a minute after it was last asked about, read the disk there. A worker thread looks and writes the
+            // path, unless something was saved after this call (outliving the service, which may go right after)
+            val art = media.artworkURL ?: ""
+            AppScope.launch(Dispatchers.IO) {
+                val thumb = CoverHook.file(media)?.path ?: art
+                synchronized(this@PlaylistManager) {
+                    if (resumeThumbTurn == turn) settings.putSingle(KEY_CURRENT_AUDIO_RESUME_THUMB, thumb)
+                }
+            }
         }
     }
 

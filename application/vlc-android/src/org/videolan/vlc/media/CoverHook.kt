@@ -46,10 +46,13 @@ object CoverHook {
         null
     }
 
-    /** [media]'s own cover file, when Nağmedar keeps one. */
+    /**
+     * [media]'s own cover file, when Nağmedar keeps one. An album not asked about for a minute is looked for among
+     * the kept files: call it off the main thread.
+     */
     fun file(media: MediaWrapper?): File? = media?.let { runCatching { covers?.coverFile(it) }.getOrNull() }
 
-    /** [album]'s own cover file, when Nağmedar keeps one. */
+    /** [album]'s own cover file, when Nağmedar keeps one; off the main thread, as [file] of a media. */
     fun file(album: Album?): File? = album?.let { runCatching { covers?.albumCoverFile(it.albumArtist, it.title) }.getOrNull() }
 
     /** [media]'s cover: Nağmedar's kept one, else the medialibrary's art (a path or an address). */
