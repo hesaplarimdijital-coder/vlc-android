@@ -75,6 +75,7 @@ Arabada sekmeler, hemen açılan müzik listesi, Desktop Kit 2.3'ün hareketi, t
 - Desktop Kit 2.3.0'ın platformu: Compose 1.12 (BOM 2026.09.00), Kotlin 2.4.20, AGP 9.4.1, Gradle 9.8.2, navigation-compose 2.10.2, Haze 2.0.1; Java 17 bayt kodu.
 - Veritabanı 24'e geçer: ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar yerinde kalır.
 - Baseline Profile yeni kodla yeniden üretildi.
+- APK 88,2 MB'den yaklaşık 97 MB'ye büyüdü: Android 14'ten başlayan bir derlemede kod (dex) APK'nın içinde sıkıştırılmadan durur; karşılığında Android onu kurarken ayrıca açıp kopyalamaz.
 
 ### Test
 - Emülatör yürüyüşü her Android sürümünde iki işe bölündü (tablet işi: tablet, iş istasyonu, Türkçe telefon; telefon işi: İngilizce telefon, sizin telefonunuzdaki gibi üç düğmeli gezinmeyle): iş başına yürüyüş 47–50 dakika yerine 25–31 dakika sürer. Sistemin kendi “yanıt vermiyor” pencereleri kaydedilip geçilir; uygulamanınki çalışmayı düşürür.
