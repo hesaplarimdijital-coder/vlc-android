@@ -77,21 +77,22 @@ gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/
 
 ### Android 17 (API 37)
 
-Uygulama Android 17'nin SDK'sıyla derlenir (`compileSdk 37`), ama davranışı Android 16'nınkidir (`targetSdk 36`). 1.0.3, Android 17'yi hedeflemenin getirdiklerini hazırladı; hedefi yükseltmek sizin kararınızdır ve verilene kadar hedef 36'da kalır.
+Uygulama Android 17'nin SDK'sıyla derlenir ve onu hedefler (`compileSdk 37`, `targetSdk 37`). Hedefi yükseltme kararını 12 Kasım 2026'da siz verdiniz (“37”); 1.0.2'ye kadar hedef 36'ydı.
 
-Hedeften bağımsız olarak, Android 17'li cihazda bugün de geçerli olanlar (1.0.3'te karşılandı):
+Hedeften bağımsız olarak Android 17'li cihazda geçerli olanlar:
 
 - **Arka planda ses**: Android 17 sesi, ses odağını ve ses düzeyini yalnızca görünen bir pencereye ya da çalışan bir ön plan hizmetine verir. Oynatma hizmeti motor çalmadan ve odak istemeden önce ön plana geçer (kulaklık düğmesi, kilit ekranı, Android Auto ve widget'tan sürdürme); alarm ses düzeyini hizmet ön plandayken yükseltir.
 - **Widget bit eşlem sınırı**: ana ekran widget'ının kapağı yerinin boyutunda (96 dp) kare olarak gönderilir, `6 × genişlik × yükseklik` baytı geçmez; reddedilen güncelleme yer tutucuyla yeniden gönderilir.
 
-Yalnızca hedef 37 olunca devreye girenler (kod hazır, 36'da kapalı):
+Hedef 37 ile gelenler (1.0.3'te devrede):
 
-- **Yerel ağ izni** (`ACCESS_LOCAL_NETWORK`, sistemde “Yakındaki cihazlar”): yalnızca 37'yi hedefleyen derleme bildirir (36'da bildirmek Android 17'de yerel ağı keserdi). Kaynaklar › Ağ, Yayınla…, Ayarlar › Uzaktan erişim ve yerel ağdaki bir radyo ya da akış adresi izni bir kez sorar; reddedilince sayfa nedenini ve “İzin ver”i, kalıcı reddedilince “Ayarları aç”ı gösterir.
+- **Yerel ağ izni** (`ACCESS_LOCAL_NETWORK`, sistemde “Yakındaki cihazlar”): yalnızca 37'yi hedefleyen derleme bildirir (36'da bildirmek Android 17'de yerel ağı keserdi; izin `app/flavors/targetSdk37/AndroidManifest.xml` dosyasındadır). Kaynaklar › Ağ, Yayınla…, Ayarlar › Uzaktan erişim ve yerel ağdaki bir radyo ya da akış adresi izni bir kez sorar; reddedilince sayfa nedenini ve “İzin ver”i, kalıcı reddedilince “Ayarları aç”ı gösterir.
 - **Alarm**: kilit ekranında alarm sayfasıyla çalar (tam ekran bildirim); telefon kullanılırken sesli bir bildirim gelir, dokununca müzik başlar.
-- Bilinen eksikler: uygulama arka plandayken ve hiçbir şey çalmıyorken uzaktan erişimden verilen “oynat” komutu sessiz kalabilir; kullanıcı rehberine izin ve alarm sayfası bölümleri eklenmeli.
+- Kullanıcı rehberi ikisini de anlatır (Ağ kaynakları, Alarm, Yayınlama, Uzaktan erişim).
+- Bilinen sınır: uygulama arka plandayken ve hiçbir şey çalmıyorken uzaktan erişimden verilen “oynat” komutu sessiz kalabilir (Android 17 arka plandan ses başlatılmasına izin vermez).
 - Ayrıca (uygulamayı etkilemeyenler): büyük ekranda yön ve boyut kısıtlarından çıkış yok (uygulama zaten her yöne ve boyuta uyuyor), Certificate Transparency varsayılan (radyo akışlarının HTTPS sunucuları), `System.load()` ile yüklenen kitaplıkların salt okunur olması (Nağmedar kitaplıklarını APK'dan yükler), statik `final` alanlara yazılamaması (JNI dahil), RFCOMM okumalarının `-1` dönmesi (Nağmedar Bluetooth soketi kullanmaz).
 
-Hedefi yükseltmek: `settings.gradle` dosyasında `targetSdk = 37` (ve `build.gradle` dosyasında `targetSdkVersion = 37`). Bu hâliyle CI'da derlendi ve Android 17 emülatöründe yürüdü (PR #109'daki 552998d0: debug ve kişisel derleme, telefon ve tablet). Emülatör iş akışı Android 17 imajında her sürümde yürür: `-f 'inputs[api_levels]=35,37.0'`.
+Hedef iki yerde yazar: `settings.gradle` dosyasında `targetSdk`, `build.gradle` dosyasında `targetSdkVersion`. 36'ya dönmek bu ikisini değiştirmektir (izin ve alarm sayfası kendiliğinden kapanır). Emülatör iş akışı her sürümde Android 17 imajında da yürür: `-f 'inputs[api_levels]=35,37.0'`. Emülatör Samsung'un One UI'ını çalıştırmaz: One UI 9'a özgü olanlar (Now Bar, kilit ekranının oynatıcısı, DeX'in masaüstleri ve üst-alt yaslaması) cihaz test listesindedir.
 
 ## İmzalı sürüm (S-1503, şimdilik kullanılmıyor)
 

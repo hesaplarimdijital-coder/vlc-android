@@ -49,6 +49,8 @@ Browse the media on SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV servers like local
 
 > For an HTTPS or WebDAV server with a self-signed certificate, libVLC asks whether to accept the certificate: “View certificate”, then “Accept for 24 hours” or “Accept permanently”; if in doubt, “Cancel”.
 
+> **Local network access (Android 17):** Android 17 asks before an app reaches the devices on your Wi-Fi or Ethernet network (the system's “Nearby devices” permission). Nağmedar asks once: when you open Sources › Network, choose Cast…, turn remote access on, or play a radio or stream address on the local network. If you refuse, the page says why and shows “Allow”; once Android no longer asks, “Open settings” takes you to the permission's page. Internet radio and podcasts work without it.
+
 ## Latency profiles {sync}
 
 A Bluetooth headset, an AV receiver and a USB DAC each play the sound with a different delay. In Settings › Latency profiles, record a device's delay by hand or by measuring it with the microphone (five short test tones are played); when the device becomes the output, its profile is applied by itself and a short notice is shown. The profile takes the place of the single Bluetooth delay of VLC's classic player; the two are not added. Playback paused for a measurement goes on when it ends, even if you closed the settings.
@@ -113,6 +115,7 @@ Progress and Cancel show in the notification and in the strip above the library.
 ### Sleep timer and alarm
 - {key:SleepTimer}: from 15 min to 2 hours or until the end of the track; the volume fades over the last 30 s, “+15 min” extends it.
 - Settings › Alarm: a time, days, and the last played music, a playlist or an internet radio stream; the volume rises from silence over the time you choose. It is set as a system alarm and survives a restart.
+- **The alarm's page (Android 17):** on Android 17 an app in the background cannot make a sound by itself; the alarm's music is started by its page. With the screen locked the page opens over the lock screen by itself and the music starts: “Stop the music” or “Keep playing”. While you use the phone the alarm comes as a sounding notification (“The alarm is ringing. Tap to start the music.”). Nağmedar's notifications and full-screen notifications must be allowed for this; Settings › Alarm says in its own row which one is missing.
 
 ## Lyrics, the lyrics editor and scrobbling {lyrics}
 
@@ -186,7 +189,7 @@ Send music to a Chromecast or a DLNA device (a TV, a receiver, a speaker) on the
 3. Choose the device; found devices are updated as they come and go. “This device” ends the cast.
 4. While casting, the player's controls drive the remote device; when casting stops, the track goes on on this device where it was.
 
-> If the device does not show in the list, check that both are on the same Wi-Fi (not a guest network), the TV is on and DLNA or media sharing is on, the Chromecast is awake, and the router has multicast (mDNS, UPnP) on and client isolation off. A VPN on this device can hide the local network.
+> If the device does not show in the list, check that both are on the same Wi-Fi (not a guest network), the TV is on and DLNA or media sharing is on, the Chromecast is awake, and the router has multicast (mDNS, UPnP) on and client isolation off. A VPN on this device can hide the local network. On Android 17 local network access must be allowed; without it the list says so and shows “Allow”.
 
 ## Remote access from a browser {remote-access}
 
@@ -200,6 +203,8 @@ Look at your library, control playback and send files from the browser of a comp
 Which parts (music, playlists, search), file and network browsers, history, playback control and log files are open to the browser is chosen on the Settings › Remote access page. “How it works…” tells all this in five steps.
 
 > The connection is always HTTPS and there is no setting to turn that off. Turn the switch off when you are not using it; open the log files only while you are chasing a problem.
+
+> On Android 17 browsers on this network reach remote access only with local network access; the page says so while it is missing. With the app in the background and nothing playing, a “play” given from the browser may stay silent (Android 17 lets nothing start sound from the background): bring Nağmedar to the front or start playing on the device, then control it from the browser.
 
 ## DeX, keyboard and mouse {desktop}
 
@@ -226,7 +231,7 @@ Nağmedar is based on VLC for Android, but VLC's classic screens no longer open:
 - **Media information:** “Media information” in a menu opens Nağmedar's window: the tags, the file's location (“Copy the location”) and the technical facts.
 - **Notices and questions:** short notices such as “Copied” show at the bottom of the window for a few seconds. A server's sign-in and certificate questions come in Nağmedar's window; with no window open, tap the “Nağmedar is asking: …” notification. When a new external drive is connected, a notice with a “Library folders” button comes.
 - **Resuming:** the “Resume where you stopped?” question comes in Nağmedar's window for music, radio and streams too: “Resume” or “Start over”, and if you like “The same for the rest of the list”.
-- **Permissions:** Android's own window asks for the media, notification and storage permissions.
+- **Permissions:** Android's own window asks for the media, notification and storage permissions, and on Android 17 for local network access (“Nearby devices”).
 - **Widget:** there is one Nağmedar widget for the home screen: at 4×1 the cover, what plays, previous, play or pause and next; made 4×2, the cover stands beside them.
 
 ## Long jobs and Android's time limit {jobs}

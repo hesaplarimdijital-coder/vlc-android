@@ -98,10 +98,10 @@ ext {
     // VLC 3 needs to stick to NDK21 which is the last one supporting Android API 17
     toolchainNdkVersion = properties.getProperty('android.ndkFullVersion') ?: (vlcMajorVersion == 3 ? '21.4.7075529' : '28.2.13676358')
     tooclchainNdkPath = properties.getProperty('android.ndkPath')
-    // Nağmedar 1.0: compiled against Android 17 (API 37); its behaviour stays Android 16's until the
-    // local network permission, the background audio rules and the widget bitmap limit that
-    // targeting 37 brings are handled (buildsystem/release/README.md)
-    targetSdkVersion = 36
+    // Nağmedar 1.0.3: compiled against Android 17 (API 37) and targeting it (the owner's decision of
+    // 12 Nov 2026): the local network permission, the background audio rules and the widget bitmap
+    // limit that come with 37 are handled (buildsystem/release/README.md)
+    targetSdkVersion = 37
     compileSdkVersion = 37
     desugarLib = '2.0.4'
     androidxLegacyVersion = '1.0.0'

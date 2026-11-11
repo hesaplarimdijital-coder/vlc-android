@@ -49,6 +49,8 @@ SMB, FTP, SFTP, NFS, UPnP/DLNA ve WebDAV sunucularındaki medyaya yerel dosya gi
 
 > Kendi imzaladığı sertifikayla çalışan bir HTTPS ya da WebDAV sunucusu için libVLC sertifikayı kabul edip etmeyeceğinizi sorar: “Sertifikayı göster”, ardından “24 saat kabul et” ya da “Kalıcı olarak kabul et”; emin değilseniz “Vazgeç”.
 
+> **Yerel ağ izni (Android 17):** Android 17, bir uygulama Wi-Fi ya da Ethernet ağınızdaki cihazlara ulaşmadan önce izninizi sorar (sistemin “Yakındaki cihazlar” izni). Nağmedar bunu bir kez sorar: Kaynaklar › Ağ'ı açtığınızda, Yayınla… dediğinizde, uzaktan erişimi açtığınızda ya da yerel ağdaki bir radyo ya da akış adresini çaldığınızda. Reddederseniz sayfa nedenini ve “İzin ver” düğmesini gösterir; Android artık sormuyorsa “Ayarları aç” izin sayfasına götürür. İnternet radyoları ve podcastler bu izin olmadan da çalışır.
+
 ## Gecikme profilleri {sync}
 
 Bluetooth kulaklık, AV alıcı ve USB DAC gibi her çıkış cihazı sesi farklı gecikmeyle çalar. Ayarlar › Gecikme profilleri'nde cihazın gecikmesini elle ya da mikrofonla (beş kısa “test sesi” çalınır) ölçerek kaydedin; cihaz çıkış olunca profili kendiliğinden uygulanır ve kısa bir bildirim gösterilir. Profil, VLC'nin klasik oynatıcısındaki tek Bluetooth gecikmesinin yerini alır; ikisi toplanmaz. Ölçüm için duraklatılan oynatma, ölçüm bitince ayarları kapatmış olsanız da sürer.
@@ -113,6 +115,7 @@ Müzik dosyalarını başka biçime yeni dosyalar olarak çevirin; uyku zamanlay
 ### Uyku zamanlayıcısı ve alarm
 - {key:SleepTimer}: 15 dk'dan 2 saate ya da parça sonuna kadar; ses son 30 sn'de yavaşça kısılır, “+15 dk” uzatır.
 - Ayarlar › Alarm: saat, günler ve son çalınan müzik, bir çalma listesi ya da internet radyosu; ses sessizlikten seçtiğiniz sürede yükselir. Android'in alarm saati olarak kurulur, yeniden başlatmadan sonra da çalışır.
+- **Alarm sayfası (Android 17):** Android 17'de arka plandaki bir uygulama kendiliğinden ses çıkaramaz; alarmın müziğini alarm sayfası başlatır. Ekran kilitliyken sayfa kilit ekranının üstünde kendiliğinden açılır ve müzik başlar: “Müziği durdur” ya da “Çalmaya devam et”. Telefonu kullanırken alarm sesli bir bildirimle gelir (“Alarm çalıyor. Müziği başlatmak için dokunun.”). Bunun için Nağmedar'ın bildirimlerine ve tam ekran bildirimlere izin verilmiş olmalıdır; eksik olanı Ayarlar › Alarm kendi satırında söyler.
 
 ## Sözler, söz düzenleyici ve scrobble {lyrics}
 
@@ -186,7 +189,7 @@ Müziği aynı ağdaki bir Chromecast'e ya da DLNA cihazına (TV, alıcı, hopar
 3. Listeden cihazı seçin; bulunan cihazlar geldikçe ve gittikçe güncellenir. “Bu cihaz” yayını bitirir.
 4. Yayın sürerken oynatıcı denetimleri uzaktaki cihazı yönetir; yayını durdurunca parça bu cihazda kaldığı yerden sürer.
 
-> Cihaz listede görünmüyorsa denetleyin: ikisi de aynı Wi-Fi'de olsun (misafir ağında değil), TV açık ve DLNA ya da medya paylaşımı açık olsun, Chromecast uyanık olsun, modemde multicast (mDNS, UPnP) açık ve istemci yalıtımı kapalı olsun. Bu cihazdaki bir VPN yerel ağı gizleyebilir.
+> Cihaz listede görünmüyorsa denetleyin: ikisi de aynı Wi-Fi'de olsun (misafir ağında değil), TV açık ve DLNA ya da medya paylaşımı açık olsun, Chromecast uyanık olsun, modemde multicast (mDNS, UPnP) açık ve istemci yalıtımı kapalı olsun. Bu cihazdaki bir VPN yerel ağı gizleyebilir. Android 17'de yerel ağ izni verilmiş olmalıdır; liste izin yokken bunu söyler ve “İzin ver” düğmesini gösterir.
 
 ## Tarayıcıdan uzaktan erişim {remote-access}
 
@@ -200,6 +203,8 @@ Bu ağdaki bir bilgisayarın ya da telefonun tarayıcısından kütüphanenize b
 Tarayıcıya hangi bölümlerin (müzik, çalma listeleri, arama), dosya ve ağ gezgininin, geçmişin, oynatma denetiminin ve günlük dosyalarının açık olacağını Ayarlar › Uzaktan erişim sayfasından seçersiniz. “Nasıl çalışır…” bunları beş adımda anlatır.
 
 > Bağlantı her zaman HTTPS'tir ve bunun kapatılabilen bir ayarı yoktur. Kullanmadığınız zaman anahtarı kapatın; günlük dosyalarını yalnızca bir sorunun peşindeyken açın.
+
+> Android 17'de bu ağdaki tarayıcılar uzaktan erişime yalnız yerel ağ izniyle ulaşır; sayfa izin yokken bunu söyler. Uygulama arka plandayken ve hiçbir şey çalmıyorken tarayıcıdan verilen “oynat” sessiz kalabilir (Android 17 arka plandan ses başlatılmasına izin vermez): Nağmedar'ı öne getirin ya da çalmayı cihazdan başlatın, sonrasını tarayıcıdan yönetin.
 
 ## DeX, klavye ve fare {desktop}
 
@@ -226,7 +231,7 @@ Nağmedar VLC for Android'e dayanır, ama VLC'nin klasik ekranları artık açı
 - **Medya bilgisi:** menüdeki “Medya bilgisi” Nağmedar'ın penceresini açar: etiketler, dosyanın konumu (“Konumu kopyala”) ve teknik bilgiler.
 - **Kısa haberler ve sorular:** “Kopyalandı” gibi kısa haberler pencerenin altında birkaç saniye görünür. Sunucunun oturum ve sertifika soruları Nağmedar penceresinde gelir; pencere açık değilse “Nağmedar bir soru soruyor: …” bildirimine dokunun. Yeni bir harici disk takılınca “Kütüphane klasörleri” düğmeli bir haber çıkar.
 - **Kaldığınız yerden:** “Kaldığınız yerden devam edilsin mi?” sorusu müzikte, radyoda ve akışlarda da Nağmedar penceresinde gelir: “Devam et” ya da “Baştan başla”, isterseniz “Listenin kalanında da böyle yap”.
-- **İzinler:** medya, bildirim ve depolama izinlerini Android'in kendi penceresi sorar.
+- **İzinler:** medya, bildirim ve depolama izinlerini, Android 17'de yerel ağ iznini de (“Yakındaki cihazlar”) Android'in kendi penceresi sorar.
 - **Widget:** ana ekranda tek Nağmedar widget'ı vardır: 4×1'de kapak, çalan, önceki, oynat ya da duraklat ve sonraki; 4×2'ye büyütünce kapak yanda durur.
 
 ## Uzun işler ve Android'in süre sınırı {jobs}
