@@ -15,6 +15,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,7 +27,9 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.ScreenCommands
+import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.LocalWidthClass
+import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -68,6 +72,21 @@ class NetworkBrowserTest {
     }
 
     private fun row(name: String) = compose.onNode(hasText(name) and hasClickAction())
+
+    /** The browser in a phone's window; [navKind]: the shell's navigation it is shown under, null: on its own (no top bar). */
+    private fun showOnAPhone(navKind: NavKind?) {
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                CompositionLocalProvider(
+                    LocalScreenCommands provides commands,
+                    LocalWidthClass provides WidthClass.Compact,
+                    LocalNavKind provides (navKind ?: LocalNavKind.current),
+                ) {
+                    Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { SampleNetworkBrowser() }
+                }
+            }
+        }
+    }
 
     @Test
     fun foldersOpenWithTheKeysAndFilesPlay() {
@@ -140,5 +159,25 @@ class NetworkBrowserTest {
         compose.onNodeWithTag("prompt-action-2").performClick()
         assertEquals(listOf("action 2"), replies)
         compose.onNodeWithTag("network-connecting").assertExists()
+    }
+
+    /** 1.0.3: under the phone's top bar, whose arrow goes up a folder as Back does, the open folder's trail has no arrow of its own. */
+    @Test
+    @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun underThePhonesTopBarTheFolderHasNoArrowOfItsOwn() {
+        showOnAPhone(NavKind.BottomBar)
+        compose.onNodeWithText("Salondaki NAS").performClick()
+        compose.onNodeWithText("Diziler").assertExists()
+        assertEquals(0, compose.onAllNodesWithContentDescription("Üst klasör").fetchSemanticsNodes().size)
+    }
+
+    @Test
+    @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun whereNoBarHasAnArrowTheTrailKeepsItsOwn() {
+        showOnAPhone(null)
+        compose.onNodeWithText("Salondaki NAS").performClick()
+        compose.onNodeWithText("Diziler").assertExists()
+        compose.onNodeWithContentDescription("Üst klasör").performClick()
+        compose.onNodeWithText("Diziler").assertDoesNotExist()
     }
 }

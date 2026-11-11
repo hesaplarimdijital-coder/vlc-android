@@ -71,6 +71,7 @@ import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.rememberTrailScroll
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.KeyChord
 import app.nagmedar.ui.input.ShortcutId
@@ -84,7 +85,10 @@ import app.nagmedar.ui.library.sizeLabel
 import app.nagmedar.ui.network.EntryKind
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -142,6 +146,9 @@ fun DeviceScreen(prefs: NagmedarPreferences, source: DeviceSource? = null) {
         DeviceRequests.taken(reveal)
     }
     val wide = currentWidthClass() >= WidthClass.Expanded
+    // 1.0.3: where the top bar has its arrow (a phone, a rail) that arrow goes up a folder, as Back does: the trail
+    // keeps an arrow of its own only where the bar has none
+    val trailBack = !wide && !NavRules.showsBack(Destination.Device, LocalNavKind.current)
     BrowserCommands(onUp = model::up, onRefresh = {
         model.refresh()
         true
@@ -151,7 +158,8 @@ fun DeviceScreen(prefs: NagmedarPreferences, source: DeviceSource? = null) {
     val actions = remember(context, model, scope, prefs) { DeviceActions(context, model, scope, prefs) { sourcesFor = it } }
     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
     Column(Modifier.fillMaxSize()) {
-        PageHeader(title = stringResource(R.string.nag_nav_device), subtitle = model.current?.name) {
+        // beside the places the header names the open folder; where the folder covers them its trail, right under, does
+        PageHeader(title = stringResource(R.string.nag_nav_device), subtitle = model.current?.name.takeIf { wide }) {
             NagIconButton(NagIcons.Repeat, stringResource(R.string.nag_sc_refresh), { model.refresh() }, shortcut = ShortcutId.Refresh)
             IconMenuButton(NagIcons.Sort, stringResource(R.string.nag_device_view_menu), {
                 viewMenu(context.resources, model) { hidden, sort ->
@@ -168,7 +176,7 @@ fun DeviceScreen(prefs: NagmedarPreferences, source: DeviceSource? = null) {
         }
         HorizontalRule()
         val places = @Composable { paneModifier: Modifier -> PlacesPane(model, paneModifier) }
-        val folder = @Composable { paneModifier: Modifier -> FolderPane(model, actions, paneModifier, showBack = !wide) }
+        val folder = @Composable { paneModifier: Modifier -> FolderPane(model, actions, paneModifier, showBack = trailBack) }
         if (wide) {
             Row(Modifier.fillMaxSize()) {
                 places(Modifier.width(if (NagTheme.inputMode == InputMode.Pointer) 280.dp else 320.dp).fillMaxHeight())
@@ -446,7 +454,7 @@ private fun FolderBar(model: DeviceBrowserModel, actions: DeviceActions, showBac
         if (showBack) {
             NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_sc_folder_up), { if (!model.up()) model.close() }, shortcut = ShortcutId.FolderUp)
         }
-        Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()).testTag("device-trail"), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f).horizontalScroll(rememberTrailScroll(model.trail)).testTag("device-trail"), verticalAlignment = Alignment.CenterVertically) {
             model.trail.forEachIndexed { index, crumb ->
                 if (index > 0) Icon(NagIcons.ChevronRight, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(14.dp))
                 CrumbButton(crumb.name, current = index == model.trail.lastIndex) { model.goTo(index) }

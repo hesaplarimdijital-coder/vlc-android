@@ -85,6 +85,7 @@ import app.nagmedar.ui.components.alertBackground
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.rememberTrailScroll
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.input.ContextMenuArea
@@ -93,7 +94,10 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.shell.Destination
+import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -233,6 +237,9 @@ fun NetworkBrowser(
     val res = LocalContext.current.resources
     var editing by remember { mutableStateOf<Editing?>(initialDraft?.let { if (it.editing != null) Editing.Change(it.editing, it) else Editing.New(it) }) }
     val wide = currentWidthClass() >= WidthClass.Expanded
+    // 1.0.3: where the top bar has its arrow (a phone, a rail) that arrow goes up a folder, as Back does: the trail
+    // keeps an arrow of its own only where the bar has none
+    val trailBack = !wide && !NavRules.showsBack(Destination.Network, LocalNavKind.current)
     val folder = model.folder
     val refresh = {
         if (model.folder != null) model.refresh() else if (lan == LanState.Available) model.discover()
@@ -282,7 +289,7 @@ fun NetworkBrowser(
                 onOpen = openServer)
         }
         val folderPane = @Composable { paneModifier: Modifier ->
-            FolderPane(model, actions, paneModifier, clock = clock, onAdd = addServer, onEdit = editServer, showBack = !wide, access = access,
+            FolderPane(model, actions, paneModifier, clock = clock, onAdd = addServer, onEdit = editServer, showBack = trailBack, access = access,
                 onAllowLocalNetwork = onAllowLocalNetwork)
         }
         if (wide) {
@@ -636,7 +643,7 @@ private fun FolderBar(view: FolderView, model: NetworkModel, actions: NetworkAct
             NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_sc_folder_up), { if (!model.up()) model.close() }, shortcut = ShortcutId.FolderUp)
         }
         Row(
-            Modifier.weight(1f).horizontalScroll(rememberScrollState()).testTag("network-trail"),
+            Modifier.weight(1f).horizontalScroll(rememberTrailScroll(view.trail)).testTag("network-trail"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             view.trail.forEachIndexed { index, crumb ->
