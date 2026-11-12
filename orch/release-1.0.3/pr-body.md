@@ -12,6 +12,8 @@ Kare şeritlerinde üç kusur görüldü; üçü de Desktop Kit'te 5 Kasım'da d
 2. **Sayfalar.** Sayfadan açılan sayfa alttakini çeyrek ekran yana itiyordu. Sayfa artık opak olarak alttakinin üstüne kayar; alttaki yerinde %95'e çekilir ve perdenin %70'i altında kararır (`ShellPage`); Geri aynı yolun tersi, hareketle de aranır.
 3. **Ayrıntı.** Telefonun ayrıntısı (kit 2.3.0'ın derinliği) solarak gelirken liste altında soluyordu: iki ekran birden yarı saydam. Kit 2.4.0'ın yolu: ayrıntı ilk karesinden opak, pencerenin tamamı kadar kayarak gelir; liste çekilir ve kararır; kutucukla sıralı solma, kutucuk hep opak; tabletin paylaşılan ekseni sıralı solar.
 
+4. **Azaltılmış hareket.** Sayfanın geçişine eklenen iki animasyon (alttaki sayfanın derinliği, hareketle bırakılan sekmenin köşeleri) hiçbir şey oynatmadığında da 300 ms sürüyordu; gezinme ayrılan sayfayı geçiş bitene dek ekranda tuttuğundan “Animasyonları kaldır” açıkken Geri alttaki sayfayı 300 ms geç gösteriyordu. İkisi de yalnız gerçekten oynadıklarında süre alır.
+
 Testler: `BackMotionTest` ve `DetailNoDoubleExposureTest` her kareye bakar (sayfalar saf kırmızı ve mavi): hiçbir sayfa ötekinin içinden görünmez, ikisi de opak, alttaki yerinde ve koyu, sekmeler hiçbir karede birlikte değil; düğme, Android 16'nın düğmesi, hareket, vazgeçme, ray, azaltılmış hareket.
 
 ## Sürümü hazırlarken bulunanlar
@@ -24,7 +26,13 @@ Testler: `BackMotionTest` ve `DetailNoDoubleExposureTest` her kareye bakar (sayf
 - One UI 9 için gözden geçirme: üç düğmenin Geri'si, DeX'in geniş ve alçak pencereleri, temalı simge, güvenli alan; cihazda denenecekler test listesinde.
 
 ## Kanıt
-CI, yürüyüşler ve yeniden üretilen profil bu dalın son commit'inde koşuyor; sonuçlar buraya yazılacak.
+Son commit `56366976` (yeniden üretilen profille):
+- **CI:** Uygulama · debug yeşil (2290 test; ekran görüntüleri 281 aynı, 0 yeni, 0 değişti, 0 eksik), Uygulama · release yeşil, laboratuvar işleri yeşil.
+- **Yürüyüşler, debug, API 35 (bu PR'ın koşusu):** tablet 134 adım, 67 denetimin hepsi tamam; telefon 131 adım, 61 denetimin hepsi tamam. Çökme, ANR, StrictMode ihlali yok.
+- **Yürüyüşler, debug, API 37.0 (koşu 43115460870):** tablet 134 adım, 0/67; telefon 131 adım, 0/61.
+- **Yürüyüşler, kişisel derleme, API 35 ve 37.0 (koşu 43115464293):** dördü de geçti (tablet 134 adım, 0/66; telefon 132 adım, 0/61); kurulan paket `targetSdk=37`. API 37.0'daki tek kayıt emülatörün kendi Google Play hizmetlerinin açılıştaki ANR'ı, uygulamanın değil.
+- **Baseline Profile (koşu 43111686458):** 44195 kural (11343'ü Nağmedar'ın ve VLC'nin kendi kodu), açılış profili 22872; üreticinin üç testi geçti, telefonun oynatıcısı altı turun altısında açıldı (1.0.2'nin profilinde sıfır).
+- **Kare şeritleri:** `ci/shots-pr-113` dalının `motion/` klasörü (tab-back, page-push, page-pop, album-open, album-close, detail-back).
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 

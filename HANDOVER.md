@@ -71,3 +71,18 @@ makes the before/after sheets of the Back strips. Left when this was written: CI
 compile of the Back work pending), the screenshot references of the folders' arrow, the Baseline Profile regenerated
 on the final code, the walks (debug and personal, API 35 and 37.0), then `release_chain.sh release-1.0.3 <sha> 1.0.3`
 from outside the worktree, `tools/apkcheck.py` (now expecting targetSdk 37) and the APK sent to the user.
+
+State on 12 Nov 03:05 (Istanbul): **1.0.3 is delivered.** master is 56366976 (PR #113 merged by fast-forward): CI
+green (2290 tests, 281 screenshots the same, release build), the walks green on the final commit (debug API 35 and
+37.0, personal API 35 and 37.0), the Baseline Profile regenerated (44195 rules, the phone's player in six rounds of
+six). The personal APK (run 43121979708): `app.nagmedar.debug`, 14010009, minSdk 34, target 37, 97433156 bytes,
+SHA-256 `31e780146059a20a504a0757dd3b89decdd562fda13993a65d1a6a09fc95e5f9`; it was sent to the user, the device
+checks are at the top of the plan document's "1.0 cihaz testi" tab, the plan's "Sürüm" row says delivered. New here:
+`orch/wait_debug.sh <sha>` (the app's debug job alone), `orch/wait_ids.sh <run ids…>`, and `watch_sha.sh`'s third
+argument (the least number of runs to wait for: a run that has not started its jobs has no check runs yet). Two things
+learned the hard way: a dispatch of `emulator.yml` with the same inputs on the same branch cancels the one in progress,
+and `gh pr edit` needs GraphQL (refused here): `gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -F body=@file`.
+Left for a later release, told to the user: "Klasör seç" and "Kütüphaneye ekle" share one icon; the shortcut list's
+rows are tight on a phone with a keyboard; the "Sıradaki" button stays as it is; the One UI 9 items (Now Bar, the lock
+screen's player, DeX desktops) can only be tried on his devices; the old `story/*` branches on GitHub wait for his
+word before they are deleted.

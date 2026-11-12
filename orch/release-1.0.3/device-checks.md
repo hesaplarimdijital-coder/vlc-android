@@ -46,6 +46,7 @@ Android Auto'nun sekmeleri, her açılışta taramayan kütüphane, Desktop Kit 
 - [ ] Bir albüm açılınca sayfa saydamlaşmadan, sağdan listenin üstüne kayarak geliyor; liste arkasında kararıyor, yazılar üst üste binmiyor
 - [ ] Albümden Geri: sayfa sağa kayıp çıkıyor, liste aydınlanıyor ve kaldığı yerde duruyor
 - [ ] Podcast'te bir programın kutucuğuna dokununca kutucuk başlığa büyüyor; liste önce gidiyor, sayfa sonra beliriyor; kutucuk yolda saydamlaşmıyor
+- [ ] Sistemde “Animasyonları kaldır” açıkken sayfadan ve sekmeden Geri beklemeden, bir anda dönüyor
 
 ### Telefon: hareket
 

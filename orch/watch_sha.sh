@@ -3,12 +3,16 @@
 # watch_sha.sh <sha> [max-minutes]: waits until no CI job or emulator walk of <sha> is queued or running, re-running once
 # the walk jobs that failed on the runner's setup (the SDK's "Error reading Zip content", the emulator never booting:
 # "the walk produced no report"), then prints the app jobs, the walk summaries and every failure with its cause.
-SHA=$1; MAX=${2:-240}
+SHA=$1; MAX=${2:-240}; MINRUNS=${3:-2}
 R=hesaplarimdijital-coder/vlc-android
 RERUN_DONE=""
 i=0
 while [ $i -lt $((MAX * 2)) ]; do
   s=$(sh $ORCH/ci.sh $SHA 2>&1)
+  # the runs themselves: a run that has not started its jobs yet ("pending", "queued") has no check runs to show
+  rs=$(gh api "repos/$R/actions/runs?head_sha=$SHA&per_page=30" --jq '.workflow_runs[] | .status' 2>/dev/null)
+  nruns=$(echo "$rs" | grep -c .); open=$(echo "$rs" | grep -c -v "^completed$")
+  if [ -z "$rs" ] || [ "$nruns" -lt "$MINRUNS" ] || [ "$open" -gt 0 ]; then sleep 30; i=$((i + 1)); continue; fi
   if ! echo "$s" | grep -q "in_progress\|queued"; then
     # infra failures: re-run the failed jobs of those runs once
     runs=$(gh api "repos/$R/actions/runs?head_sha=$SHA&per_page=20" --jq '.workflow_runs[] | select(.conclusion=="failure") | .id' 2>/dev/null)

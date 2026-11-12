@@ -592,3 +592,41 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
 - Plan doc: Kararlar targetSdk row = "Karar (12 Kasım): 37…" (rev 31). Device checks draft updated
   ($SCRATCH/release-1.0.3/device-checks.md: Geri, Bu cihaz ve Ağ, Android 17 (hedef 37), One UI 9).
 - Montage script: $SCRATCH/ux/montage.py <before dir> <after dir> <out dir> (before = $SCRATCH/ux/strips).
+- 924bb20b first CI of the Back work: compiled; 8 test-only failures (DetailNoDoubleExposureTest ×6: the test window's
+  white showed in the margins → content on the page's colour; DetailDepthTest turn tolerance; BackMotionTest reduced
+  motion restated) + 3 screenshots changed (network folder trail without its arrow) → dad6152c, ab51b44b (22:25 UTC).
+  Dispatched on ab51b44b: profile 43111686458, debug 37.0 walk 43111695134, personal 35/37.0 walks 43111703459.
+  Sent the user three before/after montages ($SCRATCH/ux/out/geri-*.png).
+- ab51b44b CI: 281 screenshots same; ONE failure, BackMotionTest.withReducedMotionPagesAndTabsAreThereAtOnce ("the page
+  is gone: Back, frame 5: blue …"). A REAL BUG: ShellPage's transition.animateFloat specs (tabCorner tween 300, pageDepth)
+  last their duration from 0 to 0 too, and navigation keeps the leaving page until the transition ends → with
+  "Remove animations" Back showed the page under 300 ms late; a desktop's 150 ms cross-fade kept the old screen composed
+  for 300. Fix 9251ac87 (22:42 UTC): both specs snap() unless the page sinks / rounds. PR runs of ab51b44b cancelled by
+  the push; dispatched runs go on. Waiters: $ORCH/wait_debug.sh <sha>, $ORCH/wait_ids.sh <run ids…>, watch_sha.sh.
+  The profile from ab51b44b fits 9251ac87 (only two spec lambdas changed): take it, no new profile run.
+- 9251ac87 debug job GREEN at 22:52 UTC (all tests, 281 screenshots same): the reduced-motion fix holds.
+- Profile run 43111686458 green: 44195 rules (11343 own), startup 22872, 3 tests OK, phone player 6/6, tablet 6/6,
+  nothing missing (ci/baseline-profile 524a2bb4). Taken into the branch: 56366976 = FINAL HEAD
+  563669760910b847eeb9af808067c116bfa7be6f, pushed 22:53:17 UTC. Runs on it: CI 43115470196, PR walks 43115470033,
+  dispatched debug 37.0 walk 43115460870, personal 35/37.0 walks 43115464293. Waiters: watch_sha.sh (b43ynrarz),
+  wait_debug.sh (b7jf2am29); ab51b44b's dispatched walks still running (wait_ids.sh ba7jbkvee). send_later fallback +50 min.
+- Next: all green → PR #113 "Kanıt" → release_chain.sh release-1.0.3 <final sha> 1.0.3 → apkcheck → SendUserFile →
+  device-test tab (intro paragraph m1gesnh1vzq.25 hash 096d3f6f rev 6 → 1.0.3; insert device-checks.md before
+  m1gesnh1vzq.6771) → plan tab "Sürüm" row delivered → final message.
+- LESSON: dispatching emulator.yml with the same inputs on the same ref CANCELS the run in progress (concurrency group
+  emulator-<ref>--<profile>-<build>-<levels>-…): the ab51b44b personal and 37.0 walks were cancelled at minute 27 by the
+  dispatches on the final head. watch_sha.sh now also waits for runs that have not started their jobs (3rd arg = min runs).
+- FINAL HEAD 56366976 all green at 23:40 UTC: debug (2290 tests logged, 281 screenshots same), release, lab; PR walks
+  API 35 (tablet 134 steps 0/67, phone 131 steps 0/61); debug 37.0 run 43115460870 (0/67, 0/61); personal 35+37.0 run
+  43115464293 (0/66, 0/61 each; installed targetSdk=37). The only "system ANR" on 37.0 is Google Play services' own at
+  boot. PR #113 "Kanıt" filled (REST: gh api -X PATCH …/pulls/113 -F body=@file; gh pr edit needs GraphQL = 403 here).
+- release_chain.sh: landed at 23:43 UTC (master = 563669760910b847eeb9af808067c116bfa7be6f, PR #113 merged), personal
+  release run 43121979708, ready after 17 min. APK $SCRATCH/release-1.0.3/Nagmedar-1.0.3-arm64-v8a.apk: 97433156 bytes,
+  SHA-256 31e780146059a20a504a0757dd3b89decdd562fda13993a65d1a6a09fc95e5f9, app.nagmedar.debug, 14010009, minSdk 34,
+  target 37, not debuggable, v2 signed with d094907b…bbc, baseline.prof inside, arm64-v8a, ACCESS_LOCAL_NETWORK present.
+  SENT to the user (SendUserFile) at 00:03 UTC 12 Nov.
+- Docs: device-test tab (a85e3dab-fb45) rev 8: 1.0.3 section (83 checks, 10 groups) on top, intro for 1.0.3. Plan tab
+  (f3c1d53a-3c01) rev 34: "Sürüm" = Teslim edildi; "5 Android 17" = hedef 37 devrede; audit row "Telefonda tek alt cam" =
+  Karar B.
+- 1.0.3 IS DELIVERED. Left for later (told the user): the two FolderAdd icons, the tight shortcut rows on a phone with a
+  keyboard, the "Sıradaki" button as is; One UI 9 items only he can test; old story/* remote branches (ask before deleting).
