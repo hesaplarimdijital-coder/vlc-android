@@ -2955,6 +2955,115 @@ class Smoke:
         self.check("the pages were opened with the animations on: by following, from the row twice, an episode, from the tile twice",
                    len(opened) >= 6, "%d opening(s) read: %s" % (len(opened), "; ".join(r["what"] for r in opened)))
 
+    # ---------------------------------------------------------------- 1.0.6: Android Auto's tree on a car's screen
+
+    def car_tap(self, labels, title, wait=3.0, below=0.0):
+        """Taps what on the car's screen says one of [labels] (any app's: the car's media app draws the tree) and takes
+        the step [title]; the step's nodes, or None with a warning when none of them is on screen. [below]: only what
+        is lower than this share of the screen (the lists, not the tabs)."""
+        nodes = self.nodes(self.dump())
+        h = max((n.b[3] for n in nodes), default=768)
+        for label in labels:
+            hit = [n for n in nodes if n.area and n.center[1] >= h * below and (n.text.strip() == label or n.desc.strip() == label)]
+            if hit:
+                x, y = hit[0].center
+                return self.step(title, lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
+        self.warnings.append("[%s] \"%s\" is not on the car's screen (%s)" % (self.cur_pass, labels[0], title))
+        return None
+
+    def car_first_row(self, title, starts=None, wait=3.0):
+        """Taps the first row of the list on the car's screen (the first text below the bar; with [starts], the first
+        that begins so) and takes the step [title]; the step's nodes or None."""
+        nodes = self.nodes(self.dump())
+        h = max((n.b[3] for n in nodes), default=768)
+        rows = sorted((n for n in nodes if n.area and n.text.strip() and n.center[1] > h * 0.22
+                       and n.pkg != self.pkg and (starts is None or n.text.strip().startswith(starts))),
+                      key=lambda n: (n.center[1], n.center[0]))
+        if not rows:
+            self.warnings.append("[%s] no row to open on the car's screen (%s)" % (self.cur_pass, title))
+            return None
+        x, y = rows[0].center
+        return self.step("%s (\"%s\")" % (title, rows[0].text.strip()[:30]), lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
+
+    def pass_auto_shots(self):
+        """1.0.6, on demand (passes=auto-shots; the workflow boots an Android Automotive emulator for it): the owner
+        asked for Android Auto's screens (13 Nov). Android Auto itself cannot run here: its head unit needs a phone
+        whose Play Store is signed in. The tree Android Auto browses is opened where a car's own system draws it
+        instead: Android Automotive's media app, bound to the app's PlaybackService as Android Auto is. The tabs, the
+        lists and what plays are the app's; the drawing is the car's, not Android Auto's. In Turkish, as his car has
+        it. Every step is a screenshot of the report."""
+        self.cur_pass, self.lang = "auto-shots", "tr"
+        s = self.strings["tr"]
+        user = self.sh("am get-current-user", timeout=20).strip()
+        user = user if user.isdigit() else "0"
+        rc, out = self.adb("root", timeout=60)
+        time.sleep(3)
+        self.adb("wait-for-device", timeout=60)
+        self.log("the car's user: %s; adb: uid %s" % (user, self.sh("id -u", timeout=20)))
+        # a car's system user has no storage of its own and no screen: the walk's media and the app's permissions go
+        # to the driver's
+        for perm in PERMISSIONS_MEDIA + ["android.permission.POST_NOTIFICATIONS", "android.permission.ACCESS_LOCAL_NETWORK"]:
+            self.sh("pm grant --user %s %s %s" % (user, self.pkg, perm))
+        base = "/data/media/%s/Music" % user
+        self.sh("mkdir -p %s/nagmedar-walk" % base)
+        files = []
+        if self.a.media and os.path.exists(os.path.join(self.a.media, "tone.mp3")):
+            self.adb("push", os.path.join(self.a.media, "tone.mp3"), base + "/tone.mp3", timeout=120)
+        if self.a.music and os.path.isdir(self.a.music):
+            files = sorted(glob.glob(os.path.join(self.a.music, "*.mp3")))
+            if files:
+                self.adb("push", *files, base + "/nagmedar-walk/", timeout=300)
+            cover = os.path.join(self.out, "raw", "walk-cover.jpg")
+            if self.cover_image(cover, (231, 76, 60), (241, 196, 15)):
+                self.adb("push", cover, base + "/nagmedar-walk/cover.jpg", timeout=60)
+        self.sh("chown -R media_rw:media_rw %s ; chmod -R 775 %s ; restorecon -R %s" % (base, base, base))
+        scan = self.sh("content call --user %s --uri content://media --method scan_volume --arg external_primary" % user, timeout=180)
+        seen = self.sh("content query --user %s --uri content://media/external/audio/media --projection _data | head -3" % user, timeout=60)
+        self.log("the car's media: %d tracks pushed; scan: %s; the media store: %s" % (len(files), " ".join(scan.split())[:160], " ".join(seen.split())[:300]))
+        self.sh("cmd locale set-app-locales %s --user %s --locales tr-TR" % (self.pkg, user))
+        self.launch()
+        nodes = self.step("The app on the car's screen", wait=2.5)
+        if any(x.text.strip() == s["nag_fr_skip"] for x in nodes):
+            self.first_run_walk("First run")
+        time.sleep(12)
+        self.step("The app after its first run", wait=1.0)
+        # the car's media app with the app's service as its source, as Android Auto binds it
+        component = "%s/org.videolan.vlc.PlaybackService" % self.pkg
+        started = self.sh("am start --user %s -a android.car.intent.action.MEDIA_TEMPLATE --es android.car.intent.extra.MEDIA_COMPONENT %s"
+                          % (user, component), timeout=60)
+        self.log("the car's media app: %s" % " ".join(started.split())[:300])
+        nodes = self.step("The car's media app: Nağmedar's first tab", wait=6.0)
+        said = {n.text.strip() for n in nodes} | {n.desc.strip() for n in nodes}
+        tabs = {"music": [s["nag_nav_music"]], "podcasts": [s["nag_nav_podcasts"], s["nag_nav_podcasts_short"]],
+                "radio": [s["nag_nav_radio"]], "recent": [s["nag_music_view_recent"]]}
+        shown = [k for k, labels in tabs.items() if any(l in said for l in labels)]
+        self.check("the car's media app shows the app's tabs", len(shown) >= 3,
+                   "%s of Music, Podcasts, Radio, Recently played; on screen: %s" % (", ".join(shown) or "none", ", ".join(sorted(x for x in said if x)[:24])))
+        if len(shown) < 3:
+            return
+        # Music: the albums, an album, a track played
+        self.car_tap(tabs["music"], "Music")
+        if self.car_tap([s["nag_music_view_albums"]], "Music: the albums", below=0.15):
+            if self.car_first_row("An album", starts="Profile album"):
+                if self.car_first_row("A track played", starts="Profile track", wait=5.0):
+                    self.step("What plays", wait=2.0)
+                    self.key(4, record=False)
+                self.key(4, record=False)
+            self.key(4, record=False)
+        # Podcasts: the lists, Discover, the popular shows of the directory
+        if self.car_tap(tabs["podcasts"], "Podcasts"):
+            if self.car_tap([s["nag_auto_discover"]], "Podcasts: Discover", below=0.15):
+                if self.car_tap([s["nag_auto_popular_shows"]], "Discover: the popular shows", wait=8.0, below=0.15):
+                    self.key(4, record=False)
+                self.key(4, record=False)
+        # Radio: the lists, the countries, a country's stations
+        if self.car_tap(tabs["radio"], "Radio"):
+            if self.car_tap([s["nag_auto_countries"]], "Radio: the countries", wait=8.0, below=0.15):
+                if self.car_first_row("A country's stations", wait=8.0):
+                    self.key(4, record=False)
+                self.key(4, record=False)
+        self.car_tap(tabs["recent"], "Recently played")
+
     # ---------------------------------------------------------------- 1.0.6: a notice swiped as a finger swipes it
 
     def raw_touch(self):

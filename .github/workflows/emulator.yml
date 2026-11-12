@@ -122,23 +122,32 @@ jobs:
           levels = [x.strip() for x in os.environ["LEVELS"].split(",") if x.strip()] or ["35"]
           passes = [x.strip() for x in os.environ["PASSES"].split(",") if x.strip()]
           groups = [("tablet", ["tablet-en", "workstation", "phone-tr"]), ("phone", ["phone-en"])]
+          # the emulator every walk has: a tablet with Google's APIs, at the API level asked (image: the system image's
+          # own level when it has another name than the platform's)
+          phone = {"image": "", "target": "google_apis", "profile": "pixel_tablet"}
+          # 1.0.6: auto-shots walks a car instead (Android Automotive 14: its media app draws the tree Android Auto browses)
+          cars = {"auto-shots": {"api": "34", "image": "34-ext9", "target": "android-automotive", "profile": "automotive_1024p_landscape"}}
           runs = []
           if os.environ["PROFILE"] == "true":
-              runs = [{"api": levels[0], "group": "profile", "passes": "", "evidence": "ci/baseline-profile"}]
+              runs = [dict(phone, api=levels[0], group="profile", passes="", evidence="ci/baseline-profile")]
           else:
               split = []
               for name, members in groups:
                   mine = [p for p in passes if p in members]
                   if mine:
                       split.append((name, mine))
-              rest = [p for p in passes if not any(p in m for _, m in groups)]
+              rest = [p for p in passes if not any(p in m for _, m in groups) and p not in cars]
               if rest:
                   split.append(("-".join(rest)[:40], rest))
               for api in levels:
                   for name, mine in split:
                       # API 35 on ci/emulator-<group>, another level beside it, the personal build with "-personal"
                       branch = "ci/emulator%s%s-%s" % ("" if api == "35" else "-api" + api, os.environ["SUFFIX"], name)
-                      runs.append({"api": api, "group": name, "passes": ",".join(mine), "evidence": branch})
+                      runs.append(dict(phone, api=api, group=name, passes=",".join(mine), evidence=branch))
+              for p in passes:
+                  if p in cars:
+                      runs.append(dict(cars[p], group=p, passes=p,
+                                       evidence="ci/emulator-api%s%s-%s" % (cars[p]["api"], os.environ["SUFFIX"], p)))
           print("runs=" + json.dumps(runs))' >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
 
@@ -316,9 +325,10 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.run.api }}
-          target: google_apis
+          system-image-api-level: ${{ matrix.run.image }}
+          target: ${{ matrix.run.target }}
           arch: x86_64
-          profile: pixel_tablet
+          profile: ${{ matrix.run.profile }}
           ram-size: 4096M
           heap-size: 512M
           disk-size: 6000M
@@ -335,9 +345,10 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.run.api }}
-          target: google_apis
+          system-image-api-level: ${{ matrix.run.image }}
+          target: ${{ matrix.run.target }}
           arch: x86_64
-          profile: pixel_tablet
+          profile: ${{ matrix.run.profile }}
           ram-size: 4096M
           heap-size: 512M
           disk-size: 6000M
