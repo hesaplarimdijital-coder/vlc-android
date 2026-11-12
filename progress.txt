@@ -1,0 +1,9 @@
+374 s, 30 steps, pass back-button, 0 crashes
+23 back-button Pause the episode ok
+24 back-button Back from the episode ok
+25 back-button Back from the podcast ok
+26 back-button Music ok
+27 back-button Play Profile track 1.1 ok
+28 back-button A tap on the mini player ok
+29 back-button Before the Back button: the full player ok
+30 back-button The Back button held on the full player, then let go ok

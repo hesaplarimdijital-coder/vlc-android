@@ -1,0 +1,547 @@
+{
+ "verdict": "FAILED",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "back-button",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-back-button-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-back-button-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "back-button",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-back-button-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-back-button-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.4,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "back-button",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-back-button-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-back-button-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "back-button",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-back-button-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-back-button-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "back-button",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-back-button-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-back-button-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "back-button",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-back-button-after-the-scan.png",
+   "dump": "dumps/006-back-button-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "back-button",
+   "title": "Launch (the Back button)",
+   "status": "ok",
+   "shot": "shots/007-back-button-launch-the-back-button.png",
+   "dump": "dumps/007-back-button-launch-the-back-button.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "back-button",
+   "title": "Podcasts",
+   "status": "ok",
+   "shot": "shots/008-back-button-podcasts.png",
+   "dump": "dumps/008-back-button-podcasts.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "back-button",
+   "title": "Add a podcast by its address",
+   "status": "ok",
+   "shot": "shots/009-back-button-add-a-podcast-by-its-address.png",
+   "dump": "dumps/009-back-button-add-a-podcast-by-its-address.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "back-button",
+   "title": "The feed's address typed",
+   "status": "ok",
+   "shot": "shots/010-back-button-the-feed-s-address-typed.png",
+   "dump": "dumps/010-back-button-the-feed-s-address-typed.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "back-button",
+   "title": "Subscribe",
+   "status": "ok",
+   "shot": "shots/011-back-button-subscribe.png",
+   "dump": "dumps/011-back-button-subscribe.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "back-button",
+   "title": "Followed",
+   "status": "ok",
+   "shot": "shots/012-back-button-followed.png",
+   "dump": "dumps/012-back-button-followed.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "back-button",
+   "title": "Episode page (the play button watched)",
+   "status": "ok",
+   "shot": "shots/013-back-button-episode-page-the-play-button-watched.png",
+   "dump": "dumps/013-back-button-episode-page-the-play-button-watched.xml",
+   "changed": true,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "back-button",
+   "title": "Before the Back button: the episode's page",
+   "status": "ok",
+   "shot": "shots/014-back-button-before-the-back-button-the-episode-s-page.png",
+   "dump": "dumps/014-back-button-before-the-back-button-the-episode-s-page.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "back-button",
+   "title": "The Back button held on the episode's page, then let go",
+   "status": "ok",
+   "shot": "shots/015-back-button-the-back-button-held-on-the-episode-s-page-then-.png",
+   "dump": "dumps/015-back-button-the-back-button-held-on-the-episode-s-page-then-.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": "check failed: the episode's page stays whole while the system's Back button is held"
+  },
+  {
+   "n": 16,
+   "pass": "back-button",
+   "title": "Before the Back button: the podcast's page",
+   "status": "ok",
+   "shot": "shots/016-back-button-before-the-back-button-the-podcast-s-page.png",
+   "dump": "dumps/016-back-button-before-the-back-button-the-podcast-s-page.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "back-button",
+   "title": "The Back button held on the podcast's page, then let go",
+   "status": "ok",
+   "shot": "shots/017-back-button-the-back-button-held-on-the-podcast-s-page-then-.png",
+   "dump": "dumps/017-back-button-the-back-button-held-on-the-podcast-s-page-then-.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": "check failed: the podcast's page stays whole while the system's Back button is held"
+  },
+  {
+   "n": 18,
+   "pass": "back-button",
+   "title": "Podcasts",
+   "status": "ok",
+   "shot": "shots/018-back-button-podcasts.png",
+   "dump": "dumps/018-back-button-podcasts.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "back-button",
+   "title": "The podcast's page",
+   "status": "ok",
+   "shot": "shots/019-back-button-the-podcast-s-page.png",
+   "dump": "dumps/019-back-button-the-podcast-s-page.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "back-button",
+   "title": "An episode's page (to play it)",
+   "status": "ok",
+   "shot": "shots/020-back-button-an-episode-s-page-to-play-it.png",
+   "dump": "dumps/020-back-button-an-episode-s-page-to-play-it.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "back-button",
+   "title": "Play the episode",
+   "status": "ok",
+   "shot": "shots/021-back-button-play-the-episode.png",
+   "dump": "dumps/021-back-button-play-the-episode.xml",
+   "changed": true,
+   "seconds": 15.7,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "back-button",
+   "title": "The episode plays",
+   "status": "ok",
+   "shot": "shots/022-back-button-the-episode-plays.png",
+   "dump": "dumps/022-back-button-the-episode-plays.xml",
+   "changed": true,
+   "seconds": 14.4,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "back-button",
+   "title": "Pause the episode",
+   "status": "ok",
+   "shot": "shots/023-back-button-pause-the-episode.png",
+   "dump": "dumps/023-back-button-pause-the-episode.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "back-button",
+   "title": "Back from the episode",
+   "status": "ok",
+   "shot": "shots/024-back-button-back-from-the-episode.png",
+   "dump": "dumps/024-back-button-back-from-the-episode.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "back-button",
+   "title": "Back from the podcast",
+   "status": "ok",
+   "shot": "shots/025-back-button-back-from-the-podcast.png",
+   "dump": "dumps/025-back-button-back-from-the-podcast.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "back-button",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/026-back-button-music.png",
+   "dump": "dumps/026-back-button-music.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "back-button",
+   "title": "Play Profile track 1.1",
+   "status": "ok",
+   "shot": "shots/027-back-button-play-profile-track-1-1.png",
+   "dump": "dumps/027-back-button-play-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 15.7,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "back-button",
+   "title": "A tap on the mini player",
+   "status": "ok",
+   "shot": "shots/028-back-button-a-tap-on-the-mini-player.png",
+   "dump": "dumps/028-back-button-a-tap-on-the-mini-player.xml",
+   "changed": true,
+   "seconds": 15.9,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "back-button",
+   "title": "Before the Back button: the full player",
+   "status": "ok",
+   "shot": "shots/029-back-button-before-the-back-button-the-full-player.png",
+   "dump": "dumps/029-back-button-before-the-back-button-the-full-player.xml",
+   "changed": true,
+   "seconds": 15.8,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "back-button",
+   "title": "The Back button held on the full player, then let go",
+   "status": "ok",
+   "shot": "shots/030-back-button-the-back-button-held-on-the-full-player-then-let.png",
+   "dump": "dumps/030-back-button-the-back-button-held-on-the-full-player-then-let.xml",
+   "changed": true,
+   "seconds": 14.6,
+   "note": "check failed: the full player stays whole while the system's Back button is held"
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "back-button",
+   "name": "the Podcasts open",
+   "ok": true,
+   "detail": "",
+   "step": 8
+  },
+  {
+   "pass": "back-button",
+   "name": "the podcast address field",
+   "ok": true,
+   "detail": "",
+   "step": 9
+  },
+  {
+   "pass": "back-button",
+   "name": "the feed is followed",
+   "ok": true,
+   "detail": "",
+   "step": 11
+  },
+  {
+   "pass": "back-button",
+   "name": "an episode on the podcast's page",
+   "ok": true,
+   "detail": "",
+   "step": 12
+  },
+  {
+   "pass": "back-button",
+   "name": "the episode's play button",
+   "ok": true,
+   "detail": "",
+   "step": 12
+  },
+  {
+   "pass": "back-button",
+   "name": "the episode's play button does not move",
+   "ok": true,
+   "detail": "first (42, 643, 708, 769) at 2.1 s; then (42, 643, 708, 769) at +3.6 s; (42, 643, 708, 769) at +6.6 s",
+   "step": 13
+  },
+  {
+   "pass": "back-button",
+   "name": "the episode's page stays whole while the system's Back button is held",
+   "ok": false,
+   "detail": "of the page differs from the page at rest: 0.0 % a tap's length into the press, 21.7 % a second on (the button: back of com.google.android.apps.nexuslauncher at 228, 2337)",
+   "step": 15
+  },
+  {
+   "pass": "back-button",
+   "name": "the system's Back button closes the episode's page",
+   "ok": true,
+   "detail": "held and let go: closed; tapped: not needed",
+   "step": 15
+  },
+  {
+   "pass": "back-button",
+   "name": "the podcast's page stays whole while the system's Back button is held",
+   "ok": false,
+   "detail": "of the page differs from the page at rest: 0.0 % a tap's length into the press, 19.8 % a second on (the button: back of com.google.android.apps.nexuslauncher at 228, 2337)",
+   "step": 17
+  },
+  {
+   "pass": "back-button",
+   "name": "the system's Back button closes the podcast's page",
+   "ok": true,
+   "detail": "held and let go: closed; tapped: not needed",
+   "step": 17
+  },
+  {
+   "pass": "back-button",
+   "name": "the Podcasts open",
+   "ok": true,
+   "detail": "",
+   "step": 18
+  },
+  {
+   "pass": "back-button",
+   "name": "a followed podcast",
+   "ok": true,
+   "detail": "",
+   "step": 18
+  },
+  {
+   "pass": "back-button",
+   "name": "an episode that plays is not on the air in the bar: a seek bar with its times",
+   "ok": true,
+   "detail": "the bar's line: 0:31 Track position \u22120:29",
+   "step": 22
+  },
+  {
+   "pass": "back-button",
+   "name": "a track in the Music's list",
+   "ok": true,
+   "detail": "",
+   "step": 26
+  },
+  {
+   "pass": "back-button",
+   "name": "the mini player shows the track",
+   "ok": true,
+   "detail": "",
+   "step": 27
+  },
+  {
+   "pass": "back-button",
+   "name": "a tap on the mini player opens the full player",
+   "ok": true,
+   "detail": "",
+   "step": 28
+  },
+  {
+   "pass": "back-button",
+   "name": "the full player stays whole while the system's Back button is held",
+   "ok": false,
+   "detail": "of the page differs from the page at rest: 0.0 % a tap's length into the press, 57.1 % a second on (the button: back of com.google.android.apps.nexuslauncher at 228, 2337)",
+   "step": 30
+  },
+  {
+   "pass": "back-button",
+   "name": "the system's Back button closes the full player",
+   "ok": true,
+   "detail": "held and let go: closed; tapped: not needed",
+   "step": 30
+  },
+  {
+   "pass": "back-button",
+   "name": "the system's Back button was pressed on the episode's page, the podcast's and the full player",
+   "ok": true,
+   "detail": "pressed on: the episode's page, the podcast's page, the full player",
+   "step": 30
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 30
+  },
+  {
+   "pass": "all",
+   "name": "no StrictMode violation of the app (debug build)",
+   "ok": true,
+   "detail": "0 in the log, 0 in the dropbox",
+   "step": 30
+  }
+ ],
+ "frames": [],
+ "seconds": 376,
+ "passes": "back-button",
+ "source": "563669760910b847eeb9af808067c116bfa7be6f (master, debug build, API 37.0, back-button), run 43217588211",
+ "system": [],
+ "sheet_trials": [],
+ "back_presses": [
+  {
+   "pass": "back-button",
+   "page": "the episode's page",
+   "button": "back of com.google.android.apps.nexuslauncher at 228, 2337",
+   "rest": "shots/014-back-button-before-the-back-button-the-episode-s-page.png",
+   "held": [
+    "shots/015-back-button-back-button-held-on-the-episode-s-page-tap.png",
+    "shots/015-back-button-back-button-held-on-the-episode-s-page-long.png"
+   ],
+   "changes": [
+    0.0,
+    0.21724799957037752
+   ],
+   "change": 0.21724799957037752,
+   "let_go": "closed",
+   "tap": ""
+  },
+  {
+   "pass": "back-button",
+   "page": "the podcast's page",
+   "button": "back of com.google.android.apps.nexuslauncher at 228, 2337",
+   "rest": "shots/016-back-button-before-the-back-button-the-podcast-s-page.png",
+   "held": [
+    "shots/017-back-button-back-button-held-on-the-podcast-s-page-tap.png",
+    "shots/017-back-button-back-button-held-on-the-podcast-s-page-long.png"
+   ],
+   "changes": [
+    0.0,
+    0.1978568104111845
+   ],
+   "change": 0.1978568104111845,
+   "let_go": "closed",
+   "tap": ""
+  },
+  {
+   "pass": "back-button",
+   "page": "the full player",
+   "button": "back of com.google.android.apps.nexuslauncher at 228, 2337",
+   "rest": "shots/029-back-button-before-the-back-button-the-full-player.png",
+   "held": [
+    "shots/030-back-button-back-button-held-on-the-full-player-tap.png",
+    "shots/030-back-button-back-button-held-on-the-full-player-long.png"
+   ],
+   "changes": [
+    0.0004987687823508719,
+    0.571381308943498
+   ],
+   "change": 0.571381308943498,
+   "let_go": "closed",
+   "tap": ""
+  }
+ ]
+}
