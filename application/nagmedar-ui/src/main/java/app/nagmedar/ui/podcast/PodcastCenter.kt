@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import org.videolan.tools.AppScope
@@ -238,10 +239,58 @@ class ServiceEpisodePlayer(activity: Context) : EpisodePlayer {
 }
 
 /**
+ * 1.0.4: the addresses handed to the player as podcast episodes, each with the length its feed gives it (0 when the feed
+ * gives none). An episode streamed from its enclosure is, to the player, a stream without a length until libVLC has
+ * found one, as a station on the air is for good: the bars took it for one and said "Canlı yayın" (the owner, 12 Nov:
+ * "podcast çaldığında canlı yayın diyor müzik barı"). What [EpisodeMedia] starts is told here before it plays, so a
+ * timeline knows the episode from its first frame, without a query; what the player was left with from an earlier run
+ * is told once Room has been asked ([ask]). The last [KEPT] are kept.
+ */
+object EpisodeAddresses {
+    private const val KEPT = 64
+
+    private val known = object : LinkedHashMap<String, Long>(KEPT, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean = size > KEPT
+    }
+
+    /** [location] (a media's address, as the playback service reports it) plays an episode [feedLengthMs] long by its feed. */
+    @Synchronized
+    fun started(location: String, feedLengthMs: Long) {
+        known[location] = feedLengthMs.coerceAtLeast(0L)
+    }
+
+    /** The feed's length of the episode at [location] (0: the feed gives none); null when no episode is known there. */
+    @Synchronized
+    fun lengthOf(location: String?): Long? = location?.let { known[it] }
+
+    /** Room's answer for an address nobody told of: the feed's length of the episode there, null for none. Off the main thread. */
+    @Volatile
+    internal var source: (Context, String) -> Long? = { app, location ->
+        PodcastPlaybackObserver.episodeAt(NagmedarDatabase.get(app).podcasts(), location)?.durationMs
+    }
+
+    /**
+     * [lengthOf], and for an address not told of yet Room is asked (the player was left with it by an earlier run): an
+     * episode found there is kept as [started]. Null when it is no episode's, or Room could not be asked.
+     */
+    suspend fun ask(context: Context, location: String): Long? {
+        lengthOf(location)?.let { return it }
+        val app = context.applicationContext
+        val length = withContext(Dispatchers.IO) { runCatching { source(app, location) }.getOrNull() } ?: return null
+        started(location, length)
+        return lengthOf(location)
+    }
+
+    /** Forgets everything (tests). */
+    @Synchronized
+    fun forget() = known.clear()
+}
+
+/**
  * What an episode plays as, wherever it is started (the app's pages, Android Auto): the downloaded file (S-1103) or the
  * enclosure's address as a stream, a video enclosure heard as sound alone, titled by the episode and its show, started at
  * the place the listener left (S-1104) or after the show's intro. The show's speed, outro and volume boost follow from its
- * address ([PodcastPlaybackObserver]).
+ * address ([PodcastPlaybackObserver]); the bars know it for an episode by that address too ([EpisodeAddresses]).
  */
 object EpisodeMedia {
     /** The media of [episode] of [feed], started at [from] when given (a chapter, a line of the transcript). */
@@ -256,6 +305,8 @@ object EpisodeMedia {
         (episode.imageUrl ?: feed.imageUrl)?.let(media::setArtworkURL)
         val start = from ?: PlaybackRules.startMs(episode.positionMs, episode.played, episode.durationMs, feed.skipIntroSeconds, feed.skipOutroSeconds)
         if (start > 0) media.time = start
+        // 1.0.4: what plays from this address is an episode, from its first frame in the bars (never a station on the air)
+        EpisodeAddresses.started(media.location, episode.durationMs)
         return media
     }
 

@@ -4,7 +4,7 @@ Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo
 
 ## 1.0.4 (12 Kasım 2026)
 
-Geri düğmesi hiçbir sayfayı küçültmez: bölüm, program, albüm ve oynatıcı düğmenin altında olduğu gibi durur, bırakınca kendi yolundan çıkar.
+Geri düğmesi hiçbir sayfayı küçültmez: bölüm, program, albüm ve oynatıcı düğmenin altında olduğu gibi durur, bırakınca kendi yolundan çıkar. Çalan podcast bölümü “Canlı yayın” değildir: çubukta arama çubuğu ve süresi vardır.
 
 ### Geri
 - Üç düğmenin Geri'si ayrıntı sayfalarını küçültmez (12 Kasım: “Podcast sayfasında podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi”). Android 16'dan beri Geri düğmesi, basılı olduğu sürece uygulamaya sistemin kendi ilerlettiği bir “öngörülü geri” gönderir: kenarsız (`EDGE_NONE`), ilerlemesi bir yayla 0'dan 1'e gider ve bir dokunuşun onda bir saniyesinde yarıyı geçer. 1.0.3 bunu yalnız sekmelerde düğme olarak tanıyordu. Ayrıntı sayfaları (podcast bölümü, program, albüm, sanatçı, tür, çalma listesi) onu parmak sanıyordu: sayfa düğmenin altında %90'a doğru küçülüyor, köşeleri yuvarlanıyor, yana yaslanıyor, sonra gidiyordu; 1.0.2'nin Geri'si. Düğme basılıyken sayfa artık yerinde ve tam boyunda durur; bırakılınca sayfanın kendi okunun oynattığı yolu oynar: opak, bitiş kenarından dışarı kayar, alttaki sayfa perdenin altından çıkar.
@@ -12,12 +12,16 @@ Geri düğmesi hiçbir sayfayı küçültmez: bölüm, program, albüm ve oynat�
 - Tablet ve DeX'te görev çubuğunun Geri düğmesi ayrıntıyı, Sıradaki'ni ve büyük oynatıcıyı küçültüp yana yaslamaz; bırakılınca kapatır.
 - Parmakla geri (hareketle gezinme) değişmedi: sayfa parmakla küçülür, bırakınca gider, vazgeçince geri gelir. Kural tek yerde durur (`BackSource`): kenarı olmayan bir öngörülü geri parmağın değildir.
 
+### Oynatıcı çubuğu
+- Çalan podcast bölümü canlı yayın değildir (12 Kasım: “podcast çaldığında canlı yayın diyor müzik barı”). İndirilmeden, yayın adresinden çalan bir bölüm oynatıcı için uzunluğu henüz bilinmeyen bir akıştır; 1.0.2'nin kuralı (uzunluğu olmayan akış yayındadır) onu radyo istasyonu sayıyor, çubukta arama çubuğunun yerine “● Canlı yayın” yazıyordu. Bölüm artık ilk kareden bölümdür: çubukta ve büyük oynatıcıda arama çubuğu durur, süre oynatıcıdan sorulur (bir istasyonda sorulmaz), oynatıcı yanıtlayana dek yayının bildirdiği süre gösterilir, kısım işaretleri yerine oturur. Önceki açılıştan kalan bir bölüm de, veritabanına sorulur sorulmaz, öyle görünür. Radyo istasyonu değişmedi: “● Canlı yayın”.
+
 ### Sürüm
 - `versionCode` 4010004; kişisel arm64 APK'sı 14010010 (1.0.3'ün 14010009'unun üzerine güncelleme olarak kurulur). Baseline Profile 1.0.3'ünküdür: değişen üç koşul, profilin saydığı yolların içindedir.
 
 ### Test
 - Testler Geri düğmesine artık Android 16'nın bastığı gibi basar (`BackButton`: kenarsız başlangıç, sistemin yayıyla ilerleyen ilerleme, bırakınca Geri). 1.0.3'ün testleri düğmeyi çıplak bir `onBackPressed()` ya da ilerlemesiz bir başlangıç olarak basıyordu; bu bir klavyenin Geri tuşudur, düğmenin ayrıntıya yaptığı bu yüzden görülmedi.
 - `EpisodeBackButtonTest`: telefonun kabuğunda program sayfası, üstünde bölüm sayfası. Düğme basılıyken sayfa yerinde ve tam boyunda; bırakınca aynı boyda, bitiş kenarından çıkar; önce bölüm sayfası kapanır, sonraki basışta program sayfası. `DetailNoDoubleExposureTest` aynısını telefonda ve geniş pencerede kare kare, `PlayerMotionTest` oynatıcıda ölçer. Her birinin yanında karşı test vardır: aynı ilerlemeyle bir parmak sayfayı küçültür.
+- `PlayingLengthTest`: uygulamanın başlattığı bölüm hiçbir karede canlı görünmez, süresi yayının bildirdiğidir; önceki açılıştan kalan bölüm veritabanı yanıtlayınca bölümdür; istasyon her karede canlıdır; cihazdaki bir dosya için veritabanına sorulmaz.
 - Kare şeritleri (`ci/shots-pr-<n>` dalında `motion/`) gerçek düğmeyle: `episode-open`, `episode-back-button`, `detail-back-button`, `album-close`, `page-pop`, `tab-back`, `player-back`; sayfanın kendi okuyla `page-pop-arrow`.
 
 ## 1.0.3 (12 Kasım 2026)

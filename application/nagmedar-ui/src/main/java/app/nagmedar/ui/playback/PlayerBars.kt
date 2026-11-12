@@ -243,7 +243,10 @@ data class PlayerBarInfo(
     val repeatOne: Boolean = false,
     /** The playing speed: the timelines move at it between the service's readings. */
     val rate: Float = 1f,
-    /** 1.0.2: a stream without a length (a station on the air): the bars show it live instead of a seek bar. */
+    /**
+     * 1.0.2: a stream without a length (a station on the air): the bars show it live instead of a seek bar. 1.0.4: never
+     * a podcast episode, streamed or not ([PlayingLength.live]).
+     */
     val live: Boolean = false,
 )
 
@@ -413,12 +416,14 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
     val video = media.type == MediaWrapper.TYPE_VIDEO
     val artist = media.artistName
     val links = remember(media) { MusicLinks.artistOf(media) to MusicLinks.albumOf(media) }
+    // 1.0.4: the podcast episode it is the audio of (its feed's length), null for anything else
+    val episode = rememberEpisodeLength(media)
     return PlayerBarInfo(
         title = media.nowPlaying ?: media.title ?: "",
         subtitle = if (artist.isNullOrBlank()) stringResource(R.string.nag_now_playing) else artist,
         isVideo = video,
         playing = playing,
-        lengthMs = rememberPlayingLength(media, playing),
+        lengthMs = rememberPlayingLength(media, playing, episode),
         format = tech?.mainAudio()?.let(::audioFormatLabel),
         shuffling = shuffling,
         repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
@@ -431,7 +436,8 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
         linked = links.first != null && !artist.isNullOrBlank(),
         repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
         rate = playbackRate(),
-        live = media.length <= 0L && isStream(media.uri?.scheme),
+        // 1.0.4: a station on the air, never a podcast episode streamed from its enclosure ([PlayingLength])
+        live = PlayingLength.live(media.length, media.uri?.scheme, episode != null),
     )
 }
 
@@ -440,26 +446,36 @@ private fun rememberPlayerBarInfo(media: MediaWrapper, playing: Boolean): Player
  * library has not read) the player's, read at the progress's pace until it reads the same twice ([playing] starting
  * reads it again). 0 while neither knows it (a stream on the air is not asked): a timeline then shows the time played
  * alone. Before, such a file's times stayed at "0:00" while its seek bar moved.
+ *
+ * 1.0.4: a podcast episode streamed from its enclosure is asked of the player too (it is no station), and until the
+ * player answers the length its feed gives stands in ([PlayingLength], [rememberEpisodeLength]). The player's answer
+ * is one media's: the next starts without it.
  */
 @Composable
-internal fun rememberPlayingLength(media: MediaWrapper?, playing: Boolean): Long {
+internal fun rememberPlayingLength(media: MediaWrapper?, playing: Boolean, episode: Long? = rememberEpisodeLength(media)): Long {
     val own = media?.length ?: 0L
-    val player by produceState(0L, media, own, playing) {
-        if (media == null || own > 0L || isStream(media.uri?.scheme)) return@produceState
+    val asks = media != null && PlayingLength.asksPlayer(own, media.uri?.scheme, episode != null)
+    val answered by produceState(PlayerLength(null, 0L), media, own, playing, asks) {
+        if (media == null || !asks) return@produceState
         var last = 0L
         repeat(LENGTH_READINGS) {
             val service = PlaybackService.instance
             // the player's own media, not the one it is leaving
             val length = if (service != null && service.currentMediaWrapper?.uri == media.uri) service.length else 0L
-            if (length > 0L) value = length
+            if (length > 0L) value = PlayerLength(media.location, length)
             // read the same twice: the player has settled on it
             if (length > 0L && length == last) return@produceState
             last = length
             delay(PROGRESS_READING_MS)
         }
     }
-    return if (own > 0L) own else player
+    // the answer for another media (the one played before this) is not this one's
+    val player = if (media != null && answered.location == media.location) answered.lengthMs else 0L
+    return PlayingLength.shown(own, player, episode)
 }
+
+/** What the player said of the length of the media at [location]. */
+private class PlayerLength(val location: String?, val lengthMs: Long)
 
 /** How many times [rememberPlayingLength] asks the player (some ten seconds) before it leaves the length unknown. */
 private const val LENGTH_READINGS = 20
