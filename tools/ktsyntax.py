@@ -20,7 +20,9 @@ def errors(src: bytes):
         stack.extend(n.children)
     return sorted(found)
 
-files = subprocess.run(["git", "-C", wt, "diff", "--name-only", f"{base}...HEAD"], capture_output=True, text=True, check=True).stdout.split()
+# what the branch changed against the base, the working tree's changes and new files included
+files = subprocess.run(["git", "-C", wt, "diff", "--name-only", base], capture_output=True, text=True, check=True).stdout.split()
+files += subprocess.run(["git", "-C", wt, "ls-files", "--others", "--exclude-standard"], capture_output=True, text=True, check=True).stdout.split()
 bad = 0
 for f in files:
     if not f.endswith(".kt"):

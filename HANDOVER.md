@@ -87,22 +87,55 @@ rows are tight on a phone with a keyboard; the "Sıradaki" button stays as it is
 screen's player, DeX desktops) can only be tried on his devices; the old `story/*` branches on GitHub wait for his
 word before they are deleted.
 
-## 1.0.4 (12 Nov 2026, in progress)
-The user on 1.0.3, 11:47 (Istanbul): "Podcast sayfasında podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi
-onu da düzeltiver". The cause, read from Android's source (not yet seen on a device): since Android 16 the Back button
-of the three-button navigation starts a predictive Back with no edge whose progress the system runs by itself while
-the button is down; the app's three own handlers (a detail's on a phone, a detail's wider up, the phone's player)
-followed it as a finger's and shrank the page into a rounded card. The fix and its tests are on `story/release-1.0.4`
-(draft PR #114, version 4010004 / 14010010); `orch/release-1.0.4/` has the PR's body and the device checks.
+## 1.0.4 (12 Nov 2026) — delivered
+Two reports of the user on 1.0.3, both fixed, both in `CHANGELOG.md`:
+1. 11:47 (Istanbul): "Podcast sayfasında podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi onu da
+   düzeltiver". Since Android 16 the Back button of the three-button navigation starts a predictive Back whose progress
+   the system runs by itself while the button is down. The app's three own handlers (`DepthBackHandler`: a detail on a
+   phone; `DetailBackHandler`: a detail wider up, Up next, the window player; `ExpandablePlayer`: the phone's player)
+   followed it as a finger's and shrank the page into a rounded card. The rule now: `BackSource.finger(swipeEdge,
+   edgeSwipes)`, a predictive Back is a finger's only when it names an edge AND the system keeps the window's side
+   edges for the Back swipe (`rememberBackSwipes`: the system gesture insets). With three buttons nothing is a finger's,
+   whatever edge a maker's button names.
+2. 15:02: "Bir de podcast çaldığında canlı yayın diyor müzik barı. Canlı yayın olmamalı". An episode streamed from its
+   enclosure is, to the player, a stream without a length; 1.0.2's bar rule drew "● Canlı yayın" for every such
+   stream. `PlayingLength` (the rule in one place) and `EpisodeAddresses` (the addresses given to the player as
+   episodes, told by `EpisodeMedia.of` before the episode plays; Room is asked once for a list restored at start).
 
-State at 15:30: **nothing of 1.0.4 is compiled yet.** GitHub stopped running this fork's workflows ("Workflows are
-not currently being run on this fork due to the scale of GitHub Actions usage", on the repository's Actions tab; a
-dispatch answers 422). Only the owner's click on "Enable workflows" there turns them on; he was told at 12:35.
-`orch/await_enabled.sh [minutes]` waits for it without starting anything. `orch/LOG.md`'s last entry is the plan of
-runs for when it is on, kept lean so GitHub does not stop them again.
+State on 12 Nov 17:50 (Istanbul): **1.0.4 is delivered.** master is 23a19b22 (PR #114 merged by fast-forward): CI
+green (2314 tests, 281 screenshots the same, release build); walks green on that commit (debug API 35 tablet and
+phone, personal API 37.0 phone; the personal API 37.0 tablet walk stands from 01607e78, the same app code). The
+personal APK (run 43238370290): `app.nagmedar.debug`, 14010010, minSdk 34, target 37, 97433156 bytes, SHA-256
+`f263b72ac07fbd0a6c2e6cc13c6d1ba0624accd465a2906358f2310404402159`; sent to the user with a side-by-side picture of
+1.0.3 and 1.0.4 under the held Back button. The device checks are at the top of the plan document's "1.0 cihaz
+testi" tab, the plan tab has a 1.0.4 paragraph. The Baseline Profile is 1.0.3's (not regenerated: the release was
+kept lean after GitHub had stopped the fork's workflows for some hours that day).
 
-New: `story/back-button-walk` (pushed, not in the PR on purpose: a change of the walk's driver makes every push of a
-pull request run two walks). It makes the emulator walk touch the system's own Back button, held and tapped, instead
-of sending a key, which never showed the bug; `passes=back-button` with the workflow's `ref` input walks an older
-app with it. `tools/back_button_offline.py <emulator_smoke.py>` checks that code against a pretended device, and
-`tools/ktsyntax.py <worktree>` counts a branch's Kotlin syntax slips against master (tree-sitter).
+What was seen where, said to the user the same way:
+- The Back button's effect is real and was seen on the Android 17 emulator: with 1.0.3 the system's own Back button,
+  held for a second, changes 21.7 % of the episode's page, 19.8 % of the podcast's page and 57.1 % of the full player
+  (shrunk rounded cards); with 1.0.4 at most 0.1 %. There the button's predictive Back starts with a long press; a
+  Samsung may start it at once, which cannot be seen from here. The rule does not depend on it.
+- "Canlı yayın" was NOT reproduced on the emulator: the walk's local feed server lets libVLC know the length at once,
+  1.0.3 reads the same seek row there. The fix rests on the code and `PlayingLengthTest`; his phone is the test.
+
+New in the kit:
+- The walk touches the system's own Back button (`back_button_check` in `buildsystem/ci/emulator_smoke.py`: the
+  button is found in the windows' hierarchy, held, the screen taken a tap's length and a second into the press, then
+  let go; whole = at most 2 % of the page differs) on the full player, an episode's page and a podcast's page of
+  `phone-en`, and ends by playing an episode and reading the bar (`episode_plays`). `passes=back-button` runs these
+  alone; with the workflow's `ref` input it walks an older app with today's driver (that is how 1.0.3 was shown).
+  The driver and the workflow are in master now: every push of a pull request that touches them runs two walks.
+- `tools/back_button_offline.py <emulator_smoke.py>` checks that code against a pretended device (11 cases);
+  `tools/ktsyntax.py <worktree> [base]` counts a branch's Kotlin syntax slips against its base (tree-sitter; known
+  false positives: DetailTransition.kt 3, MotionStripsTest.kt 3). Gradle does not run in the session: CI compiles.
+- `orch/await_enabled.sh [minutes]` waits for GitHub to run the fork's workflows again without starting anything.
+  GitHub stopped them on 12 Nov ("not currently being run on this fork due to the scale of GitHub Actions usage");
+  only the owner's click on the Actions tab turned them on. Four runs of that day are still "queued" there; a
+  session may not cancel a run.
+- Every Compose test class needs `@GraphicsMode(GraphicsMode.Mode.NATIVE)` (`ComposeSandboxTest` fails otherwise).
+
+Left, told to the user: the offer to make CI lighter (fewer walks per push) so GitHub does not stop the fork again;
+the merged `story/release-1.0.4` and `story/back-button-walk` branches wait, with the older `story/*`, for his word
+before they are deleted. Seen on the way, not touched: on Android 15 (not his systems) the emulator's keyboard stays
+up after the "Add by RSS address" dialog and takes the next Back.

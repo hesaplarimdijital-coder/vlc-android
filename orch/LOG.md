@@ -689,3 +689,102 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
      apkcheck (14010010, target 37); SendUserFile; device-checks.md to the top of the "1.0 cihaz testi" tab; plan tab.
   Told the user: tests, the release build, an API 35 walk, a personal walk on Android 17 only (four walk jobs, not
   eight), no profile regeneration. The demo job is one more than that: say so.
+- 12 Nov 15:01 (Istanbul) the user: "Açtım sanırım" (Actions on again: the probe answers about the ref). 15:02, after
+  interrupting a tool call to say it: "Bir de podcast çaldığında canlı yayın diyor müzik barı. Canlı yayın olmamalı".
+- 12:02 UTC: PR #114 closed and reopened (CI run 43214305843 on 4c3e1c90: debug green in 11 min, 2300 tests, 281
+  screenshots the same; the new Back tests all pass at their first compile; strips on ci/shots-pr-114 look right:
+  episode-back-button, detail-back-button, player-back whole under the button, out on the release).
+- Demo 1 (run 43214305599, story/back-button-walk a2bd2303, ref=master = 1.0.3, API 37.0, back-button pass): PASSED,
+  which proves nothing: the screen was taken a tap's length into the press and showed every page whole (0.0 %), the
+  button pressed (the launcher's taskbar: "back of com.google.android.apps.nexuslauncher at 228, 2337"); the release
+  closed each page. Either the emulator's system runs no progress for its button, or only after a long press (Android
+  16's notes: "Long-pressing the back button initiates a predictive back animation"). Evidence kept:
+  refs/keep/back-button-1.0.3-run1 and $SCRATCH/release-1.0.4/demo-1.0.3/.
+- Walk branch 72776028: the held button is read twice (a tap's length in, a second on), the report names the system
+  (navigation_mode, aflags' predictive Back flags), episode_plays reads the bar while an episode of the walk's feed
+  plays (seek bar and times, never "Live"): in the back-button pass after the pages, in phone-en at its very end.
+  Demo 2 on master dispatched 12:24 UTC (waiter b54i4315x).
+- THE LIVE LABEL (task #17), commit 42fde036: EpisodeMedia streams an episode not downloaded; to the player that is a
+  stream without a length, and PlayerBars' 1.0.2 rule (length <= 0 && isStream) drew "● Canlı yayın" for it.
+  EpisodeAddresses (PodcastCenter.kt: what EpisodeMedia.of starts, with the feed's length; Room asked once for a
+  stream left by an earlier run, EpisodeAddresses.source replaceable in tests), PlayingLength (playback/: live,
+  asksPlayer, shown), rememberEpisodeLength, rememberPlayingLength(media, playing, episode) now asks the player for an
+  episode's stream and falls back on the feed's length; PlayingLengthTest. CI on 42fde036: everything green but
+  ComposeSandboxTest (PlayingLengthTest lacked @GraphicsMode(NATIVE)): fixed in the next commit.
+- THE STRONGER BACK RULE, commit 1528be02: BackSource.finger(swipeEdge, edgeSwipes) and rememberBackSwipes() (the
+  system's gesture insets at the window's sides, the shell's old edgeBack): with three buttons nothing is a finger's,
+  whatever edge a maker's button names (the owner's phone is a Samsung; EDGE_NONE is AOSP's word). The three handlers
+  and the shell's tab rule ask it. Tests of a finger's Back call compose.gestureNavigation() (shell/BackButton.kt);
+  counter cases: BackSourceTest, DetailNoDoubleExposureTest.onAPhoneWithThreeButtons…, EpisodeBackButtonTest.
+  withThreeButtons…, PlayerMotionTest (the edged Back without edges leaves the player whole). CI waiter be3zwvegq.
+- NEXT: CI green on 1528be02 → git merge story/back-button-walk into story/release-1.0.4 (+ CHANGELOG's walk line),
+  push: CI + the PR's API 35 walks; dispatch the personal 37.0 walk on that head; then evidence, release_chain.sh
+  release-1.0.4 <sha> 1.0.4, apkcheck (14010010), send, docs (device-checks.md rewritten for both fixes).
+- Demo 2 (run 43217588211, walk 72776028 on master = 1.0.3, API 37.0): FAILED as it should. Held a second, the system's
+  Back button changes 21.7 % of the episode's page, 19.8 % of the podcast's page, 57.1 % of the full player (shrunk
+  rounded cards over the scrim: $SCRATCH/release-1.0.4/demo2-1.0.3/episode-held.png, player-held.png); a tap's length
+  into the press nothing (0.0 %). So on AOSP 17 (the launcher's taskbar button) the button's predictive Back starts with
+  the long press and 1.0.3 follows it as a finger's: the mechanism is real. A Samsung may start it at once (the owner
+  saw it on plain presses in 1.0.2 and 1.0.3). The bar while an episode plays was NOT live on 1.0.3 there ("0:31 Track
+  position −0:29"): the walk's local server lets libVLC know the length at once; the owner's streams do not. Evidence
+  kept: refs/keep/back-button-1.0.3-run2. aflags listed no predictive Back flag; navigation_mode=0.
+- CI on 1528be02: debug green, 2314 tests (2300 + 9 PlayingLengthTest + 3 BackSourceTest + 2 three-button cases), 281
+  screenshots the same.
+- FINAL HEAD 01607e78d04987abb3d4057113eadffefd576973 (12:45 UTC): merge of story/back-button-walk (033c6253) + the
+  release notes' walk lines. Runs: CI 43220855839, the PR's API 35 walks 43220855836, personal 37.0 walk 43220871981
+  (dispatched). Waiter: watch_sha.sh <sha> 110 3 (bxec4cufo).
+- Then: PR #114 body ($SCRATCH/release-1.0.4/pr-body.md, "Kanıt" to fill), from /home/claude:
+  sh $ORCH/release_chain.sh release-1.0.4 01607e78d04987abb3d4057113eadffefd576973 1.0.4; apkcheck (14010010); send;
+  docs: device-checks.md before m1gesnh1vzq.8727 of tab a85e3dab-fb45, intro m1gesnh1vzq.25 to 1.0.4; plan tab note.
+- Head 01607e78 (13:30 UTC): CI green (debug, release, lab). Walks: API 35 debug tablet passed (134 steps, 0/67),
+  personal 37.0 tablet passed (134 steps, 0/66); both PHONE jobs failed 2 of 70 checks, both at the very last step 138:
+  "the Podcasts open" and "a followed podcast" of episode_plays: phone-en ends on Settings (Ctrl+, then the cold start
+  restores it), a page without the bottom bar, and podcast_page looked for the Podcasts tab there. Everything before
+  passed, the new Back-button checks included. THE FIX VERIFIED ON A REAL ANDROID 17 SYSTEM (personal build, run
+  43220871981): under the held button the full player 0.1 % / 0.1 %, the episode's page 0.0 % / 0.1 %, the podcast's
+  page 0.0 % / 0.0 % (1.0.3 on the same emulator: 57.1 %, 21.7 %, 19.8 % a second on); each closed by the button.
+  Evidence kept: refs/keep/walk-1.0.4-{37-personal-phone,37-personal-tablet,35-phone,35-tablet}-run1;
+  $SCRATCH/release-1.0.4/geri-dugmesi-1.0.3-1.0.4.png is the side-by-side for the user (send it with the APK).
+  The debug job's web preview ("Uzaktan erişim web arayüzü görünümü", continue-on-error, "a look, not a gate") timed out
+  once on "Gece Yarısı": unrelated, the job is green.
+- Driver fix 23a19b2267fcf654c520e8de37e113893f589516 (13:33 UTC): podcast_page() leaves a page of its own first
+  (back_to_tabs), episode_plays() starts the app afresh should the bottom bar still be away. Runs on it: the PR's CI and
+  API 35 walks (automatic), personal 37.0 phone-en only (dispatched; the tablet's personal walk stands from 01607e78,
+  the same app code: the two commits differ in the walk's driver alone, in a step only phone-en runs). Waiter b2q6w45qf.
+- Head 23a19b22 ALL GREEN (14:25 UTC): CI 43228481940 (debug: 2314 tests started, 2314 SUCCESS, counted from the job's
+  log; 281 screenshots the same; release; lab). Walks: API 35 debug tablet 134 steps 0/67 and phone 141 steps 0/71
+  (run 43228481866, on the PR's merge commit bfa650a), personal API 37.0 phone 145 steps 0/71 (run 43228474544; one
+  ANR of the system at launch: the emulator's Google Play services, GoogleLocationManagerService). Under the held
+  button on the personal build: the full player 0.1 % / 0.1 %, the episode's page 0.0 % / 0.1 %, the podcast's page
+  0.0 % / 0.0 %; each closed when let go. The episode played from its enclosure: "0:31 Track position −0:29" in the bar
+  (looked at: shots/142-phone-en-the-episode-plays.png, the seek row with its times). Evidence kept under
+  refs/keep/walk-1.0.4-{37-personal-phone,35-phone,35-tablet}-run2.
+  On API 35 the episode's page stays open after the held press and closes on the tap, both runs: the emulator's soft
+  keyboard is still up there after the "Add by RSS address" dialog (the shots show it) and takes the first Back. Not
+  the app's Back; on Android 17 the keyboard goes with the dialog. (A dialog that leaves the keyboard up on Android 15
+  is not among the owner's systems; not touched.)
+  Looked for a second place that could call an episode live: nag_radio_live is drawn by the bar's LiveLine
+  (PlayingLength.live, fixed) and by the Radio tab's NowStrip, which only shows a station started from the Radio
+  screen while the service plays that station. EpisodeMedia.of is the only maker of an episode's media (PodcastCenter's
+  play, AppCarCatalog): both tell EpisodeAddresses.
+- PR #114's body has "Kanıt" (the four walks, the 1.0.3 / 1.0.4 table under the held button, and that the walk does
+  NOT show the "Canlı yayın" fix: 1.0.3 reads the same line there). 14:33 UTC: release_chain.sh release-1.0.4 23a19b22…
+  1.0.4 (background b4enz5n9p): master is 23a19b22 by fast-forward, PR #114 merged, personal release run 43238370290.
+- Plan document, tab "1.0 cihaz testi" (a85e3dab-fb45) rev 9: the 1.0.4 section (heading m1gesnh1vzq.17668, 9 + 7
+  checks) is at the top, the intro names 1.0.4 (hash 9f0501ca). $SCRATCH/release-1.0.4/device-checks.md is its source.
+- Four runs of the throttled day are still "queued" on GitHub (43097360728, 43097182461, 43097182618 of 11 Nov;
+  38645881043 of 15 Oct): cancelling a run is denied to this session; told to the user as his to cancel.
+- **1.0.4 DELIVERED** (14:50 UTC = 17:50 Istanbul, 12 Nov). master 23a19b2267fcf654c520e8de37e113893f589516 (PR #114
+  merged by fast-forward). Personal release run 43238370290, ready 15 min after the dispatch. apkcheck:
+  app.nagmedar.debug, versionName 1.0.4, versionCode 14010010, minSdk 34, target 37, not debuggable, v2 signed, cert
+  d094907b020a7f3ee143b53c7be0874c33543b51bf3ebe32943df576a9fecbbc, baseline.prof + profm, arm64-v8a, 97433156 bytes,
+  SHA-256 f263b72ac07fbd0a6c2e6cc13c6d1ba0624accd465a2906358f2310404402159. The size is 1.0.3's to the byte: compared
+  entry by entry, 8 of 2385 differ (the manifest, the three dex files, the compiled profile, resources.arsc, the
+  version-control stamp); the alignment padding takes up the 9 KB the dex files grew by.
+  Sent with SendUserFile: the APK and geri-dugmesi-1.0.3-1.0.4.png (1.0.3 / 1.0.4 under the held button).
+  Plan document: "1.0 cihaz testi" rev 9 (the 1.0.4 checks at the top), "1.0.3 planı" rev 35 (a 1.0.4 paragraph under
+  the intro, block m1gesnh1vzq.10707).
+  Left on GitHub for the user's word: story/release-1.0.4 and story/back-button-walk (merged), with the older story/*
+  branches. Local worktree and branch of back-button-walk removed.
+  Not seen from here, his devices are the test: whether One UI's Back button starts its predictive Back at once (the
+  rule does not depend on it), and the "Canlı yayın" fix (the emulator's local server never showed the bug).
