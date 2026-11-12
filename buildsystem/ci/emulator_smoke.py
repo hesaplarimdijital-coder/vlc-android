@@ -37,10 +37,25 @@ violations). The walk, in passes (a size and a language each):
                then each page with the mini player and its list under the bars, Sıradaki and the full
                player, dark and light; the bar's and the card's glass must blur wherever they show
                (glass-b/README.md names each screenshot)
+  back-button  (on demand, either build; an older app by the workflow's ref input) 1.0.4: the system's
+               Back button of the three-button navigation touched where the owner touches it, on what
+               the phone opens over a list: an episode's page, the podcast's page under it, the full
+               player; each at rest, with the button held and after a tap of it (back_button_check);
+               and the bar read while an episode plays: a seek bar, never "live" (episode_plays)
 
 1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
-bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band)
-and Back is pressed as he presses it. The product draws the phone's bottom chrome on one glass
+bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band).
+1.0.4: and Back is pressed as he presses it. The walk's Back is a key (`input keyevent 4`), and a
+key is not his button: since Android 16 a touch on the system's Back button starts a predictive
+Back whose progress the system runs by itself while the button is down. 1.0.3's detail pages and
+its player followed that progress as a finger's and shrank into a rounded card before they left
+(the owner, 12 Nov: "podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi"); no key shows
+it. phone-en now leaves the full player, the episode's page and the podcast's by the button itself,
+found in the windows' hierarchy: held, the page must stay whole; tapped, it must close (the report's
+"The system's Back button"). 1.0.4 also (the owner: "podcast çaldığında canlı yayın diyor müzik
+barı"): phone-en ends by playing an episode of the walk's feed from its page, a stream as his are,
+and reads the bar: a seek bar with its times, never a station's "live" line (episode_plays).
+The product draws the phone's bottom chrome on one glass
 (glass B); with the system's animations removed, as the walk runs, the app draws it opaque, so
 phone-en's glass_b_check turns them on to see it blur: switched on at run time over the search
 page's covers, moved, and from a cold start (the walk's folder has a cover.jpg for that).
@@ -88,7 +103,7 @@ import time
 import xml.etree.ElementTree as ET
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageChops
 except Exception:  # Pillow is optional: screenshots are then kept at full size
     Image = None
 
@@ -114,6 +129,11 @@ THREE_BUTTON_OVERLAY = "com.android.internal.systemui.navbar.threebutton"
 GESTURAL_OVERLAY = "com.android.internal.systemui.navbar.gestural"
 # 1.0.3: the debug-only launch extra that draws the phone's chrome on glass (shell/ChromeGlass.kt)
 CHROME_GLASS_EXTRA = "app.nagmedar.debug.CHROME_GLASS"
+# 1.0.4: the system's Back button in the windows' hierarchy (System UI's navigation bar, the launcher's taskbar)
+BACK_ID_RE = re.compile(r":id/back$")
+# 1.0.4: a page counts as whole under the held Back button while no more than this share of it differs from the page
+# at rest (a seek bar's thumb, a time that changed); shrunk towards nine tenths, a fifth of it and more does
+BACK_HELD_WHOLE = 0.02
 
 
 class Node:
@@ -195,6 +215,8 @@ class Smoke:
         self.last_app_sig = None  # the app's part of the screen at the end of the last step
         self.library_ready = False  # the walk's media pushed and granted, and scanned (the first run with them)
         self.sheet_trials = []  # the sheet-drag pass's trials
+        self.back_presses = []  # 1.0.4: what the system's Back button did to each page (back_button_check)
+        self.back_system_info = None  # 1.0.4: the system's navigation mode and predictive Back flags (back_system)
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
@@ -1337,6 +1359,160 @@ class Smoke:
                 self.key(4)
                 self.step("Back: the full player closed")
 
+    # ---------------------------------------------------------------- 1.0.4: the system's Back button
+
+    def system_back_button(self, nodes):
+        """1.0.4: the system's Back button of the three-button navigation: the x and y of its centre, the top of its bar
+        and how it was found. The app's own dump has the app's window alone, so the hierarchy of every window is read
+        (System UI's navigation bar, or the launcher's taskbar); failing that, where AOSP's bar has the button."""
+        w, h = self.screen_size(nodes)
+        rc, out = self.adb("shell", "uiautomator dump --windows /sdcard/ui-windows.xml", timeout=60)
+        if rc == 0 and "dumped" in out:
+            rc, xml = self.adb("exec-out", "cat /sdcard/ui-windows.xml", timeout=30)
+            backs = [n for n in (self.nodes(xml) if rc == 0 else [])
+                     if n.pkg != self.pkg and n.area and BACK_ID_RE.search(n.rid) and n.center[1] > h * 0.9]
+            if backs:
+                b = max(backs, key=lambda n: n.area)
+                return b.center[0], b.center[1], b.b[1], "%s of %s" % (b.rid.split("/")[-1], b.pkg)
+        # AOSP's bar, 48 dp high: Back in the middle of the last two thirds of the space before Home
+        bar = int(round(48 * w / 411.4))
+        return int(w * 0.277), h - bar // 2, h - bar, "a guess (not in the windows' hierarchy)"
+
+    def back_button_held(self, x, y, name):
+        """The screen while a finger holds the Back button at ([x], [y]), twice: a moment into the press (a tap's length)
+        and a second later (a long press: Android 16's notes have the button's predictive Back start with one); the
+        finger is lifted after them. The screenshots [name]-tap and [name]-long, None for one that could not be taken."""
+        self.sh("rm -f /sdcard/nag-held-1.png /sdcard/nag-held-2.png ; input motionevent DOWN %d %d ; sleep 0.05 ; "
+                "screencap -p /sdcard/nag-held-1.png ; sleep 0.9 ; screencap -p /sdcard/nag-held-2.png ; "
+                "input motionevent UP %d %d" % (x, y, x, y), timeout=90)
+        shots = []
+        for i, moment in ((1, "tap"), (2, "long")):
+            rc, data = self.adb("exec-out", "cat /sdcard/nag-held-%d.png" % i, timeout=60, binary=True)
+            rel = None
+            if rc == 0 and len(data) > 1000:
+                rel = "shots/%s-%s.png" % (name, moment)
+                with open(os.path.join(self.out, rel), "wb") as f:
+                    f.write(data)
+            shots.append(rel)
+        return shots
+
+    def back_system(self):
+        """What the system says of its Back button, for the report: the navigation mode and the flags that name the
+        predictive Back (aflags, where the build has it)."""
+        mode = self.sh("settings get secure navigation_mode", timeout=30)
+        flags = self.sh("aflags list 2>/dev/null | grep -i -E 'predictive_back|three_button|back_anim' | head -20", timeout=60)
+        flags = "; ".join(" ".join(l.split()) for l in flags.splitlines() if l.strip())
+        return "navigation_mode=%s; flags: %s" % (mode or "?", flags or "none listed")
+
+    def page_change(self, rel_a, rel_b, box, width):
+        """How much of [box] (x0, y0, x1, y1 on a screen [width] px wide) differs between the screenshots [rel_a] and
+        [rel_b]: the share of its pixels, 0 to 1, with a colour channel more than 16 apart; None without Pillow or
+        either screenshot."""
+        if Image is None or not rel_a or not rel_b:
+            return None
+        try:
+            a = Image.open(os.path.join(self.out, rel_a)).convert("RGB")
+            b = Image.open(os.path.join(self.out, rel_b)).convert("RGB")
+        except Exception:
+            return None
+        if b.size != a.size:
+            b = b.resize(a.size)
+        k = a.width / float(width)
+        x0, y0, x1, y1 = [int(round(v * k)) for v in box]
+        crop = (x0, y0, max(x1, x0 + 1), max(y1, y0 + 1))
+        red, green, blue = ImageChops.difference(a.crop(crop), b.crop(crop)).split()
+        hist = ImageChops.lighter(ImageChops.lighter(red, green), blue).histogram()
+        return sum(hist[17:]) / float(sum(hist) or 1)
+
+    def back_button_check(self, what, tag):
+        """1.0.4 (the owner's report from his phone, three buttons, Android 17: Back from an episode's page played "the
+        old animation"): Back from the page [tag] by the system's own Back button, touched where he touches it. Since
+        Android 16 a touch on that button starts a predictive Back whose progress the system runs by itself while the
+        button is down; 1.0.3's detail pages and its player followed it as a finger's and shrank into a rounded card.
+        So first the button held: the page must stay whole (on an older system the held button changes nothing, and the
+        check is met without telling much); then a tap of it, which must close the page. The system's animations are on
+        meanwhile: without them the app moves nothing with a Back gesture either. Returns the nodes after."""
+        nodes = self.nodes(self.dump())
+        page = self.by_id(nodes, tag)
+        if not page:
+            self.warnings.append("[%s] %s is not open: Back by the key" % (self.cur_pass, what))
+            self.key(4)
+            return self.step("Back from %s" % what)
+        w, h = self.screen_size(nodes)
+        x, y, bar_top, how = self.system_back_button(nodes)
+        if self.back_system_info is None:
+            self.back_system_info = self.back_system()
+            self.log("back button: the system: %s" % self.back_system_info)
+        b = page[0].b
+        # the page without the system's bar under it (the pressed button lights up there)
+        box = (b[0], b[1], b[2], min(b[3], bar_top))
+        closed = lambda ns: bool(self.app_nodes(ns)) and not self.by_id(ns, tag)
+        self.animations(True)
+        try:
+            time.sleep(1.0)
+            self.step("Before the Back button: %s" % what)
+            rest = self.steps[-1]["shot"]
+            held = self.back_button_held(x, y, "%03d-%s-%s" % (self.n + 1, self.cur_pass, slug("back button held on " + what)))
+            time.sleep(1.5)
+            nodes = self.step("The Back button held on %s, then let go" % what)
+            # a tap's length into the press, and a long press's
+            changes = [self.page_change(rest, shot, box, w) for shot in held]
+            read = [c for c in changes if c is not None]
+            change = max(read) if read else None
+            gone = closed(nodes)
+            press = {"pass": self.cur_pass, "page": what, "button": "%s at %d, %d" % (how, x, y), "rest": rest, "held": held,
+                     "changes": changes, "change": change, "let_go": "closed" if gone else "open", "tap": ""}
+            self.back_presses.append(press)
+            if not gone:
+                # a tap as a finger's: down for a tenth of a second (`input tap` lifts at once; a long press is no Back)
+                self.step("The Back button tapped on %s" % what, lambda: self.sh("input swipe %d %d %d %d 100" % (x, y, x, y)), wait=1.2)
+                nodes, gone = self.wait_for(closed, 5)
+                press["tap"] = "closed" if gone else "open"
+            self.log("back button [%s] %s: %s" % (self.cur_pass, what, press))
+            if not gone and how.startswith("a guess"):
+                # nothing came of a touch at a guessed place: the button is not there, and nothing was read of it
+                self.warnings.append("[%s] the system's Back button was not found (%s): %s was not left by it"
+                                     % (self.cur_pass, press["button"], what))
+            else:
+                if change is None:
+                    self.warnings.append("[%s] %s under the held Back button was not read (no screenshot of it, or no Pillow)"
+                                         % (self.cur_pass, what))
+                else:
+                    self.check("%s stays whole while the system's Back button is held" % what, change <= BACK_HELD_WHOLE,
+                               "of the page differs from the page at rest: %s a tap's length into the press, %s a second on (the button: %s)"
+                               % (tuple("?" if c is None else "%.1f %%" % (c * 100) for c in changes) + (press["button"],)))
+                self.check("the system's Back button closes %s" % what, bool(gone),
+                           "held and let go: %s; tapped: %s" % (press["let_go"], press["tap"] or "not needed"))
+            if not gone:
+                # the walk goes on from the page under
+                self.key(4)
+                nodes = self.step("Back from %s (the key)" % what)
+        finally:
+            self.animations(False)
+        return nodes
+
+    def player_back_button(self):
+        """1.0.4: the full player, opened by a tap on the mini player's words over a track that plays, left by the
+        system's own Back button (back_button_check): held, the player stays the page from edge to edge; tapped, it
+        goes down to the mini player."""
+        nodes = self.nodes(self.dump())
+        mini = self.by_id(nodes, "mini-player")
+        if not mini:
+            self.warnings.append("[%s] no mini player: the full player's Back button was not walked" % self.cur_pass)
+            return nodes
+        b = mini[0].b
+        x, y = (b[0] + b[2]) // 2, self.first_row(b)
+        shown = None
+        for attempt in ("", " (again)"):
+            # once more, should a slow emulator have lost the first tap
+            self.step("A tap on the mini player" + attempt, lambda: self.sh("input tap %d %d" % (x, y)), wait=1.5)
+            nodes, shown = self.wait_for(lambda ns: self.by_id(ns, "phone-player"), 6)
+            if shown:
+                break
+        if not self.check("a tap on the mini player opens the full player", bool(shown)):
+            return nodes
+        return self.back_button_check("the full player", "phone-player")
+
     def follow_podcast(self, nodes):
         """Follows the walk's feed (--feed) by the Podcasts' "Add by address" when no podcast is followed."""
         s = self.strings[self.lang]
@@ -1359,23 +1535,71 @@ class Smoke:
         self.check("the feed is followed", bool(done))
         return self.step("Followed")
 
-    def episode_page(self):
-        """A followed podcast's page, then an episode's: its play button stays where it first showed."""
+    def podcast_page(self):
+        """The Podcasts, then a followed podcast's page (the walk's feed, --feed, followed first when none is): the nodes
+        with its episodes; None without a feed or when the page did not open."""
         s = self.strings[self.lang]
         self.open_label(s["nag_nav_podcasts_short"]) or self.open_label(s["nag_nav_podcasts"])
         nodes = self.step("Podcasts")
         self.check("the Podcasts open", bool(self.by_id(nodes, "podcast-add") or self.by_id(nodes, "podcast-list")
                                              or self.by_id(nodes, "podcast-grid") or self.by_id(nodes, "podcast-row")))
         if not self.a.feed:
-            return
+            return None
         if not (self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")):
             nodes = self.follow_podcast(nodes)
         if not self.by_id(nodes, "podcast-episode"):
             show = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
             if not self.check("a followed podcast", bool(show)):
-                return
+                return None
             self.step("The podcast's page", lambda: self.tap(show[0]))
             nodes, _ = self.wait_for(lambda ns: self.by_id(ns, "podcast-episode"), 15)
+        return nodes
+
+    def episode_plays(self):
+        """1.0.4 (the owner, 12 Nov: "podcast çaldığında canlı yayın diyor müzik barı. Canlı yayın olmamalı"): an episode
+        of the walk's feed played from its page, streamed from its enclosure as his are: the bar must show a seek bar
+        with its times, never a station's "live" line. An episode that does not start in time is a warning (the
+        emulator's network), a bar that says live a failed check. Paused after, and back to the Podcasts."""
+        s = self.strings[self.lang]
+        nodes = self.podcast_page()
+        episodes = self.by_id(nodes, "podcast-episode") if nodes else []
+        if not episodes:
+            self.warnings.append("[%s] no episode to play: the bar was not read while one plays" % self.cur_pass)
+            return
+        self.step("An episode's page (to play it)", lambda: self.tap(episodes[0]), wait=1.5)
+        nodes, play = self.wait_for(lambda ns: self.by_id(ns, "episode-play"), 12)
+        if play:
+            self.step("Play the episode", lambda: self.tap(play[0]), wait=2.0)
+            # the walk's episodes are "Episode 1" … "Episode 3": the bar names the one that plays
+            nodes, named = self.wait_for(lambda ns: "Episode" in (self.mini_title(ns) or ""), 25)
+            if not named:
+                self.warnings.append("[%s] the episode did not start within 25 s: the bar was not read while one plays (the bar: %s)"
+                                     % (self.cur_pass, self.mini_title(nodes)))
+            else:
+                time.sleep(2.0)
+                nodes = self.step("The episode plays")
+                seek = self.by_id(nodes, "mini-player-seek")
+                line = seek + [n for n in self.app_nodes(nodes) if seek and self.inside(n, seek[0].b)]
+                words = " ".join(w for n in line for w in (n.text.strip(), n.desc.strip()) if w)
+                live = bool(self.by_id(nodes, "bar-live")) or s["nag_radio_live"] in words
+                self.check("an episode that plays is not on the air in the bar: a seek bar with its times",
+                           bool(seek) and not live and bool(TIME_RE.search(words)),
+                           "the bar's line: %s" % (words[:160] or "nothing read"))
+                again = self.by_id(nodes, "episode-play")
+                if again:
+                    self.step("Pause the episode", lambda: self.tap(again[0]), wait=1.5)
+        else:
+            self.warnings.append("[%s] no play button on the episode's page: the bar was not read while one plays" % self.cur_pass)
+        for what in ("the episode", "the podcast"):
+            self.key(4)
+            self.step("Back from %s" % what)
+
+    def episode_page(self):
+        """A followed podcast's page, then an episode's: its play button stays where it first showed. 1.0.4: Back from
+        both by the system's own Back button, held and tapped (back_button_check)."""
+        nodes = self.podcast_page()
+        if nodes is None:
+            return
         episodes = self.by_id(nodes, "podcast-episode")
         if not self.check("an episode on the podcast's page", bool(episodes)):
             return
@@ -1403,10 +1627,9 @@ class Smoke:
         moved = [(dt, b) for dt, b in later if b != first]
         self.check("the episode's play button does not move", not moved,
                    "first %s at %.1f s; then %s" % (first, t_first - t_tap, "; ".join("%s at +%.1f s" % (b, dt) for dt, b in later)))
-        self.key(4)
-        self.step("Back from the episode")
-        self.key(4)
-        self.step("Back from the podcast")
+        # 1.0.4: Back as the owner presses it (the key the walk pressed here never showed what his button does)
+        self.back_button_check("the episode's page", "episode-detail")
+        self.back_button_check("the podcast's page", "podcast-page")
 
     def radio_opens(self):
         s = self.strings[self.lang]
@@ -1416,7 +1639,8 @@ class Smoke:
         self.check("the Radio opens", any(self.by_id(nodes, i) for i in ids))
 
     def phone_player(self):
-        """1.0's phone: sheets, the pages, a track played, the list's frames, the player's drag, the episode page, the Radio."""
+        """1.0's phone: sheets, the pages, a track played, the list's frames, the player's drag, 1.0.4's Back button on the
+        full player, the episode page (and the button again), the Radio."""
         nodes = self.open_music()
         self.item_sheet(nodes)
         self.phone_pages()
@@ -1427,6 +1651,7 @@ class Smoke:
         nodes = self.nodes(self.settle(0.8))
         self.play_track(nodes)
         self.player_drag()
+        self.player_back_button()
         self.episode_page()
         self.radio_opens()
 
@@ -1740,6 +1965,8 @@ class Smoke:
         self.playback()
         self.palette()
         self.rotation_and_background()
+        # 1.0.4, last: nothing else of the pass has an episode in the player
+        self.episode_plays()
 
     def ensure_library(self):
         """1.0.3: a pass that needs the walk's media (workstation, phone-tr) and runs without phone-en before it (the walk
@@ -2429,6 +2656,29 @@ class Smoke:
         if self.combo(113, 55):  # Ctrl+, settings
             self.step("Settings (Ctrl+,)")
 
+    def pass_back_button(self):
+        """1.0.4, on demand (passes=back-button, either build; the workflow's ref input walks an older app with this
+        walk): the system's Back button of the three-button navigation, touched where the owner touches it
+        (back_button_check), on what the phone opens over a list: an episode's page (his report of 12 Nov), the
+        podcast's page under it, then the full player over a track that plays. Each page at rest, while the button is
+        held and after a tap of it; the report's "The system's Back button" lists the screenshots and how much of each
+        page changed under the held button. In the light theme: around a shrunk page the list shows dark under its
+        scrim."""
+        self.cur_pass, self.lang = "back-button", "en"
+        self.sh("am force-stop " + self.pkg)
+        self.set_display("1080x2400", "420")
+        self.three_button_navigation()
+        self.sh("cmd uimode night no")
+        self.ensure_library()
+        self.step("Launch (the Back button)")
+        self.episode_page()
+        self.episode_plays()
+        self.play_track(self.open_music())
+        self.player_back_button()
+        pages = [p["page"] for p in self.back_presses if p["pass"] == self.cur_pass]
+        self.check("the system's Back button was pressed on the episode's page, the podcast's and the full player",
+                   len(pages) >= 3, "pressed on: %s" % (", ".join(pages) or "nothing"))
+
     def pass_sheet_trials(self):
         """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
         1.0.2's `input swipe … 300` and by drag() in turn, each trial with the moves the system delivered (dumpsys
@@ -2634,6 +2884,19 @@ class Smoke:
             md.append("| %s | %d | %s | %s | %s | %s | %s | %s | %s |" % (r["pass"], r["step"], r["what"],
                       "?" if r["frames"] is None else "%d" % r["frames"], janky, pct("p50"), pct("p90"), pct("p95"), pct("p99")))
         md.append("")
+        if self.back_presses:
+            md.append("## The system's Back button (1.0.4: touched as the owner touches it; whole: at most %.0f %% of the page differs)\n"
+                      % (BACK_HELD_WHOLE * 100))
+            md.append("The system: %s\n" % (self.back_system_info or "?"))
+            md.append("| pass | page | the button | at rest | held, a tap's length | differs | held, a second on | differs | let go | tapped |")
+            md.append("|------|------|------------|---------|----------------------|---------|-------------------|---------|--------|--------|")
+            link = lambda rel: "[%s](%s)" % (os.path.basename(rel), rel) if rel else "none"
+            pct = lambda c: "?" if c is None else "%.1f %%" % (c * 100)
+            for p in self.back_presses:
+                md.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+                    p["pass"], p["page"], p["button"], link(p["rest"]), link(p["held"][0]), pct(p["changes"][0]),
+                    link(p["held"][1]), pct(p["changes"][1]), p["let_go"], p["tap"] or "not needed"))
+            md.append("")
         if self.crashes:
             md.append("## Crashes and ANRs\n")
             for i, c in enumerate(self.crashes, 1):
@@ -2693,7 +2956,7 @@ class Smoke:
             json.dump({"verdict": verdict, "steps": self.steps, "crashes": self.crashes, "errors": self.errors,
                        "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
                        "frames": self.jank, "seconds": dur, "passes": self.a.passes, "source": self.a.source,
-                       "system": self.system_events, "sheet_trials": self.sheet_trials}, f, indent=1)
+                       "system": self.system_events, "sheet_trials": self.sheet_trials, "back_presses": self.back_presses}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
