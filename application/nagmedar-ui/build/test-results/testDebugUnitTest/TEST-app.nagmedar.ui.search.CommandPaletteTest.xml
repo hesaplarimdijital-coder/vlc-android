@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.CommandPaletteTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:26:24.629Z" hostname="runnervmwuk1x" time="0.324">
+  <properties/>
+  <testcase name="withoutAQueryTheRecentComeFirst" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.071"/>
+  <testcase name="theArrowsAndEnterRunAHit" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.049"/>
+  <testcase name="inEnglishTheTitlesAreEnglishCapitals" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.044"/>
+  <testcase name="aClickRunsAHitAndEscapeCloses" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.041"/>
+  <testcase name="prefixesAndTabNarrowTheSearch" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.07"/>
+  <testcase name="typingFindsTurkishWordsFuzzily" classname="app.nagmedar.ui.search.CommandPaletteTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[System.logW: A resource failed to call close. 
+System.logW: A resource failed to call close. 
+]]></system-err>
+</testsuite>

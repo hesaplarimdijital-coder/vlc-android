@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.library.LibraryRecheckTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:21:00.773Z" hostname="runnervmwuk1x" time="0.101">
+  <properties/>
+  <testcase name="theStampDoesNotDependOnTheVolumesOrder" classname="app.nagmedar.library.LibraryRecheckTest" time="0.09"/>
+  <testcase name="aClockSetBackCountsAsOld" classname="app.nagmedar.library.LibraryRecheckTest" time="0.001"/>
+  <testcase name="anOldLookIsMadeAgain" classname="app.nagmedar.library.LibraryRecheckTest" time="0.002"/>
+  <testcase name="aNewOrRemovedFileMovesTheStamp" classname="app.nagmedar.library.LibraryRecheckTest" time="0.0"/>
+  <testcase name="noFinishedLookOrNoIndexMeansALook" classname="app.nagmedar.library.LibraryRecheckTest" time="0.001"/>
+  <testcase name="anUnchangedIndexLookedAtTodayIsTrusted" classname="app.nagmedar.library.LibraryRecheckTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

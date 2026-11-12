@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.ShellScreenshotTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:26:18.867Z" hostname="runnervmwuk1x" time="2.062">
+  <properties/>
+  <testcase name="mediumDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.077"/>
+  <testcase name="compactMorePageDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.099"/>
+  <testcase name="compactMorePageLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.094"/>
+  <testcase name="compactDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.081"/>
+  <testcase name="expandedDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.082"/>
+  <testcase name="extraLargeDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.132"/>
+  <testcase name="extraLargeOled" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.132"/>
+  <testcase name="compactNetworkPageDarkEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.118"/>
+  <testcase name="compactLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.104"/>
+  <testcase name="compactMorePageLightEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.089"/>
+  <testcase name="compactNetworkPageLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.089"/>
+  <testcase name="largeDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.089"/>
+  <testcase name="extraLargeLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.15"/>
+  <testcase name="mediumLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.071"/>
+  <testcase name="compactLightEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.148"/>
+  <testcase name="expandedLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.093"/>
+  <testcase name="largeDarkEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.1"/>
+  <testcase name="compactSettingsPageDark" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.105"/>
+  <testcase name="largeLight" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.1"/>
+  <testcase name="compactSettingsPageLightEnglish" classname="app.nagmedar.ui.screenshots.ShellScreenshotTest" time="0.107"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

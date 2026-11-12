@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarMusicTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:25:00.535Z" hostname="runnervmwuk1x" time="0.113">
+  <properties/>
+  <testcase name="theMusicTabShufflesFirstThenItsListsWithGenresWhenTheMusicHasSome" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.065"/>
+  <testcase name="everyTrackIsListedAToZAndPlaysTheWholeListFromTheOneChosen" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.004"/>
+  <testcase name="aGenresOrFoldersEmptyKeyIsReadBackAsOne" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.002"/>
+  <testcase name="theMusicSearchStillFindsTheTracksOfTheNewLists" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.022"/>
+  <testcase name="theSmartListsFollowThePlaylistsAndOpenOnWhatTheyTakeNow" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.011"/>
+  <testcase name="shuffleAllPlaysTheWholeMusicFromItsFirstTrack" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.0"/>
+  <testcase name="aPageNamedByItsLettersWritesThemAsTheLanguageDoes" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.0"/>
+  <testcase name="theGenresAreTheMusicPagesWithTheTracksOfNoneLast" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.004"/>
+  <testcase name="aSmartListThatTakesNothingOrIsGoneSaysSo" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.001"/>
+  <testcase name="aLongListOfEveryTrackIsCutIntoPagesNamedByTheirFirstLetters" classname="app.nagmedar.ui.auto.CarMusicTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

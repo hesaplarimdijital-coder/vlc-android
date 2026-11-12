@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.CompactTransportBarTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:25:38.151Z" hostname="runnervmwuk1x" time="0.406">
+  <properties/>
+  <testcase name="fitsAt320WithTheLargestText" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.034"/>
+  <testcase name="theSeekBarSeeksWhereLetGoTheTimeFollowingTheFinger" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.064"/>
+  <testcase name="aDragUpOnTheCardOpensTheFullPlayer" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.071"/>
+  <testcase name="aStationOnTheAirIsLiveWithoutASeekBar" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.03"/>
+  <testcase name="shuffleAndRepeatJoinWhereThereIsRoom" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.03"/>
+  <testcase name="aSidewaysSwipeOnTheCardSkipsOneOnTheSeekBarDoesNot" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.089"/>
+  <testcase name="fitsAt320" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.027"/>
+  <testcase name="fitsAt384" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.027"/>
+  <testcase name="fitsAt412" classname="app.nagmedar.ui.playback.CompactTransportBarTest" time="0.029"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

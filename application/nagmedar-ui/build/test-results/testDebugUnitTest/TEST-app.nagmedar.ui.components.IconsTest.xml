@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.IconsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:25:06.454Z" hostname="runnervmwuk1x" time="0.051">
+  <properties/>
+  <testcase name="iconsStayInsideTheirGrid" classname="app.nagmedar.ui.components.IconsTest" time="0.024"/>
+  <testcase name="onlyDirectionalIconsMirror" classname="app.nagmedar.ui.components.IconsTest" time="0.011"/>
+  <testcase name="everyIconIsListedOnceByItsName" classname="app.nagmedar.ui.components.IconsTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

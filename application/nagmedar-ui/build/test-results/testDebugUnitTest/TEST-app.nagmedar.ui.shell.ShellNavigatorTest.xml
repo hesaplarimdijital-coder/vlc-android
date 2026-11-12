@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.ShellNavigatorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:26:34.804Z" hostname="runnervmwuk1x" time="0.393">
+  <properties/>
+  <testcase name="goingElsewhereForgetsForward" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.132"/>
+  <testcase name="aPageOpensOnItsTabsStackAndBackReturnsToTheOneThatOpenedIt" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.058"/>
+  <testcase name="navigatePicksTabOrPageByTheWindow" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.038"/>
+  <testcase name="aPageOpenedAgainIsReturnedTo" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.049"/>
+  <testcase name="eachTabKeepsItsPages" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.044"/>
+  <testcase name="backThenForwardReturns" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.033"/>
+  <testcase name="theEqualizerFromThePlayerStaysInMusic" classname="app.nagmedar.ui.shell.ShellNavigatorTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

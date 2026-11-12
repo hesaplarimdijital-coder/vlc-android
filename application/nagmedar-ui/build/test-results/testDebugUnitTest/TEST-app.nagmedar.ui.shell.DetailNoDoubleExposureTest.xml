@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-12T12:26:30.410Z" hostname="runnervmwuk1x" time="3.238">
+  <properties/>
+  <testcase name="onAPhoneABackGestureGivenUpSpringsBackOpaque" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.274"/>
+  <testcase name="onAPhoneTheDetailSlidesInOpaqueOverTheDarkeningListAndOutAgain" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.482"/>
+  <testcase name="onAPhoneAFingersBackAtTheButtonsProgressShrinksTheDetail" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.322"/>
+  <testcase name="onAPhoneTheBackButtonLeavesTheDetailWholeAndItsReleaseSlidesItOut" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.317"/>
+  <testcase name="widerUpTheSharedAxisFadesInTurn" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.352"/>
+  <testcase name="onAPhoneTheBackGestureShrinksTheOpaqueDetailOverTheDimmedList" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.365"/>
+  <testcase name="onAPhoneAnOpeningTurnedAroundStaysOpaque" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.285"/>
+  <testcase name="onAPhoneWithACardTheScreensFadeThroughNotOverEachOther" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.578"/>
+  <testcase name="widerUpTheBackButtonLeavesTheDetailWhole" classname="app.nagmedar.ui.shell.DetailNoDoubleExposureTest" time="0.26"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
