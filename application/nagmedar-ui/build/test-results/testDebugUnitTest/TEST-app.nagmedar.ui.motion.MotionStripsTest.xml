@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.motion.MotionStripsTest" tests="31" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:47.743Z" hostname="runnervmccnms" time="7.951">
+  <properties/>
+  <testcase name="sheetFlingOverBottomGlass" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.249"/>
+  <testcase name="sheetClose" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.238"/>
+  <testcase name="sheetFling" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.238"/>
+  <testcase name="tabBack" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.327"/>
+  <testcase name="episodeOpen" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.419"/>
+  <testcase name="detailBackCancelled" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.366"/>
+  <testcase name="pagePopArrow" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.24"/>
+  <testcase name="tabBackGesture" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.277"/>
+  <testcase name="playerCollapseBarsHidden" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.243"/>
+  <testcase name="detailBack" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.344"/>
+  <testcase name="detailOpen" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.363"/>
+  <testcase name="albumClose" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.298"/>
+  <testcase name="playerTapBarsHiddenGlass" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.285"/>
+  <testcase name="pagePop" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.243"/>
+  <testcase name="playerExpand" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.205"/>
+  <testcase name="episodeBackButton" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.279"/>
+  <testcase name="playerBackGlass" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.265"/>
+  <testcase name="albumTurnAround" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.244"/>
+  <testcase name="listAppear" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.212"/>
+  <testcase name="playerCollapse" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.236"/>
+  <testcase name="albumOpen" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.185"/>
+  <testcase name="playerExpandGlass" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.219"/>
+  <testcase name="tabBackGestureCancelled" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.236"/>
+  <testcase name="playerTapBarsHidden" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.224"/>
+  <testcase name="detailBackButton" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.304"/>
+  <testcase name="sheetOpenOverBottomGlass" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.176"/>
+  <testcase name="pagePush" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.214"/>
+  <testcase name="tabSwitch" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.253"/>
+  <testcase name="sheetOpen" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.161"/>
+  <testcase name="queueFling" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.178"/>
+  <testcase name="playerBack" classname="app.nagmedar.ui.motion.MotionStripsTest" time="0.221"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

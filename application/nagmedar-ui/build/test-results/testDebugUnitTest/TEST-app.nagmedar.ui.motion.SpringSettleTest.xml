@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.motion.SpringSettleTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:55.696Z" hostname="runnervmccnms" time="0.145">
+  <properties/>
+  <testcase name="thePlayerOpensAndClosesWithoutATail" classname="app.nagmedar.ui.motion.SpringSettleTest" time="0.066"/>
+  <testcase name="aDetailArrivesOnThePhoneAndJumpsWithReducedMotion" classname="app.nagmedar.ui.motion.SpringSettleTest" time="0.026"/>
+  <testcase name="withReducedMotionThePlayerJumps" classname="app.nagmedar.ui.motion.SpringSettleTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

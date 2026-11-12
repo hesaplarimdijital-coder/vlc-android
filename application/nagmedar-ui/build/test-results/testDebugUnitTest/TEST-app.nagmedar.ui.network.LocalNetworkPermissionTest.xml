@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.network.LocalNetworkPermissionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:58.527Z" hostname="runnervmccnms" time="0.332">
+  <properties/>
+  <testcase name="aServerOnTheInternetOpensWithoutIt" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.098"/>
+  <testcase name="refusedForGoodAServerThatCannotBeReachedSaysWhy" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.05"/>
+  <testcase name="theServersPaneSaysWhyAndAsks" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.043"/>
+  <testcase name="eachStateHasItsWords" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.028"/>
+  <testcase name="aWindowPutsAQuestionOnceAndOnlyWhileItIsRecent" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.019"/>
+  <testcase name="aServerOnTheLocalNetworkAsksAndOpensOnceGiven" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.054"/>
+  <testcase name="withThePermissionNothingIsSaid" classname="app.nagmedar.ui.network.LocalNetworkPermissionTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

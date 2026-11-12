@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.SystemBandTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:28:48.538Z" hostname="runnervmccnms" time="0.652">
+  <properties/>
+  <testcase name="theOpaqueChromeReachesBehindTheButtonsToo" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.036"/>
+  <testcase name="lightButtonsOnTheDarkTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.029"/>
+  <testcase name="aScreenUnderTheBarsIsPaddedForTheButtonsToo" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.03"/>
+  <testcase name="theShellSitsOnTheButtonsAtFirstLaunch" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.047"/>
+  <testcase name="theKeyboardLeavesNoBand" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.039"/>
+  <testcase name="buttonsFollowTheLightTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.031"/>
+  <testcase name="tabletThreeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.057"/>
+  <testcase name="aScreenThatDoesNotAskEndsAboveTheBars" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.025"/>
+  <testcase name="threeButtonLargeText" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.112"/>
+  <testcase name="threeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.076"/>
+  <testcase name="tabletChromeFillsTheNavigationBar" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.03"/>
+  <testcase name="phoneBarReachesBehindTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.029"/>
+  <testcase name="talkBackReadsTheBottomBarLast" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.029"/>
+  <testcase name="threeButtonLight" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.061"/>
+  <testcase name="theFirstRunStaysAboveTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.ListAppearTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:33.972Z" hostname="runnervmccnms" time="0.212">
+  <properties/>
+  <testcase name="withReducedMotionTheRowsAreThereAtOnce" classname="app.nagmedar.ui.components.ListAppearTest" time="0.036"/>
+  <testcase name="widerUpTheRowsAreThereAtOnce" classname="app.nagmedar.ui.components.ListAppearTest" time="0.055"/>
+  <testcase name="theFirstRowsRiseIntoPlaceInTurnAndLaterRowsAreThere" classname="app.nagmedar.ui.components.ListAppearTest" time="0.079"/>
+  <testcase name="onlyTheFirstEightRowsArriveInTurn" classname="app.nagmedar.ui.components.ListAppearTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

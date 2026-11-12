@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.input.DragStartTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:44.044Z" hostname="runnervmccnms" time="0.361">
+  <properties/>
+  <testcase name="aQuickPressAndMoveStartsNoDrag" classname="app.nagmedar.ui.input.DragStartTest" time="0.077"/>
+  <testcase name="theButtonThatOpensMenusDragsNothing" classname="app.nagmedar.ui.input.DragStartTest" time="0.033"/>
+  <testcase name="theCardStandsAboveThePointer" classname="app.nagmedar.ui.input.DragStartTest" time="0.024"/>
+  <testcase name="cardsScreenshot" classname="app.nagmedar.ui.input.DragStartTest" time="0.042"/>
+  <testcase name="aMouseHeldStillThenMovedStartsTheDrag" classname="app.nagmedar.ui.input.DragStartTest" time="0.031"/>
+  <testcase name="aFingerKeepsItsLongPressForTheMenu" classname="app.nagmedar.ui.input.DragStartTest" time="0.027"/>
+  <testcase name="aSlowClickStaysAClick" classname="app.nagmedar.ui.input.DragStartTest" time="0.029"/>
+  <testcase name="severalFilesShowTheirCountInTheAccentColour" classname="app.nagmedar.ui.input.DragStartTest" time="0.094"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

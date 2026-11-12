@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastControllerTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:28:05.527Z" hostname="runnervmccnms" time="0.735">
+  <properties/>
+  <testcase name="unsubscribingIsTakenBackWithItsEpisodes" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.117"/>
+  <testcase name="oneTapOnAResultSubscribes" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.048"/>
+  <testcase name="aFileThatIsNoOpmlIsSaidSo" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.024"/>
+  <testcase name="searchingTellsWhereTheResultsCameFrom" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.017"/>
+  <testcase name="theUndoStillWorksWhenTheScreenHasBeenLeft" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.031"/>
+  <testcase name="aFileThatIsGoneIsUnreadable" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.024"/>
+  <testcase name="aResultReachedByAnOldAddressIsSubscribedAndOpensItsPage" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.034"/>
+  <testcase name="anOpmlFileIsImportedAndSummed" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.045"/>
+  <testcase name="anImportGoesOnAndKeepsItsSummaryWhenTheScreenIsLeft" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.025"/>
+  <testcase name="aRefusedFeedWarnsAndSavesNothing" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.035"/>
+  <testcase name="subscriptionsAreExportedToTheChosenFile" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.044"/>
+  <testcase name="aSearchWithNoNetworkSaysOffline" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.018"/>
+  <testcase name="anExportToAFileThatCannotBeWrittenSaysSoAndLeavesNothing" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.089"/>
+  <testcase name="anAddressTypedInTheSearchIsAdded" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.017"/>
+  <testcase name="aSubscriptionByAddressOutlivesTheScreenThatSentIt" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.018"/>
+  <testcase name="aClosedAddWindowsSubscriptionGoesOnAndSaysHowItWent" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.029"/>
+  <testcase name="theAddWindowStaysWithTheReasonAndOpensTheNewPage" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.031"/>
+  <testcase name="anEpisodePlaysAndIsMarkedPlayed" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.045"/>
+  <testcase name="anUnsubscribingUndoneAfterTheScreenWasLeftBringsEverythingBack" classname="app.nagmedar.ui.podcast.PodcastControllerTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

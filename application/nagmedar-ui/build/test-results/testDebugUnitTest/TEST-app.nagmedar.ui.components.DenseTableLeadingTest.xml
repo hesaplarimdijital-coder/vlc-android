@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.DenseTableLeadingTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:33.317Z" hostname="runnervmccnms" time="0.18">
+  <properties/>
+  <testcase name="aListTheUserHasScrolledStaysWhereItIs" classname="app.nagmedar.ui.components.DenseTableLeadingTest" time="0.072"/>
+  <testcase name="aLeadingItemThatComesAfterTheRowsIsShownOverTheTitles" classname="app.nagmedar.ui.components.DenseTableLeadingTest" time="0.056"/>
+  <testcase name="aLeadingItemThereFromTheStartIsTheFirstItem" classname="app.nagmedar.ui.components.DenseTableLeadingTest" time="0.049"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

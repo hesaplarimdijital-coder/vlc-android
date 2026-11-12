@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.device.DeviceScreenTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:27:40.560Z" hostname="runnervmccnms" time="0.533">
+  <properties/>
+  <testcase name="whereNoBarHasAnArrowTheTrailKeepsItsOwn" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.081"/>
+  <testcase name="aFolderOpensAndBackGoesUpToTheDriveAndThePlaces" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.056"/>
+  <testcase name="aClickSelectsARowBesideThePlaces" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.056"/>
+  <testcase name="underThePhonesTopBarTheFolderHasNoArrowOfItsOwnAndIsNamedOnce" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.054"/>
+  <testcase name="theInternalStorageListsItsFoldersAndFiles" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.054"/>
+  <testcase name="aPickedFolderListsItsDocuments" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.046"/>
+  <testcase name="underTheRailsTopBarTooTheFolderHasNoArrowOfItsOwn" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.044"/>
+  <testcase name="aLongWayKeepsTheOpenFolderInSight" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.084"/>
+  <testcase name="anOpenFolderKeepsItsStateWhenTheWindowSavesIt" classname="app.nagmedar.ui.device.DeviceScreenTest" time="0.056"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

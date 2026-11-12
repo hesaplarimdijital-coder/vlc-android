@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.work.RetiredWorkTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:28:50.315Z" hostname="runnervmccnms" time="0.644">
+  <properties/>
+  <testcase name="theTranscriptsModelsFilesAndSettingsGoAndThePodcastsStay" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.169"/>
+  <testcase name="eachStepRunsOnce" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.06"/>
+  <testcase name="theTvFilmMetadataGoesAndVlcsDatabaseStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.065"/>
+  <testcase name="theDroppedJobsNoteAndTvLabsFilesGoOnce" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.038"/>
+  <testcase name="theTranscriptsJobsGoAndThePodcastsWorkStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.04"/>
+  <testcase name="theRemovedFeaturesWorkIsCancelledAndOneZerosStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.049"/>
+  <testcase name="theTvLabNightAlarmIsCancelled" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.039"/>
+  <testcase name="theVideoFoldersLetGoAsFarAsNothingInOneZeroKeepsThem" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.042"/>
+  <testcase name="theVideoFeaturesFilesGoAndWhatOneZeroUsesStays" classname="app.nagmedar.ui.work.RetiredWorkTest" time="0.14"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

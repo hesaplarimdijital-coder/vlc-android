@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.DetailDepthTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-12T22:28:43.566Z" hostname="runnervmccnms" time="0.534">
+  <properties/>
+  <testcase name="withReducedMotionTheDetailSimplyAppears" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.03"/>
+  <testcase name="aSharedDepthsListScrollsAtRestAndOnceItsDetailHasComeAndGone" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.075"/>
+  <testcase name="theBackGestureSeeksTheClosingWithTheListBehindAndCancelRestoresIt" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.028"/>
+  <testcase name="aGestureGivenUpPutsTheCoverBackAndASecondOneStillCloses" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.023"/>
+  <testcase name="theCoverFliesFromTheRowToItsPlaceInTheDetail" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.03"/>
+  <testcase name="aPhonesDetailComesFromTheEndOverTheSinkingList" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.02"/>
+  <testcase name="theDepthIsAtRestOnceItsSharedElementsHaveLanded" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.023"/>
+  <testcase name="aDetailStaysInPlaceWhenWhatFliesWithItLandsLater" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.025"/>
+  <testcase name="aSharedDepthsListsStillScrollOnceMotionIsReduced" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.081"/>
+  <testcase name="afterALongFlightTheDetailScrolls" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.038"/>
+  <testcase name="aChangeOfMindRunsTheWayBackFromWhereItIs" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.022"/>
+  <testcase name="aPlainDepthsListIsMeasuredOnceAFrame" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.033"/>
+  <testcase name="afterItsOwnWayASharedDepthsDetailScrolls" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.037"/>
+  <testcase name="afterALongFlightTheDetailLeavesOnItsWayAndOpensAgain" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.041"/>
+  <testcase name="aDetailKeptAfterBackRunsTheGestureBack" classname="app.nagmedar.ui.shell.DetailDepthTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
