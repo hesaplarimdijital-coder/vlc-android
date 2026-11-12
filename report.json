@@ -1,0 +1,704 @@
+{
+ "verdict": "FAILED",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "page-blank",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-page-blank-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-page-blank-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 7.8,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "page-blank",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-page-blank-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-page-blank-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.0,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "page-blank",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-page-blank-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-page-blank-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "page-blank",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-page-blank-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-page-blank-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "page-blank",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-page-blank-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-page-blank-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "page-blank",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-page-blank-after-the-scan.png",
+   "dump": "dumps/006-page-blank-after-the-scan.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "page-blank",
+   "title": "Launch (the page that went blank)",
+   "status": "ok",
+   "shot": "shots/007-page-blank-launch-the-page-that-went-blank.png",
+   "dump": "dumps/007-page-blank-launch-the-page-that-went-blank.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "page-blank",
+   "title": "Podcasts",
+   "status": "ok",
+   "shot": "shots/008-page-blank-podcasts.png",
+   "dump": "dumps/008-page-blank-podcasts.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "page-blank",
+   "title": "Add a podcast by its address",
+   "status": "ok",
+   "shot": "shots/009-page-blank-add-a-podcast-by-its-address.png",
+   "dump": "dumps/009-page-blank-add-a-podcast-by-its-address.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "page-blank",
+   "title": "The feed's address typed",
+   "status": "ok",
+   "shot": "shots/010-page-blank-the-feed-s-address-typed.png",
+   "dump": "dumps/010-page-blank-the-feed-s-address-typed.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "page-blank",
+   "title": "Subscribe",
+   "status": "ok",
+   "shot": "shots/011-page-blank-subscribe.png",
+   "dump": "dumps/011-page-blank-subscribe.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "page-blank",
+   "title": "Followed",
+   "status": "ok",
+   "shot": "shots/012-page-blank-followed.png",
+   "dump": "dumps/012-page-blank-followed.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "page-blank",
+   "title": "Back on the Podcasts, the feed followed",
+   "status": "ok",
+   "shot": "shots/013-page-blank-back-on-the-podcasts-the-feed-followed.png",
+   "dump": "dumps/013-page-blank-back-on-the-podcasts-the-feed-followed.xml",
+   "changed": true,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/014-page-blank-host-swap-nothing-played-the-podcasts.png",
+   "dump": "dumps/014-page-blank-host-swap-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/015-page-blank-host-swap-nothing-played-the-podcast-s-page-the-.png",
+   "dump": "dumps/015-page-blank-host-swap-nothing-played-the-podcast-s-page-the-.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/016-page-blank-host-swap-nothing-played-back-on-the-podcasts.png",
+   "dump": "dumps/016-page-blank-host-swap-nothing-played-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=swap, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=swap, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 17,
+   "pass": "page-blank",
+   "title": "[host=swap,glass=solid, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/017-page-blank-host-swap-glass-solid-nothing-played-the-podcast.png",
+   "dump": "dumps/017-page-blank-host-swap-glass-solid-nothing-played-the-podcast.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "page-blank",
+   "title": "[host=swap,glass=solid, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/018-page-blank-host-swap-glass-solid-nothing-played-the-podcast.png",
+   "dump": "dumps/018-page-blank-host-swap-glass-solid-nothing-played-the-podcast.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "page-blank",
+   "title": "[host=swap,glass=solid, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/019-page-blank-host-swap-glass-solid-nothing-played-back-on-the.png",
+   "dump": "dumps/019-page-blank-host-swap-glass-solid-nothing-played-back-on-the.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=swap,glass=solid, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=swap,glass=solid, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 20,
+   "pass": "page-blank",
+   "title": "[host=stl, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/020-page-blank-host-stl-nothing-played-the-podcasts.png",
+   "dump": "dumps/020-page-blank-host-stl-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "page-blank",
+   "title": "[host=stl, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/021-page-blank-host-stl-nothing-played-the-podcast-s-page-the-u.png",
+   "dump": "dumps/021-page-blank-host-stl-nothing-played-the-podcast-s-page-the-u.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "page-blank",
+   "title": "[host=stl, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/022-page-blank-host-stl-nothing-played-back-on-the-podcasts.png",
+   "dump": "dumps/022-page-blank-host-stl-nothing-played-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=stl, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=stl, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 23,
+   "pass": "page-blank",
+   "title": "[host=box, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/023-page-blank-host-box-nothing-played-the-podcasts.png",
+   "dump": "dumps/023-page-blank-host-box-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "page-blank",
+   "title": "[host=box, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/024-page-blank-host-box-nothing-played-the-podcast-s-page-the-u.png",
+   "dump": "dumps/024-page-blank-host-box-nothing-played-the-podcast-s-page-the-u.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "page-blank",
+   "title": "[host=box, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/025-page-blank-host-box-nothing-played-back-on-the-podcasts.png",
+   "dump": "dumps/025-page-blank-host-box-nothing-played-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=box, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=box, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 26,
+   "pass": "page-blank",
+   "title": "[host=redraw, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/026-page-blank-host-redraw-nothing-played-the-podcasts.png",
+   "dump": "dumps/026-page-blank-host-redraw-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "page-blank",
+   "title": "[host=redraw, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/027-page-blank-host-redraw-nothing-played-the-podcast-s-page-th.png",
+   "dump": "dumps/027-page-blank-host-redraw-nothing-played-the-podcast-s-page-th.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "page-blank",
+   "title": "[host=redraw, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/028-page-blank-host-redraw-nothing-played-back-on-the-podcasts.png",
+   "dump": "dumps/028-page-blank-host-redraw-nothing-played-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=redraw, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=redraw, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 29,
+   "pass": "page-blank",
+   "title": "[host=redraw-host, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/029-page-blank-host-redraw-host-nothing-played-the-podcasts.png",
+   "dump": "dumps/029-page-blank-host-redraw-host-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "page-blank",
+   "title": "[host=redraw-host, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/030-page-blank-host-redraw-host-nothing-played-the-podcast-s-pa.png",
+   "dump": "dumps/030-page-blank-host-redraw-host-nothing-played-the-podcast-s-pa.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "page-blank",
+   "title": "[host=redraw-host, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/031-page-blank-host-redraw-host-nothing-played-back-on-the-podc.png",
+   "dump": "dumps/031-page-blank-host-redraw-host-nothing-played-back-on-the-podc.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=redraw-host, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=redraw-host, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 32,
+   "pass": "page-blank",
+   "title": "[host=redraw-detail, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/032-page-blank-host-redraw-detail-nothing-played-the-podcasts.png",
+   "dump": "dumps/032-page-blank-host-redraw-detail-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 33,
+   "pass": "page-blank",
+   "title": "[host=redraw-detail, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/033-page-blank-host-redraw-detail-nothing-played-the-podcast-s-.png",
+   "dump": "dumps/033-page-blank-host-redraw-detail-nothing-played-the-podcast-s-.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 34,
+   "pass": "page-blank",
+   "title": "[host=redraw-detail, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/034-page-blank-host-redraw-detail-nothing-played-back-on-the-po.png",
+   "dump": "dumps/034-page-blank-host-redraw-detail-nothing-played-back-on-the-po.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=redraw-detail, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=redraw-detail, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 35,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] The Podcasts",
+   "status": "ok",
+   "shot": "shots/035-page-blank-host-swap-nothing-played-the-podcasts.png",
+   "dump": "dumps/035-page-blank-host-swap-nothing-played-the-podcasts.xml",
+   "changed": false,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 36,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/036-page-blank-host-swap-nothing-played-the-podcast-s-page-the-.png",
+   "dump": "dumps/036-page-blank-host-swap-nothing-played-the-podcast-s-page-the-.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 37,
+   "pass": "page-blank",
+   "title": "[host=swap, nothing played] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/037-page-blank-host-swap-nothing-played-back-on-the-podcasts.png",
+   "dump": "dumps/037-page-blank-host-swap-nothing-played-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=swap, nothing played] the podcast's page is on screen 2.5 s after the tap; check failed: [host=swap, nothing played] the page moves on screen under a swipe"
+  },
+  {
+   "n": 38,
+   "pass": "page-blank",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/038-page-blank-music.png",
+   "dump": "dumps/038-page-blank-music.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 39,
+   "pass": "page-blank",
+   "title": "Play Profile track 1.1",
+   "status": "ok",
+   "shot": "shots/039-page-blank-play-profile-track-1-1.png",
+   "dump": "dumps/039-page-blank-play-profile-track-1-1.xml",
+   "changed": true,
+   "seconds": 15.5,
+   "note": ""
+  },
+  {
+   "n": 40,
+   "pass": "page-blank",
+   "title": "[host=swap, a track plays] The Podcasts",
+   "status": "ok",
+   "shot": "shots/040-page-blank-host-swap-a-track-plays-the-podcasts.png",
+   "dump": "dumps/040-page-blank-host-swap-a-track-plays-the-podcasts.xml",
+   "changed": true,
+   "seconds": 14.2,
+   "note": ""
+  },
+  {
+   "n": 41,
+   "pass": "page-blank",
+   "title": "[host=swap, a track plays] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/041-page-blank-host-swap-a-track-plays-the-podcast-s-page-the-u.png",
+   "dump": "dumps/041-page-blank-host-swap-a-track-plays-the-podcast-s-page-the-u.xml",
+   "changed": true,
+   "seconds": 14.3,
+   "note": ""
+  },
+  {
+   "n": 42,
+   "pass": "page-blank",
+   "title": "[host=swap, a track plays] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/042-page-blank-host-swap-a-track-plays-back-on-the-podcasts.png",
+   "dump": "dumps/042-page-blank-host-swap-a-track-plays-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 14.9,
+   "note": "check failed: [host=swap, a track plays] the podcast's page is on screen 2.5 s after the tap; check failed: [host=swap, a track plays] the page moves on screen under a swipe"
+  },
+  {
+   "n": 43,
+   "pass": "page-blank",
+   "title": "[host=swap, a track paused] The Podcasts",
+   "status": "ok",
+   "shot": "shots/043-page-blank-host-swap-a-track-paused-the-podcasts.png",
+   "dump": "dumps/043-page-blank-host-swap-a-track-paused-the-podcasts.xml",
+   "changed": true,
+   "seconds": 5.8,
+   "note": ""
+  },
+  {
+   "n": 44,
+   "pass": "page-blank",
+   "title": "[host=swap, a track paused] The podcast's page, the UI asked",
+   "status": "ok",
+   "shot": "shots/044-page-blank-host-swap-a-track-paused-the-podcast-s-page-the-.png",
+   "dump": "dumps/044-page-blank-host-swap-a-track-paused-the-podcast-s-page-the-.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 45,
+   "pass": "page-blank",
+   "title": "[host=swap, a track paused] Back on the Podcasts",
+   "status": "ok",
+   "shot": "shots/045-page-blank-host-swap-a-track-paused-back-on-the-podcasts.png",
+   "dump": "dumps/045-page-blank-host-swap-a-track-paused-back-on-the-podcasts.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": "check failed: [host=swap, a track paused] the podcast's page is on screen 2.5 s after the tap; check failed: [host=swap, a track paused] the page moves on screen under a swipe"
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "page-blank",
+   "name": "the Podcasts open",
+   "ok": true,
+   "detail": "",
+   "step": 8
+  },
+  {
+   "pass": "page-blank",
+   "name": "the podcast address field",
+   "ok": true,
+   "detail": "",
+   "step": 9
+  },
+  {
+   "pass": "page-blank",
+   "name": "the feed is followed",
+   "ok": true,
+   "detail": "",
+   "step": 11
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 16
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 16
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap,glass=solid, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 19
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap,glass=solid, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 19
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=stl, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.5 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 22
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=stl, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 22
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=box, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 25
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=box, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 25
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 28
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 28
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw-host, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 31
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw-host, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 31
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw-detail, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 34
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=redraw-detail, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 34
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, nothing played] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 14.3 % at 0.3 s, 0.0 % at 0.8 s, 0.0 % at 2.5 s, 0.0 % after the swipe; 0.0 % once the UI was asked (the page in its tree: NO); back on the list: 4.6 %",
+   "step": 37
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, nothing played] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 37
+  },
+  {
+   "pass": "page-blank",
+   "name": "a track in the Music's list",
+   "ok": true,
+   "detail": "",
+   "step": 38
+  },
+  {
+   "pass": "page-blank",
+   "name": "the mini player shows the track",
+   "ok": true,
+   "detail": "",
+   "step": 39
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, a track plays] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 13.8 % at 0.3 s, 0.5 % at 0.8 s, 0.5 % at 2.5 s, 0.5 % after the swipe; 0.5 % once the UI was asked (the page in its tree: NO); back on the list: 5.1 %",
+   "step": 42
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, a track plays] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 42
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, a track paused] the podcast's page is on screen 2.5 s after the tap",
+   "ok": false,
+   "detail": "drawn in the page's place: 13.9 % at 0.3 s, 0.5 % at 0.8 s, 0.5 % at 2.5 s, 0.5 % after the swipe; 0.5 % once the UI was asked (the page in its tree: NO); back on the list: 5.1 %",
+   "step": 45
+  },
+  {
+   "pass": "page-blank",
+   "name": "[host=swap, a track paused] the page moves on screen under a swipe",
+   "ok": false,
+   "detail": "0.0 % of the page's place changed between 2.5 s and after the swipe",
+   "step": 45
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 45
+  }
+ ],
+ "frames": [],
+ "seconds": 508,
+ "passes": "page-blank",
+ "source": "563669760910b847eeb9af808067c116bfa7be6f (563669760910b847eeb9af808067c116bfa7be6f, personal build, API 37.0, page-blank), run 43263760366",
+ "system": [
+  {
+   "pass": "page-blank",
+   "step": 1,
+   "kind": "ANR",
+   "who": "com.google.android.gms.persistent",
+   "seen": "Reason: Broadcast of Intent { act=android.intent.action.SIM_STATE_CHANGED flg=0x15000010 xflg=0x4 cmp=com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver (has extras) }",
+   "how": "log"
+  }
+ ],
+ "sheet_trials": [],
+ "back_presses": []
+}

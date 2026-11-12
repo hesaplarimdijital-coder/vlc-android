@@ -1,0 +1,9 @@
+443 s, 40 steps, pass page-blank, 0 crashes
+33 page-blank [host=redraw-detail, nothing played] The podcast's page, the UI asked ok
+34 page-blank [host=redraw-detail, nothing played] Back on the Podcasts ok
+35 page-blank [host=swap, nothing played] The Podcasts ok
+36 page-blank [host=swap, nothing played] The podcast's page, the UI asked ok
+37 page-blank [host=swap, nothing played] Back on the Podcasts ok
+38 page-blank Music ok
+39 page-blank Play Profile track 1.1 ok
+40 page-blank [host=swap, a track plays] The Podcasts ok
