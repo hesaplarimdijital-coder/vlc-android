@@ -29,7 +29,9 @@
 # 38-minute deadline. A pass of the "passes" input outside both groups (sheet-trials: the phone's track
 # sheet dragged again and again, 1.0.2's flaky check's evidence; 1.0.4's back-button: the system's Back
 # button of the three-button navigation held and tapped on an episode's page, a podcast's and the full
-# player, which with the ref input shows what an older app does under it) runs as a job of its own. The
+# player, which with the ref input shows what an older app does under it; 1.0.5's page-opens: the pages
+# a phone opens over a list, opened with the system's animations on and read by their pixels, the one
+# pass that walks them as a person's phone shows them) runs as a job of its own. The
 # emulator's own ANRs and crashes (System UI, the launcher) are recorded, waited out and the step tried
 # once more; the app's still fail the run.
 #
@@ -60,7 +62,7 @@ on:
         type: string
         default: ''
       passes:
-        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials, back-button on demand)'
+        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials, back-button, page-opens on demand)'
         type: string
         default: 'tablet-en,phone-en,workstation,phone-tr'
       build:
@@ -266,6 +268,37 @@ jobs:
             items="$items<item><title>Episode $ep</title><guid isPermaLink=\"false\">nagmedar-profile-$ep</guid><pubDate>Mon, 0$ep Jun 2026 08:00:00 +0000</pubDate><description>Episode $ep of the profile feed.</description><enclosure url=\"http://10.0.2.2:8765/episode$ep.mp3\" length=\"$size\" type=\"audio/mpeg\"/><itunes:duration>60</itunes:duration></item>"
           done
           printf '%s' "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\"><channel><title>Nagmedar profile feed</title><link>http://10.0.2.2:8765/</link><description>A podcast for the Baseline Profile's run.</description><language>en</language><itunes:author>Nagmedar QA</itunes:author>$items</channel></rss>" > "$feed/feed.xml"
+          # 1.0.5 (the page-opens pass): a feed as the owner's show's: a cover, a link, a long description and 80
+          # episodes, so its page scrolls and its row's cover has a way to fly to the page's
+          python3 - "$feed" <<'PY'
+          import sys
+          from PIL import Image, ImageDraw
+          d = sys.argv[1]
+          im = Image.new("RGB", (600, 600), (16, 150, 135))
+          dr = ImageDraw.Draw(im)
+          for i in range(0, 600, 60):
+              dr.rectangle((i, 0, i + 30, 600), fill=(8, 60, 70))
+          im.save(d + "/cover.jpg", quality=90)
+          items = []
+          for n in range(80, 0, -1):
+              ep = (n % 3) + 1
+              items.append(
+                  "<item><title>%d - A long title of an episode that takes two lines on a phone</title>"
+                  "<guid isPermaLink=\"false\">nagmedar-long-%d</guid>"
+                  "<pubDate>Mon, %02d Jun 2026 08:00:00 +0000</pubDate>"
+                  "<description>Episode %d of the long feed.</description>"
+                  "<enclosure url=\"http://10.0.2.2:8765/episode%d.mp3\" length=\"240000\" type=\"audio/mpeg\"/>"
+                  "<itunes:duration>32:26</itunes:duration></item>" % (n, n, (n % 28) + 1, n, ep))
+          text = ("There are stories that can only be understood by listening. A host shares the most unusual stories from "
+                  "the worlds of art, design and technology in a show that offers a unique listening journey, week after week, "
+                  "for anyone who is curious about how things are made and why they matter.")
+          open(d + "/feed-long.xml", "w", encoding="utf-8").write(
+              "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\">"
+              "<channel><title>A long feed with 80 episodes</title><link>http://10.0.2.2:8765/</link>"
+              "<description>%s</description><language>en</language><itunes:author>Nagmedar Media</itunes:author>"
+              "<itunes:image href=\"http://10.0.2.2:8765/cover.jpg\"/>%s</channel></rss>" % (text, "".join(items)))
+          PY
+          ls -l "$feed"
           # kept running for the next steps; the job's end stops it
           (cd "$feed" && nohup python3 -m http.server 8765 > "$RUNNER_TEMP/feed.log" 2>&1 &)
           sleep 2

@@ -42,6 +42,11 @@ violations). The walk, in passes (a size and a language each):
                the phone opens over a list: an episode's page, the podcast's page under it, the full
                player; each at rest, with the button held and after a tap of it (back_button_check);
                and the bar read while an episode plays: a seek bar, never "live" (episode_plays)
+  page-opens   (on demand, either build; an older app by the workflow's ref input) 1.0.5: what the phone
+               opens over a list, opened with the system's animations on and nothing in the player, on a
+               screen of the owner's phone's size, each read by its pixels: a show's page once its feed is
+               followed, from its row (twice), an episode over it and back, from its tile (twice); the
+               page must be on screen, in the UI's tree and move under a swipe (opening_check)
 
 1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
 bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band).
@@ -55,6 +60,10 @@ found in the windows' hierarchy: held, the page must stay whole; tapped, it must
 "The system's Back button"). 1.0.4 also (the owner: "podcast çaldığında canlı yayın diyor müzik
 barı"): phone-en ends by playing an episode of the walk's feed from its page, a stream as his are,
 and reads the bar: a seek bar with its times, never a station's "live" line (episode_plays).
+1.0.5 (the owner, 12 Nov, with a recording: "Podcastte sayfası böyle oluyor"): his show's page slid in
+and was gone, every pixel of it, in the frame its opening ended, in 1.0.3 and 1.0.4. The walk opens
+its pages with the system's animations off (a transition then is a snap) and mostly over a playing
+track, and never saw it; a release is walked through page-opens too, where they are on.
 The product draws the phone's bottom chrome on one glass
 (glass B); with the system's animations removed, as the walk runs, the app draws it opaque, so
 phone-en's glass_b_check turns them on to see it blur: switched on at run time over the search
@@ -134,6 +143,11 @@ BACK_ID_RE = re.compile(r":id/back$")
 # 1.0.4: a page counts as whole under the held Back button while no more than this share of it differs from the page
 # at rest (a seek bar's thumb, a time that changed); shrunk towards nine tenths, a fifth of it and more does
 BACK_HELD_WHOLE = 0.02
+# 1.0.5: a page is on screen when more than this share of its place (between the bars) is not its ground colour (an
+# empty page: 0.0 %; the owner's show's page: some 11 to 14 %), and it moves when more than this share of the place
+# changes under a swipe
+PAGE_INK = 0.01
+PAGE_MOVES = 0.01
 
 
 class Node:
@@ -217,6 +231,7 @@ class Smoke:
         self.sheet_trials = []  # the sheet-drag pass's trials
         self.back_presses = []  # 1.0.4: what the system's Back button did to each page (back_button_check)
         self.back_system_info = None  # 1.0.4: the system's navigation mode and predictive Back flags (back_system)
+        self.page_openings = []  # 1.0.5: the pages opened with the animations on (opening_check)
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
@@ -2687,6 +2702,189 @@ class Smoke:
         self.check("the system's Back button was pressed on the episode's page, the podcast's and the full player",
                    len(pages) >= 3, "pressed on: %s" % (", ".join(pages) or "nothing"))
 
+    # ---------------------------------------------------------------- 1.0.5: pages opened with the animations on
+
+    def ink(self, rel, box, width):
+        """The share of [box]'s pixels (x0, y0, x1, y1 on a screen [width] px wide) in the screenshot [rel] that are not
+        its most common colour (a channel more than 24 apart): next to nothing for an empty page. None without Pillow
+        or the screenshot."""
+        if Image is None or not rel:
+            return None
+        try:
+            a = Image.open(os.path.join(self.out, rel)).convert("RGB")
+        except Exception:
+            return None
+        k = a.width / float(width)
+        x0, y0, x1, y1 = [int(round(v * k)) for v in box]
+        crop = a.crop((x0, y0, max(x1, x0 + 1), max(y1, y0 + 1)))
+        small = crop.resize((max(1, crop.width // 4), max(1, crop.height // 4)), Image.NEAREST)
+        colours = small.getcolors(maxcolors=small.width * small.height + 1) or []
+        if not colours:
+            return None
+        base = max(colours)[1]
+        red, green, blue = ImageChops.difference(crop, Image.new("RGB", crop.size, base)).split()
+        hist = ImageChops.lighter(ImageChops.lighter(red, green), blue).histogram()
+        return sum(hist[25:]) / float(sum(hist) or 1)
+
+    def raw_shots(self, cmd, count, name):
+        """Runs [cmd] on the device (it writes /sdcard/nag-b1.png … nag-b<count>.png) and brings the screenshots:
+        shots/<name>-<i>.png, None for one that is not there. Nothing is asked of the UI meanwhile."""
+        self.sh("rm -f /sdcard/nag-b*.png ; " + cmd, timeout=180)
+        shots = []
+        for i in range(1, count + 1):
+            rc, data = self.adb("exec-out", "cat /sdcard/nag-b%d.png" % i, timeout=60, binary=True)
+            rel = None
+            if rc == 0 and len(data) > 1000:
+                rel = "shots/%s-%d.png" % (name, i)
+                with open(os.path.join(self.out, rel), "wb") as f:
+                    f.write(data)
+            shots.append(rel)
+        return shots
+
+    def opening_check(self, what, nodes, at=None, tags=("podcast-page", "podcast-episode"), swipe=True):
+        """1.0.5: one page opened with the system's animations on, as on a person's phone. [at] (x, y) is tapped (None:
+        the page is the one the app has just opened itself), and the screen is read with nothing asked of the UI
+        meanwhile: 0.3 s, 0.8 s and 2.5 s after the tap, then after a swipe up the page ([swipe]). Only then the UI's
+        own tree is read: the page must be in it ([tags]), drawn in its place 2.5 s after it opened (more than
+        PAGE_INK of the place between the bars is not the page's ground colour: an empty page has none), and move
+        under the swipe. The owner's show's page (12 Nov) slid in and was gone, every pixel of it, in the frame its
+        opening ended; the walk's own steps open pages with the animations off and never saw it. Returns the nodes."""
+        w, h = self.screen_size(nodes)
+        # between the top bar and the bottom bar (the mini player's card, when there is one, is above this foot)
+        box = (0, int(h * 0.12), w, int(h * 0.74))
+        name = "%03d-%s-%s" % (self.n + 1, self.cur_pass, slug("opened " + what))
+        cmd = ("input tap %d %d ; " % at if at else "") + \
+            "sleep 0.3 ; screencap -p /sdcard/nag-b1.png ; sleep 0.4 ; screencap -p /sdcard/nag-b2.png ; sleep 1.5 ; screencap -p /sdcard/nag-b3.png"
+        if swipe:
+            cmd += " ; input swipe %d %d %d %d 250 ; sleep 1.2 ; screencap -p /sdcard/nag-b4.png" % (w // 2, int(h * 0.66), w // 2, int(h * 0.30))
+        shots = self.raw_shots(cmd, 4 if swipe else 3, name)
+        inks = [self.ink(r, box, w) for r in shots]
+        scrolled = self.page_change(shots[2], shots[3], box, w) if swipe else None
+        nodes = self.step("%s: the UI asked" % what, wait=1.0)
+        in_tree = any(self.by_id(nodes, t) for t in tags)
+        pct = lambda v: "?" if v is None else "%.1f %%" % (v * 100)
+        drawn = inks[2] is not None and inks[2] >= PAGE_INK
+        r = {"pass": self.cur_pass, "what": what, "tapped": bool(at), "shots": shots, "inks": inks, "scrolled": scrolled,
+             "in_tree": in_tree, "ok": bool(drawn and in_tree and (not swipe or (scrolled is not None and scrolled >= PAGE_MOVES)))}
+        self.page_openings.append(r)
+        self.log("page opening [%s]: %s" % (what, r))
+        self.check("%s: the page is on screen 2.5 s after it opened (the animations on)" % what, drawn and in_tree,
+                   "drawn in the page's place: %s at 0.3 s, %s at 0.8 s, %s at 2.5 s%s; the page in the UI's tree: %s"
+                   % (pct(inks[0]), pct(inks[1]), pct(inks[2]), (", %s after the swipe" % pct(inks[3])) if swipe else "",
+                      "yes" if in_tree else "NO"))
+        if swipe:
+            self.check("%s: the page moves under a swipe" % what, scrolled is not None and scrolled >= PAGE_MOVES,
+                       "%s of the page's place changed between 2.5 s and after the swipe" % pct(scrolled))
+        return nodes
+
+    def podcasts_list(self, what):
+        """Back from a show's page to the Podcasts' list, the animations on: the nodes, and the check that it is there."""
+        self.key(4)
+        nodes, rows = self.wait_for(lambda ns: self.by_id(ns, "podcast-row") or self.by_id(ns, "podcast-tile"), 8)
+        nodes = self.step("Back on the Podcasts (%s)" % what, wait=1.0)
+        rows = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
+        self.check("Back from the show's page shows the Podcasts again (%s)" % what, bool(rows) and not self.by_id(nodes, "podcast-page"),
+                   "%d show(s) listed" % len(rows))
+        return nodes
+
+    def pass_page_opens(self):
+        """1.0.5, on demand (passes=page-opens, either build; the workflow's ref input walks an older app with this
+        walk): what the phone opens over a list, opened with the system's animations on and nothing in the player,
+        on a screen of the owner's phone's size (1080 x 2340 at 480 dpi, dark, three buttons), each read by its
+        pixels (opening_check). His report of 12 Nov, with a recording: his show's page slid in and was gone in
+        the frame its opening ended, in 1.0.3 and 1.0.4; "the first time it opened, and would not scroll then".
+        From a fresh app: the long feed (80 episodes, a cover, a long description) followed by its address, the
+        page the app opens then; back, the show's row tapped, twice (the owner's tap; a second opening starts where
+        the first left the transition); an episode opened over the show's page and left, the show's page still
+        there; then the shows as covers and the tile tapped (it grows into the page's header: the other way in).
+        The report's "Pages opened with the animations on" lists every opening with its screenshots."""
+        self.cur_pass, self.lang = "page-opens", "en"
+        s = self.strings["en"]
+        self.sh("am force-stop " + self.pkg)
+        self.set_display("1080x2340", "480")
+        self.three_button_navigation()
+        self.sh("cmd uimode night yes")
+        self.ensure_library()
+        # the workflow's long feed: a cover, a link, a long description and 80 episodes, as the owner's show has
+        if self.a.feed:
+            self.a.feed = self.a.feed.rsplit("/", 1)[0] + "/feed-long.xml"
+        self.animations(True)
+        try:
+            self.launch()
+            self.back_to_tabs()
+            self.open_label(s["nag_nav_podcasts_short"]) or self.open_label(s["nag_nav_podcasts"])
+            nodes = self.step("Podcasts (the animations on)", wait=1.2)
+            if not self.a.feed:
+                self.check("a feed to follow (--feed)", False, "the walk was started without one")
+                return
+            self.page_opens_walk(nodes)
+        finally:
+            self.animations(False)
+            self.sh("cmd uimode night no")
+
+    def page_opens_walk(self, nodes):
+        s = self.strings[self.lang]
+        shows = lambda ns: self.by_id(ns, "podcast-row") or self.by_id(ns, "podcast-tile")
+        if not shows(nodes):
+            # nothing followed yet, the owner's first day: the "add" window closes onto the show's page
+            nodes = self.follow_podcast(nodes)
+            time.sleep(1.5)
+            if self.keyboard_shown():
+                # (a Back while it is up sends it away; without one it would leave the page)
+                self.warnings.append("[%s] the keyboard was still up 1.5 s after the 'add' window closed onto the show's page" % self.cur_pass)
+                self.key(4, record=False)
+                time.sleep(1.0)
+            nodes = self.step("After following: the page the app opened", wait=1.0)
+            if self.by_id(nodes, "podcast-page") or self.by_id(nodes, "podcast-episode"):
+                nodes = self.opening_check("the page the app opens once the show is followed", nodes)
+                nodes = self.podcasts_list("after following")
+            else:
+                self.warnings.append("[%s] following the feed did not open its page: the page is opened from its row alone" % self.cur_pass)
+        if not self.check("a followed show on the Podcasts", bool(shows(nodes)), "none listed"):
+            return
+        # the owner's tap, and once more: a second opening starts where the first left the transition
+        for turn in ("its row tapped", "its row tapped again"):
+            nodes = self.opening_check("the show's page, %s" % turn, nodes, at=shows(nodes)[0].center)
+            if turn.endswith("again"):
+                break
+            nodes = self.podcasts_list(turn)
+            if not shows(nodes):
+                return
+        # the show's page is open: an episode's page over it, and back
+        w, h = self.screen_size(nodes)
+        episodes = [n for n in self.by_id(nodes, "podcast-episode") if h * 0.15 < n.center[1] < h * 0.72]
+        if self.check("an episode on the show's page to open", bool(episodes), "%d in sight" % len(episodes)):
+            x, y = episodes[0].center
+            # (the row's title, clear of the buttons at its end)
+            nodes = self.opening_check("an episode's page over the show's", nodes, at=(min(x, int(w * 0.4)), y),
+                                       tags=("episode-detail",), swipe=False)
+            self.key(4)
+            nodes = self.opening_check("the show's page again, Back from the episode", nodes)
+        nodes = self.podcasts_list("after the episode")
+        if not shows(nodes):
+            return
+        # the other way in: the shows as covers, the tile grows into the page's header
+        more = self.by_id(nodes, "podcast-more")
+        if more:
+            nodes = self.step("The Podcasts' menu", lambda: self.tap(more[0]), wait=1.0)
+            covers = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_pod_view_grid"]]
+            if covers:
+                nodes = self.step("Show as covers", lambda: self.tap(covers[0]), wait=1.2)
+            else:
+                self.key(4)
+                nodes = self.step("The menu closed (no 'Show as covers' in it)", wait=1.0)
+        tiles = self.by_id(nodes, "podcast-tile")
+        if self.check("the shows as covers", bool(tiles), "%d tile(s)" % len(tiles)):
+            nodes = self.opening_check("the show's page, its tile tapped", nodes, at=tiles[0].center)
+            nodes = self.podcasts_list("after the tile")
+            tiles = self.by_id(nodes, "podcast-tile")
+            if tiles:
+                nodes = self.opening_check("the show's page, its tile tapped again", nodes, at=tiles[0].center)
+                nodes = self.podcasts_list("after the tile, again")
+        opened = [r for r in self.page_openings if r["pass"] == self.cur_pass]
+        self.check("the pages were opened with the animations on: by following, from the row twice, an episode, from the tile twice",
+                   len(opened) >= 6, "%d opening(s) read: %s" % (len(opened), "; ".join(r["what"] for r in opened)))
+
     def pass_sheet_trials(self):
         """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
         1.0.2's `input swipe … 300` and by drag() in turn, each trial with the moves the system delivered (dumpsys
@@ -2905,6 +3103,19 @@ class Smoke:
                     p["pass"], p["page"], p["button"], link(p["rest"]), link(p["held"][0]), pct(p["changes"][0]),
                     link(p["held"][1]), pct(p["changes"][1]), p["let_go"], p["tap"] or "not needed"))
             md.append("")
+        if self.page_openings:
+            md.append("## Pages opened with the animations on (1.0.5: on screen when more than %.0f %% of the page's place between the "
+                      "bars is drawn; an empty page has 0.0 %%)\n" % (PAGE_INK * 100))
+            md.append("| pass | page | 0.3 s | 0.8 s | 2.5 s | after a swipe | moved by the swipe | in the UI's tree | result |")
+            md.append("|------|------|-------|-------|-------|---------------|--------------------|------------------|--------|")
+            link = lambda rel, v: "none" if not rel else "[%s](%s)" % ("?" if v is None else "%.1f %%" % (v * 100), rel)
+            for r in self.page_openings:
+                cells = [link(rel, v) for rel, v in zip(r["shots"], r["inks"])] + ["not swiped"] * (4 - len(r["shots"]))
+                md.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+                    r["pass"], r["what"], cells[0], cells[1], cells[2], cells[3],
+                    "not swiped" if len(r["shots"]) < 4 else ("?" if r["scrolled"] is None else "%.1f %%" % (r["scrolled"] * 100)),
+                    "yes" if r["in_tree"] else "**no**", "ok" if r["ok"] else "**FAILED**"))
+            md.append("")
         if self.crashes:
             md.append("## Crashes and ANRs\n")
             for i, c in enumerate(self.crashes, 1):
@@ -2964,7 +3175,8 @@ class Smoke:
             json.dump({"verdict": verdict, "steps": self.steps, "crashes": self.crashes, "errors": self.errors,
                        "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
                        "frames": self.jank, "seconds": dur, "passes": self.a.passes, "source": self.a.source,
-                       "system": self.system_events, "sheet_trials": self.sheet_trials, "back_presses": self.back_presses}, f, indent=1)
+                       "system": self.system_events, "sheet_trials": self.sheet_trials, "back_presses": self.back_presses,
+                       "page_openings": self.page_openings}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
