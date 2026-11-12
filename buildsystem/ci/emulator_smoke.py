@@ -48,6 +48,18 @@ violations). The walk, in passes (a size and a language each):
                followed, from its row (twice), an episode over it and back, from its tile (twice); the
                page must be on screen, in the UI's tree (opening_check) and scroll: its episodes follow
                a swipe by most of its length (scrolls_check)
+  notice-swipe (on demand, either build; an older app by the workflow's ref input) 1.0.6: a notice
+               swiped as a finger swipes it, by raw touch events written to the emulator's touch screen
+               (adb as root), on a screen of the owner's phone's size with the animations on: swiped far
+               and lifted at rest it leaves; flung and lifted in motion (the last move and the lift
+               together) it leaves; swiped a little and lifted in motion it comes back. Read by the
+               bar's place in the pixels 0.3 s, 0.9 s and 1.6 s after the lift (notice_swipe)
+  auto-shots   (on demand; the workflow boots an Android Automotive image for it) 1.0.6: the tree
+               Android Auto browses, drawn by a car's own media app bound to the playback service:
+               its tabs, the music's albums, an album, a track played and the car's player, the
+               podcasts' directory, the radio's countries and a station, what was played, the car's
+               search. Android Auto itself needs a phone signed in to the Play Store and cannot run
+               here; these are the car system's drawings of the same tree
 
 1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
 bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band).
@@ -153,6 +165,8 @@ PAGE_INK = 0.01
 PAGE_FOLLOWS = 0.4
 # 1.0.6: a swiped notice is back at its place, or still aside, by this many px of its left edge
 NOTICE_STILL = 12
+# 1.0.6: Android Automotive's media app, which draws a media service's tree as Android Auto does (pass_auto_shots)
+CAR_MEDIA = "com.android.car.media"
 # 1.0.6: the Linux input events of a touch screen (multi-touch protocol B, with slots; A without)
 EV_SYN, EV_KEY, EV_ABS = 0, 1, 3
 SYN_REPORT, SYN_MT_REPORT, BTN_TOUCH = 0, 2, 0x14a
@@ -244,6 +258,7 @@ class Smoke:
         self.notice_swipes = []  # 1.0.6: a notice swiped with a finger's raw events (notice_swipe)
         self.raw_touch_why = ""  # 1.0.6: why the touch screen takes no raw events here (raw_touch)
         self.notices_stay = False  # 1.0.6: the system's longer time for notices is in force (pass_notice_swipe)
+        self.other_app_expected = False  # 1.0.6: the steps are of another app's screen on purpose (pass_auto_shots)
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
         self.logfile = open(os.path.join(self.out, "logcat-warn.txt"), "w", encoding="utf-8")
@@ -732,8 +747,9 @@ class Smoke:
 
     # ---------------------------------------------------------------- steps
 
-    def step(self, title, action=None, wait=0.8, shot=True):
-        """Does the action, waits for the screen to settle, saves evidence and checks the logs."""
+    def step(self, title, action=None, wait=0.8, shot=True, read=True):
+        """Does the action, waits for the screen to settle, saves evidence and checks the logs. 1.0.6, read=False: a
+        screen that never rests (a car's player while it plays) has no tree to wait for; its picture only."""
         self.n += 1
         n = self.n
         name = "%03d-%s-%s" % (n, self.cur_pass, slug(title))
@@ -752,8 +768,12 @@ class Smoke:
             except Exception as e:  # a failing action is a driver problem, not the app's
                 note.append("action failed: %s" % e)
                 self.errors.append("[%s] %s: %s" % (self.cur_pass, title, e))
-            # dump() deals with the system's dialogs on the way (system_dialogs)
-            xml = self.settle(wait)
+            if read:
+                # dump() deals with the system's dialogs on the way (system_dialogs)
+                xml = self.settle(wait)
+            else:
+                time.sleep(wait)
+                xml = None
             nodes = self.nodes(xml)
             came = [d for d in self.dialogs_seen[mark:] if d == "system"]
             if not came or attempt == 2:
@@ -772,7 +792,9 @@ class Smoke:
         sig = self.signature(nodes) if nodes else None
         self.last_app_sig = self.app_signature(nodes) if nodes else None
         self.gone_words(nodes, name)
-        if xml is None:
+        if xml is None and not read:
+            note.append("the picture only: this screen does not rest, so it was not read")
+        elif xml is None:
             note.append("no UI dump (the screen never went idle?)")
             self.warnings.append("[%s] step %d %s: no UI dump" % (self.cur_pass, n, title))
         else:
@@ -797,7 +819,7 @@ class Smoke:
             self.launch()
             self.settle(1.0)
         pk = sorted({x.pkg for x in nodes if x.pkg})
-        if nodes and self.pkg not in pk and status == "ok":
+        if nodes and self.pkg not in pk and status == "ok" and not self.other_app_expected:
             status = "warn"
             note.append("the app is not in the foreground (windows: %s)" % ", ".join(pk))
         changed = sig is not None and sig != self.last_sig
@@ -1807,11 +1829,15 @@ class Smoke:
         title = [n.text.strip() for n in self.app_nodes(nodes) if n.text.strip() in ("tone", "Smoke tone") and any(self.inside(n, b) for b in bar)]
         if title:
             return "transport bar: %s" % title[0]
-        out = self.sh("dumpsys media_session", timeout=30)
-        block = out[out.find("package=" + self.pkg):] if ("package=" + self.pkg) in out else ""
-        if re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3)\b", block[:3000]):
+        if self.session_playing():
             return "media session playing"
         return None
+
+    def session_playing(self):
+        """The app's media session says it plays."""
+        out = self.sh("dumpsys media_session", timeout=30)
+        block = out[out.find("package=" + self.pkg):] if ("package=" + self.pkg) in out else ""
+        return bool(re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3)\b", block[:3000]))
 
     def big_player(self):
         """1.0.2: the transport bar's "open the player" opens the big player over the window (not the Music page);
@@ -2962,21 +2988,22 @@ class Smoke:
 
     def car_tap(self, labels, title, wait=3.0, below=0.0):
         """Taps what on the car's screen says one of [labels] (any app's: the car's media app draws the tree) and takes
-        the step [title]; the step's nodes, or None with a warning when none of them is on screen. [below]: only what
-        is lower than this share of the screen (the lists, not the tabs)."""
+        the step [title]; True when it was there, else a warning. [below]: only what is lower than this share of the
+        screen (the lists, not the tabs)."""
         nodes = self.nodes(self.dump())
         h = max((n.b[3] for n in nodes), default=768)
         for label in labels:
             hit = [n for n in nodes if n.area and n.center[1] >= h * below and (n.text.strip() == label or n.desc.strip() == label)]
             if hit:
                 x, y = hit[0].center
-                return self.step(title, lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
+                self.step(title, lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
+                return True
         self.warnings.append("[%s] \"%s\" is not on the car's screen (%s)" % (self.cur_pass, labels[0], title))
-        return None
+        return False
 
-    def car_first_row(self, title, starts=None, wait=3.0):
+    def car_first_row(self, title, starts=None, wait=3.0, read=True):
         """Taps the first row of the list on the car's screen (the first text below the bar; with [starts], the first
-        that begins so) and takes the step [title]; the step's nodes or None."""
+        that begins so) and takes the step [title]; what the row says, or None with a warning."""
         nodes = self.nodes(self.dump())
         h = max((n.b[3] for n in nodes), default=768)
         rows = sorted((n for n in nodes if n.area and n.text.strip() and n.center[1] > h * 0.22
@@ -2986,7 +3013,61 @@ class Smoke:
             self.warnings.append("[%s] no row to open on the car's screen (%s)" % (self.cur_pass, title))
             return None
         x, y = rows[0].center
-        return self.step("%s (\"%s\")" % (title, rows[0].text.strip()[:30]), lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
+        said = rows[0].text.strip()
+        self.step("%s (\"%s\")" % (title, said[:30]), lambda: self.sh("input tap %d %d" % (x, y)), wait=wait, read=read)
+        return said
+
+    def car_back(self):
+        self.key(4, record=False)
+        time.sleep(1.2)
+
+    def car_tabs(self, labels, start):
+        """Back until the car's media app shows the app's tabs again (one of [labels]); [start] opens it once more when
+        Back has left it. False when they do not come."""
+        for _ in range(5):
+            nodes = self.nodes(self.dump())
+            said = {n.text.strip() for n in nodes} | {n.desc.strip() for n in nodes}
+            if any(label in said for label in labels):
+                return True
+            if nodes and not any(n.pkg == CAR_MEDIA for n in nodes):
+                start()
+                time.sleep(4.0)
+            else:
+                self.car_back()
+        self.warnings.append("[%s] the car's media app does not show the app's tabs again" % self.cur_pass)
+        return False
+
+    def car_pause(self):
+        """Pauses what plays with the media key, as a steering wheel's button does; True once the app's session no
+        longer says it plays."""
+        for cmd in ("input keyevent 127", "cmd media_session dispatch pause"):
+            self.sh(cmd)
+            for _ in range(4):
+                time.sleep(0.7)
+                if not self.session_playing():
+                    return True
+        return False
+
+    def car_player(self, title, starts=None, wait=4.0, named=True):
+        """Taps the first row, a thing that plays: the car's player comes up over the list. A player that plays never
+        rests (its time runs), so it is photographed as it is and read only once paused; Back then takes it down.
+        [named]: the paused player must say what the row said (not asked of a station: a stream names itself). True
+        when a row was tapped."""
+        said = self.car_first_row(title + ": the car's player", starts=starts, wait=wait, read=False)
+        if not said:
+            return False
+        playing = self.session_playing()
+        if named:
+            self.check("%s: the app's session plays" % title.lower(), playing)
+        else:
+            self.log("%s: the app's session %s" % (title, "plays" if playing else "does not play (yet)"))
+        paused = self.car_pause()
+        nodes = self.step("The car's player, paused" if paused else "The car's player (it would not pause)", wait=1.5, read=paused)
+        if paused and named:
+            on = [n.text.strip() for n in nodes if n.text.strip()]
+            self.check("%s: the car's player names it" % title.lower(), said in on, "tapped \"%s\"; the player says: %s" % (said, ", ".join(on[:10])))
+        self.car_back()
+        return True
 
     def pass_auto_shots(self):
         """1.0.6, on demand (passes=auto-shots; the workflow boots an Android Automotive emulator for it): the owner
@@ -2996,6 +3077,7 @@ class Smoke:
         lists and what plays are the app's; the drawing is the car's, not Android Auto's. In Turkish, as his car has
         it. Every step is a screenshot of the report."""
         self.cur_pass, self.lang = "auto-shots", "tr"
+        self.other_app_expected = True
         s = self.strings["tr"]
         user = self.sh("am get-current-user", timeout=20).strip()
         user = user if user.isdigit() else "0"
@@ -3032,9 +3114,12 @@ class Smoke:
         self.step("The app after its first run", wait=1.0)
         # the car's media app with the app's service as its source, as Android Auto binds it
         component = "%s/org.videolan.vlc.PlaybackService" % self.pkg
-        started = self.sh("am start --user %s -a android.car.intent.action.MEDIA_TEMPLATE --es android.car.intent.extra.MEDIA_COMPONENT %s"
-                          % (user, component), timeout=60)
-        self.log("the car's media app: %s" % " ".join(started.split())[:300])
+
+        def start():
+            return self.sh("am start --user %s -a android.car.intent.action.MEDIA_TEMPLATE --es android.car.intent.extra.MEDIA_COMPONENT %s"
+                           % (user, component), timeout=60)
+
+        self.log("the car's media app: %s" % " ".join(start().split())[:300])
         nodes = self.step("The car's media app: Nağmedar's first tab", wait=6.0)
         said = {n.text.strip() for n in nodes} | {n.desc.strip() for n in nodes}
         tabs = {"music": [s["nag_nav_music"]], "podcasts": [s["nag_nav_podcasts"], s["nag_nav_podcasts_short"]],
@@ -3044,28 +3129,31 @@ class Smoke:
                    "%s of Music, Podcasts, Radio, Recently played; on screen: %s" % (", ".join(shown) or "none", ", ".join(sorted(x for x in said if x)[:24])))
         if len(shown) < 3:
             return
+        every = [label for labels in tabs.values() for label in labels]
         # Music: the albums, an album, a track played
         self.car_tap(tabs["music"], "Music")
         if self.car_tap([s["nag_music_view_albums"]], "Music: the albums", below=0.15):
             if self.car_first_row("An album", starts="Profile album"):
-                if self.car_first_row("A track played", starts="Profile track", wait=5.0):
-                    self.step("What plays", wait=2.0)
-                    self.key(4, record=False)
-                self.key(4, record=False)
-            self.key(4, record=False)
-        # Podcasts: the lists, Discover, the popular shows of the directory
-        if self.car_tap(tabs["podcasts"], "Podcasts"):
+                self.car_player("A track tapped", starts="Profile track")
+        # Podcasts: the lists, Discover, the popular shows of the directory, one of them
+        if self.car_tabs(every, start) and self.car_tap(tabs["podcasts"], "Podcasts"):
             if self.car_tap([s["nag_auto_discover"]], "Podcasts: Discover", below=0.15):
                 if self.car_tap([s["nag_auto_popular_shows"]], "Discover: the popular shows", wait=8.0, below=0.15):
-                    self.key(4, record=False)
-                self.key(4, record=False)
-        # Radio: the lists, the countries, a country's stations
-        if self.car_tap(tabs["radio"], "Radio"):
+                    self.car_first_row("A show of the directory", wait=8.0)
+        # Radio: the lists, the countries, a country's stations, one of them played
+        if self.car_tabs(every, start) and self.car_tap(tabs["radio"], "Radio"):
             if self.car_tap([s["nag_auto_countries"]], "Radio: the countries", wait=8.0, below=0.15):
                 if self.car_first_row("A country's stations", wait=8.0):
-                    self.key(4, record=False)
-                self.key(4, record=False)
-        self.car_tap(tabs["recent"], "Recently played")
+                    self.car_player("A station tapped", wait=9.0, named=False)
+        if self.car_tabs(every, start):
+            # what was played: the track and the station
+            self.car_tap(tabs["recent"], "Recently played")
+            # the car's search, over music, shows and stations at once
+            if self.car_tap(["Search"], "The car's search", wait=2.0):
+                self.sh("input text Profile")
+                self.step("Search: \"Profile\" typed", wait=5.0)
+                self.car_back()
+                self.step("Search: after Back (the keyboard down)", wait=1.5)
 
     # ---------------------------------------------------------------- 1.0.6: a notice swiped as a finger swipes it
 
@@ -3788,6 +3876,7 @@ def main():
                 s.warnings.append("time is up before pass %s" % name)
                 break
             try:
+                s.other_app_expected = False
                 getattr(s, "pass_" + name.strip().replace("-", "_"))()
             except Exception as e:
                 s.errors.append("pass %s: %s" % (name, e))
