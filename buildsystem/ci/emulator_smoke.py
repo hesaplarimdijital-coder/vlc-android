@@ -3134,14 +3134,19 @@ class Smoke:
         return pick
 
     @staticmethod
-    def raw_point(touch, x, y):
-        """A point of the screen (the UI's px) in the touch screen's raw axes."""
+    def panel_point(touch, x, y):
+        """A point of the screen (the UI's px) on the panel itself, in the panel's own px: where a forced size (wm size)
+        is drawn smaller in the panel's middle the two differ. The input dispatcher counts in these."""
         m = touch["map"]
         lx0, ly0, lx1, ly1 = m["logical"]
         px0, py0, px1, py1 = m["physical"]
-        dw, dh = m["device"]
-        px = px0 + (x - lx0) * (px1 - px0) / float(lx1 - lx0)
-        py = py0 + (y - ly0) * (py1 - py0) / float(ly1 - ly0)
+        return (px0 + (x - lx0) * (px1 - px0) / float(lx1 - lx0), py0 + (y - ly0) * (py1 - py0) / float(ly1 - ly0))
+
+    @staticmethod
+    def raw_point(touch, x, y):
+        """A point of the screen (the UI's px) in the touch screen's raw axes."""
+        px, py = Smoke.panel_point(touch, x, y)
+        dw, dh = touch["map"]["device"]
         (xmin, xmax), (ymin, ymax) = touch["axes"]["POSITION_X"], touch["axes"]["POSITION_Y"]
         return (int(round(xmin + px * (xmax - xmin + 1) / float(dw))), int(round(ymin + py * (ymax - ymin + 1) / float(dh))))
 
@@ -3216,7 +3221,8 @@ class Smoke:
 
     def recent_touch(self):
         """The last touch events the input dispatcher sent (dumpsys input's recent events), oldest first: (ms, action,
-        x, y); its queue keeps the last ten or so, so a long gesture's start is not among them."""
+        x, y), the place in the panel's own px (panel_point); its queue keeps the last ten or so, so a long gesture's
+        start is not among them. The times are nanoseconds, with or without the unit (Android 17 and 15)."""
         out = self.sh("dumpsys input", timeout=60)
         lines = [l.strip() for l in out.splitlines() if "MotionEvent" in l and ("DOWN" in l or "MOVE" in l or "UP" in l)]
         with open(os.path.join(self.out, "input-trials.txt"), "a", encoding="utf-8") as f:
@@ -3227,7 +3233,9 @@ class Smoke:
             a = re.search(r"action=(?:AMOTION_EVENT_ACTION_|ACTION_)?(DOWN|MOVE|UP)\b", l)
             at = re.search(r"pointers=\[0: \((-?[\d.]+), (-?[\d.]+)\)", l)
             if t and a and at:
-                seq.append((int(t.group(1)) // (1000000 if t.group(2) else 1), a.group(1), int(float(at.group(1))), int(float(at.group(2)))))
+                v = int(t.group(1))
+                ms = v / 1e6 if (t.group(2) or v > 10 ** 11) else float(v)
+                seq.append((ms, a.group(1), int(float(at.group(1))), int(float(at.group(2)))))
         return seq
 
     def notice_edge(self, rel, ref, band, width):
@@ -3313,7 +3321,9 @@ class Smoke:
         last_move = moves_seen[-1] if moves_seen else None
         together = (ups[-1][0] - last_move[0]) if ups and last_move else None
         # the finger was on the notice: the last move the dispatcher sent is where the swipe ended, on the bar's line
-        reached = last_move is not None and abs(last_move[2] - points[-1][0]) <= 24 and abs(last_move[3] - y) <= 24
+        # (the dispatcher counts in the panel's own px)
+        end = self.panel_point(touch, points[-1][0], y)
+        reached = last_move is not None and abs(last_move[2] - end[0]) <= 6 and abs(last_move[3] - end[1]) <= 6
         rest_edge = edges[0]
         aside = lambda e: e is not None and rest_edge is not None and abs(e - rest_edge) > NOTICE_STILL
         if leaves:
@@ -3328,9 +3338,10 @@ class Smoke:
              "in_tree": bool(said), "tree_left": said[0].b[0] if said else None, "ok": bool(ok and reached)}
         self.notice_swipes.append(r)
         self.check("a notice %s: the raw swipe reached it" % way, reached and rest_edge is not None,
-                   "the notice's bar before the swipe: %s; the last move sent: %s, the swipe's end: (%d, %d); the lift %s after it"
-                   % (px(rest_edge), "(%d, %d)" % (last_move[2], last_move[3]) if last_move else "none read", points[-1][0], y,
-                      "?" if together is None else "%d ms" % together))
+                   "the notice's bar before the swipe: %s; the last move the dispatcher sent: %s of the panel, the swipe's end "
+                   "there: (%d, %d); the lift %s after it"
+                   % (px(rest_edge), "(%d, %d)" % (last_move[2], last_move[3]) if last_move else "none read", end[0], end[1],
+                      "?" if together is None else "%.1f ms" % together))
         if reached and rest_edge is not None:
             self.check("a notice %s %s" % (way, "leaves" if leaves else "comes back to its place"), ok,
                        "its bar's left edge: %s before the swipe; %s, %s and %s about 0.3 s, 0.9 s and 1.6 s after the lift; "
@@ -3653,7 +3664,7 @@ class Smoke:
             for r in self.notice_swipes:
                 cells = [cell(rel, e) for rel, e in zip(r["shots"], r["edges"])]
                 md.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
-                    r["pass"], r["way"], "?" if r["together_ms"] is None else "%d ms" % r["together_ms"], cells[0], cells[1], cells[2],
+                    r["pass"], r["way"], "?" if r["together_ms"] is None else "%.1f ms" % r["together_ms"], cells[0], cells[1], cells[2],
                     cells[3], "at x %d" % r["tree_left"] if r["in_tree"] else "no", "leave" if r["leaves"] else "come back",
                     "ok" if r["ok"] else ("**FAILED**" if r["reached"] else "**not reached**")))
             md.append("")
