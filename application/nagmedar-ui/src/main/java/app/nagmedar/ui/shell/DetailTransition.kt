@@ -38,6 +38,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -360,8 +361,11 @@ internal class DepthState(open: Boolean) {
     /** The transition of [seekable], set where it is composed. */
     lateinit var transition: Transition<Boolean>
 
-    /** Its values, set where it is composed. */
-    var values: DepthValues? = null
+    /**
+     * Its values, set where it is composed. A state of its own (1.0.5): they are made anew at every rest
+     * ([rememberDepth]), and what reads them while placing and drawing then reads the new ones.
+     */
+    var values by mutableStateOf<DepthValues?>(null)
 
     /** A closing driven by the Back gesture: the detail shrinks with the finger, the list rises behind it. */
     var gestureClose by mutableStateOf(false)
@@ -393,10 +397,17 @@ internal class DepthState(open: Boolean) {
     /** The detail covers the list and nothing moves: the list is neither measured, drawn nor read out. */
     val covered: Boolean get() = seekable.currentState && seekable.targetState && !gestureClose && !dropped
 
-    /** Something moves, or is about to: [open] is where the app wants the detail. */
+    /**
+     * Something moves, or is about to: [open] is where the app wants the detail.
+     *
+     * 1.0.5: by the depth's own states alone. Until 1.0.4 also for as long as the transition said it was running,
+     * which a seekable transition at rest says for good once it has been sought again there (see [rememberDepth]):
+     * the depth then went back into the shared elements' layout and stayed in it. All that moves the depth is
+     * told here: a way has its target apart from its current state from its first frame to its last, a finger's
+     * Back and a run back have their own marks.
+     */
     fun moving(open: Boolean): Boolean =
-        open != seekable.currentState || seekable.targetState != seekable.currentState || transition.isRunning ||
-            gestureClose || dropped || runningBack
+        open != seekable.currentState || seekable.targetState != seekable.currentState || gestureClose || dropped || runningBack
 
     /** [side] was on its way when the transition was run back, and lets its shared elements go. */
     fun held(side: DetailSide): Boolean = dropped && (side == DetailSide.Detail) != seekable.currentState
@@ -503,6 +514,10 @@ internal class DepthState(open: Boolean) {
                 shape = RoundedCornerShape((DetailMotion.BACK_CORNER_DP * frame.lean).dp)
                 clip = true
             }
+        } else if (seekable.currentState && seekable.targetState) {
+            // 1.0.5: arrived and open, the detail is in its place and opaque by the state alone, whatever the
+            // transition's values hold (see [rememberDepth]: sought again at rest they once held the way's start,
+            // and the open page stood a whole width beyond the end edge)
         } else {
             val v = values ?: return
             if (withCard) {
@@ -514,20 +529,41 @@ internal class DepthState(open: Boolean) {
     }
 }
 
-/** The phone's depth of a list and its detail; [open] is where it starts. */
+/**
+ * The phone's depth of a list and its detail; [open] is where it starts.
+ *
+ * 1.0.5: its values are made anew at every rest (whenever the transition has arrived at a state), so each way
+ * starts from where the detail stands. A [SeekableTransitionState] that has arrived keeps its animations as the
+ * way left them (from the old state's values to the new one's) and its fraction at 0, and whenever the length of
+ * what is animated in it changes afterwards it seeks them to that fraction again: back to the start of the way
+ * they have just come (and its transition says it is running from then on). The length does change in the frame
+ * after an arrival, when the shared elements' layout goes and its sides' animations with it ([DepthHost]), if one
+ * of those was the longest of all. A cover's bounds settle to half a pixel on the opening spring, the detail's
+ * way to a thousandth: flying more than some 500 px the cover lands after the detail. On the owner's phone
+ * (three pixels to the dp, his show's row a third of the way down the list) that was every opening of the show:
+ * its page slid in and, the frame after it had arrived, stood a whole width beyond the end edge again, until
+ * Back (1.0.3 and 1.0.4; "Podcastte sayfası böyle oluyor", 12 Nov). The way back then started from there too,
+ * and was not played. Animations made at rest begin and end at the state's own values: sought to wherever, they
+ * stay there, and the next way starts from them.
+ */
 @Composable
 internal fun rememberDepth(open: Boolean): DepthState {
     val depth = remember { DepthState(open) }
     val transition = rememberTransition(depth.seekable, label = "detailDepth")
-    // the detail's way, and with it the list's sinking and its scrim
-    val detailShift = transition.animateFloat(transitionSpec = { NagMotion.open(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
-    // with a card the two fade through, the one going away gone before the other appears
-    val gone = tween<Float>(DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardAccelerate)
-    val appears = tween<Float>(DetailDepth.FADE_IN_MS, delayMillis = DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardDecelerate)
-    val cardAlpha = transition.animateFloat(transitionSpec = { if (targetState) appears else gone }, label = "cardAlpha") { if (it) 1f else 0f }
-    val listAlpha = transition.animateFloat(transitionSpec = { if (targetState) gone else appears }, label = "listAlpha") { if (it) 0f else 1f }
     depth.transition = transition
-    if (depth.values == null) depth.values = DepthValues(detailShift, cardAlpha, listAlpha)
+    // anew at every rest: their key is the state the transition has arrived at (no way changes it before its end)
+    val values = key(depth.seekable.currentState) {
+        // the detail's way, and with it the list's sinking and its scrim
+        val detailShift = transition.animateFloat(transitionSpec = { NagMotion.open(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
+        // with a card the two fade through, the one going away gone before the other appears
+        val gone = tween<Float>(DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardAccelerate)
+        val appears = tween<Float>(DetailDepth.FADE_IN_MS, delayMillis = DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardDecelerate)
+        val cardAlpha = transition.animateFloat(transitionSpec = { if (targetState) appears else gone }, label = "cardAlpha") { if (it) 1f else 0f }
+        val listAlpha = transition.animateFloat(transitionSpec = { if (targetState) gone else appears }, label = "listAlpha") { if (it) 0f else 1f }
+        remember(detailShift, cardAlpha, listAlpha) { DepthValues(detailShift, cardAlpha, listAlpha) }
+    }
+    // (the same ones written again change nothing)
+    depth.values = values
     return depth
 }
 
