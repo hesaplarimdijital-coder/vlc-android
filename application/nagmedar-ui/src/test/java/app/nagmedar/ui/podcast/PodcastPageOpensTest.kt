@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
+import app.nagmedar.ui.shell.BOTTOM_GLASS_TAG
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -36,10 +37,11 @@ import kotlin.math.abs
  *
  * The Podcasts in the phone's shell as the app has them, in a window of his phone's size: nothing open, a show's row
  * tapped. Its page must be in its place when all has landed, scroll, let an episode's page over it come and go,
- * leave on Back, and open again. A row far down the list is the one that lost its page: its cover has the longest
- * way to the page's, and lands after the page itself ([app.nagmedar.ui.shell.DetailDepthTest] has the mechanism
- * alone). A row at the top kept its page, which then would not scroll (his "ilk yüklediğimde açılmıştı, o zaman
- * da aşağı scroll yapılmıyordu"). The tests of 1.0.3 and 1.0.4 began with the page already open.
+ * leave on Back, and open again. In this window the last row's page was lost in 1.0.4's code (the page a whole
+ * width beyond the end edge: the tests here that open it were red); on his phone, and on an emulator of its size,
+ * his one show's too ([app.nagmedar.ui.shell.DetailDepthTest] has the mechanism alone). Where the page was not
+ * lost (the one the app opens once a show is followed, a tile's) it would not scroll: his "ilk yüklediğimde
+ * açılmıştı, o zaman da aşağı scroll yapılmıyordu". The tests of 1.0.3 and 1.0.4 began with the page already open.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -123,6 +125,23 @@ class PodcastPageOpensTest {
         assertEquals("$message: the list is covered, none of its rows is read out", 0, rowsReadOut())
     }
 
+    /**
+     * A swipe up the page, as long as the page: its top (the header, with its back arrow) must go out of sight. A list
+     * that no longer takes the scroll gives some 25 dp, what its rows in sight have left, and stands still.
+     */
+    private fun assertThePageScrolls(message: String) {
+        assertTrue("$message: the page is at its top", there("podcast-page-close"))
+        val before = drawn("podcast-episode")
+        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(durationMillis = 400) }
+        compose.waitForIdle()
+        assertThePageIsInItsPlace("$message, swiped")
+        val after = drawn("podcast-episode")
+        assertTrue(
+            "$message: the page follows the finger and its top goes out of sight (the first episode was at $before, the first is now at $after)",
+            !there("podcast-page-close"),
+        )
+    }
+
     /** Taps the row of the show that is [index]th in the list, and lets its opening play to the end. */
     private fun tapRow(index: Int) {
         compose.onAllNodesWithTag("podcast-row")[index].performClick()
@@ -152,27 +171,39 @@ class PodcastPageOpensTest {
         phone()
         tapRow(compose.onAllNodesWithTag("podcast-row").fetchSemanticsNodes().size - 1)
         assertThePageIsInItsPlace("opened from the last row")
-        val before = drawn("podcast-episode")
-        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(durationMillis = 400) }
-        compose.waitForIdle()
-        assertThePageIsInItsPlace("scrolled")
-        // (the first episode there now is one further down the page, or the same one higher up)
-        val after = drawn("podcast-episode")
-        assertTrue("the episodes move under the finger: the first was at $before, the first is now at $after", after.top < before.top - 100f)
+        assertThePageScrolls("opened from the last row")
     }
 
-    /** The shortest way: the page was not lost here, and stood still under the finger. */
+    /** The shortest way in the list: there too the page is in its place and scrolls. */
     @Test
     fun thePageOpenedFromTheFirstRowScrollsToo() {
         phone()
         tapRow(0)
         assertThePageIsInItsPlace("opened from the first row")
-        val before = drawn("podcast-episode")
-        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(durationMillis = 400) }
-        compose.waitForIdle()
-        assertThePageIsInItsPlace("scrolled")
-        val after = drawn("podcast-episode")
-        assertTrue("the episodes move under the finger: the first was at $before, the first is now at $after", after.top < before.top - 100f)
+        assertThePageScrolls("opened from the first row")
+    }
+
+    /**
+     * Scrolling down the page slides the phone's bottom bar away, as everywhere. Back on the shows it is there again:
+     * the shows, too few to scroll, could not have called it back.
+     */
+    @Test
+    fun backFromAScrolledPageShowsTheBottomBarAgain() {
+        phone()
+        val shown = drawn(BOTTOM_GLASS_TAG).top
+        tapRow(compose.onAllNodesWithTag("podcast-row").fetchSemanticsNodes().size - 1)
+        assertThePageIsInItsPlace("opened from the last row")
+        assertEquals("the bottom bar is where it was while the page is at its top", shown, drawn(BOTTOM_GLASS_TAG).top, 1f)
+        assertThePageScrolls("opened from the last row")
+        val away = drawn(BOTTOM_GLASS_TAG).top
+        assertTrue("scrolling down the page slides the bottom bar away: its glass from $shown to $away", away > shown + 60f)
+        back()
+        assertTrue("the list is there again", rowsReadOut() > 0)
+        assertEquals("back on the shows the bottom bar is shown again", shown, drawn(BOTTOM_GLASS_TAG).top, 1f)
+        // and a page opened then starts with the bars shown
+        tapRow(0)
+        assertThePageIsInItsPlace("opened again")
+        assertEquals("a page opened starts with the bottom bar shown", shown, drawn(BOTTOM_GLASS_TAG).top, 1f)
     }
 
     @Test
@@ -189,6 +220,7 @@ class PodcastPageOpensTest {
         assertEquals(listOf("open", "open-episode", "close-episode"), calls)
         assertTrue("the episode's page is gone", !there("episode-detail"))
         assertThePageIsInItsPlace("back from the episode")
+        assertThePageScrolls("back from the episode")
 
         back()
         assertEquals(listOf("open", "open-episode", "close-episode", "close-page"), calls)
@@ -204,5 +236,6 @@ class PodcastPageOpensTest {
         assertTrue("the list is there again", rowsReadOut() > 0)
         tapRow(last)
         assertThePageIsInItsPlace("opened a third time, from the last row")
+        assertThePageScrolls("opened a third time, from the last row")
     }
 }

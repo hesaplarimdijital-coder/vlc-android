@@ -53,6 +53,22 @@ class ShellScrollStateTest {
         assertNull("hidden already", ShellScrollState.settleTarget(64f, 64f))
     }
 
+    /**
+     * 1.0.5: a page opened or closed inside a screen (a show's page over the shows, the shows again): the bars are
+     * shown again. A list too short to scroll could not bring them back ([aPullTheContentCannotTakeMovesNothing]).
+     */
+    @Test
+    fun aPageOpenedOrClosedInsideAScreenShowsTheBarsAgain() {
+        val scroll = state()
+        scroll.onScrolled(consumedY = -200f)
+        assertEquals("slid away", 64f, scroll.offsetPx)
+        scroll.showBars()
+        assertEquals("shown again", 0f, scroll.offsetPx)
+        // and they follow the content from there as before
+        scroll.onScrolled(consumedY = -10f)
+        assertEquals(10f, scroll.offsetPx)
+    }
+
     @Test
     fun aNewScreenStartsWithTheBarsShown() {
         val scroll = state()

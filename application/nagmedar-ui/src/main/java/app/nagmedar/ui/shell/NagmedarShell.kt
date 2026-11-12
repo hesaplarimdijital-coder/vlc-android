@@ -450,7 +450,7 @@ fun NagmedarShell(
                         .background(NagTheme.colors.background)
                         .nestedScroll(scroll.connection),
                 ) {
-                    CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass) {
+                    CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass, LocalShellScroll provides scroll) {
                         NavHost(
                             navController = navController,
                             startDestination = Destination.Music.route,

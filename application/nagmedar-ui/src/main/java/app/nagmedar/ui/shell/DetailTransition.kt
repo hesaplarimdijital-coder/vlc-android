@@ -537,14 +537,12 @@ internal class DepthState(open: Boolean) {
  * way left them (from the old state's values to the new one's) and its fraction at 0, and whenever the length of
  * what is animated in it changes afterwards it seeks them to that fraction again: back to the start of the way
  * they have just come (and its transition says it is running from then on). The length does change in the frame
- * after an arrival, when the shared elements' layout goes and its sides' animations with it ([DepthHost]), if one
- * of those was the longest of all. A cover's bounds settle to half a pixel on the opening spring, the detail's
- * way to a thousandth: flying more than some 500 px the cover lands after the detail. On the owner's phone
- * (three pixels to the dp, his show's row a third of the way down the list) that was every opening of the show:
- * its page slid in and, the frame after it had arrived, stood a whole width beyond the end edge again, until
- * Back (1.0.3 and 1.0.4; "Podcastte sayfası böyle oluyor", 12 Nov). The way back then started from there too,
- * and was not played. Animations made at rest begin and end at the state's own values: sought to wherever, they
- * stay there, and the next way starts from them.
+ * after an arrival, when the shared elements' scopes go and their sides' animations with them ([DepthHost]), if
+ * one of those was the longest of all: a shared element that lands after the detail itself. On the owner's phone
+ * that was every opening of his show from its row: the page slid in and, the frame after it had arrived, stood a
+ * whole width beyond the end edge again, until Back (1.0.3 and 1.0.4; "Podcastte sayfası böyle oluyor", 12 Nov).
+ * The way back then started from there too, and was not played. Animations made at rest begin and end at the
+ * state's own values: sought to wherever, they stay there, and the next way starts from them.
  */
 @Composable
 internal fun rememberDepth(open: Boolean): DepthState {
@@ -982,8 +980,11 @@ fun <T : Any> DetailTransition(
     // registered before the detail's own handlers: those (a selection inside it) go first
     DetailBackHandler(enabled = handleBack && open && !phone, state = state, onBack = onBack)
     DepthBackHandler(enabled = handleBack && open && phone, depth = depth, animated = animated, isOpen = { latestDetail != null }, onBack = onBack)
+    val bars = LocalShellScroll.current
     LaunchedEffect(open, phone, animated) {
         if (open) lingering = true
+        // 1.0.5: a page opened or closed is a new screen: the phone's bars are shown again ([ShellScrollState.showBars])
+        if (phone) bars?.showBars()
         if (phone) {
             state.stand(open)
             depth.drive(open, animated)

@@ -62,13 +62,12 @@ import kotlin.math.roundToInt
  * screens opaque, the list dark under a scrim) is [DetailNoDoubleExposureTest]'s.
  *
  * 1.0.5, the owner's phone (12 Nov, "Podcastte sayfası böyle oluyor", with a recording: his show's page slid in and
- * was gone in the frame its opening ended): the last tests here, where what flies with the detail takes longer than
- * the detail's own way. A cover's bounds settle to half a pixel on the opening spring, the detail's way to a
- * thousandth: beyond some 500 px (at a phone's three pixels to the dp, a row a third of the way down its list) the
- * cover lands after the detail. These tests' covers, at 1.5 px to the dp, never flew that far; nor did the walk see
- * it, its animations off. And where the page was not lost it would not scroll ("o zaman da aşağı scroll
- * yapılmıyordu"): a lazy list taken out of the shared elements' layout after a way no longer takes a scroll. Until
- * 1.0.4 a test here held that a shared depth's list at rest had no lookahead pass; it has one now, and scrolls.
+ * was gone in the frame its opening ended): the last tests here, where what flies with the detail lands after the
+ * detail itself (an animation of its side that outlasts the detail's own way). The covers of the tests above never
+ * did; nor did the walk see it, its animations off. And where the page was not lost it would not scroll ("o zaman
+ * da aşağı scroll yapılmıyordu"): a lazy list taken out of the shared elements' layout after a way no longer takes
+ * a scroll. Until 1.0.4 a test here held that a shared depth's list at rest had no lookahead pass; it has one now,
+ * and scrolls.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -551,8 +550,8 @@ class DetailDepthTest {
 }
 
 /**
- * What a shared element with a long way to fly is to the transition: an animation of its side that outlasts the
- * detail's own way (see [DetailDepthTest]).
+ * What a shared element that lands after the detail is to the transition: an animation of its side that outlasts
+ * the detail's own way (see [DetailDepthTest]).
  */
 @Composable
 private fun AFlightThatOutlastsTheWay() {

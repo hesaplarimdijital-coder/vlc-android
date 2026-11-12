@@ -162,9 +162,12 @@ fun <K : Any> ListDetailPanes(
     // registered before the details' own handlers: those (a selection, an episode) go first
     DetailBackHandler(enabled = detail != null && !side && !phone, state = state, onBack = onCloseDetail)
     DepthBackHandler(enabled = detail != null && phone, depth = depth, animated = animated, isOpen = { latestDetail != null }, onBack = onCloseDetail)
+    val bars = LocalShellScroll.current
     LaunchedEffect(detail, side, phone, animated) {
         val open = detail != null
         if (open) retained = detail
+        // 1.0.5: the details opened or closed are a new screen: the phone's bars are shown again ([ShellScrollState.showBars])
+        if (phone) bars?.showBars()
         when {
             side -> {
                 // the phone's transition stands where this one goes, without holding it up (it waits for a composition)

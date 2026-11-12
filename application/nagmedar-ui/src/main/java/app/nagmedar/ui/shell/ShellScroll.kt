@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -27,7 +28,8 @@ import app.nagmedar.ui.theme.NagMotion
  * [offsetPx] is only read while drawing (a layer translation) and by the screens that leave their
  * padding to the shell, so a scrolled pixel neither measures nor recomposes a screen that lies
  * under the bars. The shell keeps one, turns it off on wider windows and while the keyboard is
- * up, and resets it whenever the screen changes.
+ * up, and resets it whenever the screen changes. 1.0.5: a detail page opened or closed inside a screen
+ * shows the bars again too ([showBars]).
  */
 @Stable
 class ShellScrollState {
@@ -100,6 +102,16 @@ class ShellScrollState {
         scrolled = false
     }
 
+    /**
+     * 1.0.5: the bars shown again, the content where it is: a detail page opened or closed inside a screen (a show's
+     * page over the shows, the shows again) is a new screen to the eye, though the shell's screen is the same one.
+     * Until now only a scroll back up brought the bars back, and a list too short to scroll had none to give: with
+     * one show followed, Back from its scrolled page left the shows without the bottom bar.
+     */
+    fun showBars() {
+        offsetPx = 0f
+    }
+
     companion object {
         /** Where a bar left at [offset] of [max] settles; null when it is shown or hidden already. */
         fun settleTarget(offset: Float, max: Float): Float? = when {
@@ -114,3 +126,9 @@ class ShellScrollState {
         private val timedSettle: AnimationSpec<Float> = tween(SETTLE_MS, easing = NagMotion.Emphasized)
     }
 }
+
+/**
+ * 1.0.5: the shell's [ShellScrollState], for what opens pages inside a screen ([DetailTransition], [ListDetailPanes]:
+ * [ShellScrollState.showBars]); null outside the shell.
+ */
+internal val LocalShellScroll = staticCompositionLocalOf<ShellScrollState?> { null }
