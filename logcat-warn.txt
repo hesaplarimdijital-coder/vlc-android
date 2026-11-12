@@ -1,0 +1,666 @@
+2896 W/dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~ZWTe0rThK9JlOR4V8H4ouw==/app.nagmedar.debug-Dss6gE45cPbyPomgLGBf6A==/base.apk --oat-fd=7 --oat-location=/data/app/~~ZWTe0rThK9JlOR4V8H4ouw==/app.nagmedar.debug-Dss6gE45cPbyPomgLGBf6A==/oat/x86_64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10:11 --class-loader-context=PCL[]{PCL[/system_ext/framework/androidx.window.extensions.jar]#PCL[/system_ext/framework/androidx.window.sidecar.jar]} --classpath-dir=/data/app/~~ZWTe0rThK9JlOR4V8H4ouw==/app.nagmedar.debug-Dss6gE45cPbyPomgLGBf6A== --instruction-set=x86_64 --instruction-set-features=default --instruction-set-variant=x86_64 --compiler-filter=verify --compilation-reason=install --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xtarget-sdk-version:37 --runtime-arg -Xhidden-api-policy:enabled --assume-value=Landroid/os/Build$VERSION;->SDK_INT:37 --no-allow-profile-code --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-name:app.nagmedar.debug,app-version-name:1.0.4,app-version-code:14010012,art-version:370546200
+1258 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3760 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3760 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3760 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3760 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3760 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3760 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3760 W/HWUI: Unknown dataspace 0
+3760 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3760 W/VLC: [00007a2d7522fbd0/130f] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752400d0/1313] libvlc access: cannot insert stream filter record
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3760 W/VLC: [00007a2d7522ee50/1314] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752400d0/1315] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522fbd0/1316] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752401f0/1317] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522ee50/131f] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752400d0/1320] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522fbd0/1321] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752401f0/1322] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522ee50/1323] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d752400d0/1324] libvlc access: cannot insert stream filter record
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3760 W/VLC: [00007a2d7522fbd0/1325] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522ee50/1328] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d75231370/132d] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d75248fb0/1333] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:24): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+624 E/NotificationService: Package enqueue rate is 6.414299. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+3760 W/VLC: [00007a2d7522ee50/1341] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:25): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d7522ee50/1344] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:26): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75234a90/1347] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:27): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:28): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75231370/134b] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d75234a90/134d] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:29): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75231370/1351] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d75234a90/1353] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:31): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75231370/1355] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:32): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75231370/1359] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:33): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d75230b90/135b] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d7522ff30/135c] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:34): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d7522ee50/1360] libvlc access: cannot insert stream filter record
+3760 W/AndroidMedialib: type=1400 audit(0.0:35): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/VLC: [00007a2d7522ff30/1363] libvlc access: cannot insert stream filter record
+3760 W/VLC: [00007a2d75231010/1368] libvlc access: cannot insert stream filter record
+3760 E/VLC: [00007a2d7522ee50/136a] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3760 E/VLC: [00007a2db52c0b90/136a] libvlc input: Your media can't be opened
+3760 E/VLC: [00007a2db52c0b90/136a] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3760 W/VLC: [00007a2d75234f10/136b] libvlc access: cannot insert stream filter record
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3760 E/VLC: [00007a2d752328d0/1372] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3760 E/VLC: [00007a2db52c0b90/1372] libvlc input: Your media can't be opened
+3760 E/VLC: [00007a2db52c0b90/1372] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3760 W/VLC: [00007a2d7522fbd0/1373] libvlc access: cannot insert stream filter record
+3760 W/VLC/medialibrary: [T#134326284943552] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3760 W/AndroidMedialib: type=1400 audit(0.0:40): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:41): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:42): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:43): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:44): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:56): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:57): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:58): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:59): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3760 W/AndroidMedialib: type=1400 audit(0.0:60): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityTaskManager: Force removing ActivityRecord{83699801 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+624 W/InputDispatcher: channel '1a3eff1 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel '1a3eff1 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{1a3eff1 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{ed05aee #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+5476 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+5476 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+5476 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+5476 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+5476 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+5476 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+5476 W/HWUI: Unknown dataspace 0
+5476 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+5476 W/NagExp: host 52c9f12 shared false moving false hosted false mode swap isOpen false
+5476 W/NagExp: body 52c9f12: enters
+5476 W/NagExp: LDP list side: enters
+5476 W/NagExp: body 52c9f12: composed
+5476 W/NagExp: LDP list side: composed
+5476 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+5476 W/NagExp: LDP place list true pane false
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5476 W/NagExp: LDP measure 1080x1191 list true pane false covered false
+5476 W/NagExp: LDP place list true pane false
+5476 W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=app.nagmedar.debug
+5476 W/FrameTracker: Missed SF frame:jankTypeLegacy: JANK_COMPOSER, jankTypeExperimental: JANK_APPLICATION, vsyncId: 10643, totalDuration: 137866948, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5476 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+5476 W/NagExp: LDP place list true pane false
+5476 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 12264, totalDuration: 157611266, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5476 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 12264, totalDuration: 157611266, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5476 W/JobInfo: Requested important-while-foreground flag for job0 is ignored and takes no effect
+624 W/WindowManager: container Window{9caf3ef u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5476 W/NagExp: LDP detail side: enters
+5476 W/NagExp: detailPane fullScreen true page true: enters
+5476 W/NagExp: host 52c9f12 shared false moving true hosted false mode swap isOpen true
+5476 W/NagExp: LDP detail side: composed
+5476 W/NagExp: detailPane fullScreen true page true: composed
+5476 W/NagExp: host 894aeb3 shared false moving false hosted false mode swap isOpen false
+5476 W/NagExp: body 894aeb3: enters
+5476 W/NagExp: DT list side: enters
+5476 W/NagExp: PodcastPageView: enters
+5476 W/NagExp: body 894aeb3: composed
+5476 W/NagExp: DT list side: composed
+5476 W/NagExp: PodcastPageView: composed
+5476 W/NagExp: DT measure 1080x2100 list true pane false covered false
+5476 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+5476 W/NagExp: LDP place list true pane true
+5476 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+5476 W/NagExp: LDP place list false pane true
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5476 W/NagExp: host 52c9f12 shared false moving true hosted false mode swap isOpen false
+5476 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+5476 W/NagExp: LDP place list false pane true
+5476 W/NagExp: detailPane fullScreen true page true: leaves
+5476 W/NagExp: LDP detail side: leaves
+5476 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+5476 W/NagExp: LDP place list true pane false
+5476 W/NagExp: PodcastPageView: leaves
+5476 W/NagExp: DT list side: leaves
+5476 W/NagExp: body 894aeb3: leaves
+5476 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+624 W/ActivityTaskManager: Force removing ActivityRecord{18143887 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+624 W/InputDispatcher: channel 'c27857f app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel 'c27857f app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{c27857f u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{2ab488e #10 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+6086 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+6086 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+6086 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+6086 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+6086 W/NagExp: asked: host=swap
+6086 W/HWUI: Unknown dataspace 0
+6086 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6086 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6086 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+6086 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+6086 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+6086 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen false
+6086 W/NagExp: body b31e974: enters
+6086 W/NagExp: LDP list side: enters
+6086 W/NagExp: body b31e974: composed
+6086 W/NagExp: LDP list side: composed
+6086 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+6086 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+6086 W/NagExp: LDP detail side: enters
+6086 W/NagExp: detailPane fullScreen true page true: enters
+6086 W/NagExp: body e9973bf: enters
+6086 W/NagExp: DT list side: enters
+6086 W/NagExp: PodcastPageView: enters
+6086 W/NagExp: LDP detail side: composed
+6086 W/NagExp: detailPane fullScreen true page true: composed
+6086 W/NagExp: host e9973bf shared false moving false hosted false mode swap isOpen false
+6086 W/NagExp: body e9973bf: composed
+6086 W/NagExp: DT list side: composed
+6086 W/NagExp: PodcastPageView: composed
+6086 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6086 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6086 W/NagExp: LDP place list true pane true
+6086 W/NagExp: LDP place list true pane true
+6086 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+6086 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen true
+6086 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6086 W/NagExp: LDP place list false pane true
+6086 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+6086 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6086 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6086 W/NagExp: LDP place list false pane true
+6086 W/NagExp: LDP place list false pane true
+6086 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen false
+6086 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6086 W/NagExp: LDP place list false pane true
+6086 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6086 W/NagExp: LDP place list false pane true
+6086 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen false
+6086 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6086 W/NagExp: LDP place list true pane true
+6086 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6086 W/NagExp: LDP place list true pane true
+6086 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen false
+6086 W/NagExp: detailPane fullScreen true page true: leaves
+6086 W/NagExp: LDP detail side: leaves
+6086 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6086 W/NagExp: LDP place list true pane false
+6086 W/NagExp: PodcastPageView: leaves
+6086 W/NagExp: DT list side: leaves
+6086 W/NagExp: body e9973bf: leaves
+624 W/ActivityTaskManager: Force removing ActivityRecord{168238438 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t11 f}}: app died, no saved state
+624 W/InputDispatcher: channel 'b50df7c app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel 'b50df7c app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{b50df7c u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{2e0c8a7 #11 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+6414 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+6414 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+6414 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+6414 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+6414 W/NagExp: asked: host=swap,swipes=const
+6414 W/HWUI: Unknown dataspace 0
+6414 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6414 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+6414 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6414 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+6414 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+6414 W/NagExp: host c55a7e5 shared true moving false hosted false mode swap isOpen false
+6414 W/NagExp: body c55a7e5: enters
+6414 W/NagExp: LDP list side: enters
+6414 W/NagExp: body c55a7e5: composed
+6414 W/NagExp: LDP list side: composed
+6414 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+6414 W/NagExp: host c55a7e5 shared true moving true hosted true mode swap isOpen true
+6414 W/NagExp: LDP detail side: enters
+6414 W/NagExp: detailPane fullScreen true page true: enters
+6414 W/NagExp: body 64c12eb: enters
+6414 W/NagExp: DT list side: enters
+6414 W/NagExp: PodcastPageView: enters
+6414 W/NagExp: LDP detail side: composed
+6414 W/NagExp: detailPane fullScreen true page true: composed
+6414 W/NagExp: host 64c12eb shared false moving false hosted false mode swap isOpen false
+6414 W/NagExp: body 64c12eb: composed
+6414 W/NagExp: DT list side: composed
+6414 W/NagExp: PodcastPageView: composed
+6414 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6414 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6414 W/NagExp: LDP place list true pane true
+6414 W/NagExp: LDP place list true pane true
+6414 W/NagExp: host c55a7e5 shared true moving true hosted true mode swap isOpen true
+6414 W/NagExp: host c55a7e5 shared true moving false hosted false mode swap isOpen true
+6414 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6414 W/NagExp: LDP place list false pane true
+6414 W/NagExp: host c55a7e5 shared true moving true hosted true mode swap isOpen true
+6414 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6414 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6414 W/NagExp: LDP place list false pane true
+6414 W/NagExp: LDP place list false pane true
+6414 W/NagExp: host c55a7e5 shared true moving true hosted true mode swap isOpen false
+6414 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6414 W/NagExp: LDP place list false pane true
+6414 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6414 W/NagExp: LDP place list false pane true
+6414 W/NagExp: host c55a7e5 shared true moving true hosted true mode swap isOpen false
+6414 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6414 W/NagExp: LDP place list true pane true
+6414 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6414 W/NagExp: LDP place list true pane true
+6414 W/NagExp: host c55a7e5 shared true moving false hosted false mode swap isOpen false
+6414 W/NagExp: detailPane fullScreen true page true: leaves
+6414 W/NagExp: LDP detail side: leaves
+6414 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6414 W/NagExp: LDP place list true pane false
+6414 W/NagExp: PodcastPageView: leaves
+6414 W/NagExp: DT list side: leaves
+6414 W/NagExp: body 64c12eb: leaves
+624 W/ActivityTaskManager: Force removing ActivityRecord{170168995 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t12 f}}: app died, no saved state
+624 W/InputDispatcher: channel '735ffea app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel '735ffea app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{735ffea u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{35249a0 #12 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+6712 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+6712 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+6712 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+6712 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+6712 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6712 W/NagExp: asked: host=swap,inner=plain
+6712 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+6712 W/HWUI: Unknown dataspace 0
+6712 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+6712 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+6712 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+6712 W/NagExp: host 3510086 shared true moving false hosted false mode swap isOpen false
+6712 W/NagExp: body 3510086: enters
+6712 W/NagExp: LDP list side: enters
+6712 W/NagExp: body 3510086: composed
+6712 W/NagExp: LDP list side: composed
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+6712 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+6712 W/NagExp: host 3510086 shared true moving true hosted true mode swap isOpen true
+6712 W/NagExp: LDP detail side: enters
+6712 W/NagExp: detailPane fullScreen true page true: enters
+6712 W/NagExp: plain 536e119: enters
+6712 W/NagExp: DT list side: enters
+6712 W/NagExp: PodcastPageView: enters
+6712 W/NagExp: LDP detail side: composed
+6712 W/NagExp: detailPane fullScreen true page true: composed
+6712 W/NagExp: host 536e119 plain box, not shared
+6712 W/NagExp: plain 536e119: composed
+6712 W/NagExp: DT list side: composed
+6712 W/NagExp: PodcastPageView: composed
+6712 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6712 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6712 W/NagExp: LDP place list true pane true
+6712 W/NagExp: LDP place list true pane true
+6712 W/NagExp: host 3510086 shared true moving true hosted true mode swap isOpen true
+6712 W/NagExp: host 3510086 shared true moving false hosted false mode swap isOpen true
+6712 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6712 W/NagExp: LDP place list false pane true
+6712 W/NagExp: host 3510086 shared true moving true hosted true mode swap isOpen true
+6712 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6712 W/NagExp: DT measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6712 W/NagExp: LDP place list false pane true
+6712 W/NagExp: LDP place list false pane true
+6712 W/NagExp: host 3510086 shared true moving true hosted true mode swap isOpen false
+6712 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6712 W/NagExp: LDP place list false pane true
+6712 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+6712 W/NagExp: LDP place list false pane true
+6712 W/NagExp: host 3510086 shared true moving true hosted true mode swap isOpen false
+6712 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6712 W/NagExp: LDP place list true pane true
+6712 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+6712 W/NagExp: LDP place list true pane true
+6712 W/NagExp: host 3510086 shared true moving false hosted false mode swap isOpen false
+6712 W/NagExp: PodcastPageView: leaves
+6712 W/NagExp: DT list side: leaves
+6712 W/NagExp: plain 536e119: leaves
+6712 W/NagExp: detailPane fullScreen true page true: leaves
+6712 W/NagExp: LDP detail side: leaves
+6712 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+6712 W/NagExp: LDP place list true pane false
+624 W/ActivityTaskManager: Force removing ActivityRecord{243337271 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t13 f}}: app died, no saved state
+624 W/InputDispatcher: channel 'd167015 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel 'd167015 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{d167015 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{efb71a4 #13 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+7032 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+7032 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+7032 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+7032 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+7032 W/NagExp: asked: host=swap,swipes=const,inner=plain
+7032 W/HWUI: Unknown dataspace 0
+7032 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7032 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7032 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+7032 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+7032 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+7032 W/NagExp: host 9be72ba shared true moving false hosted false mode swap isOpen false
+7032 W/NagExp: body 9be72ba: enters
+7032 W/NagExp: LDP list side: enters
+7032 W/NagExp: body 9be72ba: composed
+7032 W/NagExp: LDP list side: composed
+7032 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+7032 W/NagExp: host 9be72ba shared true moving true hosted true mode swap isOpen true
+7032 W/NagExp: LDP detail side: enters
+7032 W/NagExp: detailPane fullScreen true page true: enters
+7032 W/NagExp: plain 64c12eb: enters
+7032 W/NagExp: DT list side: enters
+7032 W/NagExp: PodcastPageView: enters
+7032 W/NagExp: LDP detail side: composed
+7032 W/NagExp: detailPane fullScreen true page true: composed
+7032 W/NagExp: host 64c12eb plain box, not shared
+7032 W/NagExp: plain 64c12eb: composed
+7032 W/NagExp: DT list side: composed
+7032 W/NagExp: PodcastPageView: composed
+7032 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7032 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7032 W/NagExp: LDP place list true pane true
+7032 W/NagExp: LDP place list true pane true
+7032 W/NagExp: host 9be72ba shared true moving true hosted true mode swap isOpen true
+7032 W/NagExp: host 9be72ba shared true moving false hosted false mode swap isOpen true
+7032 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7032 W/NagExp: LDP place list false pane true
+7032 W/NagExp: host 9be72ba shared true moving true hosted true mode swap isOpen true
+7032 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7032 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7032 W/NagExp: LDP place list false pane true
+7032 W/NagExp: LDP place list false pane true
+7032 W/NagExp: host 9be72ba shared true moving true hosted true mode swap isOpen false
+7032 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7032 W/NagExp: LDP place list false pane true
+7032 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7032 W/NagExp: LDP place list false pane true
+7032 W/NagExp: host 9be72ba shared true moving true hosted true mode swap isOpen false
+7032 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7032 W/NagExp: LDP place list true pane true
+7032 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7032 W/NagExp: LDP place list true pane true
+7032 W/NagExp: host 9be72ba shared true moving false hosted false mode swap isOpen false
+7032 W/NagExp: PodcastPageView: leaves
+7032 W/NagExp: DT list side: leaves
+7032 W/NagExp: plain 64c12eb: leaves
+7032 W/NagExp: detailPane fullScreen true page true: leaves
+7032 W/NagExp: LDP detail side: leaves
+7032 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7032 W/NagExp: LDP place list true pane false
+624 W/ActivityTaskManager: Force removing ActivityRecord{125051094 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t14 f}}: app died, no saved state
+624 W/InputDispatcher: channel 'b6b869c app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel 'b6b869c app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{b6b869c u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{9f75f57 #14 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+7352 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+7352 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+7352 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+7352 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+7352 W/NagExp: asked: host=boxswap
+7352 W/HWUI: Unknown dataspace 0
+7352 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7352 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7352 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+7352 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+7352 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+7352 W/NagExp: host 52c9f12 shared true moving false hosted false mode boxswap isOpen false
+7352 W/NagExp: body 52c9f12: enters
+7352 W/NagExp: LDP list side: enters
+7352 W/NagExp: body 52c9f12: composed
+7352 W/NagExp: LDP list side: composed
+7352 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7352 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+7352 W/NagExp: host 52c9f12 shared true moving true hosted true mode boxswap isOpen true
+7352 W/NagExp: LDP detail side: enters
+7352 W/NagExp: detailPane fullScreen true page true: enters
+7352 W/NagExp: body 8d46965: enters
+7352 W/NagExp: DT list side: enters
+7352 W/NagExp: PodcastPageView: enters
+7352 W/NagExp: LDP detail side: composed
+7352 W/NagExp: detailPane fullScreen true page true: composed
+7352 W/NagExp: host 8d46965 shared false moving false hosted false mode boxswap isOpen false
+7352 W/NagExp: body 8d46965: composed
+7352 W/NagExp: DT list side: composed
+7352 W/NagExp: PodcastPageView: composed
+7352 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7352 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7352 W/NagExp: LDP place list true pane true
+7352 W/NagExp: host 52c9f12 shared true moving true hosted true mode boxswap isOpen true
+7352 W/NagExp: host 52c9f12 shared true moving false hosted false mode boxswap isOpen true
+7352 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7352 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7352 W/NagExp: LDP place list false pane true
+7352 W/NagExp: host 52c9f12 shared true moving true hosted true mode boxswap isOpen false
+7352 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7352 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7352 W/NagExp: LDP place list false pane true
+7352 W/NagExp: host 52c9f12 shared true moving true hosted true mode boxswap isOpen false
+7352 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7352 W/NagExp: LDP place list true pane true
+7352 W/NagExp: host 52c9f12 shared true moving false hosted false mode boxswap isOpen false
+7352 W/NagExp: detailPane fullScreen true page true: leaves
+7352 W/NagExp: LDP detail side: leaves
+7352 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7352 W/NagExp: LDP place list true pane false
+7352 W/NagExp: PodcastPageView: leaves
+7352 W/NagExp: DT list side: leaves
+7352 W/NagExp: body 8d46965: leaves
+624 W/ActivityTaskManager: Force removing ActivityRecord{51011141 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t15 f}}: app died, no saved state
+624 W/InputDispatcher: channel 'ffb0049 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel 'ffb0049 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{ffb0049 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{281599a #15 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+7664 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+7664 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+7664 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+7664 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+7664 W/NagExp: asked: host=stl
+7664 W/HWUI: Unknown dataspace 0
+7664 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7664 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7664 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+7664 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+7664 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+7664 W/NagExp: host d19ee9d shared true moving false hosted true mode stl isOpen false
+7664 W/NagExp: body d19ee9d: enters
+7664 W/NagExp: LDP list side: enters
+7664 W/NagExp: body d19ee9d: composed
+7664 W/NagExp: LDP list side: composed
+7664 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP place list true pane false
+7664 W/NagExp: LDP place list true pane false
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+7664 W/NagExp: LDP detail side: enters
+7664 W/NagExp: detailPane fullScreen true page true: enters
+7664 W/NagExp: host d19ee9d shared true moving true hosted true mode stl isOpen true
+7664 W/NagExp: LDP detail side: composed
+7664 W/NagExp: detailPane fullScreen true page true: composed
+7664 W/NagExp: host 5df2ff0 shared false moving false hosted false mode stl isOpen false
+7664 W/NagExp: body 5df2ff0: enters
+7664 W/NagExp: DT list side: enters
+7664 W/NagExp: PodcastPageView: enters
+7664 W/NagExp: body 5df2ff0: composed
+7664 W/NagExp: DT list side: composed
+7664 W/NagExp: PodcastPageView: composed
+7664 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7664 W/NagExp: LDP place list true pane true
+7664 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7664 W/NagExp: LDP place list true pane true
+7664 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7664 W/NagExp: LDP place list false pane true
+7664 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7664 W/NagExp: LDP place list false pane true
+7664 W/NagExp: host d19ee9d shared true moving true hosted true mode stl isOpen false
+7664 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7664 W/NagExp: LDP place list false pane true
+7664 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7664 W/NagExp: LDP place list false pane true
+7664 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7664 W/NagExp: LDP place list true pane true
+7664 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7664 W/NagExp: LDP place list true pane true
+7664 W/NagExp: detailPane fullScreen true page true: leaves
+7664 W/NagExp: LDP detail side: leaves
+7664 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP place list true pane false
+7664 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7664 W/NagExp: LDP place list true pane false
+7664 W/NagExp: PodcastPageView: leaves
+7664 W/NagExp: DT list side: leaves
+7664 W/NagExp: body 5df2ff0: leaves
+624 W/ActivityTaskManager: Force removing ActivityRecord{110118526 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t16 f}}: app died, no saved state
+624 W/InputDispatcher: channel '7e79efd app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+624 E/InputDispatcher: channel '7e79efd app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+624 E/ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ REQUEST id=234, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10234 RequestorUid: 10234 RequestorPkg: app.nagmedar.debug MatchNonThreadLocalNetworks UnderlyingNetworks: Null] ]
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+624 W/WindowManager: Exception thrown during dispatchAppVisibility Window{7e79efd u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+624 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{45c97df #16 type=standard A=10234:app.nagmedar.debug minWidth=1440 minHeight=1080}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ebdecb9
+7960 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+7960 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+7960 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+7960 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+7960 W/NagExp: asked: host=swap
+7960 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7960 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+7960 W/HWUI: Unknown dataspace 0
+7960 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+7960 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(wmsSync-VRI[NagmedarActivity]#0) as ready
+7960 E/SurfaceSyncGroup: Failed to receive transaction ready in 1000ms. Marking SurfaceSyncGroup(VRI[NagmedarActivity]#1) as ready
+7960 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen false
+7960 W/NagExp: body b31e974: enters
+7960 W/NagExp: LDP list side: enters
+7960 W/NagExp: body b31e974: composed
+7960 W/NagExp: LDP list side: composed
+7960 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP place list true pane false
+624 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+624 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+7960 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+7960 W/NagExp: LDP detail side: enters
+7960 W/NagExp: detailPane fullScreen true page true: enters
+7960 W/NagExp: body 349a5de: enters
+7960 W/NagExp: DT list side: enters
+7960 W/NagExp: PodcastPageView: enters
+7960 W/NagExp: LDP detail side: composed
+7960 W/NagExp: detailPane fullScreen true page true: composed
+7960 W/NagExp: host 349a5de shared false moving false hosted false mode swap isOpen false
+7960 W/NagExp: body 349a5de: composed
+7960 W/NagExp: DT list side: composed
+7960 W/NagExp: PodcastPageView: composed
+7960 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7960 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7960 W/NagExp: LDP place list true pane true
+7960 W/NagExp: LDP place list true pane true
+7960 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+7960 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen true
+7960 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7960 W/NagExp: LDP place list false pane true
+7960 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen true
+7960 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7960 W/NagExp: DT measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7960 W/NagExp: LDP place list false pane true
+7960 W/NagExp: LDP place list false pane true
+7960 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen false
+7960 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7960 W/NagExp: LDP place list false pane true
+7960 W/NagExp: LDP measure 1080x2100 list false pane true covered true
+7960 W/NagExp: LDP place list false pane true
+7960 W/NagExp: host b31e974 shared true moving true hosted true mode swap isOpen false
+7960 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7960 W/NagExp: LDP place list true pane true
+7960 W/NagExp: LDP measure 1080x2100 list true pane true covered false
+7960 W/NagExp: LDP place list true pane true
+7960 W/NagExp: host b31e974 shared true moving false hosted false mode swap isOpen false
+7960 W/NagExp: detailPane fullScreen true page true: leaves
+7960 W/NagExp: LDP detail side: leaves
+7960 W/NagExp: LDP measure 1080x2100 list true pane false covered false
+7960 W/NagExp: LDP place list true pane false
+7960 W/NagExp: PodcastPageView: leaves
+7960 W/NagExp: DT list side: leaves
+7960 W/NagExp: body 349a5de: leaves

@@ -1,0 +1,9 @@
+371 s, 30 steps, pass page-blank-2, 0 crashes
+23 page-blank-2 [host=swap,swipes=const,inner=plain, nothing played] The Podcasts ok
+24 page-blank-2 [host=swap,swipes=const,inner=plain, nothing played] The podcast's page, the UI asked ok
+25 page-blank-2 [host=swap,swipes=const,inner=plain, nothing played] Back on the Podcasts ok
+26 page-blank-2 [host=boxswap, nothing played] The Podcasts ok
+27 page-blank-2 [host=boxswap, nothing played] The podcast's page, the UI asked ok
+28 page-blank-2 [host=boxswap, nothing played] Back on the Podcasts ok
+29 page-blank-2 [host=stl, nothing played] The Podcasts ok
+30 page-blank-2 [host=stl, nothing played] The podcast's page, the UI asked ok

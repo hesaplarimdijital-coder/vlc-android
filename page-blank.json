@@ -1,0 +1,142 @@
+[
+ {
+  "mode": "host=swap",
+  "state": "nothing played",
+  "inks": [
+   0.1432517803813462,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scrolled": 0.0,
+  "in_tree": false,
+  "asked": 0.0,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/015-page-blank-2-opened-host-swap-nothing-played-1.png",
+   "shots/015-page-blank-2-opened-host-swap-nothing-played-2.png",
+   "shots/015-page-blank-2-opened-host-swap-nothing-played-3.png",
+   "shots/015-page-blank-2-opened-host-swap-nothing-played-4.png"
+  ]
+ },
+ {
+  "mode": "host=swap,swipes=const",
+  "state": "nothing played",
+  "inks": [
+   0.1106625060622304,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scrolled": 0.0,
+  "in_tree": false,
+  "asked": 0.0,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/018-page-blank-2-opened-host-swap-swipes-const-nothing-played-1.png",
+   "shots/018-page-blank-2-opened-host-swap-swipes-const-nothing-played-2.png",
+   "shots/018-page-blank-2-opened-host-swap-swipes-const-nothing-played-3.png",
+   "shots/018-page-blank-2-opened-host-swap-swipes-const-nothing-played-4.png"
+  ]
+ },
+ {
+  "mode": "host=swap,inner=plain",
+  "state": "nothing played",
+  "inks": [
+   0.09568433009163539,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scrolled": 0.0,
+  "in_tree": false,
+  "asked": 0.0,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/021-page-blank-2-opened-host-swap-inner-plain-nothing-played-1.png",
+   "shots/021-page-blank-2-opened-host-swap-inner-plain-nothing-played-2.png",
+   "shots/021-page-blank-2-opened-host-swap-inner-plain-nothing-played-3.png",
+   "shots/021-page-blank-2-opened-host-swap-inner-plain-nothing-played-4.png"
+  ]
+ },
+ {
+  "mode": "host=swap,swipes=const,inner=plain",
+  "state": "nothing played",
+  "inks": [
+   0.08671541976159482,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scrolled": 0.0,
+  "in_tree": false,
+  "asked": 0.0,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/024-page-blank-2-opened-host-swap-swipes-const-inner-plain-nothin-1.png",
+   "shots/024-page-blank-2-opened-host-swap-swipes-const-inner-plain-nothin-2.png",
+   "shots/024-page-blank-2-opened-host-swap-swipes-const-inner-plain-nothin-3.png",
+   "shots/024-page-blank-2-opened-host-swap-swipes-const-inner-plain-nothin-4.png"
+  ]
+ },
+ {
+  "mode": "host=boxswap",
+  "state": "nothing played",
+  "inks": [
+   0.11248245143834393,
+   0.14205975444776273,
+   0.14205975444776273,
+   0.1189320264440871
+  ],
+  "scrolled": 0.20639533399698803,
+  "in_tree": true,
+  "asked": 0.1189320264440871,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/027-page-blank-2-opened-host-boxswap-nothing-played-1.png",
+   "shots/027-page-blank-2-opened-host-boxswap-nothing-played-2.png",
+   "shots/027-page-blank-2-opened-host-boxswap-nothing-played-3.png",
+   "shots/027-page-blank-2-opened-host-boxswap-nothing-played-4.png"
+  ]
+ },
+ {
+  "mode": "host=stl",
+  "state": "nothing played",
+  "inks": [
+   0.049040891339306225,
+   0.14205975444776273,
+   0.14205975444776273,
+   0.11936531638461342
+  ],
+  "scrolled": 0.19340556959440489,
+  "in_tree": true,
+  "asked": 0.11936531638461342,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/030-page-blank-2-opened-host-stl-nothing-played-1.png",
+   "shots/030-page-blank-2-opened-host-stl-nothing-played-2.png",
+   "shots/030-page-blank-2-opened-host-stl-nothing-played-3.png",
+   "shots/030-page-blank-2-opened-host-stl-nothing-played-4.png"
+  ]
+ },
+ {
+  "mode": "host=swap",
+  "state": "nothing played",
+  "inks": [
+   0.09568433009163539,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scrolled": 0.0,
+  "in_tree": false,
+  "asked": 0.0,
+  "back": 0.045773030094187914,
+  "shots": [
+   "shots/033-page-blank-2-opened-host-swap-nothing-played-1.png",
+   "shots/033-page-blank-2-opened-host-swap-nothing-played-2.png",
+   "shots/033-page-blank-2-opened-host-swap-nothing-played-3.png",
+   "shots/033-page-blank-2-opened-host-swap-nothing-played-4.png"
+  ]
+ }
+]

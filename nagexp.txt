@@ -1,0 +1,9 @@
+--------- beginning of main
+11-12 17:28:28.935 W/NagExp  ( 7960): host b31e974 shared false moving false hosted false mode swap isOpen false
+11-12 17:28:28.935 W/NagExp  ( 7960): body b31e974: composed
+11-12 17:28:28.935 W/NagExp  ( 7960): LDP list side: composed
+11-12 17:28:28.937 W/NagExp  ( 7960): LDP measure 1080x2100 list true pane false covered false
+11-12 17:28:28.937 W/NagExp  ( 7960): LDP place list true pane false
+11-12 17:28:29.075 W/NagExp  ( 7960): host b31e974 shared false moving false hosted false mode swap isOpen false
+11-12 17:28:29.075 W/NagExp  ( 7960): body b31e974: composed
+11-12 17:28:29.075 W/NagExp  ( 7960): LDP list side: composed
