@@ -59,6 +59,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.nagmedar.ui.components.BackSource
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
@@ -239,10 +240,11 @@ fun NagmedarShell(
     // Müzik rises behind it from 94 % ([tabBackEnter], [tabBackExit]). The Back button is no swipe (Desktop Kit
     // 2.4.0): since Android 16 a press of the three buttons' Back or of a hardware Back key starts a predictive
     // Back too, with no edge ([BackEventCompat.EDGE_NONE]), which navigation plays through on the release: it
-    // gets the plain pops, the tabs' fade-through and the pages' slide
+    // gets the plain pops, the tabs' fade-through and the pages' slide (1.0.4: [BackSource], the details' and
+    // the player's rule too)
     val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> Boolean = remember(navigator) {
         { edge ->
-            edge != BackEventCompat.EDGE_NONE && currentKind == NavKind.BottomBar && NavRules.tabBack(
+            BackSource.finger(edge) && currentKind == NavKind.BottomBar && NavRules.tabBack(
                 Destination.fromRoute(initialState.destination.route),
                 Destination.fromRoute(targetState.destination.route),
                 currentKind,

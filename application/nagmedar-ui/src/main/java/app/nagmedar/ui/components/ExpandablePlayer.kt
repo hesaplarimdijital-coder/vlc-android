@@ -631,7 +631,9 @@ private fun PlayerSheet(
         backProgress.snapTo(0f)
         val release = NagMotion.spatial(state.tier, tween(NagMotion.MEDIUM, easing = NagMotion.Emphasized), NagMotion.FRACTION)
         try {
-            events.collect { event -> backProgress.snapTo(event.progress) }
+            // 1.0.4: a finger's Back shrinks the player; the Back button's own progress (Android 16 and later,
+            // [BackSource]) does not: the player stays whole under the button and its release takes it down
+            events.collect { event -> if (event.fromFinger) backProgress.snapTo(event.progress) }
             collapse()
             // 1.0.3: the shrink rides down with the sheet (scaled by the way, above) and lets go once the sheet has landed
             // on the strip, or a finger has caught it on the way. The collapse starts with the next frame; should it not

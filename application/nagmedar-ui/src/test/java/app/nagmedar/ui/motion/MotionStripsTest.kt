@@ -78,6 +78,8 @@ import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.holdBackButton
+import app.nagmedar.ui.shell.releaseBackButton
 import app.nagmedar.ui.shell.rememberShellContentPadding
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -113,6 +115,11 @@ import kotlin.math.roundToInt
  * the page's header, the page coming in from 12 % over the sinking list), the predictive Back gesture on it
  * (followed by the finger, then let go) and given up, an album opened and turned around by Back on its way,
  * an album's tracks and the albums of another way in arriving in turn.
+ *
+ * 1.0.4: Back is the Back button as the owner's phone sends it ([buttonStrip]: Android 16 and later press it as a
+ * predictive Back with a progress of the system's own; the strips of 1.0.3 pressed a bare `onBackPressed()`, a
+ * keyboard's key at most, and never showed what the button did to a detail). The episode's page opened from a
+ * show's and closed by the button, the show's page and an album closed by it, the player taken down by it.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -188,6 +195,32 @@ class MotionStripsTest {
         saveStrip(name, frames, stillAt?.let { "durdu: $it ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
     }
 
+    /**
+     * 1.0.4: the Back button as Android 16 and later send it ([BackButton]): a predictive Back with no edge whose
+     * progress the system runs by itself while the button is down. The window before the press, 48 and 96 ms into
+     * it (a tap's length; under the button nothing of the app's follows that progress but navigation's own page), and
+     * [at] ms after the release.
+     */
+    private fun buttonStrip(name: String, at: List<Long> = times) {
+        compose.mainClock.autoAdvance = false
+        val frames = mutableListOf("önce" to shot())
+        compose.holdBackButton { frame ->
+            val ms = (frame + 1) * FRAME_MS
+            if (ms == 48L || ms == 96L) frames += "düğme basılı $ms ms" to shot()
+        }
+        stillAt = null
+        compose.releaseBackButton()
+        var now = 0L
+        for (t in at) {
+            now = advanceTo(t, now)
+            frames += "bırakınca +" + label(now) to shot()
+        }
+        while (stillAt == null && now < STILL_LIMIT_MS) now = advanceTo(now + FRAME_MS, now)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        saveStrip(name, frames, stillAt?.let { "durdu: $it ms" } ?: "durmadı: > $STILL_LIMIT_MS ms")
+    }
+
     // ---------------------------------------------------------------- the tabs and the pages
 
     private var navigator: ShellNavigator? = null
@@ -233,7 +266,10 @@ class MotionStripsTest {
         strip("page-push") { navigator?.open(Destination.Equalizer) }
     }
 
-    /** Back from that page: it leaves over the end edge, the page under it rises in its place out of the scrim. */
+    /**
+     * Back from that page (the Back button: navigation plays the way out with the button's own progress and finishes
+     * it on the release): it leaves over the end edge, the page under it rises in its place out of the scrim.
+     */
     @Test
     fun pagePop() {
         shell()
@@ -241,7 +277,18 @@ class MotionStripsTest {
         compose.waitForIdle()
         compose.runOnIdle { navigator?.open(Destination.Equalizer) }
         compose.waitForIdle()
-        strip("page-pop") { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        buttonStrip("page-pop")
+    }
+
+    /** The same Back from the page's own arrow in the top bar: what a tap plays. */
+    @Test
+    fun pagePopArrow() {
+        shell()
+        compose.runOnIdle { navigator?.selectTab(Destination.More) }
+        compose.waitForIdle()
+        compose.runOnIdle { navigator?.open(Destination.Equalizer) }
+        compose.waitForIdle()
+        strip("page-pop-arrow") { navigator?.back() }
     }
 
     /**
@@ -253,7 +300,7 @@ class MotionStripsTest {
         shell()
         compose.runOnIdle { navigator?.selectTab(Destination.Podcasts) }
         compose.waitForIdle()
-        strip("tab-back") { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        buttonStrip("tab-back")
     }
 
     /**
@@ -362,12 +409,12 @@ class MotionStripsTest {
         strip("player-collapse", at = times + 640L) { playerScope?.launch { player.collapse() } }
     }
 
-    /** Back (the key, three-button navigation's Back) on the full player. */
+    /** Back (three-button navigation's Back button) on the full player: whole under the button, down on its release. */
     @Test
     fun playerBack() {
         val player = playerShell()
         openPlayer(player)
-        strip("player-back", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        buttonStrip("player-back", at = times + 640L)
     }
 
     /** The bars slid away by a scroll of the list, as the walk's phone leaves them. */
@@ -407,7 +454,7 @@ class MotionStripsTest {
     fun playerBackGlass() {
         val player = playerShell(ChromeGlass.Bottom)
         openPlayer(player)
-        strip("player-back-glass", at = times + 640L) { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        buttonStrip("player-back-glass", at = times + 640L)
     }
 
     /** A tap with the bars hidden by a scroll, on the glass. */
@@ -529,6 +576,8 @@ class MotionStripsTest {
     private val podcastActions = PodcastActions(
         onOpen = { podcasts = podcasts.copy(page = PodcastSamples.page) },
         onClosePage = { podcasts = podcasts.copy(page = null) },
+        onOpenEpisode = { id -> podcasts = podcasts.copy(episodeId = id, episode = PodcastSamples.episodePage()) },
+        onCloseEpisode = { podcasts = podcasts.copy(episodeId = null, episode = null) },
     )
 
     /** The Podcast page in the phone's shell, as the app has it: its subscriptions, and a show's page over them. */
@@ -543,6 +592,34 @@ class MotionStripsTest {
     fun detailOpen() {
         podcastShell()
         strip("detail-open") { podcasts = podcasts.copy(page = PodcastSamples.page) }
+    }
+
+    /** 1.0.4: the show's page closed by the Back button: whole under the button, out over the end edge on its release. */
+    @Test
+    fun detailBackButton() {
+        podcasts = podcasts.copy(page = PodcastSamples.page)
+        podcastShell()
+        buttonStrip("detail-back-button")
+    }
+
+    /** 1.0.4: an episode's page opened from the show's page: opaque, over the show's page, which sinks and darkens. */
+    @Test
+    fun episodeOpen() {
+        podcasts = podcasts.copy(page = PodcastSamples.page)
+        podcastShell()
+        strip("episode-open") { podcastActions.onOpenEpisode(PodcastSamples.episodes[0].id) }
+    }
+
+    /**
+     * 1.0.4, the owner's report ("podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi"): the episode's page
+     * closed by the Back button. Under the button it stays whole (1.0.3 shrank it into a rounded card, as under a
+     * finger); the release slides it out over the show's page.
+     */
+    @Test
+    fun episodeBackButton() {
+        podcasts = podcasts.copy(page = PodcastSamples.page, episodeId = PodcastSamples.episodes[0].id, episode = PodcastSamples.episodePage())
+        podcastShell()
+        buttonStrip("episode-back-button")
     }
 
     /** Frames of the predictive Back gesture on the open show's page: the finger at 25, 50 and 80 %, then let go or given up. */
@@ -609,14 +686,17 @@ class MotionStripsTest {
         strip("album-open") { state.group = albumKey }
     }
 
-    /** Back from an open album (the Back button): it slides out over the end edge, the albums rise out of the scrim. */
+    /**
+     * Back from an open album (the Back button): whole under the button, on its release it slides out over the end
+     * edge, the albums rise out of the scrim.
+     */
     @Test
     fun albumClose() {
         val state = MusicBrowserState(view = MusicView.Albums)
         musicShell(state)
         compose.runOnIdle { state.group = albumKey }
         compose.waitForIdle()
-        strip("album-close") { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        buttonStrip("album-close")
     }
 
     /** Back right after the tap: the way is run back from where it was, the albums rise again. */

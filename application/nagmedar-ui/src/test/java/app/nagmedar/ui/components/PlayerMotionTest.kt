@@ -2,6 +2,7 @@ package app.nagmedar.ui.components
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -44,9 +45,12 @@ import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.TimelineStyle
 import app.nagmedar.ui.playback.rememberSmoothProgress
+import app.nagmedar.ui.shell.BackButton
 import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.holdBackButton
+import app.nagmedar.ui.shell.releaseBackButton
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -375,6 +379,54 @@ class PlayerMotionTest {
         // it landed where the strip is, which has not moved
         assertEquals(hidden, strip().top, 1f)
         assertEquals(hidden - overlayTop, player.collapsedTop, 1f)
+    }
+
+    /**
+     * 1.0.4: the Back button is no finger. Android 16 and later send the three buttons' Back as a predictive Back
+     * whose progress runs by itself while the button is down ([BackButton]); the open player took it for a swipe's
+     * and shrank, its corners round, before it went down. Under the button it stays the page from edge to edge and
+     * the release takes it down to the strip; a finger's Back at the same progress still shrinks it.
+     */
+    @Test
+    fun theBackButtonTakesThePlayerDownWithoutShrinkingIt() {
+        phone()
+        val window = compose.onRoot().fetchSemanticsNode().size
+        val overlayTop = strip().top - player.collapsedTop
+        compose.onNodeWithTag("mini").performClick()
+        compose.waitForIdle()
+        assertTrue(player.isExpanded)
+        // the page's colour in both upper corners and at the edge: a shrunk player, its corners round, shows the scrim there
+        fun whole(bitmap: Bitmap): Boolean =
+            near(bitmap.at(1f, overlayTop + 1f), pageColor) && near(bitmap.at(window.width - 2f, overlayTop + 1f), pageColor) &&
+                near(bitmap.at(2f, overlayTop + window.height / 2f), pageColor)
+        assertTrue("open, the player is the page from edge to edge", whole(shot()))
+        compose.mainClock.autoAdvance = false
+        compose.holdBackButton(frames = 10) { frame ->
+            assertTrue("frame $frame: the player shrinks under the Back button", whole(shot()))
+            assertTrue("frame $frame: the button down takes nothing down", player.isExpanded)
+        }
+        compose.releaseBackButton()
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertFalse("the button's release takes the player down", player.isExpanded)
+
+        compose.onNodeWithTag("mini").performClick()
+        compose.waitForIdle()
+        assertTrue(player.isExpanded)
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        fun finger(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
+        compose.mainClock.autoAdvance = false
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(finger(0f)) }
+        for (frame in 1..10) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(finger(BackButton.progressAtFrame(frame))) }
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+        }
+        assertFalse("a finger's Back at the same progress shrinks the player", whole(shot()))
+        compose.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertTrue("given up, the player stays open", player.isExpanded)
     }
 
     @Test

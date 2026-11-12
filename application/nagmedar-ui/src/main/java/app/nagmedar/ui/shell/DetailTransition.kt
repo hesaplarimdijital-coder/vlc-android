@@ -72,6 +72,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.components.BackSource
+import app.nagmedar.ui.components.fromFinger
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
@@ -219,6 +221,9 @@ fun rememberDetailMotion(open: Boolean): DetailMotionState = remember { DetailMo
  * detail shrinks, rounds its corners and leans towards the edge the swipe came from; letting go
  * calls [onBack] (the detail leaves from where the finger let it go), swiping back cancels and it
  * springs back. On older systems Back simply calls [onBack].
+ *
+ * 1.0.4: a finger's alone. The Back button (the taskbar's, a keyboard's key) sends a predictive Back too, with
+ * a progress of the system's own ([BackSource]): the detail stays whole under it and its release calls [onBack].
  */
 @Composable
 fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> Unit) {
@@ -231,7 +236,7 @@ fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> 
         try {
             events.collect { event ->
                 state.swipeEdge = event.swipeEdge
-                if (!motion.reduced) state.back.snapTo(event.progress)
+                if (!motion.reduced && event.fromFinger) state.back.snapTo(event.progress)
             }
             latestOnBack()
         } catch (e: CancellationException) {
@@ -529,6 +534,11 @@ internal fun rememberDepth(open: Boolean): DepthState {
  * called and the closing finishes from there (an app that keeps its detail, [isOpen] still, gets it run back);
  * given up, everything runs back. A gesture while the opening is still on its way leaves it be: letting go runs
  * the opening back. Back without the gesture (the three buttons) plays only the way out.
+ *
+ * 1.0.4: and so it does since Android 16, whose Back button sends a progress of its own while it is down
+ * ([BackSource]). 1.0.3 took it for a finger's: under the button the detail shrank into a rounded, leaning card
+ * (an episode's page, a show's, an album's, a playlist's), then left; the owner's "eskisi gibi". Only a swipe's
+ * events ([fromFinger]) seek the closing now; the button's release plays the way out the page's arrow plays.
  */
 @Composable
 internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boolean, isOpen: () -> Boolean, onBack: () -> Unit) {
@@ -539,7 +549,7 @@ internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boo
         try {
             events.collectLatest { event ->
                 depth.swipeEdge = event.swipeEdge
-                if (animated && depth.seekable.currentState) {
+                if (animated && depth.seekable.currentState && event.fromFinger) {
                     depth.gestureClose = true
                     depth.seekable.seekTo(event.progress * DetailDepth.GESTURE_END, false)
                 }

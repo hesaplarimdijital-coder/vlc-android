@@ -10,7 +10,8 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
  * and the theme dark (Desktop Kit 2.4.0's DetailNoDoubleExposureTest): a pixel with both red and blue in it is one
  * screen seen through the other ([mixed]); a blue one that is not pure blue is the blue screen part transparent
  * ([fadedBlue]); a red one with any green or blue in it is the red screen faded over the page ([fadedRed]; a
- * scrim is black, it only darkens the red: [redLevel]). A pure green mark tells where a screen is ([greenAt]).
+ * scrim is black, it only darkens the red: [redLevel]). A pure green mark tells where a screen is ([greenAt]),
+ * and [blueRows] how tall the blue screen is drawn (1.0.4: whole, or shrunk by a Back gesture).
  */
 internal class ExposureFrame(
     val label: String,
@@ -25,6 +26,8 @@ internal class ExposureFrame(
     val green: Int,
     private val greenXSum: Long,
     private val width: Int,
+    /** The rows from the blue screen's topmost pixel to its lowest: its height as drawn; 0 when it is not. */
+    val blueRows: Int = 0,
 ) {
     /** How bright the red screen's pixels are on average, 0 to 255: less than 255 under a scrim; 0 when there are none. */
     val redLevel: Int get() = if (red == 0) 0 else (redSum / red).toInt()
@@ -33,7 +36,7 @@ internal class ExposureFrame(
     val greenAt: Float? get() = if (green < 16) null else greenXSum.toFloat() / green / width
 
     override fun toString() =
-        "$label: blue $blue (faded $fadedBlue), red $red (faded $fadedRed, level $redLevel), mixed $mixed of $total, green $green at $greenAt"
+        "$label: blue $blue (faded $fadedBlue, $blueRows rows), red $red (faded $fadedRed, level $redLevel), mixed $mixed of $total, green $green at $greenAt"
 }
 
 /** Takes [ExposureFrame]s of the test activity's window. */
@@ -62,6 +65,8 @@ internal class ExposureCamera(private val compose: AndroidComposeTestRule<*, out
         var redSum = 0L
         var green = 0
         var greenXSum = 0L
+        var blueFirst = -1
+        var blueLast = -1
         for (i in pixels.indices) {
             val p = pixels[i]
             val r = p shr 16 and 0xff
@@ -74,6 +79,8 @@ internal class ExposureCamera(private val compose: AndroidComposeTestRule<*, out
                 bluish -> {
                     blue++
                     if (b < 250 || g > 2 || r > 2) fadedBlue++
+                    if (blueFirst < 0) blueFirst = i
+                    blueLast = i
                 }
                 reddish -> {
                     red++
@@ -86,7 +93,8 @@ internal class ExposureCamera(private val compose: AndroidComposeTestRule<*, out
                 }
             }
         }
-        return ExposureFrame(label, pixels.size, blue, red, mixed, fadedBlue, fadedRed, redSum, green, greenXSum, width)
+        val blueRows = if (blueFirst < 0) 0 else blueLast / width - blueFirst / width + 1
+        return ExposureFrame(label, pixels.size, blue, red, mixed, fadedBlue, fadedRed, redSum, green, greenXSum, width, blueRows)
     }
 
     /** The next frame of the clock, then the window as it is. */

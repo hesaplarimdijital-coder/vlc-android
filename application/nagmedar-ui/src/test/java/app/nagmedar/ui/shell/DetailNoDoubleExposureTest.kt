@@ -38,6 +38,10 @@ import org.robolectric.annotation.GraphicsMode
  * list's. The list is pure red, the detail pure blue, the theme dark ([ExposureFrame]). Every frame of an opening,
  * a closing, the Back gesture (let go and given up) and an opening turned around is looked at; a few pixels along
  * the edges of a shrunk or sinking screen are blended by antialiasing, hence the tolerance.
+ *
+ * 1.0.4: the Back button is no finger ([BackButton]: Android 16 and later send it as a predictive Back with a
+ * progress of the system's own). Under it the detail stays whole, on a phone and wider up, and the release plays
+ * the way out the detail's own arrow plays; 1.0.3 shrank the detail into a rounded card under the button.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -183,6 +187,65 @@ class DetailNoDoubleExposureTest {
         compose.mainClock.autoAdvance = true
     }
 
+    /**
+     * 1.0.4, the owner's phone (three buttons, Android 17): "Podcast sayfasında podcast bölümüne tıklayıp geri gelince
+     * animasyon eskisi gibi". The button's Back comes with a progress that runs by itself while the button is down;
+     * the detail took it for a finger's and shrank, rounded and leant before it left. Now nothing moves under the
+     * button, and its release slides the detail out whole and opaque, as its arrow does.
+     */
+    @Test
+    fun onAPhoneTheBackButtonLeavesTheDetailWholeAndItsReleaseSlidesItOut() {
+        detail = "albüm"
+        show(MotionTier.Gesture)
+        compose.mainClock.autoAdvance = false
+        val open = camera.frame("open")
+        assertTrue("the open detail is as tall as the window: $open", open.blueRows > 0 && open.red == 0)
+        val held = mutableListOf<ExposureFrame>()
+        compose.holdBackButton(frames = 10) { held += camera.frame("the button down, frame $it") }
+        for (f in held) {
+            assertEquals("the list shows around the detail under the button: $f", 0, f.red)
+            assertEquals("the detail shrinks under the button: $f", open.blueRows, f.blueRows)
+            assertEquals("the detail moves under the button: $f", open.blue, f.blue)
+            assertEquals("the detail rounds its corners under the button: $f", open.mixed, f.mixed)
+        }
+        assertEquals("the button down closes nothing", "albüm", detail)
+        compose.releaseBackButton()
+        val out = mutableListOf<ExposureFrame>()
+        repeat(36) { camera.step("the button let go, frame $it", out) }
+        assertNull(detail)
+        assertBothOpaque(out)
+        assertCaughtOnItsWay(out)
+        // whole on its way out: as tall as the window in every frame it is in (a finger's Back takes it out at nine tenths)
+        val leaving = out.filter { it.blue > it.total / 20 }
+        assertTrue("the way out was seen: ${out.joinToString("\n")}", leaving.size >= 3)
+        for (f in leaving) assertEquals("the detail leaves shrunk: $f", open.blueRows, f.blueRows)
+        assertEquals("the detail is gone once closed: ${out.last()}", 0, out.last().blue)
+        assertEquals("the list is as bright as it was: ${out.last()}", 255, out.last().redLevel)
+        compose.mainClock.autoAdvance = true
+    }
+
+    /** The same progress from a finger at the left edge does shrink it (what tells the test above from an idle one). */
+    @Test
+    fun onAPhoneAFingersBackAtTheButtonsProgressShrinksTheDetail() {
+        detail = "albüm"
+        show(MotionTier.Gesture)
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        compose.mainClock.autoAdvance = false
+        val open = camera.frame("open")
+        val frames = mutableListOf<ExposureFrame>()
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f)) }
+        for (frame in 1..10) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(BackButton.progressAtFrame(frame))) }
+            camera.step("finger, frame $frame", frames)
+        }
+        assertTrue("the finger shrinks the detail: ${frames.last()} (open: $open)", frames.last().blueRows < open.blueRows * 97 / 100)
+        assertTrue("the list shows around it: ${frames.last()}", frames.last().red > 0)
+        compose.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        repeat(30) { camera.step("given up, frame $it", frames) }
+        assertEquals("albüm", detail)
+        compose.mainClock.autoAdvance = true
+    }
+
     /** Back right after the tap: the opening runs back, both screens still opaque. */
     @Test
     fun onAPhoneAnOpeningTurnedAroundStaysOpaque() {
@@ -218,6 +281,33 @@ class DetailNoDoubleExposureTest {
             frames.none { it.blue > it.total / 10 && it.red > it.total / 10 },
         )
         assertEquals("the detail is gone: ${frames.last()}", 0, frames.last().blue)
+        compose.mainClock.autoAdvance = true
+    }
+
+    /**
+     * 1.0.4: nor wider up. A tablet's taskbar has the same Back button: the detail does not shrink and lean under it
+     * (it did, as under a finger), and its release closes it, the fades in turn.
+     */
+    @Test
+    fun widerUpTheBackButtonLeavesTheDetailWhole() {
+        detail = "albüm"
+        show(MotionTier.Timed)
+        compose.mainClock.autoAdvance = false
+        val open = camera.frame("open")
+        assertTrue("the open detail covers the window: $open", open.blue > open.total * 3 / 4)
+        val held = mutableListOf<ExposureFrame>()
+        compose.holdBackButton(frames = 10) { held += camera.frame("the button down, frame $it") }
+        for (f in held) {
+            assertEquals("the detail shrinks under the button: $f", open.blueRows, f.blueRows)
+            assertEquals("the detail moves under the button: $f", open.blue, f.blue)
+        }
+        assertEquals("albüm", detail)
+        compose.releaseBackButton()
+        val out = mutableListOf<ExposureFrame>()
+        repeat(30) { camera.step("the button let go, frame $it", out) }
+        assertNull(detail)
+        assertNoDoubleExposure(out)
+        assertEquals("the detail is gone: ${out.last()}", 0, out.last().blue)
         compose.mainClock.autoAdvance = true
     }
 

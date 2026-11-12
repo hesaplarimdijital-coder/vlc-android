@@ -172,7 +172,10 @@ class BackMotionTest {
         assertEquals("as bright as it was: ${frames.last()}", music.redLevel, frames.last().redLevel)
     }
 
-    /** Android 16 and later start a predictive Back for the button too (no edge); with three buttons the shell's Back still takes it whole. */
+    /**
+     * Android 16 and later start a predictive Back for the button too (no edge, its progress the system's own:
+     * [BackButton]); with three buttons the shell's Back still takes it whole.
+     */
     @Test
     fun theBackButtonsPredictiveBackFadesThroughToo() {
         window()
@@ -182,10 +185,11 @@ class BackMotionTest {
         val full = width("screen-Podcasts")
         val frames = mutableListOf<ExposureFrame>()
         compose.mainClock.autoAdvance = false
-        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f, BackEventCompat.EDGE_NONE)) }
-        repeat(3) { camera.step("the button down, frame $it", frames) }
-        assertEquals("nothing moves while the button is down", full, width("screen-Podcasts"), 0.5f)
-        compose.runOnUiThread { dispatcher.onBackPressed() }
+        compose.holdBackButton { frame ->
+            frames += camera.frame("the button down, frame $frame")
+            assertEquals("nothing moves while the button is down", full, width("screen-Podcasts"), 0.5f)
+        }
+        compose.releaseBackButton()
         repeat(40) { camera.step("the button let go, frame $it", frames) }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
@@ -266,7 +270,10 @@ class BackMotionTest {
         assertEquals("and where it was: $end", more.greenAt!!, end.greenAt!!, 0.005f)
     }
 
-    /** Android 16 and later: the Back button starts a predictive Back with no edge, played through on the release: the same way out. */
+    /**
+     * Android 16 and later: the Back button starts a predictive Back with no edge and a progress of the system's own
+     * ([BackButton]); navigation plays the page's same way out with it, finished on the release.
+     */
     @Test
     fun theBackButtonsPredictiveBackPlaysThePagesWayOut() {
         window()
@@ -276,9 +283,8 @@ class BackMotionTest {
         val page = camera.frame("the page at rest")
         val frames = mutableListOf<ExposureFrame>()
         compose.mainClock.autoAdvance = false
-        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f, BackEventCompat.EDGE_NONE)) }
-        repeat(3) { camera.step("the button down, frame $it", frames) }
-        compose.runOnUiThread { dispatcher.onBackPressed() }
+        compose.holdBackButton { frames += camera.frame("the button down, frame $it") }
+        compose.releaseBackButton()
         repeat(40) { camera.step("the button let go, frame $it", frames) }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
