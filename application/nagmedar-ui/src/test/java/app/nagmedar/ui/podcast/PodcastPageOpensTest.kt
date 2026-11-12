@@ -38,7 +38,8 @@ import kotlin.math.abs
  * tapped. Its page must be in its place when all has landed, scroll, let an episode's page over it come and go,
  * leave on Back, and open again. A row far down the list is the one that lost its page: its cover has the longest
  * way to the page's, and lands after the page itself ([app.nagmedar.ui.shell.DetailDepthTest] has the mechanism
- * alone). The tests of 1.0.3 and 1.0.4 began with the page already open.
+ * alone). A row at the top kept its page, which then would not scroll (his "ilk yüklediğimde açılmıştı, o zaman
+ * da aşağı scroll yapılmıyordu"). The tests of 1.0.3 and 1.0.4 began with the page already open.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -89,6 +90,9 @@ class PodcastPageOpensTest {
 
     private fun there(tag: String): Boolean = compose.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
+    /** The shows' rows as a screen reader finds them: none while a page covers the list (its semantics are cleared then). */
+    private fun rowsReadOut(): Int = compose.onAllNodesWithTag("podcast-row").fetchSemanticsNodes().size
+
     /** Where the first [tag] is drawn in the window: its layers' slide counted in, and not cut at the window's edge. */
     private fun drawn(tag: String): Rect {
         val coordinates = compose.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().first().layoutInfo.coordinates
@@ -116,7 +120,7 @@ class PodcastPageOpensTest {
         assertTrue("$message: its episodes are there", there("podcast-episode"))
         val episode = drawn("podcast-episode")
         assertTrue("$message: an episode is drawn in the window: $episode", episode.left >= 0f && episode.right <= width + 0.5f && episode.height > 0f)
-        assertTrue("$message: the list is covered", !there("podcast-row"))
+        assertEquals("$message: the list is covered, none of its rows is read out", 0, rowsReadOut())
     }
 
     /** Taps the row of the show that is [index]th in the list, and lets its opening play to the end. */
@@ -157,6 +161,20 @@ class PodcastPageOpensTest {
         assertTrue("the episodes move under the finger: the first was at $before, the first is now at $after", after.top < before.top - 100f)
     }
 
+    /** The shortest way: the page was not lost here, and stood still under the finger. */
+    @Test
+    fun thePageOpenedFromTheFirstRowScrollsToo() {
+        phone()
+        tapRow(0)
+        assertThePageIsInItsPlace("opened from the first row")
+        val before = drawn("podcast-episode")
+        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(durationMillis = 400) }
+        compose.waitForIdle()
+        assertThePageIsInItsPlace("scrolled")
+        val after = drawn("podcast-episode")
+        assertTrue("the episodes move under the finger: the first was at $before, the first is now at $after", after.top < before.top - 100f)
+    }
+
     @Test
     fun anEpisodeComesAndGoesOverThePageAndBackLeavesItAndItOpensAgain() {
         phone()
@@ -175,7 +193,7 @@ class PodcastPageOpensTest {
         back()
         assertEquals(listOf("open", "open-episode", "close-episode", "close-page"), calls)
         assertTrue("Back leaves the show's page", !there("podcast-page"))
-        assertTrue("the list is there again", there("podcast-row"))
+        assertTrue("the list is there again", rowsReadOut() > 0)
         val row = drawn("podcast-row")
         assertTrue("the list is in its place: $row", row.left >= 0f && row.width > 0f)
 
@@ -183,7 +201,7 @@ class PodcastPageOpensTest {
         tapRow(0)
         assertThePageIsInItsPlace("opened again, from the first row")
         back()
-        assertTrue("the list is there again", there("podcast-row"))
+        assertTrue("the list is there again", rowsReadOut() > 0)
         tapRow(last)
         assertThePageIsInItsPlace("opened a third time, from the last row")
     }

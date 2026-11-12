@@ -718,9 +718,9 @@ internal class DetailCards {
 }
 
 /**
- * The scopes of the side composed under it: null while nothing moves (no lookahead pass), outside a phone's
- * [DetailTransition] and with reduced motion, so a shared element is then a plain one. Dynamic: only the marked
- * elements recompose when a transition starts and ends.
+ * The scopes of the side composed under it: null while nothing moves, outside a phone's [DetailTransition] and
+ * with reduced motion, so a shared element is then a plain one. Dynamic: only the marked elements recompose when
+ * a transition starts and ends.
  */
 internal val LocalDetailSharedScopes = compositionLocalOf<DetailSharedScopes?> { null }
 
@@ -731,28 +731,52 @@ internal val LocalDetailCards = compositionLocalOf<DetailCards?> { null }
 private val DepthBounds = BoundsTransform { _, _ -> NagMotion.open(Rect.VisibilityThreshold) }
 
 /**
- * The list and the detail of [depth] in [modifier]'s place: in a plain box while nothing moves, moved (state
- * and all: scroll places, text, effects) into a [SharedTransitionLayout] while something does when [shared], so a
- * list scrolled at rest is measured once a frame (Desktop Kit 2.3.0, "Lookahead"). [content] gets the sides'
- * scopes then. A Back gesture moves the detail as a whole, without the layout.
+ * The list and the detail of [depth] in [modifier]'s place. With [shared] they live in a [SharedTransitionLayout],
+ * at rest too; [content] gets the sides' scopes only while a tap's way is played, so the marked elements fly then
+ * and are plain ones otherwise. A Back gesture moves the detail as a whole, without them. Without [shared]: a plain
+ * box, and no lookahead pass.
+ *
+ * 1.0.5: at rest too, and for good. Until 1.0.4 the content was in a plain box while nothing moved and was moved
+ * (state and all) into the layout for the length of a way, to spare a list scrolled at rest its lookahead measure
+ * (Desktop Kit 2.3.0, "Lookahead"). A lazy list cannot be taken out of a lookahead layout: once it has been
+ * measured ahead, its state takes every measure without a lookahead before it for the second of two passes, and
+ * no longer takes the scroll from it. Back in the box after a way, the show's page and the list under it stood
+ * still under the finger (the owner's first opening: "o zaman da aşağı scroll yapılmıyordu"), where the page was
+ * not lost altogether ([rememberDepth]). So content that has entered the layout stays in it ([SharedHome]): also
+ * when [shared] ends (the battery saver, a window made wide), its scopes then gone. A list in it is measured twice
+ * a frame while it scrolls, the price of scrolling at all.
  */
 @Composable
 internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifier: Modifier, content: @Composable (DepthShared?) -> Unit) {
     val latestContent by rememberUpdatedState(content)
+    // moved, state and all, the one time a plain box's content enters the layout
     val body = remember { movableContentOf { scopes: DepthShared? -> latestContent(scopes) } }
     val latestOpen by rememberUpdatedState(open)
     // a finger closing the detail moves it as a whole: its shared elements fly only on a tap's way (in the kit 2.3.0's
     // strips they waited at the list's place through the gesture and its run back, then jumped)
     val moving by remember(depth) { derivedStateOf { depth.moving(latestOpen) && !depth.gestureClose } }
-    if (shared && moving) {
+    val home = remember { SharedHome() }
+    if (shared) home.entered = true
+    if (home.entered) {
         SharedTransitionLayout(modifier) {
-            val list = sideScopes(this, depth.transition, DetailSide.List)
-            val detail = sideScopes(this, depth.transition, DetailSide.Detail)
-            body(remember(list, detail) { DepthShared(list, detail) })
+            // one place for the content, at rest and on its way: only its scopes come and go
+            val scopes = if (shared && moving) {
+                val list = sideScopes(this, depth.transition, DetailSide.List)
+                val detail = sideScopes(this, depth.transition, DetailSide.Detail)
+                remember(list, detail) { DepthShared(list, detail) }
+            } else {
+                null
+            }
+            body(scopes)
         }
     } else {
         Box(modifier) { body(null) }
     }
+}
+
+/** Whether a [DepthHost]'s content has entered the shared elements' layout: it never leaves it again. */
+private class SharedHome {
+    var entered = false
 }
 
 @OptIn(ExperimentalTransitionApi::class)
@@ -929,7 +953,7 @@ private class DetailHold<T : Any> {
  * slides in over the list, which sinks and darkens under a scrim; Back is the gesture seeking the closing
  * with the list really behind, and a change of mind runs the way back; with [sharedElements] the elements
  * marked with [detailSharedElement], [detailSharedBounds] and [detailSharedCard] fly between the two sides
- * (a lookahead pass only while something moves). Tablet and DeX windows keep [DetailMotion], its fades in
+ * (the two then live in the shared elements' layout, [DepthHost]). Tablet and DeX windows keep [DetailMotion], its fades in
  * turn; with reduced motion the detail simply appears. No frame has both screens part transparent.
  */
 @Composable
