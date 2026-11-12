@@ -149,6 +149,7 @@ object NagGlass {
 
     /** The mode for these conditions; see [GlassMode]. */
     fun modeFor(sdk: Int, powerSave: Boolean, reducedMotion: Boolean, hardwareAccelerated: Boolean): GlassMode = when {
+        app.nagmedar.ui.shell.DepthExperiment.glassSolid -> GlassMode.Solid
         powerSave || reducedMotion -> GlassMode.Solid
         sdk < Build.VERSION_CODES.S || !hardwareAccelerated -> GlassMode.Translucent
         else -> GlassMode.Blur

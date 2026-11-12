@@ -708,14 +708,29 @@ internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifi
     // a finger closing the detail moves it as a whole: its shared elements fly only on a tap's way (in the kit 2.3.0's
     // strips they waited at the list's place through the gesture and its run back, then jumped)
     val moving by remember(depth) { derivedStateOf { depth.moving(latestOpen) && !depth.gestureClose } }
-    if (shared && moving) {
-        SharedTransitionLayout(modifier) {
+    // EXPERIMENT: the host as the walk asks for it
+    val mode = DepthExperiment.host
+    if (mode.startsWith("redraw")) {
+        LaunchedEffect(moving) {
+            withFrameNanos { }
+            withFrameNanos { }
+            DepthExperiment.tick.intValue++
+        }
+    }
+    val hosted = when (mode) {
+        "stl" -> shared
+        "box" -> false
+        else -> shared && moving
+    }
+    val host = modifier.expRedrawHost()
+    if (hosted) {
+        SharedTransitionLayout(host) {
             val list = sideScopes(this, depth.transition, DetailSide.List)
             val detail = sideScopes(this, depth.transition, DetailSide.Detail)
             body(remember(list, detail) { DepthShared(list, detail) })
         }
     } else {
-        Box(modifier) { body(null) }
+        Box(host) { body(null) }
     }
 }
 
@@ -954,12 +969,12 @@ fun <T : Any> DetailTransition(
             modifier = Modifier.fillMaxSize(),
             content = {
                 Box(
-                    Modifier.layoutId(LIST).then(if (slot && covered) Modifier.clearAndSetSemantics {} else Modifier),
+                    Modifier.layoutId(LIST).expRedrawSide().then(if (slot && covered) Modifier.clearAndSetSemantics {} else Modifier),
                     propagateMinConstraints = true,
                 ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
                 if (slot && shown != null) {
                     if (phone && animated) DepthScrim(depth, Modifier.layoutId(DEPTH_SCRIM))
-                    Box(Modifier.layoutId(DETAIL).then(page), propagateMinConstraints = true) {
+                    Box(Modifier.layoutId(DETAIL).expRedrawSide().then(page), propagateMinConstraints = true) {
                         DepthSide(scopes, DetailSide.Detail, depth, shared) { detailContent(shown) }
                     }
                 }

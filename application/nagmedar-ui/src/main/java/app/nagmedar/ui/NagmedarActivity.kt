@@ -99,6 +99,8 @@ class NagmedarActivity : ComponentActivity() {
         }
         // 1.0.3: a debuggable build's chrome on glass, for the user's decision's screenshots (the emulator walk)
         DebugChrome.follow(this, intent)
+        // EXPERIMENT
+        app.nagmedar.ui.shell.DepthExperiment.follow(intent)
         // S-1103: the feeds' refresh runs in the background while there is a subscription; set again at each start, which changes nothing when it is as it was
         if (Build.FINGERPRINT != "robolectric") PodcastCenter.schedule(this)
         // 1.0: the channels of the video features an earlier version made, out of the system's settings
@@ -243,6 +245,7 @@ class NagmedarActivity : ComponentActivity() {
         openPodcastOf(intent)
         openAskedOf(intent)
         DebugChrome.follow(this, intent)
+        app.nagmedar.ui.shell.DepthExperiment.follow(intent)
     }
 
     /** The system's search (its words on the search page), a preference's page, the remote access notification (its addresses' window), a new drive's (the library's folders). */

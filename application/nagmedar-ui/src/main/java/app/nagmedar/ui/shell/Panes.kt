@@ -201,7 +201,7 @@ fun <K : Any> ListDetailPanes(
                 content = {
                     Box(
                         // covered by the details: out of the accessibility tree too
-                        Modifier.layoutId(LIST).then(if (listCovered && shown != null) Modifier.clearAndSetSemantics {} else Modifier),
+                        Modifier.layoutId(LIST).expRedrawSide().then(if (listCovered && shown != null) Modifier.clearAndSetSemantics {} else Modifier),
                         propagateMinConstraints = true,
                     ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
                     if (shown != null) {
@@ -209,6 +209,7 @@ fun <K : Any> ListDetailPanes(
                         Box(
                             Modifier
                                 .layoutId(DETAIL)
+                                .expRedrawSide()
                                 .then(page)
                                 .onKeyEvent { event ->
                                     if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
