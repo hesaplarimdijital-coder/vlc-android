@@ -203,7 +203,10 @@ fun <K : Any> ListDetailPanes(
                         // covered by the details: out of the accessibility tree too
                         Modifier.layoutId(LIST).expRedrawSide().then(if (listCovered && shown != null) Modifier.clearAndSetSemantics {} else Modifier),
                         propagateMinConstraints = true,
-                    ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
+                    ) {
+                        ExpTrace("LDP list side")
+                        DepthSide(scopes, DetailSide.List, depth, shared, list)
+                    }
                     if (shown != null) {
                         if (phone && animated) DepthScrim(depth, Modifier.layoutId(DEPTH_SCRIM))
                         Box(
@@ -220,7 +223,10 @@ fun <K : Any> ListDetailPanes(
                                     }
                                 },
                             propagateMinConstraints = true,
-                        ) { DepthSide(scopes, DetailSide.Detail, depth, shared) { detailPane(shown, !side) } }
+                        ) {
+                            ExpTrace("LDP detail side")
+                            DepthSide(scopes, DetailSide.Detail, depth, shared) { detailPane(shown, !side) }
+                        }
                         if (side) {
                             PaneDivider(
                                 widthDp = detailWidth.value,
@@ -263,7 +269,9 @@ fun <K : Any> ListDetailPanes(
                     // the list's darkening under a phone's details (Desktop Kit 2.4.0), there while the list is
                     val scrim = if (list == null) null else measurables.firstOrNull { it.layoutId == DEPTH_SCRIM }?.measure(Constraints.fixed(w, h))
                     val pane = detailM?.measure(Constraints.fixed(w, h))
+                    expLog("LDP measure " + w + "x" + h + " list " + (list != null) + " pane " + (pane != null) + " covered " + listCovered)
                     layout(w, h) {
+                        expLog("LDP place list " + (list != null) + " pane " + (pane != null))
                         if (phone) placeDepth(depth, list, scrim, pane, w, direction) else placeListAndDetail(state, list, pane, w, direction)
                     }
                 }

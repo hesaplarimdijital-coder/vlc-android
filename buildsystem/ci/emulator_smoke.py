@@ -2726,6 +2726,95 @@ class Smoke:
             shots.append(rel)
         return shots
 
+    def blank_run(self, mode, state, results, restart=True):
+        """One opening of the followed podcast's page with the app asked for [mode] (nagmedar_exp), see pass_page_blank."""
+        activity = "%s/app.nagmedar.ui.NagmedarActivity" % self.pkg
+        tag = "%s, %s" % (mode, state)
+        self.animations(True)
+        if restart:
+            self.sh("am force-stop " + self.pkg)
+            time.sleep(1)
+        self.sh("log -p w -t NagExp '======== %s ========'" % tag)
+        self.sh("am start -W -n %s --es nagmedar_destination podcasts --es nagmedar_exp %s" % (activity, mode), timeout=90)
+        time.sleep(3.0)
+        nodes = self.step("[%s] The Podcasts" % tag)
+        w, h = self.screen_size(nodes)
+        row = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
+        if not row:
+            self.warnings.append("[page-blank] %s: no podcast's row on the Podcasts" % tag)
+            return
+        x, y = row[0].center
+        # between the top bar and the bottom bar (the mini player's card, when there is one, is above this foot)
+        box = (0, int(h * 0.12), w, int(h * 0.74))
+        name = "%03d-%s-%s" % (self.n + 1, self.cur_pass, slug("opened " + tag))
+        self.sh("log -p w -t NagExp '---- the row is tapped ----'")
+        shots = self.raw_shots(
+            "input tap %d %d ; sleep 0.3 ; screencap -p /sdcard/nag-b1.png ; sleep 0.4 ; screencap -p /sdcard/nag-b2.png ; "
+            "sleep 1.5 ; screencap -p /sdcard/nag-b3.png ; log -p w -t NagExp '---- the swipe ----' ; input swipe %d %d %d %d 250 ; sleep 1.2 ; "
+            "screencap -p /sdcard/nag-b4.png" % (x, y, w // 2, int(h * 0.66), w // 2, int(h * 0.30)), 4, name)
+        inks = [self.ink(r, box, w) for r in shots]
+        scrolled = self.page_change(shots[2], shots[3], box, w)
+        self.sh("log -p w -t NagExp '---- the UI is asked ----'")
+        # now the UI is asked (the accessibility tree), and the screen read once more
+        nodes = self.step("[%s] The podcast's page, the UI asked" % tag, wait=1.0)
+        in_tree = bool(self.by_id(nodes, "podcast-page") or self.by_id(nodes, "podcast-episode"))
+        asked = self.ink(self.steps[-1]["shot"], box, w)
+        self.sh("log -p w -t NagExp '---- Back ----'")
+        self.key(4)
+        nodes = self.step("[%s] Back on the Podcasts" % tag, wait=1.5)
+        back = self.ink(self.steps[-1]["shot"], box, w)
+        pct = lambda v: "?" if v is None else "%.1f %%" % (v * 100)
+        r = {"mode": mode, "state": state, "inks": inks, "scrolled": scrolled, "in_tree": in_tree, "asked": asked,
+             "back": back, "shots": shots}
+        results.append(r)
+        self.log("page-blank [%s]: %s" % (tag, r))
+        drawn = inks[2] is not None and inks[2] >= 0.01
+        self.check("[%s] the podcast's page is on screen 2.5 s after the tap" % tag, drawn,
+                   "drawn in the page's place: %s at 0.3 s, %s at 0.8 s, %s at 2.5 s, %s after the swipe; %s once the UI was asked "
+                   "(the page in its tree: %s); back on the list: %s"
+                   % (pct(inks[0]), pct(inks[1]), pct(inks[2]), pct(inks[3]), pct(asked), "yes" if in_tree else "NO", pct(back)))
+        self.check("[%s] the page moves on screen under a swipe" % tag, scrolled is not None and scrolled >= 0.01,
+                   "%s of the page's place changed between 2.5 s and after the swipe" % pct(scrolled))
+
+    def blank_setup(self, name):
+        """The start of the page-blank passes: the owner's phone's size, dark, three buttons, the long feed followed."""
+        self.cur_pass, self.lang = name, "en"
+        self.sh("am force-stop " + self.pkg)
+        self.set_display("1080x2340", "480")
+        self.three_button_navigation()
+        self.sh("cmd uimode night yes")
+        self.ensure_library()
+        self.step("Launch (the page that went blank)")
+        # the workflow's long feed: a cover, a link, a long description and 80 episodes, as the owner's show has
+        if self.a.feed:
+            self.a.feed = self.a.feed.rsplit("/", 1)[0] + "/feed-long.xml"
+        if self.podcast_page() is None:
+            self.check("a followed podcast to open", False, "no feed, or it was not followed")
+            return False
+        self.key(4)
+        self.step("Back on the Podcasts, the feed followed")
+        return True
+
+    def pass_page_blank_2(self):
+        """EXPERIMENT, the second: what of the product's hosting loses the page. Each start writes its mode to the log
+        (NagExp), and the app traces there what of the page is composed, measured and placed."""
+        if not self.blank_setup("page-blank-2"):
+            return
+        results = []
+        for mode in ("host=swap", "host=swap,swipes=const", "host=swap,inner=plain", "host=swap,swipes=const,inner=plain",
+                     "host=boxswap", "host=stl", "host=swap"):
+            if self.over_time():
+                break
+            self.blank_run(mode, "nothing played", results)
+        self.animations(False)
+        self.sh("cmd uimode night no")
+        with open(os.path.join(self.out, "page-blank.json"), "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=1)
+        # the app's trace, whole (the report's log keeps warnings of every process; this is the app's own)
+        trace = self.sh("logcat -d -v time -s NagExp:V", timeout=120)
+        with open(os.path.join(self.out, "nagexp.txt"), "w", encoding="utf-8") as f:
+            f.write(trace)
+
     def pass_page_blank(self):
         """EXPERIMENT, on demand (passes=page-blank, the personal build of the experiment's branch). The owner's video
         of 12 Nov, his S24 (1080x2340 at 480 dpi, dark, three buttons, the animations on, nothing in the player): he
@@ -2752,67 +2841,21 @@ class Smoke:
             return
         self.key(4)
         self.step("Back on the Podcasts, the feed followed")
-        activity = "%s/app.nagmedar.ui.NagmedarActivity" % self.pkg
         results = []
-
-        def run(mode, state, restart=True):
-            tag = "%s, %s" % (mode, state)
-            self.animations(True)
-            if restart:
-                self.sh("am force-stop " + self.pkg)
-                time.sleep(1)
-            self.sh("am start -W -n %s --es nagmedar_destination podcasts --es nagmedar_exp %s" % (activity, mode), timeout=90)
-            time.sleep(3.0)
-            nodes = self.step("[%s] The Podcasts" % tag)
-            w, h = self.screen_size(nodes)
-            row = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
-            if not row:
-                self.warnings.append("[page-blank] %s: no podcast's row on the Podcasts" % tag)
-                return
-            x, y = row[0].center
-            # between the top bar and the bottom bar (the mini player's card, when there is one, is above this foot)
-            box = (0, int(h * 0.12), w, int(h * 0.74))
-            name = "%03d-%s-%s" % (self.n + 1, self.cur_pass, slug("opened " + tag))
-            shots = self.raw_shots(
-                "input tap %d %d ; sleep 0.3 ; screencap -p /sdcard/nag-b1.png ; sleep 0.4 ; screencap -p /sdcard/nag-b2.png ; "
-                "sleep 1.5 ; screencap -p /sdcard/nag-b3.png ; input swipe %d %d %d %d 250 ; sleep 1.2 ; "
-                "screencap -p /sdcard/nag-b4.png" % (x, y, w // 2, int(h * 0.66), w // 2, int(h * 0.30)), 4, name)
-            inks = [self.ink(r, box, w) for r in shots]
-            scrolled = self.page_change(shots[2], shots[3], box, w)
-            # now the UI is asked (the accessibility tree), and the screen read once more
-            nodes = self.step("[%s] The podcast's page, the UI asked" % tag, wait=1.0)
-            in_tree = bool(self.by_id(nodes, "podcast-page") or self.by_id(nodes, "podcast-episode"))
-            asked = self.ink(self.steps[-1]["shot"], box, w)
-            self.key(4)
-            nodes = self.step("[%s] Back on the Podcasts" % tag, wait=1.5)
-            back = self.ink(self.steps[-1]["shot"], box, w)
-            pct = lambda v: "?" if v is None else "%.1f %%" % (v * 100)
-            r = {"mode": mode, "state": state, "inks": inks, "scrolled": scrolled, "in_tree": in_tree, "asked": asked,
-                 "back": back, "shots": shots}
-            results.append(r)
-            self.log("page-blank [%s]: %s" % (tag, r))
-            drawn = inks[2] is not None and inks[2] >= 0.01
-            self.check("[%s] the podcast's page is on screen 2.5 s after the tap" % tag, drawn,
-                       "drawn in the page's place: %s at 0.3 s, %s at 0.8 s, %s at 2.5 s, %s after the swipe; %s once the UI was asked "
-                       "(the page in its tree: %s); back on the list: %s"
-                       % (pct(inks[0]), pct(inks[1]), pct(inks[2]), pct(inks[3]), pct(asked), "yes" if in_tree else "NO", pct(back)))
-            self.check("[%s] the page moves on screen under a swipe" % tag, scrolled is not None and scrolled >= 0.01,
-                       "%s of the page's place changed between 2.5 s and after the swipe" % pct(scrolled))
-
         for mode in ("host=swap", "host=swap,glass=solid", "host=stl", "host=box", "host=redraw", "host=redraw-host",
                      "host=redraw-detail", "host=swap"):
             if self.over_time():
                 break
-            run(mode, "nothing played")
+            self.blank_run(mode, "nothing played", results)
         # the product's hosting over a track that plays, then paused
         self.animations(False)
         self.launch()
         nodes = self.play_track(self.open_music())
         if self.by_id(nodes, "mini-player"):
-            run("host=swap", "a track plays", restart=False)
+            self.blank_run("host=swap", "a track plays", results, restart=False)
             self.key(127)
             time.sleep(1.5)
-            run("host=swap", "a track paused", restart=False)
+            self.blank_run("host=swap", "a track paused", results, restart=False)
         self.animations(False)
         self.sh("cmd uimode night no")
         with open(os.path.join(self.out, "page-blank.json"), "w", encoding="utf-8") as f:

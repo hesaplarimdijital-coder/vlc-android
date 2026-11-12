@@ -40,6 +40,8 @@ internal object BackSource {
  */
 @Composable
 internal fun rememberBackSwipes(): State<Boolean> {
+    // EXPERIMENT swipes=const: no window insets read here
+    if (app.nagmedar.ui.shell.DepthExperiment.swipesConst) return remember { androidx.compose.runtime.mutableStateOf(false) }
     val gestures = WindowInsets.systemGestures
     val density = LocalDensity.current
     return remember(gestures, density) {

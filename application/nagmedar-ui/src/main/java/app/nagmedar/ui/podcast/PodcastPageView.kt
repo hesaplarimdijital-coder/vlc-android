@@ -93,6 +93,7 @@ internal fun PodcastPageView(
     downloads: Map<Long, DownloadProgress> = emptyMap(),
     selected: Long? = null,
 ) {
+    app.nagmedar.ui.shell.ExpTrace("PodcastPageView")
     val res = LocalContext.current.resources
     val dimens = NagTheme.dimens
     val feed = page.summary.feed

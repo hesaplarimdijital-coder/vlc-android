@@ -198,6 +198,7 @@ fun PodcastsContent(
         },
         detailPane = { _, fullScreen ->
             val shownPage = page ?: retained
+            app.nagmedar.ui.shell.ExpTrace("detailPane fullScreen " + fullScreen + " page " + (shownPage != null))
             if (fullScreen) {
                 // a phone's window: the episode's page comes over the show's on the shared axis and Back
                 // (the predictive gesture) takes it away again (Desktop Kit 0.2.0)

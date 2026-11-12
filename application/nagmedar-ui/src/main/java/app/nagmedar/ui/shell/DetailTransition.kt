@@ -33,6 +33,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
@@ -703,7 +704,22 @@ private val DepthBounds = BoundsTransform { _, _ -> NagMotion.open(Rect.Visibili
 @Composable
 internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifier: Modifier, content: @Composable (DepthShared?) -> Unit) {
     val latestContent by rememberUpdatedState(content)
-    val body = remember { movableContentOf { scopes: DepthShared? -> latestContent(scopes) } }
+    val id = remember { Integer.toHexString(System.identityHashCode(depth)) }
+    // EXPERIMENT inner=plain: no movable content where nothing is shared (the host never changes there)
+    if (DepthExperiment.plainUnshared && !shared) {
+        SideEffect { expLog("host " + id + " plain box, not shared") }
+        Box(modifier) {
+            ExpTrace("plain " + id)
+            content(null)
+        }
+        return
+    }
+    val body = remember {
+        movableContentOf { scopes: DepthShared? ->
+            ExpTrace("body " + id)
+            latestContent(scopes)
+        }
+    }
     val latestOpen by rememberUpdatedState(open)
     // a finger closing the detail moves it as a whole: its shared elements fly only on a tap's way (in the kit 2.3.0's
     // strips they waited at the list's place through the gesture and its run back, then jumped)
@@ -723,7 +739,15 @@ internal fun DepthHost(depth: DepthState, open: Boolean, shared: Boolean, modifi
         else -> shared && moving
     }
     val host = modifier.expRedrawHost()
-    if (hosted) {
+    SideEffect { expLog("host " + id + " shared " + shared + " moving " + moving + " hosted " + hosted + " mode " + mode + " isOpen " + open) }
+    if (mode == "boxswap") {
+        // two boxes in turn: the content moves as it does between the layout and the box, with no lookahead to leave
+        if (shared && moving) {
+            Box(host) { body(null) }
+        } else {
+            Box(host) { body(null) }
+        }
+    } else if (hosted) {
         SharedTransitionLayout(host) {
             val list = sideScopes(this, depth.transition, DetailSide.List)
             val detail = sideScopes(this, depth.transition, DetailSide.Detail)
@@ -971,10 +995,14 @@ fun <T : Any> DetailTransition(
                 Box(
                     Modifier.layoutId(LIST).expRedrawSide().then(if (slot && covered) Modifier.clearAndSetSemantics {} else Modifier),
                     propagateMinConstraints = true,
-                ) { DepthSide(scopes, DetailSide.List, depth, shared, list) }
+                ) {
+                    ExpTrace("DT list side")
+                    DepthSide(scopes, DetailSide.List, depth, shared, list)
+                }
                 if (slot && shown != null) {
                     if (phone && animated) DepthScrim(depth, Modifier.layoutId(DEPTH_SCRIM))
                     Box(Modifier.layoutId(DETAIL).expRedrawSide().then(page), propagateMinConstraints = true) {
+                        ExpTrace("DT detail side")
                         DepthSide(scopes, DetailSide.Detail, depth, shared) { detailContent(shown) }
                     }
                 }
@@ -988,6 +1016,7 @@ fun <T : Any> DetailTransition(
             val listPlaceable = if (paneM != null && covered) null else measurables.first { it.layoutId == LIST }.measure(fixed)
             val scrimPlaceable = if (listPlaceable == null) null else measurables.firstOrNull { it.layoutId == DEPTH_SCRIM }?.measure(fixed)
             val pane = paneM?.measure(fixed)
+            expLog("DT measure " + w + "x" + h + " list " + (listPlaceable != null) + " pane " + (pane != null) + " covered " + covered)
             layout(w, h) {
                 if (phone) {
                     placeDepth(depth, listPlaceable, scrimPlaceable, pane, w, direction)
