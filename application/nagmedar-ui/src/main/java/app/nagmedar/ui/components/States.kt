@@ -1,6 +1,7 @@
 package app.nagmedar.ui.components
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
@@ -45,12 +46,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -92,8 +93,9 @@ import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.mixSrgb
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 /*
@@ -734,31 +736,36 @@ internal fun recommendedTimeout(millis: Long, controls: Boolean): Long {
  * going at the finger's speed and [onDismiss] runs once it is out (on a phone on the gesture spring;
  * wider windows and reduced motion let it go where it is); short of that it springs back. Only by
  * touch: a mouse does not swipe, it has its button. [key] is what it shows: a new one starts still.
+ *
+ * 1.0.6: the finger moves it at once ([SwipeAway.dragBy]), as it moves a sheet ([SheetDrag.pull]),
+ * not in a coroutine of its own. A finger lifted in motion gives the window its last move and the
+ * lift together, and Compose's draggable starts `onDragStopped` before anything that waits in the
+ * queue has run: the last move's coroutine then ran after the release had begun and stopped the way
+ * out (or back). The bar stayed where it was let go, half faded, until its time was up.
  */
 @Composable
 internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier {
     if (NagTheme.inputMode != InputMode.Touch) return this
-    val swipe = remember(key) { Animatable(0f) }
+    val swipe = remember(key) { SwipeAway() }
     var width by remember { mutableIntStateOf(1) }
-    val scope = rememberCoroutineScope()
     val tier = LocalMotionTier.current
     val dismiss by rememberUpdatedState(onDismiss)
     return this
         .onSizeChanged { width = it.width.coerceAtLeast(1) }
         .graphicsLayer {
-            translationX = swipe.value
-            alpha = 1f - (abs(swipe.value) / width).coerceIn(0f, 1f)
+            translationX = swipe.offset
+            alpha = 1f - (abs(swipe.offset) / width).coerceIn(0f, 1f)
         }
         .draggable(
             orientation = Orientation.Horizontal,
-            state = rememberDraggableState { delta -> scope.launch { swipe.snapTo(swipe.value + delta) } },
+            state = rememberDraggableState { delta -> swipe.dragBy(delta) },
             onDragStopped = { velocity ->
-                when (SwipeDismissRules.release(swipe.value, velocity, width, tier)) {
+                when (SwipeDismissRules.release(swipe.offset, velocity, width, tier)) {
                     SwipeDismissRules.Release.CarryOut -> {
                         // on its way at the finger's speed; gone the moment it has faded out at its own width
                         var gone = false
-                        val out = if (swipe.value < 0f || (swipe.value == 0f && velocity < 0f)) -width.toFloat() else width.toFloat()
-                        swipe.animateTo(out, NagMotion.gesture(NagMotion.PIXEL), initialVelocity = velocity) {
+                        val out = if (swipe.offset < 0f || (swipe.offset == 0f && velocity < 0f)) -width.toFloat() else width.toFloat()
+                        swipe.settle(out, NagMotion.gesture(NagMotion.PIXEL), velocity) { value ->
                             if (!gone && abs(value) >= width - 0.5f) {
                                 gone = true
                                 dismiss()
@@ -767,18 +774,60 @@ internal fun Modifier.swipeToDismiss(key: Any, onDismiss: () -> Unit): Modifier 
                         if (!gone) dismiss()
                     }
                     SwipeDismissRules.Release.Dismiss -> dismiss()
-                    SwipeDismissRules.Release.Back -> swipe.animateTo(
+                    SwipeDismissRules.Release.Back -> swipe.settle(
                         0f,
                         when (tier) {
                             MotionTier.Gesture -> NagMotion.gesture(NagMotion.PIXEL)
                             MotionTier.Timed -> spring(dampingRatio = 1f, stiffness = 400f, visibilityThreshold = NagMotion.PIXEL)
                             MotionTier.Reduced -> snap<Float>()
                         },
-                        initialVelocity = if (tier == MotionTier.Gesture) velocity else 0f,
+                        if (tier == MotionTier.Gesture) velocity else 0f,
                     )
                 }
             },
         )
+}
+
+/**
+ * Where a swiped notice is, in px from its place. The finger moves it at once ([dragBy]); let go,
+ * [settle] carries it out or back until it has arrived or the finger takes it again.
+ */
+@Stable
+internal class SwipeAway {
+    /** Read it in a layer: nothing recomposes as the notice moves. */
+    var offset by mutableFloatStateOf(0f)
+        private set
+
+    /** What carries the notice now that the finger has let go of it. */
+    private var settling: Job? = null
+
+    /** The finger moved it [delta] px; what was carrying it lets go. */
+    fun dragBy(delta: Float) {
+        settling?.cancel()
+        settling = null
+        offset += delta
+    }
+
+    /**
+     * Carries it to [to] from where it is, at [velocity] px/s to begin with; [onFrame] is told each
+     * place on the way. Ends before it has arrived (cancelled) when the finger takes the notice
+     * again: only the way itself is stopped then, a job of its own, never the caller's coroutine.
+     */
+    suspend fun settle(to: Float, spec: AnimationSpec<Float>, velocity: Float, onFrame: (Float) -> Unit = {}) {
+        settling?.cancel()
+        coroutineScope {
+            val carrying = coroutineContext[Job]
+            settling = carrying
+            try {
+                animate(offset, to, velocity, spec) { value, _ ->
+                    offset = value
+                    onFrame(value)
+                }
+            } finally {
+                if (settling === carrying) settling = null
+            }
+        }
+    }
 }
 
 /** How far across a notice must be swiped, as a part of its width, to leave when let go. */
