@@ -812,9 +812,12 @@ class Smoke:
 
     def screenshot(self, name):
         rc, data = self.adb("exec-out", "screencap -p", timeout=60, binary=True)
-        if rc != 0 or len(data) < 1000:
+        # a car has more than one display, and screencap then says so in front of the picture
+        at = data.find(b"\x89PNG\r\n\x1a\n") if rc == 0 else -1
+        if at < 0 or len(data) - at < 1000:
             self.warnings.append("screenshot failed: " + name)
             return None
+        data = data[at:]
         rel = "shots/%s.png" % name
         path = os.path.join(self.out, rel)
         raw = os.path.join(self.out, "raw", name + ".png")
