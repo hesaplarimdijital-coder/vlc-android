@@ -630,3 +630,62 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   Karar B.
 - 1.0.3 IS DELIVERED. Left for later (told the user): the two FolderAdd icons, the tight shortcut rows on a phone with a
   keyboard, the "Sıradaki" button as is; One UI 9 items only he can test; old story/* remote branches (ask before deleting).
+- 12 Nov 11:47 (Istanbul) the user on 1.0.3: "Podcast sayfasında poscast bölümüne tıklayıp geri gelince animasyon eskisi
+  gibi onu da düzeltiver". Diagnosis (AOSP commit "Add predictive back animation for 3-button-nav", flag
+  predictive_back_three_button_nav; BackProgressAnimator: EDGE_NONE starts at ACTION_DOWN and springs the progress to 1 by
+  itself, stiffness 500): the three buttons' Back sends onBackProgressed while down; DepthBackHandler, DetailBackHandler
+  and ExpandablePlayer followed it as a finger's (shrink, round, lean). activity-compose's PredictiveBackHandler does NOT
+  put the start event into the flow, only progress events, so a key (no progress) was fine and the tests never saw it.
+  Fix on story/release-1.0.4 (worktree $WT/release-1.0.4): components/BackSource.kt (finger(edge), fromFinger), the three
+  handlers; tests: shell/BackButton.kt (holdBackButton/releaseBackButton model the system's button), EpisodeBackButtonTest,
+  DetailNoDoubleExposureTest ×3, PlayerMotionTest ×1, BackMotionTest's two button tests, strips with buttonStrip().
+  1.0.4: versionCode 4010004 (personal arm64 14010010), CHANGELOG, README. Head 4c3e1c90, PR #114 (draft), body
+  $SCRATCH/release-1.0.4/pr-body.md. NOT COMPILED YET.
+- BLOCKER 09:10 UTC: "Actions has been disabled for this repository" (HTTP 422 on dispatch); the push and the PR started
+  no run (0 check runs). Last runs: 23:43 UTC 11 Nov (all green). /actions/permissions is not reachable through the
+  proxy. Told the user; $ORCH/await_enabled.sh story/release-1.0.4 polls (a dispatch of the debug 37.0 walk every 2 min).
+  When it is on again: dispatch personal walks (35,37.0), close and reopen PR #114 for its CI runs (or push), then the
+  usual: debug green → walks → release_chain.sh release-1.0.4 <sha> 1.0.4 → apkcheck (14010010, target 37) → send →
+  device-test tab section for 1.0.4 → plan tab.
+- 12 Nov 12:29 (Istanbul) the user: "Yaptım zaten öyleydi" (Settings → Actions was already "allow all"). The real cause
+  is on the repository's Actions tab: "Workflows are not currently being run on this fork due to the scale of GitHub
+  Actions usage" (GitHub's own throttle of forks; the REST API still says the workflows are active; a dispatch answers
+  422 "Actions has been disabled for this repository"). Only the owner's click on "Enable workflows" there clears it;
+  told him at 12:35. It can come back if usage stays as heavy as 11 Nov's (8 walk jobs a round, profile runs, CI per
+  push): 1.0.4 runs lean. $ORCH/await_enabled.sh [minutes] now asks every two minutes with a dispatch on a ref that
+  does not exist (it can start nothing): "has been disabled" while off, an answer about the ref once on. Four stale
+  queued runs (43097360728, 43097182461, 43097182618, 38645881043) are his to cancel; the classifier refuses me.
+- 14:29: still off (the first two hours' probe ended). While waiting:
+  - the 1.0.4 diff read again line by line against the sources it calls (nothing found); $SCRATCH/tools/ktsyntax.py
+    <worktree> [base] counts tree-sitter's ERROR nodes of every changed .kt against the base's (0 slips).
+  - WHY NO TEST SAW IT, the walk included: the walk's Back is `input keyevent 4`, a key; a key never carries the
+    button's progress. New branch story/back-button-walk (worktree $WT/back-button-walk, a2bd2303, pushed; the driver
+    and emulator.yml's comments only): back_button_check(what, tag) finds the system's Back button in `uiautomator dump
+    --windows` (":id/back" of System UI or the launcher's taskbar; AOSP's place as a last resort), holds it (`input
+    motionevent DOWN … ; screencap ; … UP`) and compares the page with the page at rest (page_change: share of pixels
+    more than 16 apart; whole = at most 2 %), then taps it (`input swipe x y x y 100`) and wants the page closed.
+    phone-en does it on the full player (player_back_button), the episode's page and the podcast's page; the on-demand
+    pass back-button does the three alone. Report section "The system's Back button". Offline check against a
+    pretended device: python3 $SCRATCH/tools/back_button_offline.py <emulator_smoke.py> (8 cases, ALL OK).
+  - It is kept OFF the release PR on purpose: emulator.yml's pull_request trigger fires when the driver or the workflow
+    file changes (two API 35 walks a push). PR #114 has code and tests only, so its pushes run CI alone.
+- PLAN once "ACTIONS ENABLED" (lean; R=hesaplarimdijital-coder/vlc-android):
+  1. PR #114 closed and reopened (gh api -X PATCH repos/$R/pulls/114 -f state=closed, then state=open): CI only. First
+     compile of the 1.0.4 code and tests; wait_debug.sh <sha>; fix, push, again. Strips: ci/shots-pr-114, motion/
+     (episode-open, episode-back-button, detail-back-button, album-close, page-pop, page-pop-arrow, tab-back, player-back).
+  2. Meanwhile the diagnosis on a real system, 1.0.3 under the real button (one job):
+     gh api repos/$R/actions/workflows/emulator.yml/dispatches -f ref=story/back-button-walk -f 'inputs[ref]=master' \
+       -f 'inputs[passes]=back-button' -f 'inputs[api_levels]=37.0'
+     evidence: ci/emulator-api37.0-back-button (report.md, "The system's Back button"). Expected on 1.0.3: the three
+     "stays whole" checks FAILED with a fifth of the page and more changed (the job red: that is the proof). All "ok"
+     at 0.0 % would mean the emulator's system does not run the button's progress: then the emulator proves nothing
+     and the user is told so. Fetch and keep that evidence before any other back-button run (same branch, force-pushed).
+  3. CI green and the demo read: git merge story/back-button-walk into story/release-1.0.4, push: CI again and the
+     pull request's API 35 walks (the driver changed), once, on the final head.
+  4. The personal walk on Android 17 on that head (two jobs; phone-en presses the real button on the personal build):
+     gh api repos/$R/actions/workflows/emulator.yml/dispatches -f ref=story/release-1.0.4 -f 'inputs[build]=personal' \
+       -f 'inputs[api_levels]=37.0'
+  5. All green: PR #114's "Kanıt", then from /home/claude: sh $ORCH/release_chain.sh release-1.0.4 <full sha> 1.0.4;
+     apkcheck (14010010, target 37); SendUserFile; device-checks.md to the top of the "1.0 cihaz testi" tab; plan tab.
+  Told the user: tests, the release build, an API 35 walk, a personal walk on Android 17 only (four walk jobs, not
+  eight), no profile regeneration. The demo job is one more than that: say so.

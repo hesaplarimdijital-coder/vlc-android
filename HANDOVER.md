@@ -86,3 +86,23 @@ Left for a later release, told to the user: "Klasör seç" and "Kütüphaneye ek
 rows are tight on a phone with a keyboard; the "Sıradaki" button stays as it is; the One UI 9 items (Now Bar, the lock
 screen's player, DeX desktops) can only be tried on his devices; the old `story/*` branches on GitHub wait for his
 word before they are deleted.
+
+## 1.0.4 (12 Nov 2026, in progress)
+The user on 1.0.3, 11:47 (Istanbul): "Podcast sayfasında podcast bölümüne tıklayıp geri gelince animasyon eskisi gibi
+onu da düzeltiver". The cause, read from Android's source (not yet seen on a device): since Android 16 the Back button
+of the three-button navigation starts a predictive Back with no edge whose progress the system runs by itself while
+the button is down; the app's three own handlers (a detail's on a phone, a detail's wider up, the phone's player)
+followed it as a finger's and shrank the page into a rounded card. The fix and its tests are on `story/release-1.0.4`
+(draft PR #114, version 4010004 / 14010010); `orch/release-1.0.4/` has the PR's body and the device checks.
+
+State at 15:30: **nothing of 1.0.4 is compiled yet.** GitHub stopped running this fork's workflows ("Workflows are
+not currently being run on this fork due to the scale of GitHub Actions usage", on the repository's Actions tab; a
+dispatch answers 422). Only the owner's click on "Enable workflows" there turns them on; he was told at 12:35.
+`orch/await_enabled.sh [minutes]` waits for it without starting anything. `orch/LOG.md`'s last entry is the plan of
+runs for when it is on, kept lean so GitHub does not stop them again.
+
+New: `story/back-button-walk` (pushed, not in the PR on purpose: a change of the walk's driver makes every push of a
+pull request run two walks). It makes the emulator walk touch the system's own Back button, held and tapped, instead
+of sending a key, which never showed the bug; `passes=back-button` with the workflow's `ref` input walks an older
+app with it. `tools/back_button_offline.py <emulator_smoke.py>` checks that code against a pretended device, and
+`tools/ktsyntax.py <worktree>` counts a branch's Kotlin syntax slips against master (tree-sitter).
