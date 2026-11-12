@@ -1352,13 +1352,18 @@ class PlaybackService : MediaBrowserServiceCompat(), LifecycleOwner, CoroutineSc
 
     private fun broadcastMetadata() {
         val media = playlistManager.getCurrentMedia()
+        // 1.0.6: asked here, on the main thread, as the notification asks. Asked in the coroutine below, the first
+        // update of a service that had played nothing made the engines on a worker thread (they are made by
+        // whoever asks first) and the app died there: "Cannot invoke setValue on a background thread". Seen on
+        // Android Automotive, where the car's connection is known the moment the service is created.
+        val playing = isPlaying
         if (lifecycleScope.isActive) lifecycleScope.launch(Dispatchers.Default) {
             sendBroadcast(Intent("com.android.music.metachanged")
                     .putExtra("track", media?.nowPlaying ?: media?.title)
                     .putExtra("artist", if (media != null) MediaUtils.getMediaArtist(this@PlaybackService, media) else null)
                     .putExtra("album", if (media != null) MediaUtils.getMediaAlbum(this@PlaybackService, media) else null)
                     .putExtra("duration", media?.length ?: 0)
-                    .putExtra("playing", isPlaying)
+                    .putExtra("playing", playing)
                     .putExtra("package", this@PlaybackService.packageName)
                     .apply {
                         if (lastChaptersCount > 0) getCurrentChapter()?.let { putExtra("chapter", it) }
