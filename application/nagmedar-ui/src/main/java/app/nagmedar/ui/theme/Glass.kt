@@ -21,6 +21,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -222,7 +223,8 @@ fun Modifier.glassSource(state: HazeState?, mode: GlassMode): Modifier {
 
 /**
  * Draws a glass surface of [material] in [shape] behind this element's content:
- * - [GlassMode.Blur] with a [source]: the source's content blurred and tinted (Haze);
+ * - [GlassMode.Blur] with a [source]: the source's content blurred and tinted (Haze), over the material's opaque
+ *   colour (1.0.5: no pixel of a glass surface shows the content as it is);
  * - [GlassMode.Translucent]: the translucent tint, no blur;
  * - [GlassMode.Solid], or no source to blur: the opaque [GlassMaterial.solid] colour.
  *
@@ -242,10 +244,18 @@ fun Modifier.glass(
         // Desktop Kit 2: a Haze 2 style is a replayable program, made once per material, not per frame
         val style = remember(material) { material.blurStyle() }
         val input = remember(source) { HazeInput.Sources(source) }
+        val under = material.solid
         this
             .clip(shape)
             // as its source: drawn once more once it blurs, should it have drawn before the source first recorded
             .drawnAgain(source)
+            // 1.0.5: the material's own opaque colour under the blur. Haze records what it blurs into a layer of whole
+            // pixels at a fraction of the surface's size (0.79 of it) and draws that back scaled up: where the fraction
+            // rounds down, the blurred picture ends up to 0.6 px short of the surface's bottom or end edge, and there
+            // the content showed through, sharp and untinted. On the owner's phone that was a line along the window's
+            // bottom under the bottom glass at rest (423 px to blur: 334 recorded, 422.5 drawn; 12 Nov, "arkası
+            // gözüküyor"). Where the blur does draw it covers this; where it does not, the bar is its own colour
+            .drawBehind { drawRect(under) }
             .hazeBlur(input = input, style = style)
     }
     mode == GlassMode.Translucent && source != null -> background(material.translucent, shape)
