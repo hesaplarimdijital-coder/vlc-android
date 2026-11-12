@@ -27,9 +27,11 @@
 # 1.0.3: the walk is split in two jobs per API level, each with its own build and emulator: "tablet"
 # (tablet-en, workstation, phone-tr) and "phone" (phone-en), each about 25 minutes of walk against its
 # 38-minute deadline. A pass of the "passes" input outside both groups (sheet-trials: the phone's track
-# sheet dragged again and again, 1.0.2's flaky check's evidence) runs as a job of its own. The emulator's
-# own ANRs and crashes (System UI, the launcher) are recorded, waited out and the step tried once more;
-# the app's still fail the run.
+# sheet dragged again and again, 1.0.2's flaky check's evidence; 1.0.4's back-button: the system's Back
+# button of the three-button navigation held and tapped on an episode's page, a podcast's and the full
+# player, which with the ref input shows what an older app does under it) runs as a job of its own. The
+# emulator's own ANRs and crashes (System UI, the launcher) are recorded, waited out and the step tried
+# once more; the app's still fail the run.
 #
 # Evidence (report.md, screenshots, dumps, filtered logcat) is force-pushed to one branch per job, an
 # orphan commit, because artifacts cannot be downloaded without a login: ci/emulator-<group> (API 35;
@@ -58,7 +60,7 @@ on:
         type: string
         default: ''
       passes:
-        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials on demand)'
+        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials, back-button on demand)'
         type: string
         default: 'tablet-en,phone-en,workstation,phone-tr'
       build:
