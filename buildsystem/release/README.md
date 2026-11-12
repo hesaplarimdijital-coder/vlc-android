@@ -12,7 +12,7 @@ Nağmedar 1.0 yalnızca sizin iki cihazınız (Galaxy S24, Galaxy Tab S11 Ultra;
 
 ### Sürüm numaraları
 
-Kök `build.gradle`: `versionName = '1.0.4'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010004. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
+Kök `build.gradle`: `versionName = '1.0.5'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010005. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
 
 | Derleme | versionName | versionCode |
 | --- | --- | --- |
@@ -21,11 +21,12 @@ Kök `build.gradle`: `versionName = '1.0.4'`, `versionCode = 4000000 + major·10
 | Kişisel sürüm 1.0.1, arm64 | 1.0.1 | 14010007 |
 | Kişisel sürüm 1.0.2, arm64 | 1.0.2 | 14010008 |
 | Kişisel sürüm 1.0.3, arm64 | 1.0.3 | 14010009 |
-| Kişisel sürüm 1.0.4, arm64 | 1.0.4 | **14010010** |
-| Kişisel sürüm 1.0.4, x86_64 (yalnızca CI emülatörü) | 1.0.4 | 14010012 |
-| 1.0.4'ten derlenen debug | 1.0.4 | 14010004 |
+| Kişisel sürüm 1.0.4, arm64 | 1.0.4 | 14010010 |
+| Kişisel sürüm 1.0.5, arm64 | 1.0.5 | **14010011** |
+| Kişisel sürüm 1.0.5, x86_64 (yalnızca CI emülatörü) | 1.0.5 | 14010013 |
+| 1.0.5'ten derlenen debug | 1.0.5 | 14010005 |
 
-Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.4 kuruluyken aynı sürümden bir debug derlemesi (14010004) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.5: 4010005, kişisel APK'sı 14010011). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
+Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.5 kuruluyken aynı sürümden bir debug derlemesi (14010005) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.6: 4010006, kişisel APK'sı 14010012). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
 
 ### Bir kez: teslim anahtarı
 
@@ -47,12 +48,12 @@ CI APK'yı sizin teslim anahtarınızın açık yarısıyla ([`delivery.pub`](de
    git fetch origin ci/personal-release
    git worktree add /tmp/nagmedar-teslim origin/ci/personal-release
    cat /tmp/nagmedar-teslim/README.md
-   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.4.apk
+   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.5.apk
    git worktree remove /tmp/nagmedar-teslim
    ```
 
    Betik APK'nın SHA-256'sını zarftakiyle karşılaştırır; tutmazsa dosyayı siler.
-4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.4.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
+4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.5.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
 
 Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. 1.0.2'ye güncellemede veritabanı 23'e geçer (yalnız Whisper'ın sütunları çıkar; programlar, bölümler, dinleme yerleri ve indirmeler kalır) ve Whisper'ın bekleyen işleri, indirilmiş modelleri ve ürettiği dökümler bir kez silinir; yayınların kendi dökümlerine dokunulmaz. 1.0.3'e güncellemede veritabanı 24'e geçer (ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar kalır) ve her müzik dosyasının başlığı ReplayGain değerleri için arka planda bir kez yeniden okunur; film bilgisinin 0.5'ten kalan veritabanı silinir. Müzik listesi ilk açılışta bir kez eskisi gibi okunur ve cihazda saklanır; sonraki açılışlarda hemen gelir, kütüphane her açılışta yeniden taranmaz (Ayarlar › Kütüphane › “Kütüphaneyi yeniden tara” elle tarar). Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır (1.0.3, 1.0.2, 1.0.1, 1.0.0).
 
@@ -75,6 +76,15 @@ gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/
 ```
 
 1.0.3'ten beri yürüyüş her Android sürümünde iki iştir: tablet işi (tablet, iş istasyonu, Türkçe telefon) ve telefon işi (İngilizce telefon, üç düğmeli gezinme; kişisel derlemede Android Auto'nun ağacı da okunur). “Emülatör · özet” işi ikisinin sonucunu tek satırda toplar. Kanıtlar (rapor, ekran görüntüleri, StrictMode kaydı) `ci/emulator[-api<sürüm>][-personal]-<tablet|phone>` dallarına yazılır: debug ve API 35 için `ci/emulator-tablet` ile `ci/emulator-phone`, kişisel derleme ve Android 17 için `ci/emulator-api37.0-personal-tablet` ile `ci/emulator-api37.0-personal-phone`.
+
+1.0.5'ten beri bir sürümden önce `page-opens` geçişi de gezilir:
+
+```sh
+gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches \
+  -f ref=master -f 'inputs[build]=personal' -f 'inputs[api_levels]=37.0' -f 'inputs[passes]=page-opens'
+```
+
+Öteki geçişler sayfaları sistemin animasyonları kapalıyken açar: geçiş o zaman tek karedir, ortak öğeler ve cam hiç kurulmaz. `page-opens` telefonun ekran boyutunda (1080 × 2340, 480 dpi; koyu tema, üç düğme), animasyonlar açık ve oynatıcı boşken gezer: temiz uygulamada bir program adresiyle eklenir, sayfası satırından ve kutucuğundan açılır, üstüne bir bölüm gelip gider. Her açılış piksellerinden okunur ve sayfa kaydırılır. 1.0.3 ve 1.0.4'te program sayfası açılınca boş kalıyor ya da kaymıyordu; animasyonları kapalı gezen hiçbir geçiş bunu görmedi. Kanıtı `ci/emulator-api37.0-personal-page-opens` dalına yazılır; `inputs[ref]` ile eski bir sürüm aynı geçişle gezilebilir.
 
 ### Android 17 (API 37)
 
