@@ -122,8 +122,8 @@ jobs:
           levels = [x.strip() for x in os.environ["LEVELS"].split(",") if x.strip()] or ["35"]
           passes = [x.strip() for x in os.environ["PASSES"].split(",") if x.strip()]
           groups = [("tablet", ["tablet-en", "workstation", "phone-tr"]), ("phone", ["phone-en"])]
-          # the emulator every walk has: a tablet with Google's APIs, at the API level asked (image: the system image's
-          # own level when it has another name than the platform's)
+          # the emulator every walk has: a tablet with the Google APIs, at the API level asked (image: the level of
+          # the system image when it is named otherwise than the platform; no apostrophes here, the shell quotes this)
           phone = {"image": "", "target": "google_apis", "profile": "pixel_tablet"}
           # 1.0.6: auto-shots walks a car instead (Android Automotive 14: its media app draws the tree Android Auto browses)
           cars = {"auto-shots": {"api": "34", "image": "34-ext9", "target": "android-automotive", "profile": "automotive_1024p_landscape"}}
