@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.network.LocalNetworkTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-12T18:19:41.428Z" hostname="runnervmwuk1x" time="0.034">
+  <properties/>
+  <testcase name="theStateFollowsTheAnswers" classname="app.nagmedar.network.LocalNetworkTest" time="0.025"/>
+  <testcase name="namesServedAtHomeAreLocal" classname="app.nagmedar.network.LocalNetworkTest" time="0.006"/>
+  <testcase name="theWalksFeedAndAHomeRadioNeedThePermission" classname="app.nagmedar.network.LocalNetworkTest" time="0.001"/>
+  <testcase name="onlyAnAppThatTargets37AsksOnAndroid17" classname="app.nagmedar.network.LocalNetworkTest" time="0.0"/>
+  <testcase name="theHostOfVlcsAddresses" classname="app.nagmedar.network.LocalNetworkTest" time="0.0"/>
+  <testcase name="theInternetAndTheLoopbackAreNot" classname="app.nagmedar.network.LocalNetworkTest" time="0.0"/>
+  <testcase name="privateLinkLocalAndMulticastAddressesAreLocal" classname="app.nagmedar.network.LocalNetworkTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

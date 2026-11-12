@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarMediaItemTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-12T18:23:34.001Z" hostname="runnervmwuk1x" time="0.124">
+  <properties/>
+  <testcase name="aBrowsableEntrySaysHowItsListIsDrawn" classname="app.nagmedar.ui.auto.CarMediaItemTest" time="0.042"/>
+  <testcase name="anEpisodeCarriesHowFarItWasHeardAndItsDownload" classname="app.nagmedar.ui.auto.CarMediaItemTest" time="0.03"/>
+  <testcase name="aSearchResultIsListedUnderItsHeading" classname="app.nagmedar.ui.auto.CarMediaItemTest" time="0.023"/>
+  <testcase name="aTrackIsAPlayableRowWithNothingElse" classname="app.nagmedar.ui.auto.CarMediaItemTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

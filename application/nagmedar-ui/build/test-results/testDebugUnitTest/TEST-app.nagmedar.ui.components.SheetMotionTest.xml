@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.SheetMotionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-12T18:23:44.598Z" hostname="runnervmwuk1x" time="0.553">
+  <properties/>
+  <testcase name="aMoreSheetsSwitchShowsItsNewState" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.078"/>
+  <testcase name="withAMouseNothingTicks" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.094"/>
+  <testcase name="theSheetsWayRules" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.025"/>
+  <testcase name="anOnOffActionIsASwitchThatLeavesTheSheetOpen" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.088"/>
+  <testcase name="aFlingCarriesTheSheetOutBeforeItIsDismissed" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.084"/>
+  <testcase name="aPullPastTheClosingPointTicksOnce" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.088"/>
+  <testcase name="onATabletAFlingClosesAtOnceAndItGoesFromWhereItIs" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.058"/>
+  <testcase name="theTickComesOncePerCrossing" classname="app.nagmedar.ui.components.SheetMotionTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

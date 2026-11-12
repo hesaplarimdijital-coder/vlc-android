@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.SidebarBadgeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-12T18:25:10.597Z" hostname="runnervmwuk1x" time="0.03">
+  <properties/>
+  <testcase name="theFooterEntryShowsItsBadge" classname="app.nagmedar.ui.shell.SidebarBadgeTest" time="0.029"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

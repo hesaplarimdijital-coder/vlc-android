@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseMigrationTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-12T18:19:49.650Z" hostname="runnervmwuk1x" time="23.246">
+  <properties/>
+  <testcase name="aTwentyTwoLosesTheTranscriptColumnsAndKeepsThePodcasts" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="13.138"/>
+  <testcase name="podcastsGetTheirTranscriptColumnsInTwentyOne" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.281"/>
+  <testcase name="aTwentyWithoutSomeOfTheTablesMigratesAllTheSame" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.237"/>
+  <testcase name="scheduleAndShowCrossFromFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.199"/>
+  <testcase name="aTwentyWithTheRemovedFeaturesRowsOpensAsTwentyTwo" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.55"/>
+  <testcase name="aPullRequestBuildsDatabaseEndsAsTwenty" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.585"/>
+  <testcase name="remuxJobsKeepTheirOrderFromNineteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.154"/>
+  <testcase name="everyVersionMigratesToTheLatest" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.215"/>
+  <testcase name="radioRecordingsAppearInFifteen" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.089"/>
+  <testcase name="aTwentyThreeKeepsItsProbesAndGainsTheReplayGainColumns" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.084"/>
+  <testcase name="aTwentyOneLosesOnlyTheRemovedFeaturesTables" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.106"/>
+  <testcase name="podcastRowsSurviveTheirNewColumns" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.087"/>
+  <testcase name="radioStationsKeepTheirRowsFromSeven" classname="app.nagmedar.data.NagmedarDatabaseMigrationTest" time="0.11"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
