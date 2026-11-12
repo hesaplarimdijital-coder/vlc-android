@@ -87,6 +87,7 @@ dependencies {
     testImplementation "androidx.work:work-testing:$rootProject.ext.workManagerVersion"
     testImplementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     testImplementation 'androidx.compose.ui:ui-test-junit4'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 }
 
