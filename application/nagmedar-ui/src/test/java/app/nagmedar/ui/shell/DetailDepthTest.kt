@@ -2,6 +2,10 @@ package app.nagmedar.ui.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -43,6 +48,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * 1.0.3 (Desktop Kit 2.3.0's DetailTransition tests, with 2.4.0's way in): a phone's detail slides in from the
@@ -50,6 +56,13 @@ import kotlin.math.abs
  * a change of mind runs the way back, the cover flies between the row and the detail, a list scrolled at rest
  * has no lookahead pass, and with reduced motion the detail simply appears. What the frames look like (both
  * screens opaque, the list dark under a scrim) is [DetailNoDoubleExposureTest]'s.
+ *
+ * 1.0.5, the owner's phone (12 Nov, "Podcastte sayfası böyle oluyor", with a recording: his show's page slid in and
+ * was gone in the frame its opening ended): the last tests here, where what flies with the detail takes longer than
+ * the detail's own way. A cover's bounds settle to half a pixel on the opening spring, the detail's way to a
+ * thousandth: beyond some 500 px (at a phone's three pixels to the dp, a row a third of the way down its list) the
+ * cover lands after the detail. These tests' covers, at 1.5 px to the dp, never flew that far; nor did the walk see
+ * it, its animations off.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -341,5 +354,150 @@ class DetailDepthTest {
         compose.waitForIdle()
         assertTrue("the scroll was measured: $main", main > 5)
         assertEquals("no lookahead pass while nothing moves", 0, lookahead)
+    }
+
+    // ------------------------------------------------------------ 1.0.5: at rest after a flight that outlasts the detail's way
+
+    private var lookahead = 0
+    private var main = 0
+
+    /** A detail whose side has [AFlightThatOutlastsTheWay], and rows to scroll; its measures are counted. */
+    private val longFlightDetail: @Composable (String) -> Unit = {
+        AFlightThatOutlastsTheWay()
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+                .testTag("detail")
+                .layout { measurable, constraints ->
+                    if (isLookingAhead) lookahead++ else main++
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                },
+        ) { items(200) { Text("Satır $it", Modifier.fillMaxWidth().height(48.dp).testTag("row-$it")) } }
+    }
+
+    /** Opens the detail and plays its opening to the end, frame by frame (the long flight lasts 900 ms). */
+    private fun openOverALongFlight() {
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle { detail = "Albüm" }
+        repeat(80) { frame() }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+    }
+
+    /** The owner's page: in the frame the opening ended the detail was gone, a whole width beyond the end edge. */
+    @Test
+    fun aDetailStaysInPlaceWhenWhatFliesWithItLandsLater() {
+        show(shared = true, content = longFlightDetail)
+        openOverALongFlight()
+        assertEquals("the detail is in its place once all has landed", 0f, left("detail")!!, 0.5f)
+        assertEquals(411f, bounds("detail").let { (it.right - it.left).value }, 0.5f)
+        compose.onNodeWithTag("list").assertDoesNotExist()
+        // and it stays there
+        repeat(10) { frame() }
+        assertEquals("the detail stays in its place", 0f, left("detail")!!, 0.5f)
+    }
+
+    /** At rest again after it: out of the shared elements' layout (no lookahead pass), and its rows scroll. */
+    @Test
+    fun afterALongFlightTheDetailScrollsWithoutALookaheadPass() {
+        show(shared = true, content = longFlightDetail)
+        openOverALongFlight()
+        lookahead = 0
+        main = 0
+        val before = compose.onNodeWithTag("row-3", useUnmergedTree = true).getBoundsInRoot().top
+        compose.onNodeWithTag("detail").performTouchInput { swipeUp(durationMillis = 600) }
+        compose.waitForIdle()
+        assertTrue("the scroll was measured: $main", main > 5)
+        assertEquals("no lookahead pass while nothing moves", 0, lookahead)
+        assertTrue("the rows moved under the finger", compose.onAllNodesWithTag("row-3", useUnmergedTree = true).fetchSemanticsNodes().let { nodes ->
+            nodes.isEmpty() || nodes.first().positionInRoot.y / compose.density.density < before.value - 48f
+        })
+    }
+
+    /** The way back is played too (its values start where the detail is, not where a stale transition left them), and the next opening lands. */
+    @Test
+    fun afterALongFlightTheDetailLeavesOnItsWayAndOpensAgain() {
+        show(shared = true, content = longFlightDetail)
+        openOverALongFlight()
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle { detail = null }
+        val lefts = mutableListOf<Float>()
+        repeat(80) {
+            frame()
+            left("detail")?.let { lefts += it }
+        }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertTrue("the detail starts its way out from its place: $lefts", lefts.isNotEmpty() && lefts.first() < 40f)
+        assertTrue("the detail is seen on its way out: $lefts", lefts.count { it > 20f && it < 390f } >= 3)
+        assertTrue("towards the end edge, never back: $lefts", lefts.zipWithNext().all { (a, b) -> b >= a - 0.5f })
+        compose.onNodeWithTag("detail").assertDoesNotExist()
+        assertEquals(0f, bounds("list").left.value, 0.5f)
+        // and again
+        openOverALongFlight()
+        assertEquals("opened again, the detail is in its place", 0f, left("detail")!!, 0.5f)
+        compose.onNodeWithTag("list").assertDoesNotExist()
+    }
+
+    /**
+     * The same on the depth itself: once the shared elements' layout has gone (and with it its sides' animations, the
+     * longest of the transition), the depth's values are the open detail's, and nothing is said to move.
+     */
+    @Test
+    fun theDepthIsAtRestOnceItsSharedLayoutHasGone() {
+        var wanted by mutableStateOf(false)
+        var depth: DepthState? = null
+        var shared: Boolean? = null
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark) {
+                val state = rememberDepth(wanted)
+                depth = state
+                LaunchedEffect(wanted) { state.drive(wanted, animated = true) }
+                DepthHost(state, wanted, shared = true, Modifier.fillMaxSize()) { scopes ->
+                    shared = scopes != null
+                    if (scopes != null) {
+                        scopes.detail.visibility.transition.animateFloat(transitionSpec = { tween(900, easing = LinearEasing) }, label = "a long flight") {
+                            if (it == EnterExitState.Visible) 1f else 0f
+                        }
+                    }
+                    Box(Modifier.fillMaxSize())
+                }
+            }
+        }
+        compose.waitForIdle()
+        assertEquals("at rest, closed: a plain box", false, shared)
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle { wanted = true }
+        repeat(6) { frame() }
+        assertEquals("on its way: the shared elements' layout", true, shared)
+        repeat(80) { frame() }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        compose.runOnIdle {
+            val state = depth!!
+            val values = state.values!!
+            // in thousandths. The detail's way: 0 in place, 1000 a whole width beyond the end edge; a card's detail: 1000 opaque;
+            // a card's list: 0 gone
+            val seen = "the detail's way ${(values.detailShift.value * 1000).roundToInt()}, a card's detail ${(values.cardAlpha.value * 1000).roundToInt()}, " +
+                "a card's list ${(values.listAlpha.value * 1000).roundToInt()}, moving ${state.moving(true)}, in the shared layout $shared"
+            assertEquals(
+                "the depth at rest, open, after a flight that outlasted its way (its transition says it is running: ${state.transition.isRunning})",
+                "the detail's way 0, a card's detail 1000, a card's list 0, moving false, in the shared layout false",
+                seen,
+            )
+        }
+    }
+}
+
+/**
+ * What a shared element with a long way to fly is to the transition: an animation of its side that outlasts the
+ * detail's own way (see [DetailDepthTest]).
+ */
+@Composable
+private fun AFlightThatOutlastsTheWay() {
+    val scopes = LocalDetailSharedScopes.current ?: return
+    scopes.visibility.transition.animateFloat(transitionSpec = { tween(900, easing = LinearEasing) }, label = "a long flight") {
+        if (it == EnterExitState.Visible) 1f else 0f
     }
 }
