@@ -1,6 +1,14 @@
 package app.nagmedar.ui.components
 
 import androidx.activity.BackEventCompat
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemGestures
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * 1.0.4: whose Back a predictive Back is. Since Android 16 the Back button of the three-button navigation
@@ -13,11 +21,28 @@ import androidx.activity.BackEventCompat
  * 1.0.3 knew this for the tabs alone (Desktop Kit 2.4.0). A detail and the player followed the button's
  * progress as a finger's: with three buttons, Back from a podcast's episode, a show, an album, a playlist or
  * the player shrank the page into a rounded card before it left, as 1.0.2 did.
+ *
+ * And a finger's Back needs an edge to come from: only gesture navigation keeps the window's side edges for
+ * it ([rememberBackSwipes]). With three buttons there is no such swipe, so no predictive Back is a finger's
+ * there, whatever edge a system's button names for its own.
  */
 internal object BackSource {
-    /** A swipe from an edge of the screen: [swipeEdge] is [BackEventCompat.EDGE_LEFT] or [BackEventCompat.EDGE_RIGHT]. */
-    fun finger(swipeEdge: Int): Boolean = swipeEdge != BackEventCompat.EDGE_NONE
+    /**
+     * A swipe from an edge of the screen: [swipeEdge] is [BackEventCompat.EDGE_LEFT] or [BackEventCompat.EDGE_RIGHT],
+     * on a system whose Back is such a swipe ([edgeSwipes], [rememberBackSwipes]).
+     */
+    fun finger(swipeEdge: Int, edgeSwipes: Boolean): Boolean = edgeSwipes && swipeEdge != BackEventCompat.EDGE_NONE
 }
 
-/** This event of a predictive Back comes from a finger's swipe ([BackSource.finger]), not from a button or a key. */
-internal val BackEventCompat.fromFinger: Boolean get() = BackSource.finger(swipeEdge)
+/**
+ * Whether the system's Back is a swipe from the window's side edges (gesture navigation): it keeps them for the
+ * gesture ([WindowInsets.systemGestures]). Three-button navigation has no such edges.
+ */
+@Composable
+internal fun rememberBackSwipes(): State<Boolean> {
+    val gestures = WindowInsets.systemGestures
+    val density = LocalDensity.current
+    return remember(gestures, density) {
+        derivedStateOf { gestures.getLeft(density, LayoutDirection.Ltr) > 0 || gestures.getRight(density, LayoutDirection.Ltr) > 0 }
+    }
+}

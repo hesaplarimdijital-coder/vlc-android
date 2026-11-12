@@ -55,7 +55,8 @@ class DetailNoDoubleExposureTest {
 
     private var detail by mutableStateOf<String?>(null)
 
-    private fun show(tier: MotionTier, card: Boolean = false) {
+    /** [swipes]: the system's Back is a swipe from the window's edges (gesture navigation); a finger's Back needs it. */
+    private fun show(tier: MotionTier, card: Boolean = false, swipes: Boolean = false) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark) {
@@ -83,6 +84,7 @@ class DetailNoDoubleExposureTest {
             }
         }
         compose.waitForIdle()
+        if (swipes) compose.gestureNavigation()
     }
 
     /** At most this many pixels of a frame may be blended: the edges of a scaled screen, not a screen seen through another. */
@@ -141,7 +143,7 @@ class DetailNoDoubleExposureTest {
     @Test
     fun onAPhoneTheBackGestureShrinksTheOpaqueDetailOverTheDimmedList() {
         detail = "albüm"
-        show(MotionTier.Gesture)
+        show(MotionTier.Gesture, swipes = true)
         val dispatcher = compose.activity.onBackPressedDispatcher
         compose.mainClock.autoAdvance = false
         val frames = mutableListOf<ExposureFrame>()
@@ -170,7 +172,7 @@ class DetailNoDoubleExposureTest {
     @Test
     fun onAPhoneABackGestureGivenUpSpringsBackOpaque() {
         detail = "albüm"
-        show(MotionTier.Gesture)
+        show(MotionTier.Gesture, swipes = true)
         val dispatcher = compose.activity.onBackPressedDispatcher
         compose.mainClock.autoAdvance = false
         val frames = mutableListOf<ExposureFrame>()
@@ -228,7 +230,7 @@ class DetailNoDoubleExposureTest {
     @Test
     fun onAPhoneAFingersBackAtTheButtonsProgressShrinksTheDetail() {
         detail = "albüm"
-        show(MotionTier.Gesture)
+        show(MotionTier.Gesture, swipes = true)
         val dispatcher = compose.activity.onBackPressedDispatcher
         compose.mainClock.autoAdvance = false
         val open = camera.frame("open")
@@ -243,6 +245,39 @@ class DetailNoDoubleExposureTest {
         compose.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
         repeat(30) { camera.step("given up, frame $it", frames) }
         assertEquals("albüm", detail)
+        compose.mainClock.autoAdvance = true
+    }
+
+    /**
+     * 1.0.4: with three buttons the system keeps no edge for a Back swipe, so no predictive Back is a finger's there,
+     * whatever edge it names: should a system's button name one for its own progress, the detail stays whole under it
+     * all the same, and its release slides it out.
+     */
+    @Test
+    fun onAPhoneWithThreeButtonsABackThatNamesAnEdgeLeavesTheDetailWholeToo() {
+        detail = "albüm"
+        show(MotionTier.Gesture)
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        compose.mainClock.autoAdvance = false
+        val open = camera.frame("open")
+        val frames = mutableListOf<ExposureFrame>()
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(back(0f)) }
+        for (frame in 1..10) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(back(BackButton.progressAtFrame(frame))) }
+            camera.step("an edge named, no edge kept: frame $frame", frames)
+        }
+        for (f in frames) {
+            assertEquals("the list shows around the detail: $f", 0, f.red)
+            assertEquals("the detail shrinks: $f", open.blueRows, f.blueRows)
+            assertEquals("the detail moves: $f", open.blue, f.blue)
+        }
+        compose.runOnUiThread { dispatcher.onBackPressed() }
+        val out = mutableListOf<ExposureFrame>()
+        repeat(36) { camera.step("let go, frame $it", out) }
+        assertNull(detail)
+        assertBothOpaque(out)
+        for (f in out.filter { it.blue > it.total / 20 }) assertEquals("the detail leaves shrunk: $f", open.blueRows, f.blueRows)
+        assertEquals("the detail is gone once closed: ${out.last()}", 0, out.last().blue)
         compose.mainClock.autoAdvance = true
     }
 

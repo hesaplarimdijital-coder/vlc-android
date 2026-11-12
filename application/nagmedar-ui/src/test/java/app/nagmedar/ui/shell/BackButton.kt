@@ -1,9 +1,14 @@
 package app.nagmedar.ui.shell
 
+import android.view.ViewGroup
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlin.math.exp
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 /**
@@ -48,6 +53,18 @@ internal fun AndroidComposeTestRule<*, out ComponentActivity>.holdBackButton(fra
         waitForIdle()
         onFrame(frame)
     }
+}
+
+/**
+ * What a system with gesture navigation tells the window: its side edges, 24 dp each, are kept for the Back swipe.
+ * A test's window has none, as a phone with three buttons has none: there no predictive Back is a finger's, whatever
+ * edge it names ([app.nagmedar.ui.components.BackSource]). A test of a finger's Back calls this once its content is set.
+ */
+internal fun AndroidComposeTestRule<*, out ComponentActivity>.gestureNavigation() {
+    val edge = (24 * activity.resources.displayMetrics.density).roundToInt()
+    val insets = WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.systemGestures(), Insets.of(edge, 0, edge, 0)).build()
+    runOnUiThread { ViewCompat.dispatchApplyWindowInsets(activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0), insets) }
+    waitForIdle()
 }
 
 /** Lets the Back button go: the system invokes Back. */

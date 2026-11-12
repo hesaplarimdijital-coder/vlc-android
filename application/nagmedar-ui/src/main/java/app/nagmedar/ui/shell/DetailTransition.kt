@@ -73,7 +73,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.BackSource
-import app.nagmedar.ui.components.fromFinger
+import app.nagmedar.ui.components.rememberBackSwipes
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
@@ -224,6 +224,7 @@ fun rememberDetailMotion(open: Boolean): DetailMotionState = remember { DetailMo
  *
  * 1.0.4: a finger's alone. The Back button (the taskbar's, a keyboard's key) sends a predictive Back too, with
  * a progress of the system's own ([BackSource]): the detail stays whole under it and its release calls [onBack].
+ * Nor is there a finger's Back where the system keeps no edge for one (three buttons, [rememberBackSwipes]).
  */
 @Composable
 fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> Unit) {
@@ -231,12 +232,13 @@ fun DetailBackHandler(enabled: Boolean, state: DetailMotionState, onBack: () -> 
     val motion = NagTheme.motion
     val tier = LocalMotionTier.current
     val latestOnBack by rememberUpdatedState(onBack)
+    val swipes = rememberBackSwipes()
     PredictiveBackHandler(enabled = enabled) { events ->
         state.back.snapTo(0f)
         try {
             events.collect { event ->
                 state.swipeEdge = event.swipeEdge
-                if (!motion.reduced && event.fromFinger) state.back.snapTo(event.progress)
+                if (!motion.reduced && BackSource.finger(event.swipeEdge, swipes.value)) state.back.snapTo(event.progress)
             }
             latestOnBack()
         } catch (e: CancellationException) {
@@ -538,18 +540,20 @@ internal fun rememberDepth(open: Boolean): DepthState {
  * 1.0.4: and so it does since Android 16, whose Back button sends a progress of its own while it is down
  * ([BackSource]). 1.0.3 took it for a finger's: under the button the detail shrank into a rounded, leaning card
  * (an episode's page, a show's, an album's, a playlist's), then left; the owner's "eskisi gibi". Only a swipe's
- * events ([fromFinger]) seek the closing now; the button's release plays the way out the page's arrow plays.
+ * events ([BackSource.finger]) seek the closing now, and only where the system's Back is a swipe from an edge
+ * ([rememberBackSwipes]: with three buttons nothing is); the button's release plays the way out the page's arrow plays.
  */
 @Composable
 internal fun DepthBackHandler(enabled: Boolean, depth: DepthState, animated: Boolean, isOpen: () -> Boolean, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val latestOnBack by rememberUpdatedState(onBack)
     val latestOpen by rememberUpdatedState(isOpen)
+    val swipes = rememberBackSwipes()
     PredictiveBackHandler(enabled = enabled) { events ->
         try {
             events.collectLatest { event ->
                 depth.swipeEdge = event.swipeEdge
-                if (animated && depth.seekable.currentState && event.fromFinger) {
+                if (animated && depth.seekable.currentState && BackSource.finger(event.swipeEdge, swipes.value)) {
                     depth.gestureClose = true
                     depth.seekable.seekTo(event.progress * DetailDepth.GESTURE_END, false)
                 }

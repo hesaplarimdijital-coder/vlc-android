@@ -49,6 +49,7 @@ import app.nagmedar.ui.shell.BackButton
 import app.nagmedar.ui.shell.ChromeGlass
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.gestureNavigation
 import app.nagmedar.ui.shell.holdBackButton
 import app.nagmedar.ui.shell.releaseBackButton
 import app.nagmedar.ui.theme.InputMode
@@ -415,6 +416,21 @@ class PlayerMotionTest {
         assertTrue(player.isExpanded)
         val dispatcher = compose.activity.onBackPressedDispatcher
         fun finger(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
+        // with three buttons (no edge kept for a swipe) even a Back that names an edge is no finger's
+        compose.mainClock.autoAdvance = false
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(finger(0f)) }
+        for (frame in 1..10) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(finger(BackButton.progressAtFrame(frame))) }
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+        }
+        assertTrue("with three buttons a Back that names an edge leaves the player whole too", whole(shot()))
+        compose.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertTrue(player.isExpanded)
+        // gesture navigation: the system keeps the window's edges for the swipe, and a finger's Back shrinks the player
+        compose.gestureNavigation()
         compose.mainClock.autoAdvance = false
         compose.runOnUiThread { dispatcher.dispatchOnBackStarted(finger(0f)) }
         for (frame in 1..10) {

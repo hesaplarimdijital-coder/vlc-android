@@ -626,6 +626,8 @@ class MotionStripsTest {
     private fun backStrip(name: String, letGo: Boolean) {
         podcasts = podcasts.copy(page = PodcastSamples.page)
         podcastShell()
+        // 1.0.4: a finger's Back needs a system that keeps the window's edges for it
+        edgeBackGesture()
         val dispatcher = compose.activity.onBackPressedDispatcher
         fun back(progress: Float) = BackEventCompat(40f, 600f, progress, BackEventCompat.EDGE_LEFT)
         compose.mainClock.autoAdvance = false

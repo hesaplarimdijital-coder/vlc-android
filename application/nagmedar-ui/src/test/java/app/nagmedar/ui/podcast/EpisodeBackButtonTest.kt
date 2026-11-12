@@ -16,6 +16,7 @@ import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.shell.BackButton
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.gestureNavigation
 import app.nagmedar.ui.shell.holdBackButton
 import app.nagmedar.ui.shell.releaseBackButton
 import app.nagmedar.ui.theme.InputMode
@@ -139,10 +140,14 @@ class EpisodeBackButtonTest {
         assertEquals("the next Back closed the show's page", listOf("open-episode", "close-episode", "close-page"), calls)
     }
 
-    /** What tells the test above from an idle one: a finger's Back from the left edge, at the button's progress, does shrink the page. */
+    /**
+     * What tells the test above from an idle one: with gesture navigation a finger's Back from the left edge, at the
+     * button's progress, does shrink the page.
+     */
     @Test
     fun aFingersBackStillShrinksTheEpisodesPage() {
         phone()
+        compose.gestureNavigation()
         compose.onAllNodesWithTag("podcast-episode")[0].performClick()
         compose.waitForIdle()
         val rest = drawn("episode-detail")
@@ -162,5 +167,33 @@ class EpisodeBackButtonTest {
         compose.waitForIdle()
         assertInPlace("given up, the page is back", rest, drawn("episode-detail"))
         assertEquals(listOf("open-episode"), calls)
+    }
+
+    /**
+     * The owner's phone has three buttons: its window keeps no edge for a Back swipe, so nothing there is a finger's.
+     * Should its button name an edge for the progress it runs (not every system says "no edge"), the page stays
+     * where it is all the same, and the release closes it.
+     */
+    @Test
+    fun withThreeButtonsABackThatNamesAnEdgeLeavesThePageInPlaceToo() {
+        phone()
+        compose.onAllNodesWithTag("podcast-episode")[0].performClick()
+        compose.waitForIdle()
+        val rest = drawn("episode-detail")
+        val dispatcher = compose.activity.onBackPressedDispatcher
+        fun edged(progress: Float) = BackEventCompat(0f, 0f, progress, BackEventCompat.EDGE_LEFT)
+        compose.mainClock.autoAdvance = false
+        compose.runOnUiThread { dispatcher.dispatchOnBackStarted(edged(0f)) }
+        for (frame in 1..10) {
+            compose.runOnUiThread { dispatcher.dispatchOnBackProgressed(edged(BackButton.progressAtFrame(frame))) }
+            compose.mainClock.advanceTimeByFrame()
+            compose.waitForIdle()
+            assertInPlace("frame $frame: the page moves under a Back that names an edge", rest, drawn("episode-detail"))
+        }
+        compose.runOnUiThread { dispatcher.onBackPressed() }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        assertEquals(listOf("open-episode", "close-episode"), calls)
+        assertTrue("the episode's page is gone", !there("episode-detail"))
     }
 }

@@ -83,6 +83,8 @@ class DetailDepthTest {
             }
         }
         compose.waitForIdle()
+        // 1.0.4: a finger's Back needs a system that keeps the window's edges for it
+        compose.gestureNavigation()
     }
 
     private fun frame() {
@@ -179,6 +181,7 @@ class DetailDepthTest {
             }
         }
         compose.waitForIdle()
+        compose.gestureNavigation()
         val dispatcher = compose.activity.onBackPressedDispatcher
         compose.runOnUiThread {
             dispatcher.dispatchOnBackStarted(back(0f))

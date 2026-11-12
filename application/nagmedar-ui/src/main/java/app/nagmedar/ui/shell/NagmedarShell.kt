@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -60,6 +59,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.BackSource
+import app.nagmedar.ui.components.rememberBackSwipes
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.GlassThickness
@@ -242,9 +242,13 @@ fun NagmedarShell(
     // Back too, with no edge ([BackEventCompat.EDGE_NONE]), which navigation plays through on the release: it
     // gets the plain pops, the tabs' fade-through and the pages' slide (1.0.4: [BackSource], the details' and
     // the player's rule too)
+    // 1.0.3: gesture navigation, whose Back is a swipe from the window's side edges (the system keeps them for it);
+    // three-button navigation has no such edges ([rememberBackSwipes]: 1.0.4, the details' and the player's rule too)
+    val edgeBack by rememberBackSwipes()
+    val currentEdgeBack by rememberUpdatedState(edgeBack)
     val tabBack: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> Boolean = remember(navigator) {
         { edge ->
-            BackSource.finger(edge) && currentKind == NavKind.BottomBar && NavRules.tabBack(
+            BackSource.finger(edge, currentEdgeBack) && currentKind == NavKind.BottomBar && NavRules.tabBack(
                 Destination.fromRoute(initialState.destination.route),
                 Destination.fromRoute(targetState.destination.route),
                 currentKind,
@@ -281,13 +285,6 @@ fun NagmedarShell(
     val view = LocalView.current
     val imeTakesRoom by remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
     val showBottomNav = !(imeVisible && imeTakesRoom)
-    // 1.0.3: gesture navigation, whose Back is a swipe from the window's side edges (the system keeps them for it);
-    // three-button navigation has no such edges
-    val gestures = WindowInsets.systemGestures
-    val edgeBack by remember(gestures, density) {
-        derivedStateOf { gestures.getLeft(density, LayoutDirection.Ltr) > 0 || gestures.getRight(density, LayoutDirection.Ltr) > 0 }
-    }
-    val currentEdgeBack by rememberUpdatedState(edgeBack)
     val scroll = remember { ShellScrollState() }
     val metrics = remember { ShellChromeMetrics() }
     val overlayHost = remember { ShellOverlayHost() }
