@@ -1537,8 +1537,10 @@ class Smoke:
 
     def podcast_page(self):
         """The Podcasts, then a followed podcast's page (the walk's feed, --feed, followed first when none is): the nodes
-        with its episodes; None without a feed or when the page did not open."""
+        with its episodes; None without a feed or when the page did not open. From wherever the walk is: a page of its
+        own (Settings) hides the phone's bottom bar, and is left first."""
         s = self.strings[self.lang]
+        self.back_to_tabs()
         self.open_label(s["nag_nav_podcasts_short"]) or self.open_label(s["nag_nav_podcasts"])
         nodes = self.step("Podcasts")
         self.check("the Podcasts open", bool(self.by_id(nodes, "podcast-add") or self.by_id(nodes, "podcast-list")
@@ -1561,6 +1563,12 @@ class Smoke:
         with its times, never a station's "live" line. An episode that does not start in time is a warning (the
         emulator's network), a bar that says live a failed check. Paused after, and back to the Podcasts."""
         s = self.strings[self.lang]
+        # phone-en ends on Settings, restored by a start after the process was killed: Back leaves it (podcast_page);
+        # should that have left the app, or the bar still be away, the app is started afresh on its first page
+        self.back_to_tabs()
+        if not self.has_bottom_bar(self.nodes(self.dump())):
+            self.launch()
+            self.step("The app started again (for the episode)", wait=1.5)
         nodes = self.podcast_page()
         episodes = self.by_id(nodes, "podcast-episode") if nodes else []
         if not episodes:
