@@ -46,8 +46,8 @@ violations). The walk, in passes (a size and a language each):
                opens over a list, opened with the system's animations on and nothing in the player, on a
                screen of the owner's phone's size, each read by its pixels: a show's page once its feed is
                followed, from its row (twice), an episode over it and back, from its tile (twice); the
-               page must be on screen, in the UI's tree (opening_check) and scroll: a swipe brings other
-               episodes into sight (scrolls_check)
+               page must be on screen, in the UI's tree (opening_check) and scroll: its episodes follow
+               a swipe by most of its length (scrolls_check)
 
 1.0.3: the phone job (phone-en, glass) runs in three-button navigation, as the user's phone: the
 bottom bar's colour must continue behind the Back, Home and Recents buttons (the shell's band).
@@ -147,6 +147,9 @@ BACK_HELD_WHOLE = 0.02
 # 1.0.5: a page is on screen when more than this share of its place (between the bars) is not its ground colour (an
 # empty page: 0.0 %; the owner's show's page: some 11 to 14 %)
 PAGE_INK = 0.01
+# 1.0.5: a page scrolls when an episode in sight moves up by this share of a swipe's length at least (a show's page
+# under the walk's 842 px swipe: 565 to 825 px; 1.0.4's page, which no longer took the scroll: 75 to 82 px)
+PAGE_FOLLOWS = 0.4
 
 
 class Node:
@@ -2761,53 +2764,86 @@ class Smoke:
         pct = lambda v: "?" if v is None else "%.1f %%" % (v * 100)
         drawn = inks[2] is not None and inks[2] >= PAGE_INK
         r = {"pass": self.cur_pass, "what": what, "tapped": bool(at), "shots": shots, "inks": inks, "in_tree": in_tree,
-             "swiped": bool(swipe), "before": [], "after": [], "scrolls": None, "ok": bool(drawn and in_tree)}
+             "swiped": bool(swipe), "moved": None, "scrolls": None, "ok": bool(drawn and in_tree)}
         self.page_openings.append(r)
         self.check("%s: the page is on screen 2.5 s after it opened (the animations on)" % what, drawn and in_tree,
                    "drawn in the page's place: %s at 0.3 s, %s at 0.8 s, %s at 2.5 s; the page in the UI's tree: %s"
                    % (pct(inks[0]), pct(inks[1]), pct(inks[2]), "yes" if in_tree else "NO"))
+        # a page opened or closed is a new screen: the bars a scroll slid away are shown again
+        self.check("%s: the bottom bar is shown" % what, self.bar_shown(nodes), self.bar_seen(nodes))
         if swipe:
-            nodes, r["before"], r["after"], r["scrolls"] = self.scrolls_check(what, nodes)
+            nodes, r["moved"], r["scrolls"] = self.scrolls_check(what, nodes)
             r["ok"] = bool(r["ok"] and r["scrolls"])
         self.log("page opening [%s]: %s" % (what, r))
         return nodes
 
-    def episode_titles(self, nodes):
-        """The titles of the episodes in sight on a show's page, top to bottom (the first line of each row)."""
+    def episode_rows(self, nodes):
+        """The episodes in sight on a show's page, top to bottom: each one's title (its row's first line) and where that
+        line starts (px from the screen's top)."""
         out = []
         for row in sorted(self.by_id(nodes, "podcast-episode"), key=lambda n: n.b[1]):
             lines = sorted((n for n in self.app_nodes(nodes) if n is not row and n.text.strip() and self.inside(n, row.b)),
                            key=lambda n: n.b[1])
             if lines:
-                out.append(lines[0].text.strip())
+                out.append((lines[0].text.strip(), lines[0].b[1]))
         return out
 
     def scrolls_check(self, what, nodes):
-        """1.0.5: a show's page scrolls: its episodes in sight, a swipe up the page, its episodes again. A list that
-        scrolls shows others then. One that no longer takes the scroll (the owner's first opening, "açılmıştı, o zaman
-        da aşağı scroll yapılmıyordu": the page was there and stood still) gives a few dp, what its rows in sight have
-        left, and shows the same episodes: a share of changed pixels does not tell the two apart. Returns the nodes,
-        the titles before and after, and whether it scrolled."""
-        before = self.episode_titles(nodes)
+        """1.0.5: a show's page scrolls: where its episodes are, a swipe up the page, where they are then. A list that
+        scrolls follows the finger: an episode still in sight has moved up by most of the swipe (PAGE_FOLLOWS of it at
+        least), or none of them is in sight any more. One that no longer takes the scroll (the owner's first opening,
+        "açılmıştı, o zaman da aşağı scroll yapılmıyordu": the page was there and stood still) gives some 25 dp, what
+        its rows in sight have left, and no more; a share of changed pixels does not tell the two apart (1.0.4's page
+        changed 17 % of its place so). Returns the nodes, the px the page moved (None: all its episodes are others)
+        and whether it scrolled."""
+        before = self.episode_rows(nodes)
         w, h = self.screen_size(nodes)
-        self.sh("input swipe %d %d %d %d 250" % (w // 2, int(h * 0.66), w // 2, int(h * 0.30)))
+        y0, y1 = int(h * 0.66), int(h * 0.30)
+        self.sh("input swipe %d %d %d %d 250" % (w // 2, y0, w // 2, y1))
         nodes = self.step("%s: swiped up" % what, wait=1.5)
-        after = self.episode_titles(nodes)
-        kept = [t for t in before[:2] if t in after]
-        ok = bool(before) and bool(after) and not kept
-        short = lambda ts: ", ".join('"%s"' % t[:12] for t in ts[:5]) or "none"
-        self.check("%s: the page scrolls under a swipe (other episodes come into sight)" % what, ok,
-                   "episodes in sight before the swipe: %s; after it: %s" % (short(before), short(after)))
-        return nodes, before, after, ok
+        after = self.episode_rows(nodes)
+        once = lambda rows: {t: y for t, y in rows if [x for x, _ in rows].count(t) == 1}
+        was, now = once(before), once(after)
+        same = [t for t, _ in before if t in was and t in now]
+        moved = (was[same[0]] - now[same[0]]) if same else None
+        need = int((y0 - y1) * PAGE_FOLLOWS)
+        ok = bool(before) and bool(after) and (moved is None or moved >= need)
+        if not before or not after:
+            seen = "episodes in sight before the swipe: %d, after it: %d" % (len(before), len(after))
+        elif moved is None:
+            seen = "none of the %d episodes in sight before the swipe is in sight after it" % len(before)
+        else:
+            seen = "\"%s\" moved up by %d px under a swipe of %d px (a page that follows the finger: %d px at least)" \
+                % (same[0][:16], moved, y0 - y1, need)
+        self.check("%s: the page scrolls under a swipe" % what, ok, seen)
+        return nodes, moved, ok
+
+    def bar_shown(self, nodes):
+        """1.0.5: the phone's bottom bar is in its place: its ⋯ tab's label whole, above the system's buttons. Slid away
+        by a scroll the label is a sliver at the window's foot, which has_bottom_bar() still takes for the bar."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        return any(n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.8 and n.b[3] - n.b[1] >= 30 and n.b[3] <= h - 40
+                   for n in self.app_nodes(nodes))
+
+    def bar_seen(self, nodes):
+        """Where the bottom bar's ⋯ label is, for a check's detail."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.8]
+        return "its ⋯ label at y %d to %d of %d" % (more[0].b[1], more[0].b[3], h) if more else "no ⋯ label at the screen's foot"
 
     def podcasts_list(self, what):
-        """Back from a show's page to the Podcasts' list, the animations on: the nodes, and the check that it is there."""
+        """Back from a show's page to the Podcasts' list, the animations on: the nodes, and the checks that it is there
+        and that the bottom bar is shown again (1.0.5: the page's scroll slid it away, and one show's list cannot
+        scroll to call it back)."""
         self.key(4)
         nodes, rows = self.wait_for(lambda ns: self.by_id(ns, "podcast-row") or self.by_id(ns, "podcast-tile"), 8)
         nodes = self.step("Back on the Podcasts (%s)" % what, wait=1.0)
         rows = self.by_id(nodes, "podcast-row") or self.by_id(nodes, "podcast-tile")
         self.check("Back from the show's page shows the Podcasts again (%s)" % what, bool(rows) and not self.by_id(nodes, "podcast-page"),
                    "%d show(s) listed" % len(rows))
+        self.check("Back on the Podcasts the bottom bar is shown (%s)" % what, self.bar_shown(nodes), self.bar_seen(nodes))
         return nodes
 
     def pass_page_opens(self):
@@ -3129,16 +3165,21 @@ class Smoke:
             md.append("")
         if self.page_openings:
             md.append("## Pages opened with the animations on (1.0.5: on screen when more than %.0f %% of the page's place between the "
-                      "bars is drawn, an empty page has 0.0 %%; it scrolls when a swipe brings other episodes into sight)\n" % (PAGE_INK * 100))
-            md.append("| pass | page | 0.3 s | 0.8 s | 2.5 s | in the UI's tree | first episodes before the swipe | after it | result |")
-            md.append("|------|------|-------|-------|-------|------------------|---------------------------------|----------|--------|")
+                      "bars is drawn, an empty page has 0.0 %%; it scrolls when it follows a swipe by %.0f %% of its length at least)\n"
+                      % (PAGE_INK * 100, PAGE_FOLLOWS * 100))
+            md.append("| pass | page | 0.3 s | 0.8 s | 2.5 s | in the UI's tree | moved under the swipe | result |")
+            md.append("|------|------|-------|-------|-------|------------------|-----------------------|--------|")
             link = lambda rel, v: "none" if not rel else "[%s](%s)" % ("?" if v is None else "%.1f %%" % (v * 100), rel)
-            short = lambda ts: ", ".join(t[:12].replace("|", "/") for t in ts[:3]) or "none"
             for r in self.page_openings:
                 cells = [link(rel, v) for rel, v in zip(r["shots"], r["inks"])]
-                md.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
-                    r["pass"], r["what"], cells[0], cells[1], cells[2], "yes" if r["in_tree"] else "**no**",
-                    short(r["before"]) if r["swiped"] else "not swiped", short(r["after"]) if r["swiped"] else "not swiped",
+                if not r["swiped"]:
+                    moved = "not swiped"
+                elif r["moved"] is None:
+                    moved = "all its episodes are others" if r["scrolls"] else "**no episodes in sight**"
+                else:
+                    moved = "%d px" % r["moved"] if r["scrolls"] else "**%d px**" % r["moved"]
+                md.append("| %s | %s | %s | %s | %s | %s | %s | %s |" % (
+                    r["pass"], r["what"], cells[0], cells[1], cells[2], "yes" if r["in_tree"] else "**no**", moved,
                     "ok" if r["ok"] else "**FAILED**"))
             md.append("")
         if self.crashes:
