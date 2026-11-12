@@ -788,3 +788,87 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   branches. Local worktree and branch of back-button-walk removed.
   Not seen from here, his devices are the test: whether One UI's Back button starts its predictive Back at once (the
   rule does not depend on it), and the "Canlı yayın" fix (the emulator's local server never showed the bug).
+
+## 12 Nov 19:04 Istanbul — the owner's recording of 1.0.4 → 1.0.5
+- His words: "Podcastte sayfası böyle oluyor. İlk yğklediğimde açılmıştı o zaman da aşağı scroll yapılmıyordu. / Alt
+  navigasyon da yukarı kayıyor dikkat edersen arkası gözüküyor". Frames in $SCRATCH/video-1911.
+- THREE causes, all in 1.0.3's phone depth (shell/DetailTransition.kt), none seen before because the walks open pages with
+  the system's animations off and the JVM tests began with the page open:
+  1. BLANK PAGE. A SeekableTransitionState at rest keeps its animations as the way left them and its fraction at 0; when
+     the transition's total duration changes afterwards (SeekableTransitionState.onTotalDurationChanged → seekToFraction →
+     Transition.seekAnimations(0)) its own animations jump back to the START of the way and Transition.isRunning stays true.
+     The duration changes when the shared elements' side transitions leave after a way, if one of their animations was the
+     longest. detailShift → 1: the page a whole width beyond the end edge; moving() (which read isRunning) put the depth
+     back into the SharedTransitionLayout for good; the way back started from there and was not played.
+     Read in androidx-main (compose/animation/animation-core Transition.kt); proven by DetailDepthTest
+     .theDepthIsAtRestOnceItsSharedElementsHaveLanded on 1.0.4's code: "the detail's way 1000, a card's detail 0, a card's
+     list 1000, moving true … (its transition says it is running: true)".
+     WHICH child animation is the longest on the owner's row is NOT established: my "cover flying more than ~500 px"
+     (in the first commits' messages, not rewritable) is wrong: on the emulator the top row's cover is ~120 px from the
+     page's and its page was lost all the same. The fix does not depend on it.
+  2. PAGE THAT WOULD NOT SCROLL. 1.0.3's DepthHost moved the content into a SharedTransitionLayout for a way and back into
+     a plain Box after it. LazyListState.hasLookaheadOccurred is never reset: after one lookahead pass every measure without
+     one is taken for the approach pass (applyMeasureResult), scrollToBeConsumed is no longer consumed. The list gives what
+     its composed rows have left (75–82 px on the emulator) and stands still. That was the page whenever it was not lost
+     (the page the app opens after subscribing, a tile's page): "açılmıştı, o zaman da aşağı scroll yapılmıyordu".
+     Found only because DetailDepthTest's scroll assertion went red on the first fix (R6 alone, commit ba6df4bf).
+  3. 1 PX LINE under the bottom glass: Haze 2.0.1 records into (size * 0.790569).roundToIntSize() and draws back at exactly
+     1/0.790569: 423 px → 334 → 422.5 drawn. NOT reproducible on the emulator. Fix by arithmetic only.
+- Fixes (branch story/release-1.0.5, PR #115, master fab4ce73 by fast-forward):
+  rememberDepth: the three values under key(seekable.currentState) (fresh, settled animations at every rest; values is a
+  snapshot state); detailLayer: identity when current && target; moving(): without transition.isRunning; DepthHost: with
+  `shared` the content lives in the SharedTransitionLayout always and for good (SharedHome latch; only the sides' scopes come
+  and go with `moving`); Glass.glass(): drawBehind { drawRect(material.solid) } before hazeBlur; ShellScrollState.showBars +
+  LocalShellScroll: a detail opened/closed/changed on a phone shows the bars again (found in the walk of the fix: after the
+  page scrolled, Back left one show's list without the bottom bar; the rule "only a scroll up brings them back" is 0.2.0's).
+  COST: the Podcasts list and a show's page are measured twice a frame while scrolling on a phone (lookahead).
+- Tests: PodcastPageOpensTest (new, 5; the shell at 1080x2340/480 dpi, page = null, a row tapped), DetailDepthTest (+7; the
+  old "a shared depth's list at rest has no lookahead pass" is now aPlainDepthsListIsMeasuredOnceAFrame),
+  ShellScrollStateTest (+1). 2327 tests, 281 screenshots the same. Red before: run 43275028253 (tests only on 1.0.4's code,
+  7 red), run 43277885554 (R6 only: "the rows moved under the finger").
+- Walk: passes=page-opens (permanent; animations ON, fresh app, feed-long.xml with 80 episodes served by the workflow; the
+  owner's geometry). opening_check (ink at 0.3/0.8/2.5 s, UI tree, bar_shown), scrolls_check (an episode in sight must move
+  up by PAGE_FOLLOWS = 40 % of the 842 px swipe), podcasts_list (Back; bar_shown). In buildsystem/release/README.md's
+  release line.
+  LESSONS: (a) my first scroll check ("≥ 1 % of the page's place changed") passed 1.0.4's stuck page (17 %): seen only by
+  looking at the screenshots; (b) my second ("the first two episodes gone") failed pages that had scrolled (tall header):
+  replaced by the geometric one, replayed offline on both runs' dumps before pushing.
+  OPEN (walk only): on an app with the bug the page opened after following can itself be blank (run 43294020905 on
+  1.0.4); the pass then reports "the feed is followed: FAILED" and stops instead of pressing Back and going on.
+- Runs: page-opens on 1.0.4: 43277971874 (first driver; row blank twice), 43294020905 (final driver; blank after
+  following, stopped early); on the fix: 43283001856 (32296bbb; pages there, scroll 565–825 px, bars stay hidden),
+  43289445307 (fab4ce73: passed 0/37; scroll 633–808 px; bars back). Release walks 43289450097: API 37 phone 0/71,
+  API 37 tablet 0/66, API 35 phone 0/71, API 35 tablet 0/66. Local refs: refs/keep/page-opens-{control-104,
+  control-104-run2,fixed-32296bbb,1.0.5-fab4ce73}, refs/keep/walk-1.0.5-*.
+- DELIVERED 12 Nov 23:34 Istanbul (20:34 UTC). `release_chain.sh release-1.0.5 fab4ce73… 1.0.5`: master fast-forwarded
+  to fab4ce73 (PR #115 closed as merged at 20:15:06Z; it was still a draft: REST cannot mark a draft ready and GraphQL
+  is refused here), the personal release dispatched at 23:15 (run 43298418416), ci/personal-release named master's sha
+  19 min later (0ff6abde), decrypted, apkcheck ok: app.nagmedar.debug, 1.0.5, 14010011, minSdk 34, target 37, not
+  debuggable, v2, cert d094907b…fecbbc, baseline.prof + profm, arm64-v8a, 97449540 bytes, SHA-256
+  c5a473ff06c1cb54be7df8ec92d210d138aa478a8d76c859cadbf507179e6d96 (computed again locally before and after sending).
+  master's own push run 43298417134: debug and release green. The dispatched run 43298418416 ended green too
+  (20:39:50Z: debug, release, the labs, the personal release; its release job was still running when the APK went out).
+  page-opens walked once more ON MASTER, personal build, API 37.0: run 43298541656 passed, 32 steps, 0/37. The seven
+  openings: 10.3–14.4 % of the page's place drawn at 0.3 s, 11.6–14.2 % at 2.5 s, in the UI's tree every time; scroll
+  616–1514 px under an 842 px swipe (336 px at least asked); the bar's ⋯ label at y 2128–2175 of 2340 on every page
+  and after every Back. Evidence: ci/emulator-api37.0-personal-page-opens (= refs/keep/page-opens-1.0.5-master).
+  A reader of fab4ce73's check runs sees ONE failed "API 37.0, page-opens": that is run 43294020905, the control
+  (today's driver, `ref` = 1.0.4's app), which is meant to fail.
+  Sent with SendUserFile: the APK and program-sayfasi-1.0.4-1.0.5.png (five panels: 1.0.4 0.3 s after the tap and
+  blank at 0.8 s; 1.0.5 in place, scrolled, Back with the list and the bottom bar).
+  Plan document: "1.0 cihaz testi" rev 10 (the 1.0.5 checks at the top: Program sayfası 8, Alt çubuk ve alt cam 4,
+  Değişmemesi gerekenler 3; heading block m1gesnh1vzq.19541, the intro names 1.0.5), "1.0.3 planı" rev 36 (a 1.0.5
+  paragraph above 1.0.4's, block m1gesnh1vzq.11233).
+  NOT SEEN FROM HERE, his phone is the test: (1) the line under the bottom glass (the emulator never drew the sliver;
+  the fix is the glass's own solid colour painted under the blur, by arithmetic); (2) whether the Podcasts list and a
+  show's page still scroll smoothly now that they are measured twice a frame; (3) that his own row opens (which of the
+  flying things outlasts the way on his row was never established; the fix does not depend on it, the walk's row did
+  lose its page on 1.0.4 and keeps it on 1.0.5).
+  SAID WRONG ON THE WAY, corrected in the closing message: the "cover flies more than ~500 px" explanation of my
+  mid-way message to him.
+  Left for his word: remote branches story/release-1.0.5, story/release-1.0.4, story/back-button-walk (merged),
+  exp/page-blank (the experiments, never merged), the older story/* (113 story branches in all), the evidence branches
+  ci/emulator-api37.0-personal-page-blank and …-page-blank-2; four old runs still "queued" (43097360728, 43097182461,
+  43097182618, 38645881043: a session may not cancel a run); the offer to make CI lighter; the walk gap above.
+  Local: worktree $WT/page-blank (branch exp/page-blank) kept; $WT/release-1.0.5 and its branch removed by merge.sh.
+  Next version: 1.0.6 = 4010006 / arm64 14010012.
