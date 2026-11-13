@@ -550,6 +550,8 @@ private fun EntryTable(entries: List<DeviceEntry>, model: DeviceBrowserModel, ac
         state = listState,
         selectedKey = selected?.uri,
         sort = if (compact) null else TableSort(sortColumn, model.sort.ascending),
+        // 1.0.8: the menu's order too, on a phone where the titles show none: another order starts at the top
+        order = model.sort,
         onSortChange = if (compact) {
             null
         } else {

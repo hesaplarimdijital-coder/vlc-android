@@ -1,6 +1,7 @@
 package app.nagmedar.ui.components
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -119,5 +120,36 @@ class DenseTableRequestsTest {
         assertEquals(setOf<Any>(1, 2), selection.keys)
         compose.onAllNodesWithContentDescription("Tümünü seç").assertCountEquals(1)
         all.assert(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, androidx.compose.ui.state.ToggleableState.On))
+    }
+
+    /**
+     * 1.0.8: another order starts the rows at the top. Keyed rows kept the first one in view where the new order put it:
+     * forty rows at their top, sorted the other way, showed their end (the walk's workstation pass, "By size").
+     */
+    @Test
+    fun anotherOrderStartsTheRowsAtTheTop() {
+        val state = LazyListState()
+        var order by mutableStateOf(true)
+        val rows = (1..40).map { Episode(it, "Program", "Bölüm %02d".format(it), fresh = false) }
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                DenseTable(
+                    columns = listOf(TableColumn("Bölüm", ColumnWidth.Weight(1f)) { it.title }),
+                    rows = if (order) rows else rows.reversed(),
+                    key = { it.id },
+                    onRowClick = { _, _ -> },
+                    state = state,
+                    sort = TableSort(0, ascending = order),
+                )
+            }
+        }
+        compose.waitForIdle()
+        assertEquals(0, state.firstVisibleItemIndex)
+        compose.onNodeWithText("Bölüm 01").assertExists()
+        order = false
+        compose.waitForIdle()
+        assertEquals(0, state.firstVisibleItemIndex)
+        compose.onNodeWithText("Bölüm 40").assertExists()
+        compose.onNodeWithText("Bölüm 01").assertDoesNotExist()
     }
 }

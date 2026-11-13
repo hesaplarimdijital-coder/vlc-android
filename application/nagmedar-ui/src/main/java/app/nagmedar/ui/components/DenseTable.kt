@@ -33,6 +33,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -145,6 +146,9 @@ class TableColumn<T>(
 @Immutable
 data class TableSort(val column: Int, val ascending: Boolean)
 
+/** 1.0.8: the order a table last laid its rows out in ([DenseTable]'s order); plain, so keeping it redraws nothing. */
+private class OrderSeen(var order: Any?)
+
 /**
  * A table's sort kept by its column's [id] rather than its place: a narrower window takes columns away and a wider
  * one brings them back, and the sort stays with its column; while that column is not shown nothing is sorted by it.
@@ -253,7 +257,23 @@ fun <T> DenseTable(
     rowEmphasis: ((T) -> Boolean)? = null,
     /** 1.0.8: shown under the header while there are no rows: why, and what to do (otherwise an empty table is its header). */
     emptyContent: (@Composable () -> Unit)? = null,
+    /**
+     * 1.0.8: what the rows are ordered by ([sort] unless the screen orders them some other way too): another order
+     * starts the rows at the top.
+     */
+    order: Any? = sort,
 ) {
+    // 1.0.8: another order starts the rows at the top. Keyed rows keep the one first in view in view, wherever the new
+    // order puts it: a drive sorted by size showed its smallest folders, the largest out of sight above them (the
+    // emulator walk's workstation pass, seen in 1.0.7 and on both tablets of 1.0.8's). Before the rows are laid out
+    // in their new order, so no frame shows the other place.
+    val seenOrder = remember { OrderSeen(order) }
+    SideEffect {
+        if (seenOrder.order != order) {
+            seenOrder.order = order
+            state.requestScrollToItem(0)
+        }
+    }
     val lead = leading.takeIf { reorder == null && !glassHeader }
     if (lead != null && leadingPresent != null) {
         LaunchedEffect(state, leadingPresent) {
