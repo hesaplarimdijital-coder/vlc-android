@@ -106,6 +106,18 @@ class PaletteResultsTest {
     }
 
     @Test
+    fun theArtistsThenTheAlbumsThenTheTracksEachBestFirst() {
+        // "Sabaha Kadar" holds "ada" (in "Kadar"): a better match than the album's, found by its artist alone; the album stays above it
+        val items = listOf(
+            artist("Ada Karan"), album("Gece Mavisi", "Ada Karan"),
+            track("Kuzeyden Esen", "Ada Karan", "Gece Mavisi"), track("Sabaha Kadar", "Ada Karan", "Gece Mavisi"), track("Adalar", "Deniz Aral", "Kıyı"),
+        )
+        assertEquals(listOf("Ada Karan", "Gece Mavisi", "Sabaha Kadar", "Kuzeyden Esen"), paletteResults("ada karan", null, items).hits.map { it.item.label })
+        // among the tracks: the title that begins with the word, the title that holds it, then the artist's
+        assertEquals(listOf("Ada Karan", "Gece Mavisi", "Adalar", "Sabaha Kadar", "Kuzeyden Esen"), paletteResults("ada", null, items).hits.map { it.item.label })
+    }
+
+    @Test
     fun theWordsOfATitleItsArtistAndItsAlbumInAnyOrder() {
         assertEquals(listOf("Kuzeyden Esen"), found("kuzeyden karan"))
         assertEquals(listOf("Kuzeyden Esen"), found("karan kuzeyden"))
