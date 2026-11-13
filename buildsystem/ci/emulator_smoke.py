@@ -165,6 +165,9 @@ PAGE_INK = 0.01
 PAGE_FOLLOWS = 0.4
 # 1.0.6: a swiped notice is back at its place, or still aside, by this many px of its left edge
 NOTICE_STILL = 12
+# 1.0.6: "the lift with the last move" is a lift the dispatcher sent this soon after it (a frame is 16.7 ms; the runs so
+# far: 0.0 to 1 ms), "lifted at rest" one that came at least this long after (the runs: 289 and 327 ms)
+NOTICE_TOGETHER_MS, NOTICE_AT_REST_MS = 4, 100
 # 1.0.6: Android Automotive's media app, which draws a media service's tree as Android Auto does (pass_auto_shots)
 CAR_MEDIA = "com.android.car.media"
 # 1.0.6: the Linux input events of a touch screen (multi-touch protocol B, with slots; A without)
@@ -1838,7 +1841,7 @@ class Smoke:
         that second form was never matched, a word boundary was asked for after its bracket; and any of the app's records
         counts, the first one need not be the one in use)."""
         out = self.sh("dumpsys media_session", timeout=30)
-        return any(block.startswith(self.pkg) and re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3\b)", block[:3000])
+        return any(block.split(None, 1)[:1] == [self.pkg] and re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3\b)", block[:3000])
                    for block in re.split(r"(?m)^\s*package=", out)[1:])
 
     def big_player(self):
@@ -3007,13 +3010,15 @@ class Smoke:
         time.sleep(1.2)
 
     def car_tap(self, labels, title, wait=3.0, below=0.0):
-        """Taps what on the car's screen says one of [labels] (any app's: the car's media app draws the tree) and takes
-        the step [title]; True when it was there, else a warning. [below]: only what is lower than this share of the
-        screen (the lists, not the tabs). What the small player covers is paged up first."""
+        """Taps what the car's media app says with one of [labels] (the app's own window says some of the same words:
+        it does not count) and takes the step [title]; True when it was there, else a warning. [below]: only what is
+        lower than this share of the screen (the lists, not the tabs). What the small player covers is paged up
+        first."""
         for attempt in range(5):
             nodes, floor = self.car_screen()
             h = max((n.b[3] for n in nodes), default=768)
-            said = [n for n in nodes if n.area and n.center[1] >= h * below and (n.text.strip() in labels or n.desc.strip() in labels)]
+            said = [n for n in nodes if n.area and n.pkg == CAR_MEDIA and n.center[1] >= h * below
+                    and (n.text.strip() in labels or n.desc.strip() in labels)]
             hit = [n for n in said if n.b[3] <= floor]
             if hit:
                 x, y = hit[0].center
@@ -3029,7 +3034,7 @@ class Smoke:
         nodes, floor = self.car_screen()
         h = max((n.b[3] for n in nodes), default=768)
         rows = sorted((n for n in nodes if n.area and n.text.strip() and n.center[1] > h * 0.22 and n.b[3] <= floor
-                       and n.pkg != self.pkg and (starts is None or n.text.strip().startswith(starts))),
+                       and n.pkg == CAR_MEDIA and (starts is None or n.text.strip().startswith(starts))),
                       key=lambda n: (n.center[1], n.center[0]))
         if not rows:
             self.warnings.append("[%s] no row to open on the car's screen (%s)" % (self.cur_pass, title))
@@ -3043,22 +3048,32 @@ class Smoke:
         self.key(4, record=False)
         time.sleep(1.2)
 
-    def car_loaded(self, seconds=20.0):
-        """Waits until the car's list no longer says that it is loading ([seconds] at most); what the screen says then."""
+    def car_loaded(self, what, unreached, seconds=20.0):
+        """A list that is asked over the network: waits until the car no longer says that it is loading ([seconds] at
+        most). True when it came; when it still loads, or the app says one of [unreached] (its lines for a directory
+        it cannot reach), a warning and a picture of what the car says instead, and False: a runner's emulator does
+        not always reach those servers, and "the first row" would be that line."""
         end = time.time() + seconds
         while True:
             nodes = self.nodes(self.dump())
-            said = {n.text.strip() for n in nodes if n.text.strip()}
-            if not any(x.startswith("Loading content") for x in said) or time.time() >= end:
-                return said
+            said = {n.text.strip() for n in nodes if n.pkg == CAR_MEDIA and n.text.strip()}
+            loading = any(x.startswith("Loading content") for x in said)
+            if not loading or time.time() >= end:
+                break
             time.sleep(2.0)
+        if not loading and not any(x in said for x in unreached):
+            return True
+        self.warnings.append("[%s] %s did not come here (the car says: %s)" % (self.cur_pass, what, "; ".join(sorted(said))[:160]))
+        self.step("Not reached from here: %s" % what, wait=0.5)
+        return False
 
     def car_tabs(self, labels, start):
-        """Back until the car's media app shows the app's tabs again (one of [labels]); [start] opens it once more when
-        Back has left it. False when they do not come."""
+        """Back until the car's media app shows the app's tabs again (one of [labels], said by the car's media app:
+        the app's own window has tabs of the same names); [start] opens it once more when Back has left it. False when
+        they do not come."""
         for _ in range(5):
             nodes = self.nodes(self.dump())
-            said = {n.text.strip() for n in nodes} | {n.desc.strip() for n in nodes}
+            said = {n.text.strip() for n in nodes if n.pkg == CAR_MEDIA} | {n.desc.strip() for n in nodes if n.pkg == CAR_MEDIA}
             if any(label in said for label in labels):
                 return True
             if nodes and not any(n.pkg == CAR_MEDIA for n in nodes):
@@ -3089,16 +3104,25 @@ class Smoke:
         if not said:
             return False
         playing = self.session_playing()
+        for _ in range(0 if named else 3):
+            # a stream may still be opening: a few seconds more before it is said not to have played
+            if playing:
+                break
+            time.sleep(2.0)
+            playing = self.session_playing()
         paused = self.car_pause()
         nodes = self.step("The car's player, paused" if paused else "The car's player (it would not pause)", wait=1.5, read=paused)
         if paused and named:
-            on = [n.text.strip() for n in nodes if n.text.strip()]
+            on = [n.text.strip() for n in nodes if n.pkg == CAR_MEDIA and n.text.strip()]
             self.check("%s: the car's player names it" % title.lower(), said in on, "tapped \"%s\"; the player says: %s" % (said, ", ".join(on[:10])))
-            clock = [t for t in on if re.match(r"^\d+:\d\d$", t)]
-            self.check("%s: it played (the car's player's clock ran)" % title.lower(), bool(clock) and clock[0] != "0:00",
-                       "the clock: %s; the app's session said it played: %s" % (" of ".join(clock[:2]) or "none", "yes" if playing else "no"))
+            # the player's own clock (its id), not the first thing that looks like a time: the length does too
+            now = [n.text.strip() for n in nodes if n.pkg == CAR_MEDIA and n.rid.endswith(":id/current_time")]
+            self.check("%s: it played (the car's player's clock ran)" % title.lower(), bool(now) and now[0] not in ("", "0:00"),
+                       "the clock: %s; the app's session said it played: %s" % (now[0] if now else "not found", "yes" if playing else "no"))
+        elif not playing:
+            self.warnings.append("[%s] %s (\"%s\"): the app's session never said it played" % (self.cur_pass, title, said))
         else:
-            self.log("%s: the app's session %s" % (title, "said it played" if playing else "did not say it played"))
+            self.log("%s: the app's session said it played" % title)
         self.car_back()
         return True
 
@@ -3108,9 +3132,9 @@ class Smoke:
         whose Play Store is signed in. The tree Android Auto browses is opened where a car's own system draws it
         instead: Android Automotive's media app, bound to the app's PlaybackService as Android Auto is. The tabs, the
         lists and what plays are the app's; the drawing is the car's, not Android Auto's. In Turkish, as his car has
-        it. Every step is a screenshot of the report."""
+        it. Every step is a screenshot of the report. adb is root from this pass on (a car's media is pushed to its
+        driver's storage): it is walked in a job of its own."""
         self.cur_pass, self.lang = "auto-shots", "tr"
-        self.other_app_expected = True
         s = self.strings["tr"]
         user = self.sh("am get-current-user", timeout=20).strip()
         user = user if user.isdigit() else "0"
@@ -3153,13 +3177,17 @@ class Smoke:
                            % (user, component), timeout=60)
 
         self.log("the car's media app: %s" % " ".join(start().split())[:300])
+        # from here on the steps are of the car's media app, not of the app
+        self.other_app_expected = True
         nodes = self.step("The car's media app: Nağmedar's first tab", wait=6.0)
-        said = {n.text.strip() for n in nodes} | {n.desc.strip() for n in nodes}
+        # said by the car's media app: the app's own window has tabs of the same names
+        said = {n.text.strip() for n in nodes if n.pkg == CAR_MEDIA} | {n.desc.strip() for n in nodes if n.pkg == CAR_MEDIA}
         tabs = {"music": [s["nag_nav_music"]], "podcasts": [s["nag_nav_podcasts"], s["nag_nav_podcasts_short"]],
                 "radio": [s["nag_nav_radio"]], "recent": [s["nag_music_view_recent"]]}
         shown = [k for k, labels in tabs.items() if any(l in said for l in labels)]
         self.check("the car's media app shows the app's tabs", len(shown) >= 3,
-                   "%s of Music, Podcasts, Radio, Recently played; on screen: %s" % (", ".join(shown) or "none", ", ".join(sorted(x for x in said if x)[:24])))
+                   "%s of Music, Podcasts, Radio, Recently played; the car's media app says: %s"
+                   % (", ".join(shown) or "none", ", ".join(sorted(x for x in said if x)[:24]) or "nothing (it is not in front)"))
         if len(shown) < 3:
             return
         every = [label for labels in tabs.values() for label in labels]
@@ -3172,19 +3200,16 @@ class Smoke:
         if self.car_tabs(every, start) and self.car_tap(tabs["podcasts"], "Podcasts"):
             if self.car_tap([s["nag_auto_discover"]], "Podcasts: Discover", below=0.15):
                 if self.car_tap([s["nag_auto_popular_shows"]], "Discover: the popular shows", wait=8.0, below=0.15):
-                    # Apple's chart, asked over the network: a runner's emulator does not always reach it
-                    said = self.car_loaded()
-                    if s["nag_auto_podcasts_offline"] in said or any(x.startswith("Loading content") for x in said):
-                        self.warnings.append("[%s] the podcast directory's popular shows did not come here (the car says: %s)"
-                                             % (self.cur_pass, "; ".join(sorted(said))[:160]))
-                        self.step("Discover: the popular shows did not come", wait=0.5)
-                    else:
+                    # Apple's chart
+                    if self.car_loaded("the podcast directory's popular shows", [s["nag_auto_podcasts_offline"]]):
                         self.car_first_row("A show of the directory", wait=8.0)
         # Radio: the lists, the countries, a country's stations, one of them played
         if self.car_tabs(every, start) and self.car_tap(tabs["radio"], "Radio"):
+            radio_unreached = [s["nag_auto_radio_offline"], s["nag_auto_radio_busy"]]
             if self.car_tap([s["nag_auto_countries"]], "Radio: the countries", wait=8.0, below=0.15):
-                if self.car_first_row("A country's stations", wait=8.0):
-                    self.car_player("A station tapped", wait=9.0, named=False)
+                if self.car_loaded("the radio directory's countries", radio_unreached) and self.car_first_row("A country's stations", wait=8.0):
+                    if self.car_loaded("the country's stations", radio_unreached):
+                        self.car_player("A station tapped", wait=9.0, named=False)
         if self.car_tabs(every, start):
             # the music that was played: the track
             self.car_tap(tabs["recent"], "Recently played")
@@ -3204,6 +3229,7 @@ class Smoke:
         until it has handled it: a lift then never arrives with a move still waiting for its frame, which is what a
         person's finger does whenever it is lifted in motion (the system hands the waiting moves over just before the
         lift, and nothing of the app runs between the two)."""
+        self.raw_touch_why = ""
         rc, out = self.adb("root", timeout=60)
         time.sleep(3)
         self.adb("wait-for-device", timeout=60)
@@ -3417,7 +3443,8 @@ class Smoke:
         return None
 
     def notice_gone(self, text, seconds):
-        nodes, gone = self.wait_for(lambda ns: not [n for n in self.app_nodes(ns) if n.text.strip() == text], seconds)
+        """The app's screen no longer says [text] (within [seconds]); a tree that could not be read says nothing."""
+        nodes, gone = self.wait_for(lambda ns: bool(self.app_nodes(ns)) and not [n for n in self.app_nodes(ns) if n.text.strip() == text], seconds)
         return bool(gone)
 
     def notice_swipe(self, touch, way, button, place, far, lift_with_last, leaves):
@@ -3443,6 +3470,8 @@ class Smoke:
                % (button[0], button[1], script))
         shots = self.raw_shots(cmd, 5, name)
         ground, shots = shots[4], shots[:4]
+        # a picture that did not come is not "no bar"
+        missing = [i + 1 for i, r in enumerate(shots) if r is None] + ([5] if ground is None else [])
         edges = [self.notice_edge(r, ground, band, w) for r in shots]
         sent = self.recent_touch()
         nodes = self.step("A notice %s: the UI asked" % way, wait=0.6)
@@ -3455,29 +3484,38 @@ class Smoke:
         # (the dispatcher counts in the panel's own px)
         end = self.panel_point(touch, points[-1][0], y)
         reached = last_move is not None and abs(last_move[2] - end[0]) <= 6 and abs(last_move[3] - end[1]) <= 6
+        # the lift came as it was meant to: with the last move (the thing under test), or well after it
+        if lift_with_last:
+            as_meant = together is not None and together <= NOTICE_TOGETHER_MS
+        else:
+            as_meant = together is not None and together >= NOTICE_AT_REST_MS
         rest_edge = edges[0]
         aside = lambda e: e is not None and rest_edge is not None and abs(e - rest_edge) > NOTICE_STILL
         if leaves:
-            ok = rest_edge is not None and edges[2] is None and edges[3] is None
+            # only where notices stay for the system's longer time: elsewhere a stuck one goes by itself after its
+            # four seconds, and "no bar" would not tell the two apart
+            ok = rest_edge is not None and not missing and self.notices_stay and edges[2] is None and edges[3] is None
         else:
             # (by the last screenshot a notice that stays its four seconds only may have gone at its place)
-            ok = rest_edge is not None and edges[2] is not None and not aside(edges[2]) and not aside(edges[3]) \
+            ok = rest_edge is not None and not missing and edges[2] is not None and not aside(edges[2]) and not aside(edges[3]) \
                 and (edges[3] is not None or not self.notices_stay)
         px = lambda e: "no bar" if e is None else "%d px" % e
         r = {"pass": self.cur_pass, "way": way, "far": far, "lift_with_last": lift_with_last, "leaves": leaves, "shots": shots,
-             "edges": edges, "reached": reached, "together_ms": together, "sent": sent[-6:], "raw": [raw[0], raw[-1]],
-             "in_tree": bool(said), "tree_left": said[0].b[0] if said else None, "ok": bool(ok and reached)}
+             "edges": edges, "reached": reached, "as_meant": as_meant, "together_ms": together, "sent": sent[-6:], "raw": [raw[0], raw[-1]],
+             "in_tree": bool(said), "tree_left": said[0].b[0] if said else None, "ok": bool(ok and reached and as_meant)}
         self.notice_swipes.append(r)
-        self.check("a notice %s: the raw swipe reached it" % way, reached and rest_edge is not None,
+        self.check("a notice %s: the raw swipe reached it" % way, reached and as_meant and rest_edge is not None,
                    "the notice's bar before the swipe: %s; the last move the dispatcher sent: %s of the panel, the swipe's end "
-                   "there: (%d, %d); the lift %s after it"
+                   "there: (%d, %d); the lift %s after it (asked: %s)"
                    % (px(rest_edge), "(%d, %d)" % (last_move[2], last_move[3]) if last_move else "none read", end[0], end[1],
-                      "?" if together is None else "%.1f ms" % together))
-        if reached and rest_edge is not None:
+                      "at a time not read" if together is None else "%.1f ms" % together,
+                      "%d ms at the most" % NOTICE_TOGETHER_MS if lift_with_last else "%d ms at the least" % NOTICE_AT_REST_MS))
+        if reached and as_meant and rest_edge is not None:
             self.check("a notice %s %s" % (way, "leaves" if leaves else "comes back to its place"), ok,
                        "its bar's left edge: %s before the swipe; %s, %s and %s about 0.3 s, 0.9 s and 1.6 s after the lift; "
-                       "in the UI's tree afterwards: %s" % (px(edges[0]), px(edges[1]), px(edges[2]), px(edges[3]),
-                                                           "at x %d" % said[0].b[0] if said else "no"))
+                       "in the UI's tree afterwards: %s; notices stay for the system's longer time here: %s%s"
+                       % (px(edges[0]), px(edges[1]), px(edges[2]), px(edges[3]), "at x %d" % said[0].b[0] if said else "no",
+                          "yes" if self.notices_stay else "no", "; screenshots that did not come: %s" % missing if missing else ""))
         self.log("notice swipe [%s]: %s" % (way, r))
         # the next one starts with no notice on screen
         if not self.notice_gone(s["nag_lib_rescan_started"], 24):
@@ -3490,7 +3528,8 @@ class Smoke:
         2340 at 480 dpi, dark, three buttons), the animations on: the Settings page's "Rescan the library" shows the
         notice, and a finger swipes it by the touch screen's raw events (raw_touch): far and lifted at rest, far and
         lifted in motion, a little and lifted in motion. The first two must take it away, the third leaves it at its
-        place. The report's "A notice swiped by raw touch events" lists each with its screenshots."""
+        place. The report's "A notice swiped by raw touch events" lists each with its screenshots. adb is root from
+        this pass on: it is walked in a job of its own."""
         self.cur_pass, self.lang = "notice-swipe", "en"
         s = self.strings["en"]
         self.sh("am force-stop " + self.pkg)
@@ -3501,6 +3540,7 @@ class Smoke:
         touch = self.raw_touch()
         if not self.check("the emulator's touch screen takes a finger's raw events", touch is not None,
                           self.raw_touch_why or "%s (%s), its place from %s: %s" % (touch["name"], touch["node"], touch["map_from"], touch["map"])):
+            self.sh("cmd uimode night no")
             return
         # a notice stays four seconds; the system's "time to take action" keeps it for the walk to read where it is
         timeouts = ("accessibility_non_interactive_ui_timeout_ms", "accessibility_interactive_ui_timeout_ms")
@@ -3797,7 +3837,7 @@ class Smoke:
                 md.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
                     r["pass"], r["way"], "?" if r["together_ms"] is None else "%.1f ms" % r["together_ms"], cells[0], cells[1], cells[2],
                     cells[3], "at x %d" % r["tree_left"] if r["in_tree"] else "no", "leave" if r["leaves"] else "come back",
-                    "ok" if r["ok"] else ("**FAILED**" if r["reached"] else "**not reached**")))
+                    "ok" if r["ok"] else ("**FAILED**" if r["reached"] and r.get("as_meant", True) else "**not the swipe meant**")))
             md.append("")
         if self.crashes:
             md.append("## Crashes and ANRs\n")
