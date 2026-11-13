@@ -1,0 +1,10 @@
+# 1.0.8 (Desktop Kit 2.8.0, the design audit's medium finding 9): the code Nağmedar shares with the kit compiled ahead of
+# time on the device, beside the profile the app's generator collects (application/app/src/main/baselineProfiles):
+# the shell and its bars, the theme, the table, the grids, sheets, menus, the palette, the keys and the gestures run
+# compiled from the first frame instead of interpreted until the JIT warms up, also where the generator's walk does not
+# go (a first sheet, a pull to refresh, a grid's zoom, a list and its detail moving between widths). Wide on purpose:
+# most of it runs in the first minute.
+HSPLapp/nagmedar/ui/components/**->**(**)**
+HSPLapp/nagmedar/ui/shell/**->**(**)**
+HSPLapp/nagmedar/ui/theme/**->**(**)**
+HSPLapp/nagmedar/ui/input/**->**(**)**
