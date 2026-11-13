@@ -1,0 +1,2 @@
+::warning title=Emulator: the system's ANR (search, step 1)::com.google.android.gms.persistent Reason: Broadcast of Intent { act=android.intent.action.SIM_STATE_CHANGED flg=0x15000010 xflg=0x4 cmp=com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver (has extras) }
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 33 steps, 0 crash/ANR, 0 StrictMode, 0/34 checks failed, 1 system ANR/crash, 0 warnings, 9 min. Evidence: branch ci/emulator-api37.0-search, report.md

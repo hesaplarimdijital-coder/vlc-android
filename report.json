@@ -1,0 +1,727 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "search",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-search-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-search-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 8.5,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "search",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-search-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-search-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "search",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-search-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-search-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 7.8,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "search",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-search-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-search-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "search",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-search-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-search-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "search",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-search-after-the-scan.png",
+   "dump": "dumps/006-search-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "search",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/007-search-music.png",
+   "dump": "dumps/007-search-music.xml",
+   "changed": false,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "search",
+   "title": "Ctrl+K: a word of every title and album",
+   "status": "ok",
+   "shot": "shots/008-search-ctrl-k-a-word-of-every-title-and-album.png",
+   "dump": "dumps/008-search-ctrl-k-a-word-of-every-title-and-album.xml",
+   "changed": true,
+   "seconds": 7.8,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "search",
+   "title": "Palette: profile",
+   "status": "ok",
+   "shot": "shots/009-search-palette-profile.png",
+   "dump": "dumps/009-search-palette-profile.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "search",
+   "title": "The palette closed",
+   "status": "ok",
+   "shot": "shots/010-search-the-palette-closed.png",
+   "dump": "dumps/010-search-the-palette-closed.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "search",
+   "title": "Ctrl+K: an artist's name",
+   "status": "ok",
+   "shot": "shots/011-search-ctrl-k-an-artist-s-name.png",
+   "dump": "dumps/011-search-ctrl-k-an-artist-s-name.xml",
+   "changed": true,
+   "seconds": 7.5,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "search",
+   "title": "Palette: nagmedar artist 3",
+   "status": "ok",
+   "shot": "shots/012-search-palette-nagmedar-artist-3.png",
+   "dump": "dumps/012-search-palette-nagmedar-artist-3.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "search",
+   "title": "The palette closed",
+   "status": "ok",
+   "shot": "shots/013-search-the-palette-closed.png",
+   "dump": "dumps/013-search-the-palette-closed.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "search",
+   "title": "Ctrl+K: an album's name",
+   "status": "ok",
+   "shot": "shots/014-search-ctrl-k-an-album-s-name.png",
+   "dump": "dumps/014-search-ctrl-k-an-album-s-name.xml",
+   "changed": true,
+   "seconds": 7.5,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "search",
+   "title": "Palette: album 6",
+   "status": "ok",
+   "shot": "shots/015-search-palette-album-6.png",
+   "dump": "dumps/015-search-palette-album-6.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "search",
+   "title": "The palette closed",
+   "status": "ok",
+   "shot": "shots/016-search-the-palette-closed.png",
+   "dump": "dumps/016-search-the-palette-closed.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "search",
+   "title": "Ctrl+K: a title with its artist",
+   "status": "ok",
+   "shot": "shots/017-search-ctrl-k-a-title-with-its-artist.png",
+   "dump": "dumps/017-search-ctrl-k-a-title-with-its-artist.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "search",
+   "title": "Palette: track 2.5 artist 1",
+   "status": "ok",
+   "shot": "shots/018-search-palette-track-2-5-artist-1.png",
+   "dump": "dumps/018-search-palette-track-2-5-artist-1.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "search",
+   "title": "The palette closed",
+   "status": "ok",
+   "shot": "shots/019-search-the-palette-closed.png",
+   "dump": "dumps/019-search-the-palette-closed.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "search",
+   "title": "Ctrl+K: an artist, by the name",
+   "status": "ok",
+   "shot": "shots/020-search-ctrl-k-an-artist-by-the-name.png",
+   "dump": "dumps/020-search-ctrl-k-an-artist-by-the-name.xml",
+   "changed": true,
+   "seconds": 7.5,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "search",
+   "title": "Palette: nagmedar artist 3",
+   "status": "ok",
+   "shot": "shots/021-search-palette-nagmedar-artist-3.png",
+   "dump": "dumps/021-search-palette-nagmedar-artist-3.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "search",
+   "title": "Enter: Nagmedar Artist 3 opens in the Music",
+   "status": "ok",
+   "shot": "shots/022-search-enter-nagmedar-artist-3-opens-in-the-music.png",
+   "dump": "dumps/022-search-enter-nagmedar-artist-3-opens-in-the-music.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "search",
+   "title": "Ctrl+K: an album, by its name",
+   "status": "ok",
+   "shot": "shots/023-search-ctrl-k-an-album-by-its-name.png",
+   "dump": "dumps/023-search-ctrl-k-an-album-by-its-name.xml",
+   "changed": true,
+   "seconds": 7.8,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "search",
+   "title": "Palette: profile album 7",
+   "status": "ok",
+   "shot": "shots/024-search-palette-profile-album-7.png",
+   "dump": "dumps/024-search-palette-profile-album-7.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "search",
+   "title": "Enter: Profile album 7 opens in the Music",
+   "status": "ok",
+   "shot": "shots/025-search-enter-profile-album-7-opens-in-the-music.png",
+   "dump": "dumps/025-search-enter-profile-album-7-opens-in-the-music.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "search",
+   "title": "Ctrl+K: a letter many commands have",
+   "status": "ok",
+   "shot": "shots/026-search-ctrl-k-a-letter-many-commands-have.png",
+   "dump": "dumps/026-search-ctrl-k-a-letter-many-commands-have.xml",
+   "changed": true,
+   "seconds": 7.7,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "search",
+   "title": "Palette: s",
+   "status": "ok",
+   "shot": "shots/027-search-palette-s.png",
+   "dump": "dumps/027-search-palette-s.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "search",
+   "title": "Enter on the line: every command",
+   "status": "ok",
+   "shot": "shots/028-search-enter-on-the-line-every-command.png",
+   "dump": "dumps/028-search-enter-on-the-line-every-command.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "search",
+   "title": "The palette closed",
+   "status": "ok",
+   "shot": "shots/029-search-the-palette-closed.png",
+   "dump": "dumps/029-search-the-palette-closed.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "search",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/030-search-music.png",
+   "dump": "dumps/030-search-music.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "search",
+   "title": "The search page",
+   "status": "ok",
+   "shot": "shots/031-search-the-search-page.png",
+   "dump": "dumps/031-search-the-search-page.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 32,
+   "pass": "search",
+   "title": "Search page: nagmedar artist 3",
+   "status": "ok",
+   "shot": "shots/032-search-search-page-nagmedar-artist-3.png",
+   "dump": "dumps/032-search-search-page-nagmedar-artist-3.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 33,
+   "pass": "search",
+   "title": "The album tapped on the search page",
+   "status": "ok",
+   "shot": "shots/033-search-the-album-tapped-on-the-search-page.png",
+   "dump": "dumps/033-search-the-album-tapped-on-the-search-page.xml",
+   "changed": true,
+   "seconds": 6.9,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "search",
+   "name": "the Music holds the walk's 64 tracks, which the search is compared with",
+   "ok": true,
+   "detail": "the Music counts 65",
+   "step": 7
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: a word of every title and album)",
+   "ok": true,
+   "detail": "",
+   "step": 8
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"profile\" (a word of every title and album): the 0 artists that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "0 listed",
+   "step": 9
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"profile\" (a word of every title and album): the 8 albums that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "8 listed",
+   "step": 9
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"profile\" (a word of every title and album): the 64 tracks that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "64 listed",
+   "step": 9
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: an artist's name)",
+   "ok": true,
+   "detail": "",
+   "step": 11
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"nagmedar artist 3\" (an artist's name): the 1 artists that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "1 listed",
+   "step": 12
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"nagmedar artist 3\" (an artist's name): the 3 albums that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "3 listed",
+   "step": 12
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"nagmedar artist 3\" (an artist's name): the 29 tracks that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "29 listed",
+   "step": 12
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: an album's name)",
+   "ok": true,
+   "detail": "",
+   "step": 14
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"album 6\" (an album's name): the 0 artists that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "0 listed",
+   "step": 15
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"album 6\" (an album's name): the 1 albums that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "1 listed",
+   "step": 15
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"album 6\" (an album's name): the 15 tracks that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "15 listed",
+   "step": 15
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: a title with its artist)",
+   "ok": true,
+   "detail": "",
+   "step": 17
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"track 2.5 artist 1\" (a title with its artist): the 0 artists that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "0 listed",
+   "step": 18
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"track 2.5 artist 1\" (a title with its artist): the 0 albums that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "0 listed",
+   "step": 18
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"track 2.5 artist 1\" (a title with its artist): the 1 tracks that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "1 listed",
+   "step": 18
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: an artist, by the name)",
+   "ok": true,
+   "detail": "",
+   "step": 20
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"nagmedar artist 3\": the first hit is an artist, by the name",
+   "ok": true,
+   "detail": "the first row: Nagmedar Artist 3 (Artist \u00b7 2 albums \u00b7 16 tracks)",
+   "step": 21
+  },
+  {
+   "pass": "search",
+   "name": "Enter on Nagmedar Artist 3 (an artist, by the name) opens its tracks in the Music view",
+   "ok": true,
+   "detail": "its name shows; 8 of the walk's tracks in sight: Profile track 5.1, Profile track 5.2, Profile track 5.3, Profile track 5.4",
+   "step": 22
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: an album, by its name)",
+   "ok": true,
+   "detail": "",
+   "step": 23
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K \"profile album 7\": the first hit is an album, by its name",
+   "ok": true,
+   "detail": "the first row: Profile album 7 (Album \u00b7 Nagmedar Artist 4 \u00b7 8 tracks)",
+   "step": 24
+  },
+  {
+   "pass": "search",
+   "name": "Enter on Profile album 7 (an album, by its name) opens its tracks in the Music view",
+   "ok": true,
+   "detail": "its name shows; 8 of the walk's tracks in sight: Profile track 7.1, Profile track 7.2, Profile track 7.3, Profile track 7.4",
+   "step": 25
+  },
+  {
+   "pass": "search",
+   "name": "Ctrl+K opens the palette (Ctrl+K: a letter many commands have)",
+   "ok": true,
+   "detail": "",
+   "step": 26
+  },
+  {
+   "pass": "search",
+   "name": "the commands show their best and a line that says how many there are",
+   "ok": true,
+   "detail": "the heading counts 33; the line: Show all 33",
+   "step": 27
+  },
+  {
+   "pass": "search",
+   "name": "Enter on that line lists every one of the commands, and the commands alone",
+   "ok": true,
+   "detail": "33 rows read of 33",
+   "step": 28
+  },
+  {
+   "pass": "search",
+   "name": "the phone's top bar has the search",
+   "ok": true,
+   "detail": "",
+   "step": 30
+  },
+  {
+   "pass": "search",
+   "name": "the search page \"nagmedar artist 3\" (an artist's name): the 1 artists that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "1 listed",
+   "step": 32
+  },
+  {
+   "pass": "search",
+   "name": "the search page \"nagmedar artist 3\" (an artist's name): the 3 albums that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "3 listed",
+   "step": 32
+  },
+  {
+   "pass": "search",
+   "name": "the search page \"nagmedar artist 3\" (an artist's name): the 29 tracks that match are all listed, and nothing else",
+   "ok": true,
+   "detail": "29 listed",
+   "step": 32
+  },
+  {
+   "pass": "search",
+   "name": "the search page lists the album \"Profile album 5\" among what it found",
+   "ok": true,
+   "detail": "",
+   "step": 32
+  },
+  {
+   "pass": "search",
+   "name": "the album tapped on the search page opens its tracks in the Music view",
+   "ok": true,
+   "detail": "8 of the walk's tracks in sight: Profile track 5.1, Profile track 5.2, Profile track 5.3, Profile track 5.4",
+   "step": 33
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 33
+  },
+  {
+   "pass": "all",
+   "name": "no StrictMode violation of the app (debug build)",
+   "ok": true,
+   "detail": "0 in the log, 0 in the dropbox",
+   "step": 33
+  }
+ ],
+ "frames": [],
+ "seconds": 550,
+ "passes": "search",
+ "source": "870df536725aa7832131426889b919b244f8161d (exp/search-all, debug build, API 37.0, search), run 43388557941",
+ "system": [
+  {
+   "pass": "search",
+   "step": 1,
+   "kind": "ANR",
+   "who": "com.google.android.gms.persistent",
+   "seen": "Reason: Broadcast of Intent { act=android.intent.action.SIM_STATE_CHANGED flg=0x15000010 xflg=0x4 cmp=com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver (has extras) }",
+   "how": "log"
+  }
+ ],
+ "sheet_trials": [],
+ "back_presses": [],
+ "page_openings": [],
+ "notice_swipes": [],
+ "searches": [
+  {
+   "pass": "search",
+   "where": "Ctrl+K",
+   "query": "profile",
+   "what": "a word of every title and album",
+   "found": {
+    "artists": 0,
+    "albums": 8,
+    "tracks": 64
+   },
+   "want": {
+    "artists": 0,
+    "albums": 8,
+    "tracks": 64
+   },
+   "missing": [],
+   "extra": [],
+   "ok": true
+  },
+  {
+   "pass": "search",
+   "where": "Ctrl+K",
+   "query": "nagmedar artist 3",
+   "what": "an artist's name",
+   "found": {
+    "artists": 1,
+    "albums": 3,
+    "tracks": 29
+   },
+   "want": {
+    "artists": 1,
+    "albums": 3,
+    "tracks": 29
+   },
+   "missing": [],
+   "extra": [],
+   "ok": true
+  },
+  {
+   "pass": "search",
+   "where": "Ctrl+K",
+   "query": "album 6",
+   "what": "an album's name",
+   "found": {
+    "artists": 0,
+    "albums": 1,
+    "tracks": 15
+   },
+   "want": {
+    "artists": 0,
+    "albums": 1,
+    "tracks": 15
+   },
+   "missing": [],
+   "extra": [],
+   "ok": true
+  },
+  {
+   "pass": "search",
+   "where": "Ctrl+K",
+   "query": "track 2.5 artist 1",
+   "what": "a title with its artist",
+   "found": {
+    "artists": 0,
+    "albums": 0,
+    "tracks": 1
+   },
+   "want": {
+    "artists": 0,
+    "albums": 0,
+    "tracks": 1
+   },
+   "missing": [],
+   "extra": [],
+   "ok": true
+  },
+  {
+   "pass": "search",
+   "where": "the search page",
+   "query": "nagmedar artist 3",
+   "what": "an artist's name",
+   "found": {
+    "artists": 1,
+    "albums": 3,
+    "tracks": 29
+   },
+   "want": {
+    "artists": 1,
+    "albums": 3,
+    "tracks": 29
+   },
+   "missing": [],
+   "extra": [],
+   "ok": true
+  }
+ ]
+}

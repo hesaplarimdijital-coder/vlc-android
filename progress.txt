@@ -1,0 +1,9 @@
+513 s, 30 steps, pass search, 0 crashes
+23 search Ctrl+K: an album, by its name ok
+24 search Palette: profile album 7 ok
+25 search Enter: Profile album 7 opens in the Music ok
+26 search Ctrl+K: a letter many commands have ok
+27 search Palette: s ok
+28 search Enter on the line: every command ok
+29 search The palette closed ok
+30 search Music ok
