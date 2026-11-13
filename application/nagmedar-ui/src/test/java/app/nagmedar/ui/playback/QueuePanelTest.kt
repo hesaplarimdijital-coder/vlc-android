@@ -150,6 +150,19 @@ class QueuePanelTest {
         assertEquals(FakeQueue.sample.map { it.title }, queue.titles)
     }
 
+    /** 1.0.8 (Desktop Kit 2.8.0, the design audit's finding 7): by touch a row's menu is in sight, not only behind a long press. */
+    @Test
+    fun byTouchARowsMenuIsInSight() {
+        panel(InputMode.Touch)
+        compose.onNodeWithContentDescription("Fener için diğer işlemler").assertExists()
+    }
+
+    @Test
+    fun withAPointerTheMenuStaysWithTheRightClick() {
+        panel(InputMode.Pointer)
+        compose.onNodeWithContentDescription("Fener için diğer işlemler").assertDoesNotExist()
+    }
+
     @Test
     fun theHandleMovesARow() {
         panel(InputMode.Touch)

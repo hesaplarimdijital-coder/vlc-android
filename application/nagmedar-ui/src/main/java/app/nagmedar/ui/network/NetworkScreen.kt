@@ -72,6 +72,8 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.toActionGroups
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.PullToRefresh
 import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.SectionCaption
@@ -396,17 +398,15 @@ private fun ServerPane(
             item(key = "saved-none") { PaneHint(stringResource(R.string.nag_net_saved_none), StateAction(stringResource(R.string.nag_net_add_server), onAdd)) }
         }
         items(saved, key = { "saved-${it.id}" }) { server ->
-            ContextMenuArea(
-                entries = {
-                    listOf(
-                        MenuEntry.Item(res.getString(R.string.nag_net_open), { onOpen(server) }),
-                        MenuEntry.Item(res.getString(R.string.nag_net_edit), { onEdit(server) }),
-                        MenuEntry.Separator,
-                        MenuEntry.Item(res.getString(R.string.nag_net_remove_server), { onRemove(server) }, icon = NagIcons.Delete, destructive = true),
-                    )
-                },
-                accessibilityLabel = menuLabel,
-            ) {
+            val entries = {
+                listOf(
+                    MenuEntry.Item(res.getString(R.string.nag_net_open), { onOpen(server) }),
+                    MenuEntry.Item(res.getString(R.string.nag_net_edit), { onEdit(server) }),
+                    MenuEntry.Separator,
+                    MenuEntry.Item(res.getString(R.string.nag_net_remove_server), { onRemove(server) }, icon = NagIcons.Delete, destructive = true),
+                )
+            }
+            ContextMenuArea(entries = entries, accessibilityLabel = menuLabel) {
                 ServerRow(
                     icon = protocolIcon(server.protocol),
                     name = server.name,
@@ -414,6 +414,7 @@ private fun ServerPane(
                     selected = openUrl == server.url,
                     locked = server.signedIn,
                     onClick = { onOpen(server) },
+                    menu = entries,
                 )
             }
         }
@@ -423,15 +424,13 @@ private fun ServerPane(
                 item(key = "found-none") { PaneHint(stringResource(R.string.nag_net_found_none), null) }
             }
             items(found, key = { "found-${it.url}" }) { server ->
-                ContextMenuArea(
-                    entries = {
-                        listOf(
-                            MenuEntry.Item(res.getString(R.string.nag_net_open), { model.open(server) }),
-                            MenuEntry.Item(res.getString(R.string.nag_net_save_server), { onSaveFound(server) }),
-                        )
-                    },
-                    accessibilityLabel = menuLabel,
-                ) {
+                val entries = {
+                    listOf(
+                        MenuEntry.Item(res.getString(R.string.nag_net_open), { model.open(server) }),
+                        MenuEntry.Item(res.getString(R.string.nag_net_save_server), { onSaveFound(server) }),
+                    )
+                }
+                ContextMenuArea(entries = entries, accessibilityLabel = menuLabel) {
                     ServerRow(
                         icon = protocolIcon(server.protocol),
                         name = server.name,
@@ -439,6 +438,7 @@ private fun ServerPane(
                         selected = openUrl == server.url,
                         locked = false,
                         onClick = { model.open(server) },
+                        menu = entries,
                     )
                 }
             }
@@ -509,7 +509,16 @@ private fun PaneNotice(tone: StateTone, icon: ImageVector, title: String, messag
 
 /** A server in the list: its icon, its name, its protocol and host, a lock when its sign-in is kept. */
 @Composable
-private fun ServerRow(icon: ImageVector, name: String, detail: String, selected: Boolean, locked: Boolean, onClick: () -> Unit) {
+private fun ServerRow(
+    icon: ImageVector,
+    name: String,
+    detail: String,
+    selected: Boolean,
+    locked: Boolean,
+    onClick: () -> Unit,
+    /** 1.0.8 (Desktop Kit 2.8.0, the audit's finding 7): the long press's menu, in sight by touch as a "⋯". */
+    menu: (() -> List<MenuEntry>)? = null,
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val interaction = remember { MutableInteractionSource() }
@@ -538,6 +547,7 @@ private fun ServerRow(icon: ImageVector, name: String, detail: String, selected:
             Icon(NagIcons.Lock, contentDescription = stringResource(R.string.nag_net_sign_in_kept_short), tint = if (selected) colors.onSelection else colors.textTertiary,
                 modifier = Modifier.size(14.dp))
         }
+        if (menu != null && NagTheme.inputMode == InputMode.Touch) MoreButton(groups = { menu().toActionGroups() }, title = name)
     }
 }
 

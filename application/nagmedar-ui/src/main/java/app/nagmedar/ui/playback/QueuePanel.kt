@@ -70,6 +70,8 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.toActionGroups
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.SwipeToRemove
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.blockInputBelow
@@ -353,6 +355,8 @@ private fun QueueRow(entry: QueueEntry, isPlaying: Boolean, onPlay: () -> Unit, 
                 }
             }
         }
+        // 1.0.8 (Desktop Kit 2.8.0, the audit's finding 7): by touch the row's menu in sight, not only behind a long press
+        if (menu != null && NagTheme.inputMode == InputMode.Touch) MoreButton(groups = { menu().toActionGroups() }, title = entry.title)
         if (handle != null) {
             val label = stringResource(R.string.nag_queue_handle, entry.title)
             Box(

@@ -73,6 +73,8 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.toActionGroups
+import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.PullToRefresh
 import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.StateAction
@@ -711,7 +713,12 @@ private fun SubscriptionRow(summary: PodcastFeedSummary, actions: PodcastActions
             if (summary.newCount > 0) {
                 ToneBadge(pluralStringResource(R.plurals.nag_pod_new, summary.newCount, summary.newCount), StateTone.Info, Modifier.testTag("podcast-new"))
             }
-            Icon(NagIcons.ChevronRight, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
+            // 1.0.8 (Desktop Kit 2.8.0, the audit's finding 7): by touch the show's actions in sight, not only behind a long press
+            if (NagTheme.inputMode == InputMode.Touch) {
+                MoreButton(groups = { subscriptionMenu(res, summary, actions).toActionGroups() }, title = summary.feed.title)
+            } else {
+                Icon(NagIcons.ChevronRight, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
+            }
         }
     }
 }
