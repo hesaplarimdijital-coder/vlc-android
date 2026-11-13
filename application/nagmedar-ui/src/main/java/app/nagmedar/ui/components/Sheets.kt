@@ -9,6 +9,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
@@ -54,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -78,6 +80,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -411,6 +415,12 @@ private fun SheetActionRow(item: MenuEntry.Item, onClick: () -> Unit) {
  * behind it); elsewhere (in a dialog, before the shell) in a window of its own, solid. Closed and
  * at rest it is nothing at all (1.0's review: every row's "⋯" holds one): only while it is open or
  * going down does it animate, take the overlay, the focus and Back.
+ *
+ * 1.0.8 (Desktop Kit 2.8.0, the design audit's high finding 6): it can be closed without a gesture. The
+ * handle is also its close button ("Sayfayı kapat") for TalkBack, Switch Access and the keyboard, and the
+ * scrim says what a tap on it does. In the shell one sheet is up at a time: a sheet opened while another
+ * is up closes that one ([onDismiss]). The keyboard's focus stays in it while it is up: Tab and Shift+Tab
+ * do not reach the screen behind.
  */
 @Composable
 fun GlassBottomSheet(
@@ -440,16 +450,25 @@ fun GlassBottomSheet(
             else -> progress.animateTo(0f, sheetWay(tier, tween(NagMotion.MEDIUM, easing = NagMotion.EmphasizedAccelerate)))
         }
     }
+    val latestVisible by rememberUpdatedState(visible)
     val host = shellOverlayHere()
     if (host != null) {
-        OverlayLayer(host, ShellOverlayHost.SHEET) { SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, content, host.systemBottomPx) }
+        // 1.0.8: one sheet at a time: opening this one closes the one that was up
+        val token = remember { Any() }
+        DisposableEffect(host, visible) {
+            if (visible) host.sheetOpened(token) { latestDismiss() }
+            onDispose { if (visible) host.sheetClosed(token) }
+        }
+        OverlayLayer(host, ShellOverlayHost.SHEET) {
+            SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, { latestVisible }, content, host.systemBottomPx)
+        }
         ReturnFocusOnClose(host, visible)
         BackHandler(enabled = visible) { latestDismiss() }
     } else {
         Dialog(onDismissRequest = { latestDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
             // the sheet slides up opaque; the window does not fade it in over the page (1.0.1)
             StillDialogWindow()
-            SheetSurface(progress, drag, label, modifier, inShell = false, { latestDismiss() }, content)
+            SheetSurface(progress, drag, label, modifier, inShell = false, { latestDismiss() }, { latestVisible }, content)
         }
     }
 }
@@ -724,6 +743,8 @@ private fun SheetSurface(
     modifier: Modifier,
     inShell: Boolean,
     onDismiss: () -> Unit,
+    /** 1.0.8: the sheet is meant to be up (not on its way out): read when the focus moves. */
+    open: () -> Boolean,
     content: @Composable ColumnScope.() -> Unit,
     /** 1.0.3: in the shell, the system's navigation bar under the sheet (px): its surface reaches behind it, its rows stay above. */
     bottomInset: () -> Int = { 0 },
@@ -733,6 +754,7 @@ private fun SheetSurface(
     val focus = remember { FocusRequester() }
     val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     val name = label ?: stringResource(R.string.nag_more_actions)
+    val closeLabel = stringResource(R.string.nag_close_sheet)
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     Box(Modifier.fillMaxSize()) {
         // the scrim darkens with the sheet and lightens while it is dragged down; a window of its own dims what is behind it itself
@@ -748,7 +770,15 @@ private fun SheetSurface(
                         }
                         .background(colors.scrim),
                 )
-                .pointerInput(Unit) { detectTapGestures { onDismiss() } },
+                .pointerInput(Unit) { detectTapGestures { onDismiss() } }
+                // 1.0.8: what a tap on the dimmed screen does, for TalkBack
+                .semantics {
+                    contentDescription = closeLabel
+                    onClick(closeLabel) {
+                        onDismiss()
+                        true
+                    }
+                },
         )
         Column(
             modifier
@@ -774,6 +804,11 @@ private fun SheetSurface(
                     if (esc) onDismiss()
                     esc
                 }
+                // 1.0.8 (Desktop Kit 2.8.0): the keyboard's focus stays in the sheet while it is up: Tab and Shift+Tab do not
+                // reach the screen behind. On a group around the sheet's own focus target, so a move from the sheet itself is
+                // held as well as one from a control in it; not once it is closing, when the focus goes back where it was
+                .focusProperties { onExit = { if (open()) cancelFocusChange() } }
+                .focusGroup()
                 .focusRequester(focus)
                 .focusable()
                 // 1.0.2: the whole sheet follows a drag down, its rows and title as well as its handle
@@ -781,9 +816,22 @@ private fun SheetSurface(
                 .then(if (inShell) Modifier.bottomInsetPadding(bottomInset) else Modifier.navigationBarsPadding())
                 .padding(bottom = dimens.gapM),
         ) {
-            // the handle says "drag me"
-            Box(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 6.dp), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(width = 36.dp, height = 4.dp).background(colors.borderStrong, RoundedCornerShape(2.dp)))
+            // the handle says "drag me"; 1.0.8 (Desktop Kit 2.8.0): it is also the sheet's close button for TalkBack, Switch
+            // Access and the keyboard (the bar looks and sits as it did)
+            val handle = remember { MutableInteractionSource() }
+            val handleState = handle.collectState()
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier
+                        .size(width = 64.dp, height = 20.dp)
+                        .focusRing(handleState, RoundedCornerShape(10.dp))
+                        .nagClickable(handle, onDismiss, role = Role.Button, onClickLabel = closeLabel)
+                        .semantics { contentDescription = closeLabel }
+                        .testTag("sheet-handle"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(Modifier.padding(top = 4.dp).size(width = 36.dp, height = 4.dp).background(colors.borderStrong, RoundedCornerShape(2.dp)))
+                }
             }
             Column(Modifier.verticalScroll(rememberScrollState()), content = content)
         }

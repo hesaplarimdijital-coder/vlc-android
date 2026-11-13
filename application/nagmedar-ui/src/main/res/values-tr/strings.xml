@@ -649,6 +649,7 @@
     <string name="nag_license_old_mit">Eski MIT</string>
     <string name="nag_license_public_domain">Kamu malı</string>
     <string name="nag_more_actions">Diğer işlemler</string>
+    <string name="nag_close_sheet">Sayfayı kapat</string>
     <string name="nag_more_actions_for">%1$s için diğer işlemler</string>
     <string name="nag_play_next">Hemen sonra oynat</string>
     <string name="nag_add_to_queue">Sıraya ekle</string>

@@ -298,6 +298,20 @@ internal class ShellOverlayHost {
      */
     val focusMemory = FocusMemory()
 
+    /** 1.0.8 (Desktop Kit 2.8.0): the sheet that is up and how to close it: a newer sheet closes it ([sheetOpened]). */
+    private var sheet: Pair<Any, () -> Unit>? = null
+
+    /** 1.0.8: the sheet [token] opened: the one that was up closes, so sheets never pile up. */
+    fun sheetOpened(token: Any, dismiss: () -> Unit) {
+        val previous = sheet
+        sheet = token to dismiss
+        if (previous != null && previous.first !== token) previous.second()
+    }
+
+    fun sheetClosed(token: Any) {
+        if (sheet?.first === token) sheet = null
+    }
+
     companion object {
         /** The expanded player: over the bars, under the screen's overlays. */
         const val PLAYER = 0
