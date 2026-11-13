@@ -217,3 +217,63 @@ the merged `story/release-1.0.5`, `story/release-1.0.4`, `story/back-button-walk
 (never merged), the evidence branches `ci/emulator-api37.0-personal-page-blank` and `…-page-blank-2` and the older
 `story/*` wait for his word before they are deleted; four runs of 11 Nov and 14 Oct are still "queued" on GitHub (a
 session may not cancel a run); the offer to make CI lighter stands.
+
+## 1.0.6 (13 Nov 2026) — delivered
+The owner's screenshot of 13 Nov 00:59 (the "Kütüphane yeniden taranıyor…" notice displaced, half faded, staying):
+"Şu alttaki uyarı türü kaydırılınca böyle kalıyor. Sanırım kit ile ilgili. Düzelt aynı zamanda kite ekle. Bir de bana
+android auto ekran görüntüleri gönder". `orch/LOG.md` has it in full; `orch/release-1.0.6/` has the PR's description
+and the device checks.
+
+- master `cc4a6cdc` (PR #116, eleven commits + one: `cc4a6cdc` only corrects a CHANGELOG sentence on top of
+  `f77a341a`, on which the walks were made). The personal APK: `app.nagmedar.debug`, 1.0.6,
+  versionCode 14010012, target 37, not debuggable, v2, baseline profile inside, arm64-v8a, 97433160 bytes, SHA-256
+  `25ba6e1266cc6c19b01252604bce130d680cfea0e569be00c1969aedfb00f49e`. Sent to the owner with the car's 14 pictures and a
+  before/after picture of the notice. Next version: 1.0.7 = 4010007 / arm64 14010013.
+- The notice: `swipeToDismiss` moved the bar with `launch { snapTo() }` per delta; a finger lifted in motion gives the
+  last MOVE and the UP together, Compose's draggable starts `onDragStopped` UNDISPATCHED, and the queued snapTo then
+  cancels the release's animation. Now `SwipeAway` (a float moved synchronously; settle() cancelled only by a new
+  drag), the way `SheetDrag` has moved sheets since 1.0.2. Since 1.0.3.
+- A crash found while taking the car's pictures: `broadcastMetadata()` read `isPlaying` in its Default coroutine, the
+  first asker creates the engines (lazy, NONE) and the player's progress LiveData: on Android Automotive, where
+  `CarConnection.type` answers inside `onCreate()`, the app died as the car's media app connected. Read before the
+  launch now. Whether a phone under Android Auto can lose the same race is NOT established.
+- Desktop Kit: the same defect in its toast and its sheet's handle and title; draft PR
+  `hesaplarimdijital-coder/desktop-kit#10` (2.4.1, five commits, each green; `FingerOffset`). Merging and the tag are
+  the owner's. Its commits are authored `Claude <noreply@anthropic.com>`: the kit's rule asks for the owner's address,
+  this session's rule keeps his address out of everything; told to him, his call.
+
+New in the kit of this branch:
+- `passes=notice-swipe` (`emulator_smoke.py`, permanent, in the release line): a notice swiped by raw Linux touch
+  events (`raw_touch`, `raw_frame`, `raw_swipe_script`: adb root, /dev/input/event2, protocol B, the screen's place
+  from the input reader's viewport), so that the last move and the lift arrive together, which `input` and UiAutomator
+  never do. The bar's left edge is read from screenshots (`notice_edge`, against the page without it); the lift's time
+  from `dumpsys input` (`recent_touch`: panel px, ns) and asserted (`NOTICE_TOGETHER_MS`, `NOTICE_AT_REST_MS`).
+  Control on 1.0.5: run 43326144857 (2 of 11 red, the two that matter); 1.0.6: 43342980334 (0 of 11).
+  OPEN: `notices_stay` comes from one dump; a dump that fails there reads as "they stay" (read the notice positively).
+- `passes=auto-shots`: the workflow's plan gives this pass an Android Automotive image (`cars` in the plan step:
+  API 34, `34-ext9`, target `android-automotive`, profile `automotive_1024p_landscape`). The car's media app is started
+  on the app's PlaybackService (`MEDIA_TEMPLATE` + `MEDIA_COMPONENT`). Things learnt: the driver is user 10 (media to
+  `/data/media/10/Music`, `pm grant --user`, `content call --user`); screencap's "Multiple displays" text in front of
+  the PNG (`screenshot()` cuts at the signature); a playing player never lets `uiautomator dump` return
+  (`step(read=False)`, pause by keyevent 127, then read); rows under the small player are in the tree and a tap there
+  opens the player (`car_screen`, `car_page_down`); only the car's media app's nodes count (`CAR_MEDIA`): the app's own
+  window has tabs of the same names; lists over the network are waited for (`car_loaded`). Android Auto itself (the
+  DHU) needs a phone signed in to the Play Store and cannot run on a runner.
+- `tools/notice_swipe_offline.py <emulator_smoke.py> <res dir> <tmp dir>`: the raw-touch arithmetic and the swipe's
+  verdict against made-up answers. `tools/car_gallery.py <shots> <out> <heading>`: the car pass's pictures as one
+  captioned sheet. `tools/notice_pair.py`: two phone screenshots side by side.
+- Compose tests: the v1 rule runs coroutines at once (UnconfinedTestDispatcher); gesture bugs that depend on what is
+  queued need `createAndroidComposeRule(effectContext = StandardTestDispatcher())` (or the v2 rule, untried here). A
+  node that follows the finger exactly is given every other Move of even steps (HitPathTracker drops a Move whose
+  position within the node is unchanged): swipe with two consecutive move counts, and assert that the thing moved.
+- `git checkout <ref> -- <files>` stages what it brings: the next commit takes it along. A push to a PR branch
+  re-runs the PR's Emulator workflow whenever the PR's whole diff touches its paths, and cancels the run in progress.
+- A container restart in the middle of a turn re-delivers the user's last message as if it were new (same text, same
+  time): it is the same request. A stopped reviewer can be resumed by its id.
+
+Left, told to the user: his phone decides the notice on a real finger and Android Auto in his car; the kit's PR waits
+for his merge and tag; the author question above; `exp/notice-swipe` (never merged), the merged
+`story/release-1.0.6` and the evidence branches `ci/emulator-api37.0-personal-notice-swipe`,
+`ci/emulator-api34-personal-auto-shots`, `ci/emulator-api37.0-notice-swipe`, `ci/emulator-notice-swipe` wait for his
+word with the earlier ones; MiniSwipeArea's decision one move behind (app and kit) and the kit's ShellScroll.settle()
+(read only) are offered as a separate job.

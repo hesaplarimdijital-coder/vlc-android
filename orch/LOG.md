@@ -872,3 +872,124 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   43097182618, 38645881043: a session may not cancel a run); the offer to make CI lighter; the walk gap above.
   Local: worktree $WT/page-blank (branch exp/page-blank) kept; $WT/release-1.0.5 and its branch removed by merge.sh.
   Next version: 1.0.6 = 4010006 / arm64 14010012.
+
+## 13 Nov 00:59 Istanbul — the owner's screenshot of 1.0.5 → 1.0.6 (the swiped notice; Android Auto's screens)
+- The owner, with a screenshot of Settings (the "Kütüphane yeniden taranıyor…" notice displaced to the right, half
+  transparent, over the page): "Şu alttaki uyarı türü kaydırılınca böyle kalıyor. Sanırım kit ile ilgili. Düzelt aynı
+  zamanda kite ekle. Bir de bana android auto ekran görüntüleri gönder". Three jobs: the notice in the app, the same in
+  Desktop Kit, screenshots of Android Auto.
+- CAUSE (the notice). `swipeToDismiss` (States.kt; came with 1.0.3, commit fd0ad689 of 5 Nov) applied each drag delta
+  with `scope.launch { swipe.snapTo(swipe.value + delta) }` and animated the same Animatable in onDragStopped. A finger
+  lifted in motion gives the window its last MOVE and the UP in one pass; Compose's draggable starts onDragStopped
+  UNDISPATCHED, ahead of the queued coroutine of the last delta, whose snapTo then cancels the animation (MutatorMutex,
+  "Mutation interrupted"). The bar stays where it was let go, part faded, until its timer. A finger that rests before
+  it lifts has nothing queued: it works.
+  HOW IT WAS FOUND: reading Draggable.kt, then a probe test that printed every delta and the settle's fate
+  (`onDragStopped … settle CANCELLED: Mutation interrupted`), then the emulator with raw touch events.
+- TESTS. The module's Compose tests run coroutines the moment they are launched (the v1 rule's
+  UnconfinedTestDispatcher; Compose 1.12 deprecates it for the v2 rule, which queues): no device has that order, and
+  no swipe test showed the bug. SwipeLetGoInMotionTest uses `createAndroidComposeRule(effectContext =
+  StandardTestDispatcher())` and a gesture whose up() has the last move's time. LESSON (a): my first version passed
+  flings on 1.0.5's code. Under these tests a bar that follows the finger is given every other move after the first
+  two; the old code froze only when the last move was a delivered one. Every swipe is now made with two consecutive
+  move counts. The cause of the alternation was found by the app's reviewer: HitPathTracker gives a node no Move
+  whose position within the node is unchanged (read in androidx main), and a bar that follows the finger exactly is
+  there at every second even step. Red on 1.0.5's code: exp commit 21c61486, run 43326140078, 5 of 5 (20 px and
+  144 px from their place). Green on the fix: the final tests on f77a341a (CI run 43341587302; the five named in the
+  debug job's log) and on cc4a6cdc (43346649951).
+- FIX (app): `SwipeAway` (a float state moved synchronously by dragBy; settle() animates in a coroutineScope whose Job
+  a new drag cancels), as `SheetDrag` has moved sheets since 1.0.2. Looked at and left: Sheets.kt (already
+  synchronous), Swipe.kt, ExpandablePlayer.kt's MiniSwipeArea and PhonePlayer.kt's artwork swipe (pointerInput: move
+  and end launched into one scope, their order kept). MiniSwipeArea decides on offset.value one move behind (the
+  reviewers; not the stuck defect; left, told to the owner).
+- THE WALK, notice-swipe (new pass). `input` and UiAutomator wait for the app after each event: a lift never arrives
+  with a move pending. The pass writes Linux touch events to /dev/input/event2 (virtio_input_multi_touch_1; adb
+  root; protocol B; the screen's place from the input reader's viewport: logical [0,0,1080,2340] in physical
+  [911,0,1649,1600] of 2560x1600), the last move and the lift in one write. Geometry of the owner's phone, dark,
+  three buttons, animations on; Settings' Rescan notice; the bar's left edge from screenshots about 0.3/0.9/1.6 s
+  after the lift; the lift's time from dumpsys input (panel px, ns).
+  1.0.5 (fab4ce73), personal, API 37.0, run 43326144857 (refs/keep/notice-control-105-personal-run2): 2 of 11 red:
+  flung and lifted with the last move (0.0 ms) the bar stays at 520 px (rest 48) at all three readings; swiped a
+  little it stays at 114 px; lifted at rest (289 ms) it leaves.
+  1.0.6 (f77a341a), personal, API 37.0, run 43342980334 (refs/keep/notice-1.0.6-f77a341a): 0 of 11: leaves (316 ms),
+  leaves (0.1 ms), back at 48 px (0.1 ms; in the tree at x 90).
+  Earlier: debug runs 43322397479 (1.0.5, API 37.0: frozen) and 43322401048 (3e1b2834, API 35: fine), both with a
+  wrong "the raw swipe reached it" check (logical px compared with the dispatcher's panel px), corrected.
+- ANDROID AUTO. The DHU needs a phone signed in to the Play Store (Android Auto must be updated there): not possible
+  on a runner. Instead: Android Automotive emulator (system-images;android-34-ext9;android-automotive;x86_64,
+  profile automotive_1024p_landscape, emulator-runner target android-automotive), the car's media app started on the
+  service (`am start --user <u> -a android.car.intent.action.MEDIA_TEMPLATE --es
+  android.car.intent.extra.MEDIA_COMPONENT app.nagmedar.debug/org.videolan.vlc.PlaybackService`). AAOS facts: a
+  headless system user, the driver is user 10 (media to /data/media/10/Music, `pm grant --user`, `content call
+  --user … scan_volume`); screencap writes a "Multiple displays" warning in front of the PNG; the media app's ids
+  (minimized_playback_controls, car_ui_scrollbar_page_down, current_time, title); a list row under the small player
+  is in the tree but a tap there opens the player; uiautomator dump never returns while the player plays (pause
+  first: keyevent 127).
+- A CRASH FOUND THAT WAY (new pass auto-shots, first run 43324177045): FATAL EXCEPTION "Cannot invoke setValue on a
+  background thread", twice, as the car's media app connected. `broadcastMetadata()` read `isPlaying` inside its
+  Dispatchers.Default coroutine; isPlaying → playlistManager.engine → lazy engines (LazyThreadSafetyMode.NONE) →
+  PlayerController.progress, a LiveData set in its lazy initialiser. On Automotive `CarConnection.type` emits inside
+  onCreate(), so the first executeUpdate() comes before anything played and the coroutine is the first to ask. FIX
+  ca0d01d5: read before the launch (as showNotification does). With it: exp runs 43329339417, 43333150109,
+  43336124269 and the release commit's 43342984526 (25 steps, 4 of 4, no crash; the podcast directory's chart came
+  in this one, not in 43336124269). NOT ESTABLISHED: whether a phone under Android Auto loses the same race (the
+  connection is answered later there, by a query); no phone or tablet walk ever showed it. No unit test (nothing in
+  the repo builds the PlaybackService on the JVM): the car pass is the evidence.
+- KIT (desktop-kit, branch fix/let-go-in-motion, draft PR #10, 2.4.1). The same defect in ToastCard (Feedback.kt)
+  and in SheetPull (Sheets.kt: handle and title; the list goes through Scrollable's fling, which is queued: read, not
+  run on 2.4.0). Commits, each green on its CI: 107a0c1 tests that record 2.4.0 (green), 99543d2 toast (FingerOffset),
+  6c9214b sheet, 1131f88 the tests ask that the finger had moved the thing (review), f9a345d version + CHANGELOG +
+  MIGRATION + README. 299 tests. Authored as Claude <noreply@anthropic.com>: the kit's stored rule asks for the
+  owner's address as author, this session's rule says his address goes nowhere; told to him, his call. Not merged,
+  not tagged (his). The kit's sample app ran on no device.
+- INDEPENDENT REVIEWS (one per repository, whole diff). Kit: code ship; docs fix first (MIGRATION's advice lacked
+  "cancel the running animation on a new move"; the CHANGELOG's evidence bullet mixed what was seen where); tests
+  could not tell "came back" from "never left" (fixed in both repos); MiniSwipeArea's stale read and
+  ShellScroll.settle() not cancelled by a new scroll (read only) left for another PR. App: code ship; a local commit
+  held the driver under a comment's message (my `git checkout <branch> -- files` had staged them; re-split before
+  the push); the CHANGELOG's Baseline Profile sentence was untrue (corrected); four walk checks could pass for the
+  wrong reason (be140c73); the HitPathTracker finding.
+- LESSONS: (b) `git checkout <ref> -- <files>` stages what it brings; the next `git add X && git commit` takes it
+  along. Look at `git show --stat` of every commit before a push. (c) A push to a PR branch re-triggers the PR's
+  Emulator workflow whenever the PR's whole diff touches its paths, not only that push's; and its concurrency group
+  cancels the run in progress. My CHANGELOG-only commit cc4a6cdc cancelled the PR's debug phone walk on f77a341a and
+  started both again. (d) The release notes said what a trial run's pictures showed; the release commit's own run
+  showed more (the directory came), so the notes needed cc4a6cdc. Write such sentences after the run they describe.
+  (e) The container restarted once in the middle (00:36 UTC); scratch, clones and unpushed commits survived, the
+  running reviewer was resumed by its id.
+- OPEN (walk only): pass_notice_swipe sets notices_stay from one dump six seconds after the first notice; a dump that
+  fails there reads as "they stay". In run 43342980334 the third swipe's last reading shows the notice in the tree
+  more than four seconds after it was shown, so they did stay. To fix: read the notice positively.
+- Release walks on f77a341a (personal): main 43342972096: API 35 phone 0/71 (145 steps), API 35 tablet 0/66 (134),
+  API 37.0 phone 0/71 (141), API 37.0 tablet 0/66 (134); page-opens 43342975939 0/37 (32 steps); notice-swipe
+  43342980334 0/11; auto-shots 43342984526 0/4 (25 steps). The PR's debug walks: on f77a341a the tablet job passed
+  and the phone job was cancelled by the push of cc4a6cdc; on cc4a6cdc (43346649885) both passed. CI green on
+  f77a341a (43341587302) and cc4a6cdc (43346649951). Local refs: refs/keep/notice-1.0.6-f77a341a,
+  refs/keep/auto-shots-1.0.6-f77a341a, refs/keep/page-opens-1.0.6-f77a341a, refs/keep/walk-1.0.6-emulator-*,
+  refs/keep/notice-control-105-personal-run2, refs/keep/auto-shots-run{1,2,3,4}, refs/keep/notice-1.0.6-master.
+- DELIVERED 13 Nov 05:45 Istanbul (02:45 UTC). `release_chain.sh release-1.0.6 cc4a6cdc… 1.0.6`: it waited for the
+  PR's debug walks too (wait_ci waits for every check), master fast-forwarded to cc4a6cdc (PR #116 closed as merged at
+  02:22:51Z, still a draft), the personal release dispatched at 02:22:53 (run 43351759076, green), ci/personal-release
+  named master's sha 17 min later, decrypted, apkcheck ok: app.nagmedar.debug, 1.0.6, 14010012, minSdk 34, target 37,
+  not debuggable, v2, cert d094907b…fecbbc, baseline.prof + profm, arm64-v8a, 97433160 bytes, SHA-256
+  25ba6e1266cc6c19b01252604bce130d680cfea0e569be00c1969aedfb00f49e (computed again locally before and after sending).
+  master's own push run 43351759080: green. notice-swipe walked once more ON MASTER, personal, API 37.0: run
+  43351822029 passed, 0/11 (leaves, leaves, back at 48 px).
+  Sent with SendUserFile: the car's 14 pictures as one captioned sheet (00-nagmedar-arabada.png) and one by one
+  (labelled: Android Automotive's media app, not Android Auto's drawing), the APK, uyari-1.0.5-1.0.6.png (the flung
+  notice 0.9 s after the lift: 1.0.5 frozen, 1.0.6 gone).
+  Plan document: "1.0 cihaz testi" rev 11 (the 1.0.6 checks at the top: Uyarı 5, Android Auto 3, Değişmemesi
+  gerekenler 2; heading block m1gesnh1vzq.21621, the intro block .25 names 1.0.6, hash 8d6b9324), "1.0.3 planı"
+  rev 37 (a 1.0.6 paragraph above 1.0.5's, block m1gesnh1vzq.12047).
+  Kit: desktop-kit PR #10 (draft) at f9a345d, five commits green, body in Turkish; not merged, not tagged.
+  NOT SEEN FROM HERE, his phone and his car are the test: (1) the notice under a real finger on his Galaxy (the
+  emulator's raw events reproduce his screenshot on 1.0.5 and not on 1.0.6); (2) Android Auto itself, and whether it
+  ever crashed there; (3) the kit's own toast and sheet on a device (its sample app was never run).
+  Left for his word: the author of the kit's commits (Claude now; his rule says his address, this session's says
+  his address nowhere); remote branches exp/notice-swipe (never merged), story/release-1.0.6 (merged), the evidence
+  branches ci/emulator-api37.0-personal-notice-swipe, ci/emulator-api34-personal-auto-shots,
+  ci/emulator-api37.0-notice-swipe, ci/emulator-notice-swipe, with the earlier list (114 story branches,
+  exp/page-blank, the page-blank evidence); the four old queued runs; the offer to make CI lighter; MiniSwipeArea's
+  decision one move behind (app and kit) and the kit's ShellScroll.settle() as a separate job if he wants it.
+  Local: worktree $WT/notice-swipe (branch exp/notice-swipe) kept; $WT/release-1.0.6 and its branch removed by
+  merge.sh. Next version: 1.0.7 = 4010007 / arm64 14010013.
