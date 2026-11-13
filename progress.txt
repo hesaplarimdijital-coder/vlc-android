@@ -1,0 +1,9 @@
+656 s, 70 steps, pass sheet-trials, 0 crashes
+63 sheet-trials Trial 24: dragged by stalled ok
+64 sheet-trials Trial 24: Back closes the sheet ok
+65 sheet-trials Trial 25: a track's ⋯ ok
+66 sheet-trials Trial 25: dragged by swipe ok
+67 sheet-trials Trial 26: a track's ⋯ ok
+68 sheet-trials Trial 26: dragged by drag ok
+69 sheet-trials Trial 27: a track's ⋯ ok
+70 sheet-trials Trial 27: dragged by stalled ok

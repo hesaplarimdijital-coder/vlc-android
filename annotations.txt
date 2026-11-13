@@ -1,0 +1,2 @@
+::warning title=Emulator: the system's ANR (sheet-trials, step 1)::com.google.android.gms.persistent Reason: executing service com.google.android.gms/.geotimezone.GeoTimeZoneService, waited 20367ms
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 78 steps, 0 crash/ANR, 0 StrictMode, 0/1 checks failed, 1 system ANR/crash, 3 warnings, 12 min. Evidence: branch ci/emulator-api37.0-personal-sheet-trials, report.md

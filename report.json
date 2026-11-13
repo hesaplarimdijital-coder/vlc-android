@@ -1,0 +1,1170 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "sheet-trials",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-sheet-trials-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-sheet-trials-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 7.3,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "sheet-trials",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-sheet-trials-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-sheet-trials-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "sheet-trials",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-sheet-trials-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-sheet-trials-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 7.3,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "sheet-trials",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-sheet-trials-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-sheet-trials-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "sheet-trials",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-sheet-trials-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-sheet-trials-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "sheet-trials",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-sheet-trials-after-the-scan.png",
+   "dump": "dumps/006-sheet-trials-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "sheet-trials",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/007-sheet-trials-music.png",
+   "dump": "dumps/007-sheet-trials-music.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "sheet-trials",
+   "title": "Trial 1: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/008-sheet-trials-trial-1-a-track-s.png",
+   "dump": "dumps/008-sheet-trials-trial-1-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "sheet-trials",
+   "title": "Trial 1: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/009-sheet-trials-trial-1-dragged-by-swipe.png",
+   "dump": "dumps/009-sheet-trials-trial-1-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "sheet-trials",
+   "title": "Trial 2: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/010-sheet-trials-trial-2-a-track-s.png",
+   "dump": "dumps/010-sheet-trials-trial-2-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "sheet-trials",
+   "title": "Trial 2: dragged by drag",
+   "status": "ok",
+   "shot": "shots/011-sheet-trials-trial-2-dragged-by-drag.png",
+   "dump": "dumps/011-sheet-trials-trial-2-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "sheet-trials",
+   "title": "Trial 3: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/012-sheet-trials-trial-3-a-track-s.png",
+   "dump": "dumps/012-sheet-trials-trial-3-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "sheet-trials",
+   "title": "Trial 3: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/013-sheet-trials-trial-3-dragged-by-stalled.png",
+   "dump": "dumps/013-sheet-trials-trial-3-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "sheet-trials",
+   "title": "Trial 3: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/014-sheet-trials-trial-3-back-closes-the-sheet.png",
+   "dump": "dumps/014-sheet-trials-trial-3-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "sheet-trials",
+   "title": "Trial 4: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/015-sheet-trials-trial-4-a-track-s.png",
+   "dump": "dumps/015-sheet-trials-trial-4-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "sheet-trials",
+   "title": "Trial 4: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/016-sheet-trials-trial-4-dragged-by-swipe.png",
+   "dump": "dumps/016-sheet-trials-trial-4-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "sheet-trials",
+   "title": "Trial 5: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/017-sheet-trials-trial-5-a-track-s.png",
+   "dump": "dumps/017-sheet-trials-trial-5-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "sheet-trials",
+   "title": "Trial 5: dragged by drag",
+   "status": "ok",
+   "shot": "shots/018-sheet-trials-trial-5-dragged-by-drag.png",
+   "dump": "dumps/018-sheet-trials-trial-5-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "sheet-trials",
+   "title": "Trial 6: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/019-sheet-trials-trial-6-a-track-s.png",
+   "dump": "dumps/019-sheet-trials-trial-6-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "sheet-trials",
+   "title": "Trial 6: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/020-sheet-trials-trial-6-dragged-by-stalled.png",
+   "dump": "dumps/020-sheet-trials-trial-6-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.4,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "sheet-trials",
+   "title": "Trial 6: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/021-sheet-trials-trial-6-back-closes-the-sheet.png",
+   "dump": "dumps/021-sheet-trials-trial-6-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "sheet-trials",
+   "title": "Trial 7: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/022-sheet-trials-trial-7-a-track-s.png",
+   "dump": "dumps/022-sheet-trials-trial-7-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "sheet-trials",
+   "title": "Trial 7: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/023-sheet-trials-trial-7-dragged-by-swipe.png",
+   "dump": "dumps/023-sheet-trials-trial-7-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "sheet-trials",
+   "title": "Trial 8: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/024-sheet-trials-trial-8-a-track-s.png",
+   "dump": "dumps/024-sheet-trials-trial-8-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "sheet-trials",
+   "title": "Trial 8: dragged by drag",
+   "status": "ok",
+   "shot": "shots/025-sheet-trials-trial-8-dragged-by-drag.png",
+   "dump": "dumps/025-sheet-trials-trial-8-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "sheet-trials",
+   "title": "Trial 9: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/026-sheet-trials-trial-9-a-track-s.png",
+   "dump": "dumps/026-sheet-trials-trial-9-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "sheet-trials",
+   "title": "Trial 9: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/027-sheet-trials-trial-9-dragged-by-stalled.png",
+   "dump": "dumps/027-sheet-trials-trial-9-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "sheet-trials",
+   "title": "Trial 9: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/028-sheet-trials-trial-9-back-closes-the-sheet.png",
+   "dump": "dumps/028-sheet-trials-trial-9-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "sheet-trials",
+   "title": "Trial 10: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/029-sheet-trials-trial-10-a-track-s.png",
+   "dump": "dumps/029-sheet-trials-trial-10-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "sheet-trials",
+   "title": "Trial 10: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/030-sheet-trials-trial-10-dragged-by-swipe.png",
+   "dump": "dumps/030-sheet-trials-trial-10-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "sheet-trials",
+   "title": "Trial 11: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/031-sheet-trials-trial-11-a-track-s.png",
+   "dump": "dumps/031-sheet-trials-trial-11-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 32,
+   "pass": "sheet-trials",
+   "title": "Trial 11: dragged by drag",
+   "status": "ok",
+   "shot": "shots/032-sheet-trials-trial-11-dragged-by-drag.png",
+   "dump": "dumps/032-sheet-trials-trial-11-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 33,
+   "pass": "sheet-trials",
+   "title": "Trial 12: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/033-sheet-trials-trial-12-a-track-s.png",
+   "dump": "dumps/033-sheet-trials-trial-12-a-track-s.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 34,
+   "pass": "sheet-trials",
+   "title": "Trial 12: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/034-sheet-trials-trial-12-dragged-by-stalled.png",
+   "dump": "dumps/034-sheet-trials-trial-12-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.4,
+   "note": ""
+  },
+  {
+   "n": 35,
+   "pass": "sheet-trials",
+   "title": "Trial 12: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/035-sheet-trials-trial-12-back-closes-the-sheet.png",
+   "dump": "dumps/035-sheet-trials-trial-12-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 36,
+   "pass": "sheet-trials",
+   "title": "Trial 13: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/036-sheet-trials-trial-13-a-track-s.png",
+   "dump": "dumps/036-sheet-trials-trial-13-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 37,
+   "pass": "sheet-trials",
+   "title": "Trial 13: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/037-sheet-trials-trial-13-dragged-by-swipe.png",
+   "dump": "dumps/037-sheet-trials-trial-13-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 38,
+   "pass": "sheet-trials",
+   "title": "Trial 14: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/038-sheet-trials-trial-14-a-track-s.png",
+   "dump": "dumps/038-sheet-trials-trial-14-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 39,
+   "pass": "sheet-trials",
+   "title": "Trial 14: dragged by drag",
+   "status": "ok",
+   "shot": "shots/039-sheet-trials-trial-14-dragged-by-drag.png",
+   "dump": "dumps/039-sheet-trials-trial-14-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 40,
+   "pass": "sheet-trials",
+   "title": "Trial 15: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/040-sheet-trials-trial-15-a-track-s.png",
+   "dump": "dumps/040-sheet-trials-trial-15-a-track-s.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 41,
+   "pass": "sheet-trials",
+   "title": "Trial 15: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/041-sheet-trials-trial-15-dragged-by-stalled.png",
+   "dump": "dumps/041-sheet-trials-trial-15-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 42,
+   "pass": "sheet-trials",
+   "title": "Trial 15: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/042-sheet-trials-trial-15-back-closes-the-sheet.png",
+   "dump": "dumps/042-sheet-trials-trial-15-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 43,
+   "pass": "sheet-trials",
+   "title": "Trial 16: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/043-sheet-trials-trial-16-a-track-s.png",
+   "dump": "dumps/043-sheet-trials-trial-16-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 44,
+   "pass": "sheet-trials",
+   "title": "Trial 16: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/044-sheet-trials-trial-16-dragged-by-swipe.png",
+   "dump": "dumps/044-sheet-trials-trial-16-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 45,
+   "pass": "sheet-trials",
+   "title": "Trial 17: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/045-sheet-trials-trial-17-a-track-s.png",
+   "dump": "dumps/045-sheet-trials-trial-17-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 46,
+   "pass": "sheet-trials",
+   "title": "Trial 17: dragged by drag",
+   "status": "ok",
+   "shot": "shots/046-sheet-trials-trial-17-dragged-by-drag.png",
+   "dump": "dumps/046-sheet-trials-trial-17-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 47,
+   "pass": "sheet-trials",
+   "title": "Trial 18: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/047-sheet-trials-trial-18-a-track-s.png",
+   "dump": "dumps/047-sheet-trials-trial-18-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 48,
+   "pass": "sheet-trials",
+   "title": "Trial 18: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/048-sheet-trials-trial-18-dragged-by-stalled.png",
+   "dump": "dumps/048-sheet-trials-trial-18-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 49,
+   "pass": "sheet-trials",
+   "title": "Trial 18: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/049-sheet-trials-trial-18-back-closes-the-sheet.png",
+   "dump": "dumps/049-sheet-trials-trial-18-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 50,
+   "pass": "sheet-trials",
+   "title": "Trial 19: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/050-sheet-trials-trial-19-a-track-s.png",
+   "dump": "dumps/050-sheet-trials-trial-19-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 51,
+   "pass": "sheet-trials",
+   "title": "Trial 19: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/051-sheet-trials-trial-19-dragged-by-swipe.png",
+   "dump": "dumps/051-sheet-trials-trial-19-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 52,
+   "pass": "sheet-trials",
+   "title": "Trial 20: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/052-sheet-trials-trial-20-a-track-s.png",
+   "dump": "dumps/052-sheet-trials-trial-20-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 53,
+   "pass": "sheet-trials",
+   "title": "Trial 20: dragged by drag",
+   "status": "ok",
+   "shot": "shots/053-sheet-trials-trial-20-dragged-by-drag.png",
+   "dump": "dumps/053-sheet-trials-trial-20-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 54,
+   "pass": "sheet-trials",
+   "title": "Trial 21: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/054-sheet-trials-trial-21-a-track-s.png",
+   "dump": "dumps/054-sheet-trials-trial-21-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 55,
+   "pass": "sheet-trials",
+   "title": "Trial 21: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/055-sheet-trials-trial-21-dragged-by-stalled.png",
+   "dump": "dumps/055-sheet-trials-trial-21-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 56,
+   "pass": "sheet-trials",
+   "title": "Trial 21: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/056-sheet-trials-trial-21-back-closes-the-sheet.png",
+   "dump": "dumps/056-sheet-trials-trial-21-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 57,
+   "pass": "sheet-trials",
+   "title": "Trial 22: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/057-sheet-trials-trial-22-a-track-s.png",
+   "dump": "dumps/057-sheet-trials-trial-22-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 58,
+   "pass": "sheet-trials",
+   "title": "Trial 22: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/058-sheet-trials-trial-22-dragged-by-swipe.png",
+   "dump": "dumps/058-sheet-trials-trial-22-dragged-by-swipe.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 59,
+   "pass": "sheet-trials",
+   "title": "Trial 22: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/059-sheet-trials-trial-22-back-closes-the-sheet.png",
+   "dump": "dumps/059-sheet-trials-trial-22-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 60,
+   "pass": "sheet-trials",
+   "title": "Trial 23: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/060-sheet-trials-trial-23-a-track-s.png",
+   "dump": "dumps/060-sheet-trials-trial-23-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 61,
+   "pass": "sheet-trials",
+   "title": "Trial 23: dragged by drag",
+   "status": "ok",
+   "shot": "shots/061-sheet-trials-trial-23-dragged-by-drag.png",
+   "dump": "dumps/061-sheet-trials-trial-23-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 62,
+   "pass": "sheet-trials",
+   "title": "Trial 24: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/062-sheet-trials-trial-24-a-track-s.png",
+   "dump": "dumps/062-sheet-trials-trial-24-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 63,
+   "pass": "sheet-trials",
+   "title": "Trial 24: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/063-sheet-trials-trial-24-dragged-by-stalled.png",
+   "dump": "dumps/063-sheet-trials-trial-24-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 64,
+   "pass": "sheet-trials",
+   "title": "Trial 24: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/064-sheet-trials-trial-24-back-closes-the-sheet.png",
+   "dump": "dumps/064-sheet-trials-trial-24-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 65,
+   "pass": "sheet-trials",
+   "title": "Trial 25: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/065-sheet-trials-trial-25-a-track-s.png",
+   "dump": "dumps/065-sheet-trials-trial-25-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 66,
+   "pass": "sheet-trials",
+   "title": "Trial 25: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/066-sheet-trials-trial-25-dragged-by-swipe.png",
+   "dump": "dumps/066-sheet-trials-trial-25-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 67,
+   "pass": "sheet-trials",
+   "title": "Trial 26: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/067-sheet-trials-trial-26-a-track-s.png",
+   "dump": "dumps/067-sheet-trials-trial-26-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 68,
+   "pass": "sheet-trials",
+   "title": "Trial 26: dragged by drag",
+   "status": "ok",
+   "shot": "shots/068-sheet-trials-trial-26-dragged-by-drag.png",
+   "dump": "dumps/068-sheet-trials-trial-26-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 69,
+   "pass": "sheet-trials",
+   "title": "Trial 27: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/069-sheet-trials-trial-27-a-track-s.png",
+   "dump": "dumps/069-sheet-trials-trial-27-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 70,
+   "pass": "sheet-trials",
+   "title": "Trial 27: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/070-sheet-trials-trial-27-dragged-by-stalled.png",
+   "dump": "dumps/070-sheet-trials-trial-27-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 71,
+   "pass": "sheet-trials",
+   "title": "Trial 27: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/071-sheet-trials-trial-27-back-closes-the-sheet.png",
+   "dump": "dumps/071-sheet-trials-trial-27-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 72,
+   "pass": "sheet-trials",
+   "title": "Trial 28: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/072-sheet-trials-trial-28-a-track-s.png",
+   "dump": "dumps/072-sheet-trials-trial-28-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 73,
+   "pass": "sheet-trials",
+   "title": "Trial 28: dragged by swipe",
+   "status": "ok",
+   "shot": "shots/073-sheet-trials-trial-28-dragged-by-swipe.png",
+   "dump": "dumps/073-sheet-trials-trial-28-dragged-by-swipe.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 74,
+   "pass": "sheet-trials",
+   "title": "Trial 29: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/074-sheet-trials-trial-29-a-track-s.png",
+   "dump": "dumps/074-sheet-trials-trial-29-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 75,
+   "pass": "sheet-trials",
+   "title": "Trial 29: dragged by drag",
+   "status": "ok",
+   "shot": "shots/075-sheet-trials-trial-29-dragged-by-drag.png",
+   "dump": "dumps/075-sheet-trials-trial-29-dragged-by-drag.xml",
+   "changed": true,
+   "seconds": 5.6,
+   "note": ""
+  },
+  {
+   "n": 76,
+   "pass": "sheet-trials",
+   "title": "Trial 30: a track's \u22ef",
+   "status": "ok",
+   "shot": "shots/076-sheet-trials-trial-30-a-track-s.png",
+   "dump": "dumps/076-sheet-trials-trial-30-a-track-s.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 77,
+   "pass": "sheet-trials",
+   "title": "Trial 30: dragged by stalled",
+   "status": "ok",
+   "shot": "shots/077-sheet-trials-trial-30-dragged-by-stalled.png",
+   "dump": "dumps/077-sheet-trials-trial-30-dragged-by-stalled.xml",
+   "changed": false,
+   "seconds": 5.5,
+   "note": ""
+  },
+  {
+   "n": 78,
+   "pass": "sheet-trials",
+   "title": "Trial 30: Back closes the sheet",
+   "status": "ok",
+   "shot": "shots/078-sheet-trials-trial-30-back-closes-the-sheet.png",
+   "dump": "dumps/078-sheet-trials-trial-30-back-closes-the-sheet.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [
+  "[sheet-trials] swipe: 9 of 10 closed the sheet",
+  "[sheet-trials] drag: 10 of 10 closed the sheet",
+  "[sheet-trials] stalled: 0 of 10 closed the sheet"
+ ],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 78
+  }
+ ],
+ "frames": [],
+ "seconds": 723,
+ "passes": "sheet-trials",
+ "source": "b1c0a9da1fed7ed0055e73a632c4f11444af7aad (story/release-1.0.8, personal build, API 37.0, sheet-trials), run 43500817348",
+ "system": [
+  {
+   "pass": "sheet-trials",
+   "step": 1,
+   "kind": "ANR",
+   "who": "com.google.android.gms.persistent",
+   "seen": "Reason: executing service com.google.android.gms/.geotimezone.GeoTimeZoneService, waited 20367ms",
+   "how": "log"
+  }
+ ],
+ "sheet_trials": [
+  {
+   "trial": 1,
+   "how": "swipe",
+   "closed": true,
+   "ms": 427,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@987+9ms MOVE@1024+28ms MOVE@1055+44ms MOVE@1365+204ms MOVE@1451+248ms MOVE@1517+282ms UP@1552+323ms"
+  },
+  {
+   "trial": 2,
+   "how": "drag",
+   "closed": true,
+   "ms": 608,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+60ms MOVE@1260+110ms MOVE@1309+153ms MOVE@1358+231ms MOVE@1406+262ms MOVE@1454+314ms MOVE@1503+377ms MOVE@1552+395ms UP@1552+440ms"
+  },
+  {
+   "trial": 3,
+   "how": "stalled",
+   "closed": false,
+   "ms": 261,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+15ms MOVE@1023+39ms MOVE@1050+98ms UP@1552+247ms"
+  },
+  {
+   "trial": 4,
+   "how": "swipe",
+   "closed": true,
+   "ms": 362,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1045+0ms MOVE@1080+18ms MOVE@1131+44ms MOVE@1183+71ms MOVE@1251+106ms MOVE@1350+157ms MOVE@1406+186ms MOVE@1466+217ms MOVE@1544+257ms UP@1552+290ms"
+  },
+  {
+   "trial": 5,
+   "how": "drag",
+   "closed": true,
+   "ms": 603,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+76ms MOVE@1260+115ms MOVE@1309+177ms MOVE@1358+212ms MOVE@1406+249ms MOVE@1454+314ms MOVE@1503+341ms MOVE@1552+392ms UP@1552+457ms"
+  },
+  {
+   "trial": 6,
+   "how": "stalled",
+   "closed": false,
+   "ms": 277,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+15ms MOVE@1023+51ms MOVE@1050+112ms UP@1552+259ms"
+  },
+  {
+   "trial": 7,
+   "how": "swipe",
+   "closed": true,
+   "ms": 347,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1010+0ms MOVE@1043+17ms MOVE@1080+36ms MOVE@1142+68ms MOVE@1249+123ms MOVE@1303+151ms MOVE@1359+180ms MOVE@1460+232ms MOVE@1511+258ms UP@1552+282ms"
+  },
+  {
+   "trial": 8,
+   "how": "drag",
+   "closed": true,
+   "ms": 541,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+38ms MOVE@1260+82ms MOVE@1309+116ms MOVE@1358+164ms MOVE@1406+227ms MOVE@1454+249ms MOVE@1503+312ms MOVE@1552+331ms UP@1552+370ms"
+  },
+  {
+   "trial": 9,
+   "how": "stalled",
+   "closed": false,
+   "ms": 264,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+15ms MOVE@1023+42ms MOVE@1050+86ms UP@1552+245ms"
+  },
+  {
+   "trial": 10,
+   "how": "swipe",
+   "closed": true,
+   "ms": 382,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1034+25ms MOVE@1070+44ms MOVE@1148+84ms MOVE@1169+95ms MOVE@1237+130ms MOVE@1317+171ms MOVE@1420+224ms MOVE@1464+247ms UP@1552+295ms"
+  },
+  {
+   "trial": 11,
+   "how": "drag",
+   "closed": true,
+   "ms": 582,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+43ms MOVE@1260+72ms MOVE@1309+113ms MOVE@1358+189ms MOVE@1406+225ms MOVE@1454+256ms MOVE@1503+299ms MOVE@1552+335ms UP@1552+410ms"
+  },
+  {
+   "trial": 12,
+   "how": "stalled",
+   "closed": false,
+   "ms": 220,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+12ms MOVE@1023+36ms MOVE@1050+71ms UP@1552+206ms"
+  },
+  {
+   "trial": 13,
+   "how": "swipe",
+   "closed": true,
+   "ms": 375,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1030+23ms MOVE@1061+39ms MOVE@1113+66ms MOVE@1230+126ms MOVE@1257+140ms MOVE@1359+193ms MOVE@1453+241ms MOVE@1530+281ms UP@1552+299ms"
+  },
+  {
+   "trial": 14,
+   "how": "drag",
+   "closed": true,
+   "ms": 557,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+37ms MOVE@1260+84ms MOVE@1309+130ms MOVE@1358+192ms MOVE@1406+227ms MOVE@1454+288ms MOVE@1503+341ms MOVE@1552+381ms UP@1552+427ms"
+  },
+  {
+   "trial": 15,
+   "how": "stalled",
+   "closed": false,
+   "ms": 282,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+22ms MOVE@1023+50ms MOVE@1050+121ms UP@1552+259ms"
+  },
+  {
+   "trial": 16,
+   "how": "swipe",
+   "closed": true,
+   "ms": 369,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1003+9ms MOVE@1037+27ms MOVE@1127+73ms MOVE@1165+93ms MOVE@1218+120ms MOVE@1323+174ms MOVE@1363+195ms MOVE@1439+234ms UP@1552+298ms"
+  },
+  {
+   "trial": 17,
+   "how": "drag",
+   "closed": true,
+   "ms": 561,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+32ms MOVE@1260+74ms MOVE@1309+136ms MOVE@1358+172ms MOVE@1406+210ms MOVE@1454+266ms MOVE@1503+305ms MOVE@1552+356ms UP@1552+393ms"
+  },
+  {
+   "trial": 18,
+   "how": "stalled",
+   "closed": false,
+   "ms": 226,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+14ms MOVE@1023+41ms MOVE@1050+65ms UP@1552+212ms"
+  },
+  {
+   "trial": 19,
+   "how": "swipe",
+   "closed": true,
+   "ms": 377,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1004+10ms MOVE@1037+27ms MOVE@1070+44ms MOVE@1222+122ms MOVE@1262+143ms MOVE@1311+168ms MOVE@1420+224ms MOVE@1466+248ms UP@1552+317ms"
+  },
+  {
+   "trial": 20,
+   "how": "drag",
+   "closed": true,
+   "ms": 613,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+38ms MOVE@1260+78ms MOVE@1309+99ms MOVE@1358+150ms MOVE@1406+198ms MOVE@1454+251ms MOVE@1503+303ms MOVE@1552+368ms UP@1552+418ms"
+  },
+  {
+   "trial": 21,
+   "how": "stalled",
+   "closed": false,
+   "ms": 251,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+16ms MOVE@1023+43ms MOVE@1050+88ms UP@1552+230ms"
+  },
+  {
+   "trial": 22,
+   "how": "swipe",
+   "closed": false,
+   "ms": 341,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1001+8ms MOVE@1028+22ms MOVE@1113+66ms MOVE@1154+87ms MOVE@1224+123ms MOVE@1301+163ms MOVE@1369+198ms MOVE@1536+284ms UP@1552+306ms"
+  },
+  {
+   "trial": 23,
+   "how": "drag",
+   "closed": true,
+   "ms": 561,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+21ms MOVE@1260+66ms MOVE@1309+105ms MOVE@1358+167ms MOVE@1406+205ms MOVE@1454+266ms MOVE@1503+315ms MOVE@1552+361ms UP@1552+405ms"
+  },
+  {
+   "trial": 24,
+   "how": "stalled",
+   "closed": false,
+   "ms": 288,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+17ms MOVE@1023+60ms MOVE@1050+110ms UP@1552+266ms"
+  },
+  {
+   "trial": 25,
+   "how": "swipe",
+   "closed": true,
+   "ms": 421,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1024+0ms MOVE@1057+17ms MOVE@1144+62ms MOVE@1235+109ms MOVE@1301+143ms MOVE@1344+165ms MOVE@1389+188ms MOVE@1455+222ms MOVE@1526+259ms UP@1552+296ms"
+  },
+  {
+   "trial": 26,
+   "how": "drag",
+   "closed": true,
+   "ms": 641,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+58ms MOVE@1260+126ms MOVE@1309+178ms MOVE@1358+217ms MOVE@1406+278ms MOVE@1454+333ms MOVE@1503+397ms MOVE@1552+447ms UP@1552+499ms"
+  },
+  {
+   "trial": 27,
+   "how": "stalled",
+   "closed": false,
+   "ms": 269,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+15ms MOVE@1023+46ms MOVE@1050+117ms UP@1552+250ms"
+  },
+  {
+   "trial": 28,
+   "how": "swipe",
+   "closed": true,
+   "ms": 359,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@985+0ms MOVE@1024+20ms MOVE@1059+38ms MOVE@1160+90ms MOVE@1193+107ms MOVE@1262+143ms MOVE@1367+197ms MOVE@1456+243ms MOVE@1486+258ms UP@1552+330ms"
+  },
+  {
+   "trial": 29,
+   "how": "drag",
+   "closed": true,
+   "ms": 610,
+   "from": 1455,
+   "height": 1890,
+   "moves": "MOVE@1164+0ms MOVE@1212+30ms MOVE@1260+70ms MOVE@1309+173ms MOVE@1358+216ms MOVE@1406+251ms MOVE@1454+300ms MOVE@1503+330ms MOVE@1552+390ms UP@1552+431ms"
+  },
+  {
+   "trial": 30,
+   "how": "stalled",
+   "closed": false,
+   "ms": 272,
+   "from": 1455,
+   "height": 1890,
+   "moves": "DOWN@970+0ms MOVE@996+15ms MOVE@1023+48ms MOVE@1050+112ms UP@1552+254ms"
+  }
+ ],
+ "back_presses": [],
+ "page_openings": [],
+ "notice_swipes": [],
+ "searches": []
+}

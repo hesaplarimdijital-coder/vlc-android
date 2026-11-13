@@ -1,0 +1,91 @@
+2869 W/dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~OxrrGQKk-t2F1xeaOzX9CA==/app.nagmedar.debug-caH0tQuSygjAhWSfs2H3oA==/base.apk --oat-fd=7 --oat-location=/data/app/~~OxrrGQKk-t2F1xeaOzX9CA==/app.nagmedar.debug-caH0tQuSygjAhWSfs2H3oA==/oat/x86_64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10:11 --class-loader-context=PCL[]{PCL[/system_ext/framework/androidx.window.extensions.jar]#PCL[/system_ext/framework/androidx.window.sidecar.jar]} --classpath-dir=/data/app/~~OxrrGQKk-t2F1xeaOzX9CA==/app.nagmedar.debug-caH0tQuSygjAhWSfs2H3oA== --instruction-set=x86_64 --instruction-set-features=default --instruction-set-variant=x86_64 --compiler-filter=verify --compilation-reason=install --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xtarget-sdk-version:37 --runtime-arg -Xhidden-api-policy:enabled --assume-value=Landroid/os/Build$VERSION;->SDK_INT:37 --no-allow-profile-code --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-name:app.nagmedar.debug,app-version-name:1.0.8,app-version-code:14010016,art-version:370546200
+1195 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3520 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3520 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3520 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3520 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3520 W/HWUI: Unknown dataspace 0
+3520 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3520 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3520 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3520 W/VLC: [00007eba69431050/12e3] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69443830/12e9] libvlc access: cannot insert stream filter record
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3520 W/VLC: [00007eba69431050/12ea] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69443830/12ec] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69432a30/12ed] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69444910/12ee] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69431050/12ef] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69443830/12f0] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69432a30/12f1] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69444910/12f2] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69431050/12f5] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69443830/12f7] libvlc access: cannot insert stream filter record
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3520 W/VLC: [00007eba69432a30/12f8] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69431050/1305] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447070/1307] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba6944ad30/130a] libvlc access: cannot insert stream filter record
+3520 W/AndroidMedialib: type=1400 audit(0.0:24): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+621 E/NotificationService: Package enqueue rate is 6.7342834. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:25): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/VLC: [00007eba6944ad30/130c] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba6944a790/1316] libvlc access: cannot insert stream filter record
+3520 W/AndroidMedialib: type=1400 audit(0.0:26): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/VLC: [00007eba6944ad30/1318] libvlc access: cannot insert stream filter record
+3520 W/AndroidMedialib: type=1400 audit(0.0:27): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/VLC: [00007eba6944a790/131a] libvlc access: cannot insert stream filter record
+3520 W/AndroidMedialib: type=1400 audit(0.0:28): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/VLC: [00007eba6944ad30/131c] libvlc access: cannot insert stream filter record
+3520 W/AndroidMedialib: type=1400 audit(0.0:29): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/VLC: [00007eba6944a790/133f] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba6944ad30/1341] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447070/1342] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447850/1345] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447070/134a] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69444eb0/134c] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447610/134e] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69444eb0/1350] libvlc access: cannot insert stream filter record
+3520 W/VLC: [00007eba69447610/1352] libvlc access: cannot insert stream filter record
+3520 E/VLC: [00007eba69444eb0/1354] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3520 E/VLC: [00007eb9f946b5e0/1354] libvlc input: Your media can't be opened
+3520 E/VLC: [00007eb9f946b5e0/1354] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3520 W/VLC: [00007eba69444eb0/1356] libvlc access: cannot insert stream filter record
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3520 E/VLC: [00007eba69444eb0/1358] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3520 E/VLC: [00007eb9f946b5e0/1358] libvlc input: Your media can't be opened
+3520 E/VLC: [00007eb9f946b5e0/1358] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3520 W/VLC: [00007eba69449470/1359] libvlc access: cannot insert stream filter record
+3520 W/VLC/medialibrary: [T#139334553125056] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3520 W/AndroidMedialib: type=1400 audit(0.0:40): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:41): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:42): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:43): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:44): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:85): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:86): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3520 W/AndroidMedialib: type=1400 audit(0.0:87): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106613 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityTaskManager: Force removing ActivityRecord{95563404 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+621 W/InputDispatcher: channel '97570fa app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+621 E/InputDispatcher: channel '97570fa app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+621 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+621 W/WindowManager: Exception thrown during dispatchAppVisibility Window{97570fa u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+621 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{8b40257 #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@ec9cc52
+5331 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+5331 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+5331 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+5331 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+5331 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+5331 W/HWUI: Unknown dataspace 0
+5331 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+5331 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
