@@ -706,6 +706,8 @@
     <string name="nag_duration_seconds">%1$d s</string>
     <string name="nag_pane_divider">Width of the details pane</string>
     <string name="nag_sidebar_divider">Width of the sidebar</string>
+    <!-- 1.0.8 (Desktop Kit 2.8.0): the divider between a list and what is chosen in it (the music view's groups, the playlists) -->
+    <string name="nag_list_divider">Width of the list</string>
     <string name="nag_tech_title">Technical</string>
     <string name="nag_tech_audio">Audio %1$d</string>
     <string name="nag_tech_subtitles">Subtitles</string>

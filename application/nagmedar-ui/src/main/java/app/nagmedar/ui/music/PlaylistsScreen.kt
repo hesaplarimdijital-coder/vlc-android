@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +63,7 @@ import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.ActionMenuButton
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
+import app.nagmedar.ui.components.HorizontalSplitPane
 import app.nagmedar.ui.components.ClearSelectionOnBack
 import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
@@ -77,7 +77,6 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
-import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
@@ -85,6 +84,7 @@ import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.rememberMultiSelection
 import app.nagmedar.ui.components.rememberReorderState
+import app.nagmedar.ui.components.rememberSplitState
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.input.ShortcutId
@@ -94,6 +94,7 @@ import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.PLAYLISTS_PANE
 import app.nagmedar.ui.shell.ShellPrimaryAction
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -454,11 +455,15 @@ fun PlaylistsBrowser(
             when {
                 playlists == null -> Unit
                 playlists.isEmpty() && smartLists.isEmpty() -> empty()
-                twoPane -> Row(Modifier.fillMaxSize()) {
-                    overview(OverviewLayout.Rows, Modifier.width(LIST_PANE_WIDTH).fillMaxHeight())
-                    VerticalRule()
-                    Box(Modifier.weight(1f).fillMaxHeight()) { openList(null) }
-                }
+                // 1.0.8 (Desktop Kit 2.8.0's list and detail): the divider between the lists and the open one is dragged and kept
+                twoPane -> HorizontalSplitPane(
+                    state = rememberSplitState(LIST_PANE_WIDTH, PLAYLISTS_PANE),
+                    start = { overview(OverviewLayout.Rows, Modifier.fillMaxSize()) },
+                    end = { openList(null) },
+                    minStart = 260.dp,
+                    minEnd = 360.dp,
+                    dividerLabel = stringResource(R.string.nag_list_divider),
+                )
                 showDetail -> openList { detail = false }
                 else -> overview(OverviewLayout.Grid, Modifier)
             }

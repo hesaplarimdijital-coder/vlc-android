@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,11 +43,19 @@ import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.theme.NagTheme
 
-/** Position of a split, as the width of the start pane in dp; survives configuration changes. */
-class SplitState(initialStartWidth: Float) {
+/**
+ * Position of a split, as the width of the start pane in dp; survives configuration changes. 1.0.8 (Desktop Kit
+ * 2.8.0): [onCommit] gets the width when a drag, a key press or TalkBack's change ends, for keeping it.
+ */
+@Stable
+class SplitState(initialStartWidth: Float, private val onCommit: (Float) -> Unit = {}) {
     var startWidthDp by mutableFloatStateOf(initialStartWidth)
+
+    /** Keeps the width now set (see [onCommit]). */
+    fun commit() = onCommit(startWidthDp)
 
     companion object {
         val Saver: Saver<SplitState, Float> = Saver(save = { it.startWidthDp }, restore = { SplitState(it) })
@@ -58,8 +67,19 @@ fun rememberSplitState(initialStartWidth: Dp): SplitState =
     rememberSaveable(saver = SplitState.Saver) { SplitState(initialStartWidth.value) }
 
 /**
- * Two panes side by side with a draggable divider (player | panel). The start pane keeps the
- * width it is dragged to, within [minStart] and the room left for [minEnd].
+ * 1.0.8 (Desktop Kit 2.8.0): a split whose place is kept under [key] where the panes' widths are ([LocalPaneWidths]):
+ * the divider is where it was left in every window and after a restart.
+ */
+@Composable
+fun rememberSplitState(initialStartWidth: Dp, key: String): SplitState {
+    val store = LocalPaneWidths.current
+    return remember(store, key) { SplitState(store.paneWidth(key) ?: initialStartWidth.value) { store.savePaneWidth(key, it) } }
+}
+
+/**
+ * Two panes side by side with a draggable divider (player | panel; 1.0.8: a list and what is chosen in it, Desktop Kit
+ * 2.8.0's list and detail). The start pane keeps the width it is dragged to, within [minStart] and the room left for
+ * [minEnd].
  */
 @Composable
 fun HorizontalSplitPane(
@@ -87,6 +107,7 @@ fun HorizontalSplitPane(
                 onSet = { state.startWidthDp = it.coerceIn(minStart.value, maxStart.value) },
                 label = dividerLabel,
                 modifier = Modifier.width(handle),
+                onResizeEnd = state::commit,
             )
             Box(Modifier.weight(1f).fillMaxHeight()) { end() }
         }

@@ -4,6 +4,11 @@ import android.content.Context
 import android.os.SystemClock
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -28,12 +32,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +67,7 @@ import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.components.WorkstationLayout
 import app.nagmedar.ui.components.rememberInspectorState
 import app.nagmedar.ui.components.ClearSelectionOnBack
+import app.nagmedar.ui.components.HorizontalSplitPane
 import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
 import app.nagmedar.ui.components.MenuEntry
@@ -74,7 +82,6 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableSort
-import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
@@ -83,6 +90,7 @@ import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toActionGroups
 import app.nagmedar.ui.components.listAppear
 import app.nagmedar.ui.components.rememberListAppear
+import app.nagmedar.ui.components.rememberSplitState
 import app.nagmedar.ui.convert.ConvertHost
 import app.nagmedar.ui.covers.CoverMenuButton
 import app.nagmedar.ui.covers.CoverTrack
@@ -118,9 +126,15 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.shell.DetailTransition
+import app.nagmedar.ui.shell.MUSIC_GROUPS_PANE
+import app.nagmedar.ui.shell.MovableDetails
+import app.nagmedar.ui.shell.rememberMovableDetails
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.Medialibrary
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -802,6 +816,23 @@ fun MusicBrowser(
     // a phone's group closing keeps the order its tracks were shown in
     val closing = remember { ClosingOrder() }
     if (inspector != null) InspectorCommands(inspectorState::toggle)
+    // 1.0.8 (Desktop Kit 2.8.0's list and detail): the groups are one list in every layout, so a window crossing a width
+    // (resized on DeX, a tablet or a phone turned, the inspector shown) keeps their place, as does a group's tracks
+    // covering them; each group's tracks move the same way, one pane per group ([MovableDetails])
+    val currentGroups by rememberUpdatedState(groups)
+    val currentActions by rememberUpdatedState(actions)
+    val savedGroups = rememberSaveableStateHolder()
+    val groupList = remember(state) {
+        movableContentOf { openKey: String?, listModifier: Modifier, rowPadding: Dp, leading: (@Composable () -> Unit)? ->
+            savedGroups.SaveableStateProvider(GROUP_LIST) { GroupList(currentGroups, state, currentActions, openKey, listModifier, rowPadding, leading) }
+        }
+    }
+    val trackPanes = rememberMovableDetails<String, TrackPaneArgs>(open?.key) { args ->
+        TrackPane(args.group, args.tracks, state, args.actions, args.showBack, stats, selection, args.leading, args.leadingPresent)
+    }
+    // the groups' width beside their tracks, dragged and kept
+    val groupsSplit = rememberSplitState(260.dp, MUSIC_GROUPS_PANE)
+    val instant = LocalMotionTier.current == MotionTier.Reduced || NagTheme.motion.reduced
     val panes: @Composable () -> Unit = {
         when {
             // nothing played yet (no filter hiding what was)
@@ -827,37 +858,58 @@ fun MusicBrowser(
                     suggestions = listOf(StateAction(stringResource(R.string.nag_clear_filters)) { state.filter = TechFilter() }),
                 )
             }
-            width >= WidthClass.Large -> Row(Modifier.fillMaxSize()) {
-                if (grouped) {
-                    GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
-                    VerticalRule()
-                }
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
-            }
-            wide && grouped -> Row(Modifier.fillMaxSize()) {
-                GroupList(groups, state, actions, open?.key, Modifier.width(260.dp).fillMaxHeight())
-                VerticalRule()
-                Box(Modifier.weight(1f).fillMaxHeight()) { if (open != null) TrackPane(open, shown, state, openActions, showBack = false, stats, selection) }
-            }
+            // the groups and the open group's tracks side by side, the divider between them dragged and kept (1.0.8)
+            wide && grouped -> HorizontalSplitPane(
+                state = groupsSplit,
+                start = { groupList(open?.key, Modifier.fillMaxSize(), 0.dp, null) },
+                end = {
+                    // 1.0.8 (Desktop Kit 2.8.0): another group chosen, its tracks come once the last ones have gone
+                    AnimatedContent(
+                        targetState = open,
+                        contentKey = { it?.key },
+                        transitionSpec = {
+                            if (instant) {
+                                fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                            } else {
+                                fadeIn(tween(NagMotion.MEDIUM, delayMillis = NagMotion.SHORT)) togetherWith fadeOut(tween(NagMotion.SHORT))
+                            }
+                        },
+                        label = "groupTracks",
+                        modifier = Modifier.fillMaxSize(),
+                    ) { group ->
+                        if (group != null) {
+                            // the one going keeps what it showed
+                            val current = open?.takeIf { it.key == group.key }
+                            trackPanes.Show(group.key, current?.let { TrackPaneArgs(it, shown, openActions, showBack = false) })
+                        }
+                    }
+                },
+                minStart = 200.dp,
+                minEnd = 360.dp,
+                dividerLabel = stringResource(R.string.nag_list_divider),
+            )
             // 1.0.3 (Desktop Kit 2.3.0): a phone opens a group's tracks in depth over the groups, which stay where they
             // were; Back is the predictive gesture
             width == WidthClass.Compact && grouped -> DetailTransition(
                 detail = open,
                 onBack = { state.group = null },
                 detailKey = { it.key },
-                list = { GroupList(groups, state, actions, null, Modifier.fillMaxSize(), rowPadding = dimens.pagePadding - 12.dp, leading = phoneShelf) },
+                list = { groupList(null, Modifier.fillMaxSize(), dimens.pagePadding - 12.dp, phoneShelf) },
             ) { group ->
                 val tracks = closing.of(group.key, if (group.key == open?.key) shown else null) ?: group.tracks
                 val groupActions = remember(actions, state.view, group.title) { actions.playingFrom(groupSource(state.view, group)) }
-                TrackPane(group, tracks, state, groupActions, showBack = true, stats, selection)
+                trackPanes.Show(group.key, TrackPaneArgs(group, tracks, groupActions, showBack = true))
             }
             !grouped || open != null -> if (open != null) {
-                TrackPane(
-                    open, shown, state, openActions, showBack = grouped, stats, selection,
-                    leading = phoneShelf.takeIf { !grouped }, leadingPresent = shelfPresent.takeIf { !grouped && phoneShelf != null },
+                trackPanes.Show(
+                    open.key,
+                    TrackPaneArgs(
+                        open, shown, openActions, showBack = grouped,
+                        leading = phoneShelf.takeIf { !grouped }, leadingPresent = shelfPresent.takeIf { !grouped && phoneShelf != null },
+                    ),
                 )
             }
-            else -> GroupList(groups, state, actions, null, Modifier.fillMaxSize(), rowPadding = dimens.pagePadding - 12.dp, leading = phoneShelf)
+            else -> groupList(null, Modifier.fillMaxSize(), dimens.pagePadding - 12.dp, phoneShelf)
         }
     }
     // "music": what the scroll benchmark (S-803) looks for
@@ -979,6 +1031,19 @@ private fun GroupList(
 }
 
 /** The order a phone's open group showed its tracks in, kept while it closes; plain, so keeping it never redraws anything. */
+/** What a group's [TrackPane] shows; 1.0.8: one movable pane per group ([MovableDetails]). */
+private class TrackPaneArgs(
+    val group: MusicGroup,
+    val tracks: List<Track>,
+    val actions: MusicActions,
+    val showBack: Boolean,
+    val leading: (@Composable () -> Unit)? = null,
+    val leadingPresent: (() -> Boolean)? = null,
+)
+
+/** The groups' saved state while they are out of sight (a narrow window's open group covering them). */
+private const val GROUP_LIST = "groups"
+
 private class ClosingOrder {
     private var key: String? = null
     private var tracks: List<Track>? = null

@@ -101,6 +101,7 @@ import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.detailSharedCard
 import app.nagmedar.ui.shell.detailSharedElement
 import app.nagmedar.ui.shell.ListDetailPanes
+import app.nagmedar.ui.shell.LocalDetailBeside
 import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
@@ -191,14 +192,14 @@ fun PodcastsContent(
     val page = model.page
     var retained by remember { mutableStateOf(page) }
     LaunchedEffect(page) { if (page != null) retained = page }
-    val side = currentWidthClass() >= WidthClass.Expanded
     val episodeOpen = model.episodeId != null
     ListDetailPanes(
         detail = page?.summary?.feed?.id,
         onCloseDetail = if (episodeOpen) actions.onCloseEpisode else actions.onClosePage,
         list = {
             val shown = page ?: retained
-            if (side && episodeOpen && shown != null) {
+            // 1.0.8: the panes' own choice, which needs the room of both as well as a wide window
+            if (LocalDetailBeside.current && episodeOpen && shown != null) {
                 PodcastPageView(shown, fullScreen = false, actions = actions, downloads = model.downloads, selected = model.episodeId)
             } else {
                 PodcastList(model, actions, focus)

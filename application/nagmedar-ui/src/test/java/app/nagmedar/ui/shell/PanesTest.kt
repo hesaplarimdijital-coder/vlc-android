@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
@@ -79,6 +80,9 @@ class PanesTest {
 
     private var detail by mutableStateOf<String?>(null)
     private val list = LazyListState()
+
+    /** 1.0.8: the room the panes have, when not the window's. */
+    private var room by mutableStateOf<Dp?>(null)
     private lateinit var inputModeManager: InputModeManager
 
     private fun panes(store: PaneWidths = Store(), input: InputMode = InputMode.Pointer, rtl: Boolean = false) {
@@ -105,6 +109,7 @@ class PanesTest {
                                 NagButton("Kapat", { detail = null }, modifier = Modifier.testTag("inside"))
                             }
                         },
+                        modifier = room?.let { Modifier.width(it) } ?: Modifier,
                     )
                 }
             }
@@ -255,6 +260,28 @@ class PanesTest {
         compose.onNodeWithTag("full").assertDoesNotExist()
         compose.onNodeWithText("Satır 51").assertExists()
         assertEquals(50, list.firstVisibleItemIndex)
+    }
+
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0's list and detail): side by side only with the room of both panes' least widths (360 dp
+     * and 280 dp here, with the divider's 8): with less, one at a time, the open details staying open as it changes.
+     */
+    @Test
+    @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")
+    fun aWideWindowWithoutTheRoomOfBothPanesShowsOneAtATime() {
+        room = 600.dp
+        panes()
+        detail = "Satır 2"
+        compose.waitForIdle()
+        compose.onNodeWithTag("full").assertExists()
+        compose.onNodeWithTag("pane").assertDoesNotExist()
+        divider.assertDoesNotExist()
+        room = 700.dp
+        compose.waitForIdle()
+        compose.onNodeWithTag("pane").assertExists()
+        compose.onNodeWithTag("list").assertExists()
+        divider.assertExists()
+        compose.onNodeWithText("Ayrıntı: Satır 2").assertExists()
     }
 
     @Test

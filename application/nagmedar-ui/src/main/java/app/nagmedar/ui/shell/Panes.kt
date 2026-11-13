@@ -6,12 +6,17 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,6 +104,12 @@ const val WORKSTATION_PANE = "workstation"
 /** The sidebar of large windows. */
 const val SIDEBAR_PANE = "sidebar"
 
+/** 1.0.8 (Desktop Kit 2.8.0): the music view's groups beside their tracks. */
+const val MUSIC_GROUPS_PANE = "music-groups"
+
+/** 1.0.8: the playlists beside the open one. */
+const val PLAYLISTS_PANE = "playlists"
+
 /** The width of a pane that can be dragged, in dp; [save] keeps it for the next session. */
 @Stable
 class PaneWidthState internal constructor(private val key: String, private val store: PaneWidths, initial: Float) {
@@ -142,6 +153,9 @@ private const val DIVIDER = "divider"
  * seeks their closing with the list behind them, and with
  * [sharedElements] what the list and the details mark ([detailSharedElement], [detailSharedCard])
  * flies between them.
+ *
+ * 1.0.8 (Desktop Kit 2.8.0's list and detail): the details stand beside the list only with the room of [minListWidth]
+ * and [minDetailWidth] together as well; the list reads which it is from [LocalDetailBeside].
  */
 @Composable
 fun <K : Any> ListDetailPanes(
@@ -156,7 +170,80 @@ fun <K : Any> ListDetailPanes(
     minListWidth: Dp = 360.dp,
     sharedElements: Boolean = false,
 ) {
-    val side = currentWidthClass() >= WidthClass.Expanded
+    val wide = currentWidthClass() >= WidthClass.Expanded
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        // 1.0.8 (Desktop Kit 2.8.0's list and detail): side by side only with the room of both panes' least widths as
+        // well: a window just past the width class (the sidebar beside it, a DeX window) shows one pane at a time
+        val side = wide && maxWidth >= minListWidth + minDetailWidth + paneHandleWidth()
+        CompositionLocalProvider(LocalDetailBeside provides side) {
+            ListDetailPanesIn(side, detail, onCloseDetail, list, detailPane, widthKey, defaultDetailWidth, minDetailWidth, minListWidth, sharedElements)
+        }
+    }
+}
+
+/**
+ * 1.0.8: whether a [ListDetailPanes]' details stand beside its list (read in its list); false outside one. The list
+ * can show what goes with the details there (a show's episodes beside the open episode).
+ */
+val LocalDetailBeside = staticCompositionLocalOf { false }
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0's list and detail): the details of what is chosen in a list, one movable content per choice
+ * ([Show]'s key), so an open details moves between a screen's layouts (beside the list in a wide window, over it in a
+ * narrow one) with its state: a window resized on DeX, a tablet or a phone turned, keeps it where it was. Every details
+ * still on screen (one fading out as another is chosen) keeps its own state and what it last showed; one is let go once
+ * nothing shows it and it is not the chosen one.
+ */
+@Stable
+class MovableDetails<K : Any, P : Any> internal constructor(private val content: State<@Composable (P) -> Unit>) {
+    private val slots = HashMap<K, @Composable (P) -> Unit>()
+    private val users = HashMap<K, Int>()
+    private val last = HashMap<K, P>()
+
+    /** The details of [key] showing [value]; null shows what they last showed (a details on its way out). */
+    @Composable
+    fun Show(key: K, value: P?) {
+        if (value != null) last[key] = value
+        val shown = value ?: last[key] ?: return
+        val slot = slots.getOrPut(key) { movableContentOf { p: P -> content.value(p) } }
+        DisposableEffect(key) {
+            users[key] = (users[key] ?: 0) + 1
+            onDispose { users[key] = (users[key] ?: 1) - 1 }
+        }
+        slot(shown)
+    }
+
+    internal fun prune(keep: K?) {
+        slots.keys.filter { it != keep && (users[it] ?: 0) <= 0 }.forEach {
+            slots.remove(it)
+            users.remove(it)
+            last.remove(it)
+        }
+    }
+}
+
+/** [MovableDetails] drawing each with [content]; [chosen] is kept while nothing shows it yet. */
+@Composable
+fun <K : Any, P : Any> rememberMovableDetails(chosen: K?, content: @Composable (P) -> Unit): MovableDetails<K, P> {
+    val latest = rememberUpdatedState(content)
+    val details = remember { MovableDetails<K, P>(latest) }
+    SideEffect { details.prune(keep = chosen) }
+    return details
+}
+
+@Composable
+private fun <K : Any> ListDetailPanesIn(
+    side: Boolean,
+    detail: K?,
+    onCloseDetail: () -> Unit,
+    list: @Composable () -> Unit,
+    detailPane: @Composable (key: K, fullScreen: Boolean) -> Unit,
+    widthKey: String,
+    defaultDetailWidth: Dp,
+    minDetailWidth: Dp,
+    minListWidth: Dp,
+    sharedElements: Boolean,
+) {
     val motion = NagTheme.motion
     val tier = LocalMotionTier.current
     // 1.0.3: a phone's window, where the details open in depth
@@ -203,7 +290,7 @@ fun <K : Any> ListDetailPanes(
     val page = if (phone) Modifier.background(NagTheme.colors.background) else Modifier
     val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val dividerLabel = stringResource(R.string.nag_pane_divider)
-    BoxWithConstraints(modifier.fillMaxSize().clipToBounds().then(if (side) Modifier else Modifier.detailShade(state))) {
+    BoxWithConstraints(Modifier.fillMaxSize().clipToBounds().then(if (side) Modifier else Modifier.detailShade(state))) {
         val handle = paneHandleWidth()
         val maxDetail = (maxWidth - minListWidth - handle).coerceAtLeast(minDetailWidth)
         val range = minDetailWidth.value..maxDetail.value
