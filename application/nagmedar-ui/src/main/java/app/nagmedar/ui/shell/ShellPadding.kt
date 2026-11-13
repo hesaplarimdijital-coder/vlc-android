@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -54,6 +55,9 @@ internal class ShellChromeMetrics {
     /** The page on screen is a full page: the phone's bottom bar and player strip are away. */
     var barsHidden by mutableStateOf(false)
 
+    /** 1.0.8 (Desktop Kit 2.8.0): the phone's floating action button with its margin ([ShellPrimaryAction]), 0 without one. */
+    var actionPx by mutableIntStateOf(0)
+
     /** Content lies under a floating player (tablet, DeX); its margin is added. */
     var underFloatingPlayer by mutableStateOf(false)
     var floatingMarginPx by mutableIntStateOf(0)
@@ -87,7 +91,8 @@ internal class ShellChromeMetrics {
 private class ShellPaddingValues(private val metrics: ShellChromeMetrics, private val density: Density, private val bars: Boolean?) : PaddingValues {
     private val bottomPx: Int get() = if (bars == null) metrics.bottomPadPx else metrics.bottomPadPx(bars)
     override fun calculateTopPadding(): Dp = with(density) { metrics.topPadPx.toDp() }
-    override fun calculateBottomPadding(): Dp = with(density) { bottomPx.toDp() }
+    // 1.0.8: a list under the bars ends above the floating action button too, so its last row can be read
+    override fun calculateBottomPadding(): Dp = with(density) { (bottomPx + if (metrics.underBottom) metrics.actionPx else 0).toDp() }
     override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp = 0.dp
     override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp = 0.dp
     override fun toString() = "ShellPaddingValues(top=${metrics.topPadPx}px, bottom=${bottomPx}px)"
@@ -138,6 +143,12 @@ fun rememberShellContentPadding(): PaddingValues {
  * Zero elsewhere, so a list outside such a screen is never padded twice.
  */
 val LocalShellBottomPadding = staticCompositionLocalOf<PaddingValues> { PaddingValues(0.dp) }
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0): the room the phone's floating action button takes over the screen's bottom ([ShellPrimaryAction]):
+ * the notices sit over it. Zero without one, and on tablet and DeX.
+ */
+val LocalShellActionPadding = compositionLocalOf { 0.dp }
 
 /**
  * The top of the shell's padding, for the list of a screen in [UnderShellBars] with `listOnTop`:

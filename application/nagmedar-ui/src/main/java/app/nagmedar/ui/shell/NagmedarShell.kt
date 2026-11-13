@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -47,9 +49,11 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -60,6 +64,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.BackSource
 import app.nagmedar.ui.components.MenuSpec
+import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.rememberBackSwipes
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
@@ -295,6 +300,9 @@ fun NagmedarShell(
     val scroll = remember { ShellScrollState() }
     val metrics = remember { ShellChromeMetrics() }
     val overlayHost = remember { ShellOverlayHost() }
+    // 1.0.8 (Desktop Kit 2.8.0): the screen's main action (ShellPrimaryAction), where the layout keeps it
+    val primaryHost = remember { PrimaryActionHost() }
+    val primary = primaryHost.current
     val glassSource = remember { HazeState() }
     val padding = remember(metrics, density) { shellPaddingValues(metrics, density) }
     val floating = floatingPlayer && navKind != NavKind.BottomBar && !short
@@ -423,7 +431,13 @@ fun NagmedarShell(
                             iconBadges = iconBadges,
                         )
                     }
-                    NavKind.Rail -> NavRail(selected, navigator::selectTab, iconBadges = iconBadges)
+                    NavKind.Rail -> NavRail(
+                        selected,
+                        navigator::selectTab,
+                        iconBadges = iconBadges,
+                        // 1.0.8: the screen's main action at the rail's top, named by a tooltip
+                        action = primary?.let { action -> { PrimaryActionButton(action, extended = false, height = 48.dp) } },
+                    )
                     NavKind.Sidebar -> Sidebar(
                         selected = selected,
                         onSelect = navigator::selectTab,
@@ -432,6 +446,16 @@ fun NagmedarShell(
                         badges = badges,
                         width = sidebarWidth,
                         iconBadges = iconBadges,
+                        // 1.0.8: the screen's main action at the sidebar's top, the icon alone while collapsed
+                        action = primary?.let { action ->
+                            { collapsed ->
+                                if (collapsed) {
+                                    PrimaryActionButton(action, extended = false, height = 40.dp)
+                                } else {
+                                    NagButton(action.label, action.onClick, Modifier.fillMaxWidth().testTag("primary-action"), icon = action.icon, primary = true)
+                                }
+                            }
+                        },
                     )
                 }
             },
@@ -497,7 +521,7 @@ fun NagmedarShell(
                                         ShellScreenFrame(metrics, scroll, bars = !NavRules.hidesBars(destination, currentKind)) {
                                             // 1.0.8: the screen hears its tab's entry tapped again (OnReselect)
                                             val page = remember(destination, navigator) { ShellTabPage(destination, navigator.reselects) }
-                                            CompositionLocalProvider(LocalShellTabPage provides page) {
+                                            CompositionLocalProvider(LocalShellTabPage provides page, LocalPrimaryActionHost provides primaryHost) {
                                                 currentScreen(destination, navigator)
                                             }
                                         }
@@ -510,8 +534,28 @@ fun NagmedarShell(
             },
             // undo bars and other messages float over the screen, above the player bar
             screenOverlay = {
-                CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass) {
-                    Box(Modifier.fillMaxSize()) { overlay() }
+                // 1.0.8: the room the phone's floating action button takes: the notices sit over it
+                val actionPadding = with(density) { metrics.actionPx.toDp() }
+                CompositionLocalProvider(LocalNavKind provides navKind, LocalWidthClass provides widthClass, LocalShellActionPadding provides actionPadding) {
+                    Box(Modifier.fillMaxSize()) {
+                        // 1.0.8 (Desktop Kit 2.8.0): the phone's floating action button (ShellPrimaryAction), above the bars and
+                        // the player and going down with them when a list scrolls them away
+                        if (navKind == NavKind.BottomBar) {
+                            PhoneActionButton(
+                                action = primary,
+                                shown = !(imeVisible && imeTakesRoom) && !barsHidden,
+                                extended = !scroll.scrolled,
+                                metrics = metrics,
+                                expandProgress = { overlayHost.expandProgress() },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset { IntOffset(0, scroll.offsetPx.roundToInt().coerceIn(0, metrics.navPx + metrics.playerPx)) },
+                            )
+                        } else {
+                            SideEffect { metrics.actionPx = 0 }
+                        }
+                        overlay()
+                    }
                 }
             },
             // over the phone's expanded player, the screen's overlays take the whole window; with a page over the whole

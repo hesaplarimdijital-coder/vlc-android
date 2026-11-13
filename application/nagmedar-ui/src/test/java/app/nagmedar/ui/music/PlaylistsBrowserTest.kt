@@ -121,8 +121,8 @@ class PlaylistsBrowserTest {
         val store = FakePlaylistStore()
         show(store)
         compose.onNodeWithText("Henüz çalma listesi yok").assertExists()
-        // the header's button and the empty screen's both make one
-        compose.onAllNodes(hasText("Yeni liste") and hasClickAction())[1].performClick()
+        // the empty screen's button makes one (1.0.8: the header's is the shell's main action, outside it none)
+        compose.onNode(hasText("Yeni liste") and hasClickAction()).performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("playlist-name-save").performClick()
         compose.waitForIdle()

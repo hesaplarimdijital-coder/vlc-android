@@ -164,6 +164,7 @@ import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.DebugChrome
+import app.nagmedar.ui.shell.LocalShellActionPadding
 import app.nagmedar.ui.shell.NavIconBadge
 import app.nagmedar.ui.shell.WindowRoot
 import app.nagmedar.ui.shell.rememberCaptionBar
@@ -582,7 +583,8 @@ private fun NagmedarMain(
                     // the app's notices (what the library, the service and the screens say), over the undo bars; above the
                     // system's buttons when a page over the whole window reaches down behind them (1.0.3)
                     Column(
-                        Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(16.dp),
+                        // 1.0.8: over the phone's floating action button when a screen has one
+                        Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = LocalShellActionPadding.current).padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {

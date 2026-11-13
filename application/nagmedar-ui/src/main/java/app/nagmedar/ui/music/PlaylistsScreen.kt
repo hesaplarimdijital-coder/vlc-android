@@ -94,6 +94,7 @@ import app.nagmedar.ui.playback.PlayFrom
 import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.ShellPrimaryAction
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -284,6 +285,9 @@ fun PlaylistsBrowser(
     val showDetail = !twoPane && detail && (shownSmart != null || open != null)
     // 1.0.3: a phone's list opens in depth over the overview, which stays where it was; Back is its transition's
     val phone = width == WidthClass.Compact
+    // 1.0.8 (Desktop Kit 2.8.0, the user's choice): "Yeni liste" is the screen's main action: a floating button on a phone,
+    // at the top of the rail and of the sidebar; not over an opened list on a phone
+    if (!showDetail) ShellPrimaryAction(stringResource(R.string.nag_pl_new), NagIcons.Plus) { naming = Naming.New }
     BackHandler(enabled = showDetail && !phone) { detail = false }
     val undoLabel = stringResource(R.string.nag_sc_undo)
     val undoKeys = ShortcutRegistry.chordLabel(ShortcutId.Undo, res)
@@ -395,8 +399,7 @@ fun PlaylistsBrowser(
             subtitle = playlists?.let { pluralStringResource(R.plurals.nag_pl_count, it.size, it.size) },
         ) {
             if (width == WidthClass.Compact) {
-                // a phone's width has room for one word: the rest is in the menu
-                NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus, modifier = Modifier.testTag("playlist-new"))
+                // the rest is in the menu; 1.0.8: "Yeni liste" is the screen's main action (ShellPrimaryAction)
                 ActionMenuButton(
                     NagIcons.MoreHorizontal,
                     stringResource(R.string.nag_more_actions),
@@ -414,8 +417,6 @@ fun PlaylistsBrowser(
                     Spacer(Modifier.width(NagTheme.dimens.gapS))
                     NagButton(stringResource(R.string.nag_smart_new), { editing = SmartEditing.New }, icon = NagIcons.SmartList, modifier = Modifier.testTag("smart-new"))
                 }
-                Spacer(Modifier.width(NagTheme.dimens.gapS))
-                NagButton(stringResource(R.string.nag_pl_new), { naming = Naming.New }, icon = NagIcons.Plus)
             }
         }
     }

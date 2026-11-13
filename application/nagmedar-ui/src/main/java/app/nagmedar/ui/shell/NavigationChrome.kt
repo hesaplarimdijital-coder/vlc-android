@@ -330,6 +330,8 @@ fun NavRail(
     modifier: Modifier = Modifier,
     /** 1.0.8: a count or a dot on the entries' icons ([NavIconBadge]). */
     iconBadges: NavIconBadges = emptyMap(),
+    /** 1.0.8 (Desktop Kit 2.8.0): the screen's main action above the entries ([ShellPrimaryAction]). */
+    action: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -345,6 +347,9 @@ fun NavRail(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BrandMark(Modifier.padding(vertical = dimens.gapS).size(28.dp))
+            if (action != null) {
+                Box(Modifier.padding(top = dimens.gapXs, bottom = dimens.gapS)) { action() }
+            }
             Column(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).selectableGroup(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -423,6 +428,8 @@ fun Sidebar(
     width: PaneWidthState? = null,
     /** 1.0.8: a count or a dot on the icons while the sidebar is collapsed ([NavIconBadge]). */
     iconBadges: NavIconBadges = emptyMap(),
+    /** 1.0.8 (Desktop Kit 2.8.0): the screen's main action at the top ([ShellPrimaryAction]), told whether the sidebar is collapsed. */
+    action: (@Composable (collapsed: Boolean) -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
@@ -451,6 +458,7 @@ fun Sidebar(
             width = shown.value,
             open = open,
             iconBadges = iconBadges,
+            action = action,
         )
         if (width != null && !collapsed) {
             // over the sidebar's padding and its edge, so the content does not move
@@ -481,10 +489,13 @@ private fun SidebarColumn(
     width: Dp,
     open: Float,
     iconBadges: NavIconBadges = emptyMap(),
+    action: (@Composable (collapsed: Boolean) -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_sidebar)
+    // the entries' inset from the sidebar's edges, narrower while collapsed
+    val inset = lerp(6.dp, dimens.gapS, open)
     Row(Modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
@@ -494,11 +505,15 @@ private fun SidebarColumn(
                 .background(colors.chrome)
                 .semantics { paneTitle = label },
         ) {
+            // 1.0.8: the screen's main action above the entries, the icon alone while collapsed
+            if (action != null) {
+                Box(Modifier.padding(start = inset, end = inset, top = dimens.gapS)) { action(collapsed) }
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = lerp(6.dp, dimens.gapS, open), vertical = dimens.gapS)
+                    .padding(horizontal = inset, vertical = dimens.gapS)
                     .selectableGroup(),
             ) {
                 NavSection.entries.filter { it != NavSection.Footer }.forEach { section ->
