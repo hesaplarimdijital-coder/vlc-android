@@ -1,6 +1,13 @@
 package app.nagmedar.ui.shell
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
@@ -32,7 +39,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import app.nagmedar.ui.R
@@ -83,6 +90,7 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.NagGlass
+import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.glass
@@ -516,20 +524,31 @@ fun PageTopBar(
     val latestBack by rememberUpdatedState(onBack)
     val latestSearch by rememberUpdatedState(onSearch)
     Box(modifier.fillMaxWidth().then(if (glass == null) Modifier.background(colors.background) else Modifier.topBarGlass(glass, scrolled()))) {
-        AnimatedContent(
-            targetState = TopBarContent(title, back = onBack != null, search = onSearch != null),
-            transitionSpec = { motion.topBarChange() },
-            label = "topBar",
-        ) { content ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
-                    .captionPadding(caption)
-                    .padding(start = if (content.back) dimens.gapXs else dimens.pagePadding, end = dimens.gapS),
-                verticalAlignment = Alignment.CenterVertically,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
+                .captionPadding(caption)
+                .padding(start = dimens.gapXs, end = dimens.gapS),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 1.0.8 (Desktop Kit 2.8.0): the back arrow slides in or out before the title, and the title moves along
+            // with it; the title fades only when its words change. Until then the whole bar faded out and in when the
+            // arrow alone came or went.
+            val tier = LocalMotionTier.current
+            val slide = NagMotion.fade(tier, NagMotion.open(IntSize.VisibilityThreshold))
+            val inset by animateDpAsState(
+                if (onBack != null) 0.dp else (dimens.pagePadding - dimens.gapXs).coerceAtLeast(0.dp),
+                NagMotion.fade(tier, NagMotion.open(Dp.VisibilityThreshold)),
+                label = "topBarTitleInset",
+            )
+            AnimatedVisibility(
+                visible = onBack != null,
+                enter = expandHorizontally(slide, expandFrom = Alignment.Start) + fadeIn(NagMotion.fade(tier, tween(NagMotion.CROSSFADE))),
+                exit = shrinkHorizontally(slide, shrinkTowards = Alignment.Start) + fadeOut(NagMotion.fade(tier, tween(NagMotion.FADE_OUT))),
+                label = "topBarBack",
             ) {
-                if (content.back) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     NagIconButton(
                         NagIcons.ChevronLeft,
                         stringResource(R.string.nag_nav_back),
@@ -540,11 +559,25 @@ fun PageTopBar(
                     )
                     Spacer(Modifier.width(dimens.gapXs))
                 }
-                Text(content.title, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).semantics { heading() })
-                if (content.search) {
-                    NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), { latestSearch?.invoke() }, Modifier.captionTarget(caption))
-                }
+            }
+            // the old title is gone before the new one fades in: two titles never show at once
+            AnimatedContent(
+                targetState = title,
+                transitionSpec = { motion.topBarChange() },
+                contentAlignment = Alignment.CenterStart,
+                label = "topBarTitle",
+                modifier = Modifier.weight(1f).padding(start = inset),
+            ) { shown ->
+                Text(shown, style = NagTheme.type.headline, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth().semantics { heading() })
+            }
+            AnimatedVisibility(
+                visible = onSearch != null,
+                enter = fadeIn(NagMotion.fade(tier, tween(NagMotion.CROSSFADE, delayMillis = NagMotion.FADE_OUT))),
+                exit = fadeOut(NagMotion.fade(tier, tween(NagMotion.FADE_OUT))),
+                label = "topBarSearch",
+            ) {
+                NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), { latestSearch?.invoke() }, Modifier.captionTarget(caption))
             }
         }
     }
@@ -572,10 +605,6 @@ private fun Modifier.topBarGlass(mode: GlassMode, scrolled: Boolean): Modifier {
             }
         }
 }
-
-/** What the top bar shows: it fades through to another when this changes. */
-@Immutable
-private data class TopBarContent(val title: String, val back: Boolean, val search: Boolean)
 
 /** The back arrow's target: a thumb's, with a pointer too. */
 private val BACK_TARGET = 48.dp
