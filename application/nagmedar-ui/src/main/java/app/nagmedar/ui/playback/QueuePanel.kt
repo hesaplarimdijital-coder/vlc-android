@@ -225,6 +225,8 @@ fun QueuePanel(
                         // by touch the swipe; with a pointer the menu and Delete
                         swipe = touch,
                         color = background,
+                        // 1.0.8: a track's second copy takes the first one's key once the first goes: back at once
+                        stillThere = upcoming,
                         actions = listOfNotNull(
                             CustomAccessibilityAction(up) { moveUp(); true }.takeIf { position > 0 },
                             CustomAccessibilityAction(down) { moveDown(); true }.takeIf { position < upcoming.lastIndex },

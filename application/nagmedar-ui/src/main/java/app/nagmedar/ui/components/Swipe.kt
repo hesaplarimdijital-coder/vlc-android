@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -87,6 +88,11 @@ fun SwipeToRemove(
     actions: List<CustomAccessibilityAction> = emptyList(),
     /** What the item is drawn on: it slides over the danger colour as an opaque row. */
     color: Color = NagTheme.colors.background,
+    /**
+     * 1.0.8: what changes once the list has taken the item away (the list itself). A row still here when it changes is
+     * another item in its place (the queue's second copy of a track takes the first one's key): it comes back at once.
+     */
+    stillThere: Any? = null,
     content: @Composable () -> Unit,
 ) {
     val offset = remember { Animatable(0f) }
@@ -98,6 +104,15 @@ fun SwipeToRemove(
     val flingPx = with(LocalDensity.current) { REMOVE_FLING_DP.dp.toPx() }
     // 1.0.8: past the third: letting go removes
     var armed by remember { mutableStateOf(false) }
+    // 1.0.8: swiped away, until the row comes back (the list kept it, or another item took its place)
+    var removing by remember { mutableStateOf(false) }
+    LaunchedEffect(stillThere) {
+        if (removing) {
+            removing = false
+            armed = false
+            offset.snapTo(0f)
+        }
+    }
     // toward the start: left, or right in a right-to-left language
     val toStart = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1f else -1f
     Box(
@@ -150,14 +165,21 @@ fun SwipeToRemove(
                         val flung = speed > flingPx && abs(position) > width * REMOVE_AT / 2
                         scope.launch {
                             if (completed && width > 0 && (far || flung)) {
-                                if (!armed) haptics.threshold()
-                                // it leaves on the emphasized accelerate curve
+                                if (!armed) {
+                                    armed = true
+                                    haptics.threshold()
+                                }
+                                // it leaves on the emphasized accelerate curve, what lies under it still saying it goes
                                 offset.animateTo(toStart * width, motion.emphasizedExit())
-                                armed = false
+                                removing = true
                                 currentOnRemove()
                                 // a list that keeps the item (nothing was removed) shows it again, once the list had its time
                                 delay(STILL_THERE_MS)
-                                offset.snapTo(0f)
+                                if (removing) {
+                                    removing = false
+                                    armed = false
+                                    offset.snapTo(0f)
+                                }
                             } else {
                                 armed = false
                                 offset.animateTo(0f, motion.spatial(NagMotion.PIXEL))
