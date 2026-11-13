@@ -49,11 +49,14 @@ import kotlin.math.abs
  * moment it is launched, an order no device has (Compose 1.12 deprecates that rule for one that
  * queues): that is why the swipes of [ComponentsBehaviourTest] never showed this.
  *
- * Every swipe is made twice, with one move more the second time. Under these tests (not on a
- * device: there a bar follows every move) a bar that moves under the finger takes only every other
- * move of it after the first two, and 1.0.5's bar stayed aside only when the last move was one it
- * took: with one count or the other it is. (Seen with a probe that printed each move the bar was
- * given; why it is so was not found.)
+ * Every swipe is made twice, with one move more the second time. Under these tests a bar that
+ * moves under the finger takes only every other move of it after the first two (seen with a probe
+ * that printed each move the bar was given), and 1.0.5's bar stayed aside only when the last move
+ * was one it took: with one count or the other it is. Compose gives a node no move whose place
+ * within the node has not changed (HitPathTracker, read in androidx's main branch); a bar that has
+ * followed the finger exactly, under the even steps of a test, is there again at every second move.
+ * A person's finger does not move in even steps, and on the emulator's touch screen, moved by raw
+ * touch events, the bar followed every move.
  *
  * Each swipe also says that the finger had moved the bar when it let go: without that, a bar that
  * never left its place would pass for one that came back.
