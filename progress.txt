@@ -1,0 +1,9 @@
+1786 s, 140 steps, pass phone-en, 0 crashes
+133 phone-en Cold start after the process was killed ok
+134 phone-en Podcasts ok
+135 phone-en The podcast's page ok
+136 phone-en An episode's page (to play it) ok
+137 phone-en Play the episode ok
+138 phone-en The episode plays ok
+139 phone-en Pause the episode ok
+140 phone-en Back from the episode ok
