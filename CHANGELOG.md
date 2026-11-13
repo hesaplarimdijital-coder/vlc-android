@@ -2,6 +2,65 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.8 (13 Kasım 2026)
+
+Desktop Kit 2.8.0'ın getirdikleri Nağmedar'a taşındı (13 Kasım: “Desktop kit 2.8.0 e göre güncelle”, sonra “Vazgeçtim hepsini taşı”): kitin tasarım denetiminin bulguları ve DeskMail'in istekleri, Nağmedar'da karşılığı olan her yerde, Nağmedar'ın kendi bileşenleri genişletilerek. Karşılığı olmayanlar sonda, nedenleriyle.
+
+### Liste ve ayrıntı
+- Müzik'in grupları (albümler, sanatçılar, klasörler) ve açık grubun parçaları, pencere bir genişlik eşiğini geçerken yerini korur: DeX'te pencere boyutlanınca, tablet ya da telefon çevrilince, denetçi açılıp kapanınca grupların listesi kaldığı yerdedir, açık albüm açık kalır ve parçaları kaldığı yerdedir. Gruplarla yan yana açık albüm, pencere daralınca tek başına açık kalır. Önceden her düzen kendi listesini baştan kuruyordu ve liste başa dönüyordu; orta genişlikte açık bir grubun altında kalan liste de geri gelince başa dönüyordu.
+- Yan yana dururken başka bir grup seçilince öncekinin parçaları önce gider, yenisininkiler sonra gelir (azaltılmış hareketle hemen).
+- Gruplarla parçaları ve Çalma Listeleri'nde listelerle açık liste arasındaki bölücü sürüklenir ve yeri saklanır (“Listenin genişliği”: fare, parmak, oklar ve TalkBack). Grupların ilk genişliği eskisi gibi 260 dp, listelerinki 340 dp.
+- Podcastler'de program ya da bölüm listenin yanına ancak ikisinin en küçük genişliklerine de yer varsa gelir; daha dar bir alanda (kenar çubuğunun yanında, DeX'in eşiğe yakın penceresinde) biri öbürünün üstünde açılır. Önceden yalnız pencerenin genişlik sınıfına bakılıyor, liste en küçük genişliğinin altına sıkışabiliyordu.
+
+### Klavye ve fare
+- Tablo (Müzik, çalma listeleri) Tab'ın tek durağıdır: Tab son odaklanan satıra (yoksa seçimin çapasına ya da görünen seçili satıra, yoksa görünen ilk satıra) gelir, sonraki Tab tablodan hemen çıkar. Uzun bir kütüphanede bir sonraki durak satır satır aranmaz; yıldız hücresi ve satırın “⋯”u durak değildir. Oklar satır satır, Home ve End uçlara, Page Up ve Page Down bir ekran gider. Sütun başlıkları Tab sırasında satırlardan önce gelir; TalkBack için başlıktırlar, sıralı olan ne yöne sıralandığını, sıralanabilen dokunuşun ne yaptığını söyler.
+- Fareyle seçili olmayan bir satırdan ya da satırların altından sürüklemek bir seçim çerçevesi çizer: Ctrl ekler ya da çıkarır, Shift ekler, liste kenarlarda kayar, Esc seçimi geri koyar; sıralama tutamaklarında olmaz. Seçili satırlar fareyle beklemeden sürüklenir; kalem ve parmak eskisi gibi bekler. Çalma listesi Shift+Yukarı ve Shift+Aşağı'yı da alır.
+- Kapak ızgaraları (Podcastler, Çalma Listeleri) Tab'ın tek durağıdır, içinde oklar gezer; bir çalma listesi kartının “⋯”una kartından ulaşılır. Denetçinin sekme şeridi de tek duraktır: oklar, Home ve End seçimi ve odağı birlikte taşır.
+- Kapakların büyüklüğü sizin: Ctrl ile tekerlek ya da dokunmatik yüzeyde iki parmak, ekranda iki parmak, Ctrl ile + ve − (yazılan karaktere göre: Türkçe Q klavyede − ABD klavyesinin = tuşundadır), Ctrl+0 ilk hâline; TalkBack'te “Kapakları büyüt” ve “Kapakları küçült”. Seçilen büyüklük her ızgara için saklanır.
+- Fare ya da dokunmatik yüzeyle listelerin sonunda ince bir kaydırma çubuğu: tablolar, ızgaralar, Podcastler'in listesi, menüler, alt sayfalar, Ctrl+K paleti ve “Daha fazla”. Kayarken ve imleç üstündeyken görünür, sonra solar; imlecin altında kalınlaşır, sürüklenir, boşluğuna basmak oraya gider. Dokunmatikte yoktur.
+- Simge düğmeleri klavyenin odağı gelince de adlarını gösterir (fare durunca gösterdikleri gibi; parmağın ya da farenin getirdiği odakta değil). Bir ipucu açıkken ya da kapandıktan bir saniye içinde komşu düğmeye geçilince onun adı hemen çıkar. Kapalı kenar çubuğunda adlar girişlerin yanında çıkar. İpucunun beklemesi Ayarlar'daki seçiminizdir.
+- Alt sayfa açıkken Tab ve Shift+Tab arkadaki ekrana geçmez; sayfa kapanınca odak açılmadan önceki yerine döner.
+- Rayda fareyle (DeX'in kenar çubuğuna dar penceresi, fareli tablet) menü çubuğunun menüleri üst çubuktaki “≡” (“Menüler”) düğmesindedir; önceden menü çubuğu yalnız kenar çubuklu düzende vardı. Parmakla kullanılan tablet eskisi gibi.
+
+### Dokunarak
+- “Yeni liste” Çalma Listeleri'nin ana eylemi oldu (sizin seçiminiz): telefonda altta, oynatıcının üstünde yüzen bir düğme; liste en üstteyken yazısıyla, kaydırılınca yalnız simgesiyle, çubuklarla birlikte iner; ekran klavyesi açıkken, telefonda açılan bir listenin üstünde ve oynatıcı büyürken görünmez. Rayda en üstte vurgulu bir simge (adı ipucunda), kenar çubuğunda en üstte yazısıyla (kapalıyken yalnız simge). Başlıktaki “Yeni liste” düğmesi kalktı; boş ekranın kendi “Yeni liste”si duruyor.
+- Çekip yenileme: Podcastler'de abonelikler parmakla aşağı çekilince hepsi şimdi okunur (dönemsel yenilemenin turu: kendi kendine indiren programların yenileri sıraya girer); bir uyarı kaç yeni bölüm geldiğini, gelmediyse “Yeni bölüm yok”u, akışlar okunamadıysa bunu söyler. Bir programın sayfası çekilince o program okunur (yalnız okunamazsa söylenir). Ağ'da açık klasör çekilince yeniden okunur (F5 ve düğmesi de duruyor). Disk üst çubuğun altından gelir, çekildikçe yayı dolar; yay tamamlanınca telefon titrer, bırakınca yenilenir, yenilenirken disk döner. Fare ve klavye çekmez; azaltılmış harekette disk yerine sıçrar; TalkBack dönerken “Yenileniyor” der.
+- Gösterilen ekranın girişine yeniden dokunmak (telefonun alt çubuğu, ray, kenar çubuğu) onu başına götürür: Müzik'in grupları ve parçaları, Podcastler'in ızgarası ve listesi, Çalma Listeleri'nin kapakları.
+- Telefonun alt çubuğunda, rayda ve kapalı kenar çubuğunda Podcastler'in simgesinde yeni bölüm sayısı (99'dan çoğu “99+”); açık kenar çubuğunda yanında “4 yeni”. “Daha fazla”, listelediği bir sayfada sayı varsa nokta alır. TalkBack girişi sayısıyla okur (“Podcast, 4 yeni bölüm”).
+- Sıradaki'de sola kaydırılan parçanın altındaki “Kaldır”, üçte biri geçince tehlike rengine döner ve simgesi büyür, telefon titrer; geri dönülünce yeniden titrer. Kaldırılan satır bir saniye dışarıda kalır: Sıradaki onu bu arada alır (önceden bir kare yerine dönüp sonra gidebiliyordu). Hızlı bir fırlatma yarı yoldan kaldırır.
+- Dokunarak bir satırın menüsü yalnız uzun basışın ardında kalmaz: abonelikler (okun yerinde), kayıtlı ve bulunan sunucular, Sıradaki'nin parçaları satırın sonunda “⋯” gösterir. Fareyle eskisi gibi.
+- Alt sayfalar jestsiz de kapanır: tutamak aynı zamanda “Sayfayı kapat” düğmesidir (TalkBack, Anahtar Erişimi, Tab ulaşır; yeri ve görünüşü aynı); karartılmış ekran TalkBack'e dokunuşun ne yapacağını söyler. Bir sayfa açılırken açık olan kapanır: sayfalar üst üste binmez.
+- Yan çevrilmiş telefon (kısa pencere, S24'te 780 × 360 dp) rayı tutar ama telefonun yazı boyutlarını, ölçülerini ve yaylarını alır; oynatıcı içeriğin üstünde yüzmez, altında durur. Önceden tabletin büyük yazısını ve zamanlı hareketlerini alıyordu.
+- Müzik'in denetçisi, yanaşamadığı genişlikte (telefon, bölünmüş ekrandaki tablet, dar DeX penceresi) düğmesiyle ve Ctrl+I ile alt sayfa olarak açılır; önceden o genişliklerde ulaşılamıyordu.
+
+### Görünüş
+- Girdilerin kenarı (metin alanları, satır içi alanlar, anahtarın kapalı yolu) açık, koyu ve OLED temada arka plana ve yüzeylere en az 3:1; düğmeler, paneller ve menüler eskisi gibi.
+- Basılı durum üzerine gelinmişten belirgindir; devre dışı düğmenin kendi görünüşü var (dolgusuz, soluk yazı, ince kenar; yarı saydam değil). Silen ya da unutan işlerin düğmeleri (indirme, bölümün indirmesi, abonelik, sunucu, scrobble hesabı) tehlike renginde, hiçbir zaman dolu değil.
+- Bir ayar satırı bütünüyle düğme olabilir (sonunda ok, yazısı öteki satırlarla aynı hizada); bir uyarının iki düğmesi yan yana sığmayınca alt alta geçer.
+- Seçili satırın başında bir çubuk; parmakla “Seç” kipinde her satırda onay kutusu, başlıkta üç durumlu “Tümünü seç”; başlık bir satır yüksekliğinde.
+- Üst çubukta geri oku kayarak gelir ve gider, başlık onunla birlikte kayar; başlık yalnız sözcükleri değişince solar.
+- Hareket: telefonda açılan ayrıntı yerini geçmeden oturur, basılan denetim sekmeden geri gelir, sekme ve seçim göstergeleri sekmez; satırlar yalnız sonradan gelen veride sırayla gelir (yeniden açılan sekmede hemen görünür).
+- Metinler: İngilizcede “Collapse the player” (“Close” diyordu, oynatıcı yalnız küçülür); Ayarlar'da “Görünüş” (“Görünüm” menüsüyle aynı sözcüktü).
+- Düzenini genişliğine göre kendi içinde seçen bir ekran kabuğun dolgusunu orada isteyince kabuk onu bir de kendisi dolgulamaz (ekran iki kez dolgulanıyordu).
+- Uygulamanın kitle paylaştığı kodu (bileşenler, kabuk, tema, girdi) kurulurken önceden derlenir: arayüz modülüne Baseline Profile'ın geniş kuralları eklendi, üreticinin 1.0.3'te topladığı profilin yanına.
+
+### Taşınmayanlar ve nedenleri
+- Adres çipli alan (TokenField): Nağmedar'da adres yazılan bir alan yok (19:44'te söylendiği gibi).
+- İmleci ve seçimi bilen metin alanı: uygulamanın imlece bir şey koyduğu ya da seçimi okuduğu bir alan yok.
+- Bildirimin kendi süresi ve 48 dp kapatma düğmesi: uyarılar ve “Geri al” çubukları imleç üstündeyken ya da odak içlerindeyken zaten durur, TalkBack için uzar; kendi süresini isteyen bir uyarı yok; kapatma düğmeleri yok, kaydırarak kapanırlar.
+- Değişen gezinme (sonradan eklenen klasörler ve hesaplar, üst öğeler, girişlerin menüleri, kapanan bölümler): Nağmedar'ın ekranları sabit. “Daha fazla” ekranları zaten bölümlerinin başlıkları altında listeliyor.
+- Izgaranın boş hâli ve ayrıntı bölmesinin yer tutucusu: ekranlar ızgaranın yerinde kendi boş durumunu gösteriyor; geniş Müzik her zaman bir grup gösteriyor, Podcastler'de liste seçimsizken bütün genişliği alıyor.
+- Kaydırmanın ikinci eylemi (sağa kaydırma): Nağmedar'ın kaydırılan listelerinde kaldırmadan başka doğal bir eylem yok.
+- Kapak hücresinin Oynat ve “⋯” düğmeleri, satır önizlemesi, noktalama kısayolları, raydaki sayfa başlığı, WebView camının duraklaması, ayrıntının liste durumu: Nağmedar'da karşılıkları zaten vardı ya da o bileşen yok.
+
+### Sürüm
+- `versionCode` 4010008; kişisel arm64 APK'sı 14010014 (1.0.7'nin 14010013'ünün üzerine güncelleme olarak kurulur).
+
+### Test
+- Yeni ve değişen testler: `MusicPanesTest` (grupların ve açık albümün parçalarının yeri pencere eşiği geçilirken korunur; yan yana açık albüm daralınca tek başına açık kalır; bölücünün yeri saklanır), `PanesTest.aWideWindowWithoutTheRoomOfBothPanesShowsOneAtATime`, `PullToRefreshTest` (uzun çekiş yeniler ve disk yenilenirken durur, kısa çekiş yenilemez, fare çekmez, disk kabukta üst çubuğun altından ya da listenin kendi üstünden çıkar, azaltılmış harekette yerine sıçrar), `PodcastPullTest`, `QueuePanelTest` (dokunarak satırın “⋯”u görünür, fareyle görünmez), `SheetAccessTest`, `TableKeyboardAndFrameTest`, `DenseTableRequestsTest`, `ScrollbarTest`, `GridZoomAndStopsTest`, `InspectorSheetTest`, `InspectorStateTest`, `HeightClassTest`, `ReselectTest`, `RailMenusTest`, `NavIconBadgeTest`, `PrimaryActionTest`, `PlaylistsBrowserTest`, `TooltipTest` (iki yeni), `PageTopBarTest`, `MotionTierTest`, `ListAppearTest`, `ComponentsBehaviourTest`, `ShellPaddingTest`, `PaletteContrastTest` (iki yeni), `DragStartTest`.
+- Yeni testlerin CI'daki ilk koşuları dört şey buldu, hepsi düzeltildi: bir eksik içe aktarma, simge listesinde eksik bir simge, testin telefonun alt çubuğunda Podcastler'i uzun adıyla araması (çubuk “Podcast” yazar) ve gerçek bir hata: Müzik'in grup listesi telefonun düzeninden tabletinkine geçerken uygulama çöküyordu (“Cannot insert LayoutNode … because it already has a parent”, `MusicPanesTest`). Bölünmüş bölme parçalarını kendi alt kompozisyonunda kuruyordu; liste bir kompozisyondan ötekine taşınırken Compose onu eski yerinden almadan yeni yerine koymaya çalışıyordu. Bölme artık kitinki gibi düz bir yerleşimdir (`c7bbc37b`); aynı test şimdi geçer. Hata sürüme girmedi: bu sürümün kendi kodundaydı.
+- CI 43488970710 (`c7bbc37b`): iki kol yeşil, 2422 testin hepsi geçti. 103 ekran görüntüsü referanslardan farklı: girdilerin kenarı, basılı ve devre dışı durumların renkleri, raydaki “≡”, Çalma Listeleri'nin ana eylemi, bölücüler, dokunarak satırların “⋯”u.
+
 ## 1.0.7 (13 Kasım 2026)
 
 Ctrl+K araması kütüphanede eşleşen her şeyi verir: parça adından olduğu kadar sanatçısından ve albümünden de bulunur, bulunanların hepsi listelenir; sanatçılar ve albümler de sonuçtur.
