@@ -1,0 +1,9 @@
+329 s, 30 steps, pass page-opens, 0 crashes
+23 page-opens the show's page again, Back from the episode: swiped up ok
+24 page-opens Back on the Podcasts (after the episode) ok
+25 page-opens The Podcasts' menu ok
+26 page-opens Show as covers ok
+27 page-opens the show's page, its tile tapped: the UI asked ok
+28 page-opens the show's page, its tile tapped: swiped up ok
+29 page-opens Back on the Podcasts (after the tile) ok
+30 page-opens the show's page, its tile tapped again: the UI asked ok

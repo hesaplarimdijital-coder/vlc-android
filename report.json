@@ -1,0 +1,773 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "page-opens",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-page-opens-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-page-opens-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 7.9,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "page-opens",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-page-opens-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-page-opens-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "page-opens",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-page-opens-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-page-opens-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 7.3,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "page-opens",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-page-opens-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-page-opens-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "page-opens",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-page-opens-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-page-opens-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "page-opens",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-page-opens-after-the-scan.png",
+   "dump": "dumps/006-page-opens-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "page-opens",
+   "title": "Podcasts (the animations on)",
+   "status": "ok",
+   "shot": "shots/007-page-opens-podcasts-the-animations-on.png",
+   "dump": "dumps/007-page-opens-podcasts-the-animations-on.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "page-opens",
+   "title": "Add a podcast by its address",
+   "status": "ok",
+   "shot": "shots/008-page-opens-add-a-podcast-by-its-address.png",
+   "dump": "dumps/008-page-opens-add-a-podcast-by-its-address.xml",
+   "changed": true,
+   "seconds": 6.9,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "page-opens",
+   "title": "The feed's address typed",
+   "status": "ok",
+   "shot": "shots/009-page-opens-the-feed-s-address-typed.png",
+   "dump": "dumps/009-page-opens-the-feed-s-address-typed.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "page-opens",
+   "title": "Subscribe",
+   "status": "ok",
+   "shot": "shots/010-page-opens-subscribe.png",
+   "dump": "dumps/010-page-opens-subscribe.xml",
+   "changed": true,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "page-opens",
+   "title": "Followed",
+   "status": "ok",
+   "shot": "shots/011-page-opens-followed.png",
+   "dump": "dumps/011-page-opens-followed.xml",
+   "changed": true,
+   "seconds": 6.5,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "page-opens",
+   "title": "After following: the page the app opened",
+   "status": "ok",
+   "shot": "shots/012-page-opens-after-following-the-page-the-app-opened.png",
+   "dump": "dumps/012-page-opens-after-following-the-page-the-app-opened.xml",
+   "changed": false,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "page-opens",
+   "title": "the page the app opens once the show is followed: the UI asked",
+   "status": "ok",
+   "shot": "shots/013-page-opens-the-page-the-app-opens-once-the-show-is-followed.png",
+   "dump": "dumps/013-page-opens-the-page-the-app-opens-once-the-show-is-followed.xml",
+   "changed": false,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "page-opens",
+   "title": "the page the app opens once the show is followed: swiped up",
+   "status": "ok",
+   "shot": "shots/014-page-opens-the-page-the-app-opens-once-the-show-is-followed.png",
+   "dump": "dumps/014-page-opens-the-page-the-app-opens-once-the-show-is-followed.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "page-opens",
+   "title": "Back on the Podcasts (after following)",
+   "status": "ok",
+   "shot": "shots/015-page-opens-back-on-the-podcasts-after-following.png",
+   "dump": "dumps/015-page-opens-back-on-the-podcasts-after-following.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "page-opens",
+   "title": "the show's page, its row tapped: the UI asked",
+   "status": "ok",
+   "shot": "shots/016-page-opens-the-show-s-page-its-row-tapped-the-ui-asked.png",
+   "dump": "dumps/016-page-opens-the-show-s-page-its-row-tapped-the-ui-asked.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "page-opens",
+   "title": "the show's page, its row tapped: swiped up",
+   "status": "ok",
+   "shot": "shots/017-page-opens-the-show-s-page-its-row-tapped-swiped-up.png",
+   "dump": "dumps/017-page-opens-the-show-s-page-its-row-tapped-swiped-up.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "page-opens",
+   "title": "Back on the Podcasts (its row tapped)",
+   "status": "ok",
+   "shot": "shots/018-page-opens-back-on-the-podcasts-its-row-tapped.png",
+   "dump": "dumps/018-page-opens-back-on-the-podcasts-its-row-tapped.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "page-opens",
+   "title": "the show's page, its row tapped again: the UI asked",
+   "status": "ok",
+   "shot": "shots/019-page-opens-the-show-s-page-its-row-tapped-again-the-ui-aske.png",
+   "dump": "dumps/019-page-opens-the-show-s-page-its-row-tapped-again-the-ui-aske.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "page-opens",
+   "title": "the show's page, its row tapped again: swiped up",
+   "status": "ok",
+   "shot": "shots/020-page-opens-the-show-s-page-its-row-tapped-again-swiped-up.png",
+   "dump": "dumps/020-page-opens-the-show-s-page-its-row-tapped-again-swiped-up.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 21,
+   "pass": "page-opens",
+   "title": "an episode's page over the show's: the UI asked",
+   "status": "ok",
+   "shot": "shots/021-page-opens-an-episode-s-page-over-the-show-s-the-ui-asked.png",
+   "dump": "dumps/021-page-opens-an-episode-s-page-over-the-show-s-the-ui-asked.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "page-opens",
+   "title": "the show's page again, Back from the episode: the UI asked",
+   "status": "ok",
+   "shot": "shots/022-page-opens-the-show-s-page-again-back-from-the-episode-the-.png",
+   "dump": "dumps/022-page-opens-the-show-s-page-again-back-from-the-episode-the-.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "page-opens",
+   "title": "the show's page again, Back from the episode: swiped up",
+   "status": "ok",
+   "shot": "shots/023-page-opens-the-show-s-page-again-back-from-the-episode-swip.png",
+   "dump": "dumps/023-page-opens-the-show-s-page-again-back-from-the-episode-swip.xml",
+   "changed": true,
+   "seconds": 7.2,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "page-opens",
+   "title": "Back on the Podcasts (after the episode)",
+   "status": "ok",
+   "shot": "shots/024-page-opens-back-on-the-podcasts-after-the-episode.png",
+   "dump": "dumps/024-page-opens-back-on-the-podcasts-after-the-episode.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "page-opens",
+   "title": "The Podcasts' menu",
+   "status": "ok",
+   "shot": "shots/025-page-opens-the-podcasts-menu.png",
+   "dump": "dumps/025-page-opens-the-podcasts-menu.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 26,
+   "pass": "page-opens",
+   "title": "Show as covers",
+   "status": "ok",
+   "shot": "shots/026-page-opens-show-as-covers.png",
+   "dump": "dumps/026-page-opens-show-as-covers.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 27,
+   "pass": "page-opens",
+   "title": "the show's page, its tile tapped: the UI asked",
+   "status": "ok",
+   "shot": "shots/027-page-opens-the-show-s-page-its-tile-tapped-the-ui-asked.png",
+   "dump": "dumps/027-page-opens-the-show-s-page-its-tile-tapped-the-ui-asked.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 28,
+   "pass": "page-opens",
+   "title": "the show's page, its tile tapped: swiped up",
+   "status": "ok",
+   "shot": "shots/028-page-opens-the-show-s-page-its-tile-tapped-swiped-up.png",
+   "dump": "dumps/028-page-opens-the-show-s-page-its-tile-tapped-swiped-up.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 29,
+   "pass": "page-opens",
+   "title": "Back on the Podcasts (after the tile)",
+   "status": "ok",
+   "shot": "shots/029-page-opens-back-on-the-podcasts-after-the-tile.png",
+   "dump": "dumps/029-page-opens-back-on-the-podcasts-after-the-tile.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 30,
+   "pass": "page-opens",
+   "title": "the show's page, its tile tapped again: the UI asked",
+   "status": "ok",
+   "shot": "shots/030-page-opens-the-show-s-page-its-tile-tapped-again-the-ui-ask.png",
+   "dump": "dumps/030-page-opens-the-show-s-page-its-tile-tapped-again-the-ui-ask.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 31,
+   "pass": "page-opens",
+   "title": "the show's page, its tile tapped again: swiped up",
+   "status": "ok",
+   "shot": "shots/031-page-opens-the-show-s-page-its-tile-tapped-again-swiped-up.png",
+   "dump": "dumps/031-page-opens-the-show-s-page-its-tile-tapped-again-swiped-up.xml",
+   "changed": true,
+   "seconds": 7.1,
+   "note": ""
+  },
+  {
+   "n": 32,
+   "pass": "page-opens",
+   "title": "Back on the Podcasts (after the tile, again)",
+   "status": "ok",
+   "shot": "shots/032-page-opens-back-on-the-podcasts-after-the-tile-again.png",
+   "dump": "dumps/032-page-opens-back-on-the-podcasts-after-the-tile-again.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "page-opens",
+   "name": "the podcast address field",
+   "ok": true,
+   "detail": "",
+   "step": 8
+  },
+  {
+   "pass": "page-opens",
+   "name": "the feed is followed",
+   "ok": true,
+   "detail": "",
+   "step": 10
+  },
+  {
+   "pass": "page-opens",
+   "name": "the page the app opens once the show is followed: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 14.2 % at 0.8 s, 14.2 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 13
+  },
+  {
+   "pass": "page-opens",
+   "name": "the page the app opens once the show is followed: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 13
+  },
+  {
+   "pass": "page-opens",
+   "name": "the page the app opens once the show is followed: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"27 - A long titl\" moved up by 609 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 14
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back from the show's page shows the Podcasts again (after following)",
+   "ok": true,
+   "detail": "1 show(s) listed",
+   "step": 15
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back on the Podcasts the bottom bar is shown (after following)",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 15
+  },
+  {
+   "pass": "page-opens",
+   "name": "a followed show on the Podcasts",
+   "ok": true,
+   "detail": "1 listed",
+   "step": 15
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 14.1 % at 0.3 s, 14.2 % at 0.8 s, 14.2 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 16
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 16
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"27 - A long titl\" moved up by 724 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 17
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back from the show's page shows the Podcasts again (its row tapped)",
+   "ok": true,
+   "detail": "1 show(s) listed",
+   "step": 18
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back on the Podcasts the bottom bar is shown (its row tapped)",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 18
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped again: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 14.2 % at 0.3 s, 14.2 % at 0.8 s, 14.2 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 19
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped again: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 19
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its row tapped again: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"27 - A long titl\" moved up by 707 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 20
+  },
+  {
+   "pass": "page-opens",
+   "name": "an episode on the show's page to open",
+   "ok": true,
+   "detail": "5 in sight",
+   "step": 20
+  },
+  {
+   "pass": "page-opens",
+   "name": "an episode's page over the show's: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 15.9 % at 0.3 s, 15.9 % at 0.8 s, 15.9 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 21
+  },
+  {
+   "pass": "page-opens",
+   "name": "an episode's page over the show's: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 21
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page again, Back from the episode: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 12.1 % at 0.3 s, 12.1 % at 0.8 s, 12.1 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 22
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page again, Back from the episode: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 22
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page again, Back from the episode: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"55 - A long titl\" moved up by 646 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 23
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back from the show's page shows the Podcasts again (after the episode)",
+   "ok": true,
+   "detail": "1 show(s) listed",
+   "step": 24
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back on the Podcasts the bottom bar is shown (after the episode)",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 24
+  },
+  {
+   "pass": "page-opens",
+   "name": "the shows as covers",
+   "ok": true,
+   "detail": "1 tile(s)",
+   "step": 26
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 14.3 % at 0.3 s, 14.2 % at 0.8 s, 14.2 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 27
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 27
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"27 - A long titl\" moved up by 707 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 28
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back from the show's page shows the Podcasts again (after the tile)",
+   "ok": true,
+   "detail": "1 show(s) listed",
+   "step": 29
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back on the Podcasts the bottom bar is shown (after the tile)",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 29
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped again: the page is on screen 2.5 s after it opened (the animations on)",
+   "ok": true,
+   "detail": "drawn in the page's place: 14.4 % at 0.3 s, 14.2 % at 0.8 s, 14.2 % at 2.5 s; the page in the UI's tree: yes",
+   "step": 30
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped again: the bottom bar is shown",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 30
+  },
+  {
+   "pass": "page-opens",
+   "name": "the show's page, its tile tapped again: the page scrolls under a swipe",
+   "ok": true,
+   "detail": "\"27 - A long titl\" moved up by 754 px under a swipe of 842 px (a page that follows the finger: 336 px at least)",
+   "step": 31
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back from the show's page shows the Podcasts again (after the tile, again)",
+   "ok": true,
+   "detail": "1 show(s) listed",
+   "step": 32
+  },
+  {
+   "pass": "page-opens",
+   "name": "Back on the Podcasts the bottom bar is shown (after the tile, again)",
+   "ok": true,
+   "detail": "its \u22ef label at y 2128 to 2175 of 2340",
+   "step": 32
+  },
+  {
+   "pass": "page-opens",
+   "name": "the pages were opened with the animations on: by following, from the row twice, an episode, from the tile twice",
+   "ok": true,
+   "detail": "7 opening(s) read: the page the app opens once the show is followed; the show's page, its row tapped; the show's page, its row tapped again; an episode's page over the show's; the show's page again, Back from the episode; the show's page, its tile tapped; the show's page, its tile tapped again",
+   "step": 32
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 32
+  }
+ ],
+ "frames": [],
+ "seconds": 349,
+ "passes": "page-opens",
+ "source": "b1c0a9da1fed7ed0055e73a632c4f11444af7aad (story/release-1.0.8, personal build, API 37.0, page-opens), run 43503835478",
+ "system": [],
+ "sheet_trials": [],
+ "back_presses": [],
+ "page_openings": [
+  {
+   "pass": "page-opens",
+   "what": "the page the app opens once the show is followed",
+   "tapped": false,
+   "shots": [
+    "shots/013-page-opens-opened-the-page-the-app-opens-once-the-show-is-f-1.png",
+    "shots/013-page-opens-opened-the-page-the-app-opens-once-the-show-is-f-2.png",
+    "shots/013-page-opens-opened-the-page-the-app-opens-once-the-show-is-f-3.png"
+   ],
+   "inks": [
+    0.14205975444776273,
+    0.14205975444776273,
+    0.14205975444776273
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 609,
+   "scrolls": true,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "the show's page, its row tapped",
+   "tapped": true,
+   "shots": [
+    "shots/016-page-opens-opened-the-show-s-page-its-row-tapped-1.png",
+    "shots/016-page-opens-opened-the-show-s-page-its-row-tapped-2.png",
+    "shots/016-page-opens-opened-the-show-s-page-its-row-tapped-3.png"
+   ],
+   "inks": [
+    0.1414069479541568,
+    0.14205975444776273,
+    0.14205975444776273
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 724,
+   "scrolls": true,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "the show's page, its row tapped again",
+   "tapped": true,
+   "shots": [
+    "shots/019-page-opens-opened-the-show-s-page-its-row-tapped-again-1.png",
+    "shots/019-page-opens-opened-the-show-s-page-its-row-tapped-again-2.png",
+    "shots/019-page-opens-opened-the-show-s-page-its-row-tapped-again-3.png"
+   ],
+   "inks": [
+    0.14204890624601169,
+    0.14205975444776273,
+    0.14205975444776273
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 707,
+   "scrolls": true,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "an episode's page over the show's",
+   "tapped": true,
+   "shots": [
+    "shots/021-page-opens-opened-an-episode-s-page-over-the-show-s-1.png",
+    "shots/021-page-opens-opened-an-episode-s-page-over-the-show-s-2.png",
+    "shots/021-page-opens-opened-an-episode-s-page-over-the-show-s-3.png"
+   ],
+   "inks": [
+    0.15900145493529366,
+    0.15875130816550528,
+    0.15875130816550528
+   ],
+   "in_tree": true,
+   "swiped": false,
+   "moved": null,
+   "scrolls": null,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "the show's page again, Back from the episode",
+   "tapped": false,
+   "shots": [
+    "shots/022-page-opens-opened-the-show-s-page-again-back-from-the-episo-1.png",
+    "shots/022-page-opens-opened-the-show-s-page-again-back-from-the-episo-2.png",
+    "shots/022-page-opens-opened-the-show-s-page-again-back-from-the-episo-3.png"
+   ],
+   "inks": [
+    0.12066454807667765,
+    0.12066454807667765,
+    0.12066454807667765
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 646,
+   "scrolls": true,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "the show's page, its tile tapped",
+   "tapped": true,
+   "shots": [
+    "shots/027-page-opens-opened-the-show-s-page-its-tile-tapped-1.png",
+    "shots/027-page-opens-opened-the-show-s-page-its-tile-tapped-2.png",
+    "shots/027-page-opens-opened-the-show-s-page-its-tile-tapped-3.png"
+   ],
+   "inks": [
+    0.14336472930545985,
+    0.14205975444776273,
+    0.14205975444776273
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 707,
+   "scrolls": true,
+   "ok": true
+  },
+  {
+   "pass": "page-opens",
+   "what": "the show's page, its tile tapped again",
+   "tapped": true,
+   "shots": [
+    "shots/030-page-opens-opened-the-show-s-page-its-tile-tapped-again-1.png",
+    "shots/030-page-opens-opened-the-show-s-page-its-tile-tapped-again-2.png",
+    "shots/030-page-opens-opened-the-show-s-page-its-tile-tapped-again-3.png"
+   ],
+   "inks": [
+    0.14375398830946728,
+    0.14205975444776273,
+    0.14205975444776273
+   ],
+   "in_tree": true,
+   "swiped": true,
+   "moved": 754,
+   "scrolls": true,
+   "ok": true
+  }
+ ],
+ "notice_swipes": [],
+ "searches": []
+}
