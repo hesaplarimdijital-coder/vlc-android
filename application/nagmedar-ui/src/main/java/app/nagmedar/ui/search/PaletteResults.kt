@@ -154,14 +154,12 @@ fun paletteResults(
         }
     }
     val words = SearchQuery.parse(query)
+    // the search's own order (best first, a shorter title before a longer one) stays among those of one rank;
+    // a hit's rank is made once, not at every comparison: a letter can find most of a large library
     val media = pool.mapNotNull { it.searchable }.search(words)
-        .sortedWith(
-            compareByDescending<SearchHit<PaletteItem>> { it.match }
-                .thenBy { it.value.order }
-                .thenBy { recentRank[it.value.id] ?: Int.MAX_VALUE }
-                .thenByDescending { it.score },
-        )
-        .map { hit -> PaletteHit(hit.value, hit.score) { highlightPositions(hit.value.label, words) } }
+        .map { hit -> hit to mediaRank(hit, recentRank) }
+        .sortedBy { it.second }
+        .map { (hit, _) -> PaletteHit(hit.value, hit.score) { highlightPositions(hit.value.label, words) } }
     val groups = PaletteKind.entries.mapNotNull { kind ->
         val found = if (kind == PaletteKind.Media) media else fuzzy.filter { it.item.kind == kind }.sortedByDescending { it.score }
         when {
@@ -172,6 +170,14 @@ fun paletteResults(
     }
     return PaletteResults(groups, effective, fuzzy.size + media.size)
 }
+
+/** A media hit's rank, the lower first: how well the words matched, then an artist, an album, a track, then what ran lately. */
+private fun mediaRank(hit: SearchHit<PaletteItem>, recentRank: Map<String, Int>): Long {
+    val recent = (if (recentRank.isEmpty()) null else recentRank[hit.value.id]) ?: NOT_RECENT
+    return ((Int.MAX_VALUE - hit.match).toLong() shl 24) or (hit.value.order.coerceIn(0, 0xFF).toLong() shl 16) or recent.coerceIn(0, NOT_RECENT).toLong()
+}
+
+private const val NOT_RECENT = 0xFFFF
 
 /** The characters of [label] that the words and phrases of [query] are found at, in order. */
 private fun highlightPositions(label: String, query: SearchQuery): IntArray {
