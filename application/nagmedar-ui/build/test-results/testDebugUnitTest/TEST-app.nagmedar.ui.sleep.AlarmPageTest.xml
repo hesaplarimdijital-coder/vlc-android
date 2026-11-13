@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.sleep.AlarmPageTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:04:01.951Z" hostname="runnervmwuk1x" time="0.037">
+  <properties/>
+  <testcase name="thePageStopsTheMusicOrLeavesItPlaying" classname="app.nagmedar.ui.sleep.AlarmPageTest" time="0.023"/>
+  <testcase name="onlyAnAppThatTargets17RingsThroughThePage" classname="app.nagmedar.ui.sleep.AlarmPageTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

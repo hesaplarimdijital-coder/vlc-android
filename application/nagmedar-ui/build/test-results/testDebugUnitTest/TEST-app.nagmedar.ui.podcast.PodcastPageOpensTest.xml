@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastPageOpensTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:27.087Z" hostname="runnervmwuk1x" time="0.591">
+  <properties/>
+  <testcase name="thePageOpenedFromTheFirstRowScrollsToo" classname="app.nagmedar.ui.podcast.PodcastPageOpensTest" time="0.112"/>
+  <testcase name="thePageOpenedFromItsRowScrolls" classname="app.nagmedar.ui.podcast.PodcastPageOpensTest" time="0.102"/>
+  <testcase name="backFromAScrolledPageShowsTheBottomBarAgain" classname="app.nagmedar.ui.podcast.PodcastPageOpensTest" time="0.146"/>
+  <testcase name="anEpisodeComesAndGoesOverThePageAndBackLeavesItAndItOpensAgain" classname="app.nagmedar.ui.podcast.PodcastPageOpensTest" time="0.172"/>
+  <testcase name="aShowsPageOpenedFromARowFarDownTheListIsThereAndStays" classname="app.nagmedar.ui.podcast.PodcastPageOpensTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

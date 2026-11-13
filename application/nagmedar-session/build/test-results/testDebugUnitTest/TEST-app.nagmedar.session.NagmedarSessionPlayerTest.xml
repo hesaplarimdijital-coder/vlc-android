@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.session.NagmedarSessionPlayerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:00:32.262Z" hostname="runnervmwuk1x" time="10.876">
+  <properties/>
+  <testcase name="anEmptySearchPlaysWhatPlayedLast" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="5.482"/>
+  <testcase name="emptyServiceIsIdle" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.104"/>
+  <testcase name="repeatShuffleAndSpeed" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.069"/>
+  <testcase name="nextPreviousAndSeeksGoToTheService" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.1"/>
+  <testcase name="browseAndSearchRequestsReachTheService" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.064"/>
+  <testcase name="mirrorsQueueMetadataAndTransport" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.058"/>
+  <testcase name="longQueuesArePublishedAsAWindowAroundTheCurrentItem" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.063"/>
+  <testcase name="sessionHostPublishesACompatTokenAndCustomActions" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.829"/>
+  <testcase name="aStreamsNewTitleReachesTheControllersAfterInvalidate" classname="app.nagmedar.session.NagmedarSessionPlayerTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

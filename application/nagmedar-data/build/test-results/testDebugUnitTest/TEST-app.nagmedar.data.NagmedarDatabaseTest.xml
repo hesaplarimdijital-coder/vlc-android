@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.data.NagmedarDatabaseTest" tests="22" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:00:46.214Z" hostname="runnervmwuk1x" time="0.951">
+  <properties/>
+  <testcase name="aVoteIsRememberedThroughPruning" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.045"/>
+  <testcase name="theOldestTracksArePrunedFirstAndTheBinBeforeThem" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.03"/>
+  <testcase name="radioStationsAreSavedOncePerDirectoryEntry" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.035"/>
+  <testcase name="mediaProbesAreCachedPerFile" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.025"/>
+  <testcase name="podcastEpisodesFollowTheirFeed" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.04"/>
+  <testcase name="anImportedStationKeptAgainIsTheSameRow" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.034"/>
+  <testcase name="aFileIsRecordedOnceAndRenamingKeepsTheRow" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.049"/>
+  <testcase name="subscriptionsAreCountedAndTheirNewEpisodesTold" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.05"/>
+  <testcase name="scrobblesWaitPerServiceOldestFirstAndOnlyOnce" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.042"/>
+  <testcase name="networkServersAreKeptOncePerAddress" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.038"/>
+  <testcase name="latencyProfilesArePerOutputDevice" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.03"/>
+  <testcase name="androidAutosPodcastQueries" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.031"/>
+  <testcase name="scheduledRecordingsAreSavedUpdatedAndDeleted" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.034"/>
+  <testcase name="musicProbesAreCachedPerFile" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.025"/>
+  <testcase name="importedStationsAreThoseWithoutADirectoryId" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.027"/>
+  <testcase name="aDirectoryStationReadAgainKeepsTheUsersMarks" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.033"/>
+  <testcase name="lyricsAreKeyedByTrackAndSource" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.031"/>
+  <testcase name="recordedTracksAreListedBySessionAndTheBinIsLeftOut" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.036"/>
+  <testcase name="smartListsAreKeptInTheOrderTheyWereMade" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.058"/>
+  <testcase name="playsSkipsAndRatingsAddUpPerTrack" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.08"/>
+  <testcase name="forgettingAPlayedStationAndPruningTheUnused" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.074"/>
+  <testcase name="aBackupsRowsAreReadAndRestored" classname="app.nagmedar.data.NagmedarDatabaseTest" time="0.076"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.ChromeGlassTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:57.347Z" hostname="runnervmwuk1x" time="0.053">
+  <properties/>
+  <testcase name="thePhonesBottomPaddingIncludesTheButtons" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.009"/>
+  <testcase name="theProductIsTheBottomGlass" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.006"/>
+  <testcase name="aNonDebuggableBuildKeepsTheProduct" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.009"/>
+  <testcase name="theModesByTheirNamesAndLetters" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.007"/>
+  <testcase name="aDebuggableBuildFollowsTheExtra" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.006"/>
+  <testcase name="anIntentWithoutTheExtraChangesNothing" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.007"/>
+  <testcase name="aTabletsContentEndsAboveTheButtons" classname="app.nagmedar.ui.shell.ChromeGlassTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

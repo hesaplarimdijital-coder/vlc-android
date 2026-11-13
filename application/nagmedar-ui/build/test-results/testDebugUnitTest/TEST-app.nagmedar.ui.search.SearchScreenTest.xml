@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.SearchScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:54.404Z" hostname="runnervmwuk1x" time="0.186">
+  <properties/>
+  <testcase name="artistsAndAlbumsAreFoundAndOpen" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.054"/>
+  <testcase name="withoutAQueryTheSyntaxIsShown" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.026"/>
+  <testcase name="nothingFoundSaysSo" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.027"/>
+  <testcase name="tracksAreFoundTheTurkishWay" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.028"/>
+  <testcase name="networkSharesOnlyWhenAsked" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.026"/>
+  <testcase name="inEnglishTheSyntaxAndTheTitlesAreEnglish" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

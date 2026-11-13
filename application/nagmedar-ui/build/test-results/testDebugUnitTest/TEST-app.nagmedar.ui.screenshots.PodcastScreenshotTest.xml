@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screenshots.PodcastScreenshotTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:44.765Z" hostname="runnervmwuk1x" time="1.683">
+  <properties/>
+  <testcase name="importRunningPhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.058"/>
+  <testcase name="offlinePhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.088"/>
+  <testcase name="resultsTabletEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.067"/>
+  <testcase name="addRefused" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.069"/>
+  <testcase name="transcriptNonePhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.096"/>
+  <testcase name="pageDex" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.083"/>
+  <testcase name="resultsDex" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.071"/>
+  <testcase name="addReadingPhoneEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.06"/>
+  <testcase name="transcriptPhoneEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.109"/>
+  <testcase name="transcriptTablet" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.079"/>
+  <testcase name="gridDex" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.075"/>
+  <testcase name="listPhoneEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.114"/>
+  <testcase name="noResultsDexEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.076"/>
+  <testcase name="episodePhoneDarkEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.097"/>
+  <testcase name="gridTablet" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.084"/>
+  <testcase name="pagePhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.093"/>
+  <testcase name="importUnusablePhoneEnglish" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.056"/>
+  <testcase name="resultsPhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.085"/>
+  <testcase name="emptyTablet" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.06"/>
+  <testcase name="episodePhone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.112"/>
+  <testcase name="importDone" classname="app.nagmedar.ui.screenshots.PodcastScreenshotTest" time="0.048"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

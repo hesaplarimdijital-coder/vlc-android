@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:32.851Z" hostname="runnervmwuk1x" time="0.263">
+  <properties/>
+  <testcase name="theBrowsersAndTheLogsAreSwitched" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.07"/>
+  <testcase name="theDefaultsAreShown" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.024"/>
+  <testcase name="theAddressesNeedItOn" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.028"/>
+  <testcase name="theSecurityIsSaidNotSet" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.027"/>
+  <testcase name="withThePermissionNothingIsSaid" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.027"/>
+  <testcase name="theSwitchStartsAndStopsIt" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.029"/>
+  <testcase name="turnedOnWithoutTheLocalNetworkPermissionItAsksAndSaysWhy" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.028"/>
+  <testcase name="aLibraryPartIsTakenOut" classname="app.nagmedar.ui.remoteaccess.RemoteAccessSectionTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

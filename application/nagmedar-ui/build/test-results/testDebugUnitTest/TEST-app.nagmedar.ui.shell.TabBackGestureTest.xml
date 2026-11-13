@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.TabBackGestureTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:04:01.775Z" hostname="runnervmwuk1x" time="0.172">
+  <properties/>
+  <testcase name="withReducedMotionNothingFollowsTheFinger" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.028"/>
+  <testcase name="withThreeButtonsBackGoesToMuzikAsBefore" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.034"/>
+  <testcase name="aTabletKeepsItsBack" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.029"/>
+  <testcase name="theRules" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.015"/>
+  <testcase name="fromTheRightEdgeItLeansLeft" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.029"/>
+  <testcase name="theTabShrinksWithTheFingerAndMuzikIsBehindIt" classname="app.nagmedar.ui.shell.TabBackGestureTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

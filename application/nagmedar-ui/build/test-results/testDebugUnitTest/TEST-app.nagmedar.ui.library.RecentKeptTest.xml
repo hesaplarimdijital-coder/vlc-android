@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.library.RecentKeptTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:10.308Z" hostname="runnervmwuk1x" time="0.03">
+  <properties/>
+  <testcase name="aClearedHistoryLeavesNoShelf" classname="app.nagmedar.ui.library.RecentKeptTest" time="0.007"/>
+  <testcase name="theIdsReadBackInTheirOrder" classname="app.nagmedar.ui.library.RecentKeptTest" time="0.005"/>
+  <testcase name="whatWasKeptIsThereAtTheNextStart" classname="app.nagmedar.ui.library.RecentKeptTest" time="0.005"/>
+  <testcase name="aTrackGoneFromTheListIsLeftOutAndOneKeptTwiceComesOnce" classname="app.nagmedar.ui.library.RecentKeptTest" time="0.005"/>
+  <testcase name="theKeptTracksAreFoundInTheKeptListNewestFirst" classname="app.nagmedar.ui.library.RecentKeptTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

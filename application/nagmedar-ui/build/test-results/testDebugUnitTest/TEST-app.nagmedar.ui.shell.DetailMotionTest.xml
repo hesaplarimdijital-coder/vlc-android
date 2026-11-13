@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.DetailMotionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:57.858Z" hostname="runnervmwuk1x" time="0.008">
+  <properties/>
+  <testcase name="bothWaysStartAndEndWhereTheOtherLeftOff" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.002"/>
+  <testcase name="theBackGestureShrinksToNinetyPercent" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.0"/>
+  <testcase name="closingGoesBackTheWayItCame" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.0"/>
+  <testcase name="aPhonesDetailComesOverAListSunkToNinetyFiveUnderSeventyPercentOfTheScrim" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.0"/>
+  <testcase name="aPhonesBackGestureHasTheListDarkBehindAndTheDetailWholeUntilLetGo" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.001"/>
+  <testcase name="theSharedAxisNeverShowsBothScreensPartTransparent" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.005"/>
+  <testcase name="aPhonesBackGestureMovesOneWayOnly" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.0"/>
+  <testcase name="openingTheDetailComesFromTheEndAndTheListGoesTheOtherWay" classname="app.nagmedar.ui.shell.DetailMotionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarPodcastTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:02:57.975Z" hostname="runnervmwuk1x" time="0.015">
+  <properties/>
+  <testcase name="anUnreachableDirectorySaysSoInOneLine" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.003"/>
+  <testcase name="aShowNotFollowedOpensOnAbonaOlThenItsFeedsEpisodes" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.003"/>
+  <testcase name="aLongFeedIsCutAndAnUnreadableOneSaysSo" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.0"/>
+  <testcase name="aShowReadAgainAfterSubscribingSaysItIsFollowed" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <testcase name="aBrowseActionOrTheRowNameTheShowToSubscribeTo" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.0"/>
+  <testcase name="aShowFollowedMeanwhileOpensAndPlaysAsItsSubscription" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <testcase name="thePodcastTabEndsWithDiscover" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <testcase name="theEpisodesLeftInTheMiddleFollowTheOrderTheyWereLastListenedTo" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <testcase name="thePopularShowsAreTheDeviceCountrysChartInItsOrder" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.0"/>
+  <testcase name="theCountriesStartWithTheDevicesThenByName" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <testcase name="theSearchListsTheDirectorysNewShowsUnderTheirOwnHeading" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.002"/>
+  <testcase name="theIdsOfDiscoverComeBack" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.0"/>
+  <testcase name="theCategoriesAreThoseOfTheChartsShowsTheFullestFirst" classname="app.nagmedar.ui.auto.CarPodcastTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

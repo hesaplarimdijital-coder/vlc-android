@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.auto.CarRadioTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:02:57.992Z" hostname="runnervmwuk1x" time="0.074">
+  <properties/>
+  <testcase name="theRadioTabListsTheWholeWorldsDirectory" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="theFavouritesAndTheStationsListenedToSayWhenThereAreNone" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="theMostListenedAndTheMostLikedAreTheWholeDirectorys" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="everyStationOffersToBeAFavouriteOrNoLonger" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="aCountryOpensOnItsStationsTheMostListenedFirst" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="theSearchStaysGroupedMusicPodcastsNewPodcastsRadio" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="aLongListIsAPageAtATimeWithARowToTheNext" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="aStationOfTheDirectoryPlaysAsTheDirectoryGaveIt" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="onlyAStationIsMadeAFavourite" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="theDirectorysListsSayWhyTheyAreEmpty" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.002"/>
+  <testcase name="theCountriesStartWithTheDevicesThenByNameWithTheirStationCounts" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="aLanguageOpensOnItsStationsAsTheDirectorySpellsIt" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="favouritingAStationKeepsItAsTheDirectoryGaveIt" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="aCategoryOpensOnItsStationsTheMostListenedFirst" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="theRadiosIdsComeBack" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.0"/>
+  <testcase name="theUsersOwnStationIsFavouritedByItsRow" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.001"/>
+  <testcase name="theLanguagesAreNamedInTheAppsLanguageItsOwnFirst" classname="app.nagmedar.ui.auto.CarRadioTest" time="0.062"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

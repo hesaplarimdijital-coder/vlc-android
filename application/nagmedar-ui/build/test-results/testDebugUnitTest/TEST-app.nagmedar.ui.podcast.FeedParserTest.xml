@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.FeedParserTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-13T06:03:25.098Z" hostname="runnervmwuk1x" time="0.523">
+  <properties/>
+  <testcase name="anExternalEntityIsNotRead" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.022"/>
+  <testcase name="atomWithEnclosureLinks" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.011"/>
+  <testcase name="whatIsNotXml" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.008"/>
+  <testcase name="nothingAtAll" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.007"/>
+  <testcase name="aFeedCutShortKeepsWhatCameBefore" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.006"/>
+  <testcase name="whatIsNotAFeed" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.008"/>
+  <testcase name="aBillionLaughsDoctypeExpandsNothing" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.009"/>
+  <testcase name="theFirstOfTwoItemsWithOneGuidStays" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.011"/>
+  <testcase name="theTestFeed" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.01"/>
+  <testcase name="theNastyFeedIsReadForWhatItHas" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.009"/>
+  <testcase name="theNewestAreKeptWhateverTheOrderOfTheFeed" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.12"/>
+  <testcase name="aFeedLargerThanTheLimitIsReadAsFarAsItGoes" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.012"/>
+  <testcase name="aByteOrderMarkAndBlankLinesBeforeTheDeclaration" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.009"/>
+  <testcase name="aHugeFeedKeepsItsNewestEpisodes" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.091"/>
+  <testcase name="aFeedOfManyMoreItemsThanItKeepsIsTrimmedWhileItIsRead" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.093"/>
+  <testcase name="podcasting20AndItunesUnderOtherPrefixes" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.01"/>
+  <testcase name="undatedItemsRankAfterDatedOnesAndKeepTheirOrder" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.074"/>
+  <testcase name="gzipWhetherTheServerSaidSoOrNot" classname="app.nagmedar.ui.podcast.FeedParserTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
