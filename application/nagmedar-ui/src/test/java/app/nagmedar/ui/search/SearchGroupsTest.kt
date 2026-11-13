@@ -1,18 +1,22 @@
 package app.nagmedar.ui.search
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.music.Track
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.Locale
 
 /**
  * 1.0.7: the search's artists and albums are the music library's groups: the same keys (the Music view opens
  * them), who an album is filed under, how much each holds; tracks without the tag make no group; the key the
- * palette keeps what ran lately by has no control character.
+ * palette keeps what ran lately by has no control character. (Run with Android's classes: whether a track is on
+ * a network share is read from its address by android.net.Uri.)
  */
+@RunWith(AndroidJUnit4::class)
 class SearchGroupsTest {
 
     private var next = 1L
