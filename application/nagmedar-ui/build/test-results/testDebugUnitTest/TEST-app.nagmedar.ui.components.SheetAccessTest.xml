@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.SheetAccessTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:39.407Z" hostname="runnervmccnms" time="0.42">
+  <properties/>
+  <testcase name="aSheetOpenedFromAnothersContentLeavesItOpen" classname="app.nagmedar.ui.components.SheetAccessTest" time="0.096"/>
+  <testcase name="aSheetKeepsTheKeyboardsFocus" classname="app.nagmedar.ui.components.SheetAccessTest" time="0.097"/>
+  <testcase name="theHandleClosesTheSheet" classname="app.nagmedar.ui.components.SheetAccessTest" time="0.08"/>
+  <testcase name="theDimmedScreenSaysItClosesTheSheet" classname="app.nagmedar.ui.components.SheetAccessTest" time="0.066"/>
+  <testcase name="aSheetOpenedOverAnotherClosesIt" classname="app.nagmedar.ui.components.SheetAccessTest" time="0.078"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

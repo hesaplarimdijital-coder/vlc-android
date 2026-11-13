@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.ReplayGainTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:42:56.943Z" hostname="runnervmccnms" time="0.211">
+  <properties/>
+  <testcase name="loudnessOfTheEnginesArray" classname="app.nagmedar.audio.ReplayGainTest" time="0.039"/>
+  <testcase name="sourceInfoKnowsDsd" classname="app.nagmedar.audio.ReplayGainTest" time="0.024"/>
+  <testcase name="theDefaultsLeaveTheSamplesAlone" classname="app.nagmedar.audio.ReplayGainTest" time="0.033"/>
+  <testcase name="displayNameOfAFile" classname="app.nagmedar.audio.ReplayGainTest" time="0.039"/>
+  <testcase name="sourceInfoCarriesTheTags" classname="app.nagmedar.audio.ReplayGainTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

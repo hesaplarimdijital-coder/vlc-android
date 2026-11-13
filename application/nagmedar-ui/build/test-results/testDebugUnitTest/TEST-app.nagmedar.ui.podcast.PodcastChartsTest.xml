@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.podcast.PodcastChartsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:14.014Z" hostname="runnervmccnms" time="0.071">
+  <properties/>
+  <testcase name="theLookupGivesTheFeedsByAppleId" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.01"/>
+  <testcase name="theAddressesAsked" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.011"/>
+  <testcase name="theChartIsReadInItsOrder" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.01"/>
+  <testcase name="aStorefrontIsTwoLettersInLowerCase" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.01"/>
+  <testcase name="theEpisodeListenedToLastGoesFirst" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.012"/>
+  <testcase name="theChartsShowsAreThoseWithAFeedEachOnce" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.009"/>
+  <testcase name="aChartWithNothingOrNonsense" classname="app.nagmedar.ui.podcast.PodcastChartsTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

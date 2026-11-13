@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.audio.TagLyricsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:42:57.518Z" hostname="runnervmccnms" time="0.142">
+  <properties/>
+  <testcase name="plainAndSynced" classname="app.nagmedar.audio.TagLyricsTest" time="0.054"/>
+  <testcase name="plainThatIsLrc" classname="app.nagmedar.audio.TagLyricsTest" time="0.047"/>
+  <testcase name="noneIsNull" classname="app.nagmedar.audio.TagLyricsTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

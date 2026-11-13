@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.FocusReturnTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:33.832Z" hostname="runnervmccnms" time="0.561">
+  <properties/>
+  <testcase name="theFocusGoesBackToTheControlThatHadIt" classname="app.nagmedar.ui.components.FocusReturnTest" time="0.133"/>
+  <testcase name="aPageOverTheWindowGivesTheFocusBack" classname="app.nagmedar.ui.components.FocusReturnTest" time="0.163"/>
+  <testcase name="thePaletteGivesTheFocusBack" classname="app.nagmedar.ui.components.FocusReturnTest" time="0.173"/>
+  <testcase name="aSheetGivesTheFocusBack" classname="app.nagmedar.ui.components.FocusReturnTest" time="0.088"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

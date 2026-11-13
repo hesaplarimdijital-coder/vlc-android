@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.PaletteResultsTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:57.102Z" hostname="runnervmccnms" time="0.011">
+  <properties/>
+  <testcase name="everyMediaFoundIsListed" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.006"/>
+  <testcase name="anArtistsNameFindsTheArtistTheAlbumsAndTheTracks" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.001"/>
+  <testcase name="whatRanLatelyComesFirstAmongMediaThatMatchAlike" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="groupsComeInTheirOrderAndAreCut" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="aKindThatShowsItsBestLeadsToTheRest" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.001"/>
+  <testcase name="withoutAQueryTheRecentLead" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="theArtistsThenTheAlbumsThenTheTracksEachBestFirst" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="prefixesNarrowTheSearch" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="theWordsOfATitleItsArtistAndItsAlbumInAnyOrder" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.001"/>
+  <testcase name="aMediaHitMarksTheWordsInItsTitle" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="eachItemOnceThoughListedTwice" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="whatRanLatelyComesUp" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.001"/>
+  <testcase name="theOtherKindsAreNotFoundByAWordOfTheMedia" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <testcase name="anAlbumsNameFindsTheAlbumAndItsTracks" classname="app.nagmedar.ui.search.PaletteResultsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

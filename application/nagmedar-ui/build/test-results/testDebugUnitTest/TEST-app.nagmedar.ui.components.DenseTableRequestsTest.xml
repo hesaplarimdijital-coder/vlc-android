@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.DenseTableRequestsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:33.495Z" hostname="runnervmccnms" time="0.332">
+  <properties/>
+  <testcase name="anotherOrderStartsTheRowsAtTheTop" classname="app.nagmedar.ui.components.DenseTableRequestsTest" time="0.098"/>
+  <testcase name="theSelectModeHasCheckBoxes" classname="app.nagmedar.ui.components.DenseTableRequestsTest" time="0.069"/>
+  <testcase name="theSortedColumnSaysWhichWayAndTheTitlesAreHeadings" classname="app.nagmedar.ui.components.DenseTableRequestsTest" time="0.067"/>
+  <testcase name="aCellButtonDoesNotOpenTheRow" classname="app.nagmedar.ui.components.DenseTableRequestsTest" time="0.041"/>
+  <testcase name="anEmptyTableSaysWhy" classname="app.nagmedar.ui.components.DenseTableRequestsTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

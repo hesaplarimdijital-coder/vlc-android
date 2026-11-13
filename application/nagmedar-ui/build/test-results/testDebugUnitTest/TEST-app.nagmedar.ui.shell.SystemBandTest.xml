@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.SystemBandTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:48:08.831Z" hostname="runnervmccnms" time="0.781">
+  <properties/>
+  <testcase name="theOpaqueChromeReachesBehindTheButtonsToo" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.046"/>
+  <testcase name="lightButtonsOnTheDarkTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.036"/>
+  <testcase name="aScreenUnderTheBarsIsPaddedForTheButtonsToo" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.03"/>
+  <testcase name="theShellSitsOnTheButtonsAtFirstLaunch" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.037"/>
+  <testcase name="theKeyboardLeavesNoBand" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.087"/>
+  <testcase name="buttonsFollowTheLightTheme" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.033"/>
+  <testcase name="tabletThreeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.097"/>
+  <testcase name="aScreenThatDoesNotAskEndsAboveTheBars" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.026"/>
+  <testcase name="threeButtonLargeText" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.094"/>
+  <testcase name="threeButtonDark" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.082"/>
+  <testcase name="tabletChromeFillsTheNavigationBar" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.038"/>
+  <testcase name="phoneBarReachesBehindTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.036"/>
+  <testcase name="talkBackReadsTheBottomBarLast" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.031"/>
+  <testcase name="threeButtonLight" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.086"/>
+  <testcase name="theFirstRunStaysAboveTheButtons" classname="app.nagmedar.ui.shell.SystemBandTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

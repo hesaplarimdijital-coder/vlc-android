@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.TableKeyboardAndFrameTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:41.871Z" hostname="runnervmccnms" time="0.29">
+  <properties/>
+  <testcase name="aSelectedRowDrawsNoFrame" classname="app.nagmedar.ui.components.TableKeyboardAndFrameTest" time="0.044"/>
+  <testcase name="aFrameSelectsTheRowsItTouchesAndEscPutsTheSelectionBack" classname="app.nagmedar.ui.components.TableKeyboardAndFrameTest" time="0.057"/>
+  <testcase name="tabLeavesALongTableAtOnceAndItsStarsAreNoStops" classname="app.nagmedar.ui.components.TableKeyboardAndFrameTest" time="0.058"/>
+  <testcase name="aFrameWithoutCtrlOrShiftReplacesTheSelection" classname="app.nagmedar.ui.components.TableKeyboardAndFrameTest" time="0.049"/>
+  <testcase name="theRowsAreOneTabStopAndTheKeysMoveAmongThem" classname="app.nagmedar.ui.components.TableKeyboardAndFrameTest" time="0.078"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

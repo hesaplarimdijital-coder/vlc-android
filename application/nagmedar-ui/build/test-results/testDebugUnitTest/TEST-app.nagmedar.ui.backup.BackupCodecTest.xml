@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.backup.BackupCodecTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:30.782Z" hostname="runnervmccnms" time="0.21">
+  <properties/>
+  <testcase name="whatIsNotABackupIsSaidSo" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.022"/>
+  <testcase name="aBackupMadeBeforeTheTvInterfaceWentRestoresWithoutItsListsSort" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.018"/>
+  <testcase name="onlyChosenCoversAreTakenFromTheFile" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.019"/>
+  <testcase name="theParentalControlNeitherGoesOutNorComesBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.02"/>
+  <testcase name="aBackupGoesOutAndComesBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.023"/>
+  <testcase name="aBackupMadeBeforeTheTranscriptsWentRestoresWithoutTheirSettings" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.018"/>
+  <testcase name="theManifestAloneIsABackupWithoutCovers" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.018"/>
+  <testcase name="aTvsOwnSettingsNeitherGoOutNorComeBack" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.022"/>
+  <testcase name="theSettingsLeaveOutThisDevicesAndAnAccountsKeys" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.016"/>
+  <testcase name="onlyTheChosenParts" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.017"/>
+  <testcase name="unknownKeysAndBadEntriesArePassedOver" classname="app.nagmedar.ui.backup.BackupCodecTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

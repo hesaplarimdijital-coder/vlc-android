@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.CoveredFocusTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:32.574Z" hostname="runnervmccnms" time="0.207">
+  <properties/>
+  <testcase name="uncoveredTabGoesThroughThePageAgain" classname="app.nagmedar.ui.components.CoveredFocusTest" time="0.06"/>
+  <testcase name="selectAllDoesNotReachTheCoveredScreen" classname="app.nagmedar.ui.components.CoveredFocusTest" time="0.043"/>
+  <testcase name="theFocusInThePageLeavesItWhenItIsCovered" classname="app.nagmedar.ui.components.CoveredFocusTest" time="0.042"/>
+  <testcase name="tabStaysOutOfTheCoveredPage" classname="app.nagmedar.ui.components.CoveredFocusTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

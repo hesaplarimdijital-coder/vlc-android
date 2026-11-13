@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.BackMotionTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:57.372Z" hostname="runnervmccnms" time="4.305">
+  <properties/>
+  <testcase name="backFromAPageSlidesItAwayOverThePageRisingInItsPlace" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.544"/>
+  <testcase name="aPageComesInOpaqueOverThePageThatSinksAndDarkensInItsPlace" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.372"/>
+  <testcase name="theBackButtonsPredictiveBackFadesThroughToo" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.343"/>
+  <testcase name="theMuzikTabChosenFadesThrough" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.3"/>
+  <testcase name="withGestureNavigationTheBackKeyFadesThroughAndDoesNotShrinkTheTab" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.342"/>
+  <testcase name="backFromAnotherTabFadesThroughToMuzik" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.321"/>
+  <testcase name="thePageUnderSinksToNinetyFiveUnderSeventyPercentOfTheScrim" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.014"/>
+  <testcase name="aPopBetweenTabsIsNotAPagesBack" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.017"/>
+  <testcase name="theBackButtonsPredictiveBackPlaysThePagesWayOut" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.38"/>
+  <testcase name="withReducedMotionPagesAndTabsAreThereAtOnce" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.211"/>
+  <testcase name="theBackGestureSeeksThePagesWayOut" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.714"/>
+  <testcase name="onTheRailAPageMovesTheSameWay" classname="app.nagmedar.ui.shell.BackMotionTest" time="0.743"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

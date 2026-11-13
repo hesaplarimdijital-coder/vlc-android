@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.playback.PlayingLengthTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:09.999Z" hostname="runnervmccnms" time="0.204">
+  <properties/>
+  <testcase name="aStationOnTheAirIsLiveAndAnEpisodeIsNot" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.02"/>
+  <testcase name="thePlayerIsAskedForAFileAndForAnEpisodeNotForAStation" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.017"/>
+  <testcase name="theLengthShownIsTheMediasThenThePlayersThenTheFeeds" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.017"/>
+  <testcase name="anEpisodeTheAppStartsIsNoStationFromItsFirstFrame" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.029"/>
+  <testcase name="onlyTheLastAddressesAreKept" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.017"/>
+  <testcase name="aStationStaysOnTheAir" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.024"/>
+  <testcase name="anEpisodeThePlayerWasLeftWithIsKnownOnceRoomAnswers" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.025"/>
+  <testcase name="anEpisodeWhoseFeedGivesNoLengthIsNoStationEither" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.025"/>
+  <testcase name="aFileIsNeverAskedAbout" classname="app.nagmedar.ui.playback.PlayingLengthTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

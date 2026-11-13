@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.ShellPaddingTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:48:08.531Z" hostname="runnervmccnms" time="0.205">
+  <properties/>
+  <testcase name="aScreenAskingFromASubcompositionIsNotPaddedTwice" classname="app.nagmedar.ui.shell.ShellPaddingTest" time="0.031"/>
+  <testcase name="screensThatDoNotAskStayClearOfTheBars" classname="app.nagmedar.ui.shell.ShellPaddingTest" time="0.03"/>
+  <testcase name="aTabletIsNotCovered" classname="app.nagmedar.ui.shell.ShellPaddingTest" time="0.031"/>
+  <testcase name="scrollingMovesTheBarsWithoutMeasuringTheScreen" classname="app.nagmedar.ui.shell.ShellPaddingTest" time="0.08"/>
+  <testcase name="aScreenUnderTheBarsGetsTheWindowAndThePadding" classname="app.nagmedar.ui.shell.ShellPaddingTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

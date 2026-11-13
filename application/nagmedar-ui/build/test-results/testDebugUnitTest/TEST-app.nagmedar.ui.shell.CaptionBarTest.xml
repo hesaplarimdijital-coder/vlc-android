@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.CaptionBarTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:48:01.680Z" hostname="runnervmccnms" time="0.362">
+  <properties/>
+  <testcase name="theMenuBarIsTheCaptionBar" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.034"/>
+  <testcase name="narrowWindowScreenshot" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.066"/>
+  <testcase name="theChipIsAtTheBarsStart" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.014"/>
+  <testcase name="theAppChipTakesTheBrandsPlace" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.033"/>
+  <testcase name="theTopBarIsTheCaptionBarOfANarrowWindow" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.034"/>
+  <testcase name="dexChipScreenshot" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.095"/>
+  <testcase name="dexScreenshot" classname="app.nagmedar.ui.shell.CaptionBarTest" time="0.082"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.PlayerMotionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:36.799Z" hostname="runnervmccnms" time="2.115">
+  <properties/>
+  <testcase name="aFileOfAnUnknownLengthShowsTheTimePlayedAlone" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.035"/>
+  <testcase name="theSurfaceIsTheCardAtTheStartAndTheWindowAtTheEnd" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.032"/>
+  <testcase name="aTapGrowsTheCardIntoThePage" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.551"/>
+  <testcase name="onTheBottomGlassTheCardGrowsIntoThePage" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.48"/>
+  <testcase name="theArtworkFliesFromTheStripToTheFullPlayerAndBack" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.693"/>
+  <testcase name="aTimelineComposedWhileATrackPlaysStartsAtTheLatestReading" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.033"/>
+  <testcase name="withTheBarsHiddenItOpensFromTheStripAndLandsThere" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.129"/>
+  <testcase name="theBackButtonTakesThePlayerDownWithoutShrinkingIt" classname="app.nagmedar.ui.components.PlayerMotionTest" time="0.154"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.PrimaryActionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:48:07.893Z" hostname="runnervmccnms" time="0.179">
+  <properties/>
+  <testcase name="aPhoneFloatsItWithItsLabelAtTheTop" classname="app.nagmedar.ui.shell.PrimaryActionTest" time="0.068"/>
+  <testcase name="theRailHasItAtItsTop" classname="app.nagmedar.ui.shell.PrimaryActionTest" time="0.031"/>
+  <testcase name="theSidebarHasItsButton" classname="app.nagmedar.ui.shell.PrimaryActionTest" time="0.033"/>
+  <testcase name="theExpandedPlayerTakesItAway" classname="app.nagmedar.ui.shell.PrimaryActionTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

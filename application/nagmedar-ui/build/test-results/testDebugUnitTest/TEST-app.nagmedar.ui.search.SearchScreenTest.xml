@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.search.SearchScreenTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:57.154Z" hostname="runnervmccnms" time="0.212">
+  <properties/>
+  <testcase name="artistsAndAlbumsAreFoundAndOpen" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.039"/>
+  <testcase name="withoutAQueryTheSyntaxIsShown" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.021"/>
+  <testcase name="nothingFoundSaysSo" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.028"/>
+  <testcase name="thePalettesMediaAreMadeOnceOfAReadInALanguage" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.016"/>
+  <testcase name="aLibraryReadAgainIsTheOneKeptUntilItChanges" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.015"/>
+  <testcase name="tracksAreFoundTheTurkishWay" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.034"/>
+  <testcase name="networkSharesOnlyWhenAsked" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.032"/>
+  <testcase name="inEnglishTheSyntaxAndTheTitlesAreEnglish" classname="app.nagmedar.ui.search.SearchScreenTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

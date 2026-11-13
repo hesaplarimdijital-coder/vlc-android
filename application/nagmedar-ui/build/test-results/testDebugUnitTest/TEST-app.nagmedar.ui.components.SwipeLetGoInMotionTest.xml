@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.SwipeLetGoInMotionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:41.544Z" hostname="runnervmccnms" time="0.323">
+  <properties/>
+  <testcase name="onAPhoneAnUndoBarLetGoShortOfTheWayComesBack" classname="app.nagmedar.ui.components.SwipeLetGoInMotionTest" time="0.071"/>
+  <testcase name="widerUpAnUndoBarLetGoShortOfTheWayComesBack" classname="app.nagmedar.ui.components.SwipeLetGoInMotionTest" time="0.07"/>
+  <testcase name="onAPhoneAnUndoBarFlungAwayLeaves" classname="app.nagmedar.ui.components.SwipeLetGoInMotionTest" time="0.071"/>
+  <testcase name="onAPhoneANoticeFlungAwayLeaves" classname="app.nagmedar.ui.components.SwipeLetGoInMotionTest" time="0.061"/>
+  <testcase name="withReducedMotionAnUndoBarLetGoShortOfTheWayIsBack" classname="app.nagmedar.ui.components.SwipeLetGoInMotionTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

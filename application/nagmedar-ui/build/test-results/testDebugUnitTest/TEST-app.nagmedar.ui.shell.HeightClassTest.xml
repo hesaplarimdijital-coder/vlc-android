@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.shell.HeightClassTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:48:06.268Z" hostname="runnervmccnms" time="0.066">
+  <properties/>
+  <testcase name="aShortWindowKeepsThePhonesTextSizesAndMotion" classname="app.nagmedar.ui.shell.HeightClassTest" time="0.016"/>
+  <testcase name="thresholds" classname="app.nagmedar.ui.shell.HeightClassTest" time="0.015"/>
+  <testcase name="theKeyboardDoesNotMakeAPhoneShort" classname="app.nagmedar.ui.shell.HeightClassTest" time="0.017"/>
+  <testcase name="aTallerWindowOfTheSameWidthIsATablets" classname="app.nagmedar.ui.shell.HeightClassTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

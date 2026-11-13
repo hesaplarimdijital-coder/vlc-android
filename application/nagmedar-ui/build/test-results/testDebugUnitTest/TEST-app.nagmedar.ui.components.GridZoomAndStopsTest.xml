@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.GridZoomAndStopsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:34.406Z" hostname="runnervmccnms" time="0.515">
+  <properties/>
+  <testcase name="ctrlAndTheWheelMakeTheCoversLargerAndSmaller" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.168"/>
+  <testcase name="ctrlPlusMinusAndZeroOnTheKeyboardByTheCharacterTyped" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.11"/>
+  <testcase name="aChosenSizeOutlivesANewDefault" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.034"/>
+  <testcase name="theChosenSizeIsKept" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.059"/>
+  <testcase name="theGridIsOneTabStop" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.071"/>
+  <testcase name="twoFingersSpreadTheCovers" classname="app.nagmedar.ui.components.GridZoomAndStopsTest" time="0.068"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

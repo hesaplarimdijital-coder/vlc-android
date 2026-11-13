@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.components.TooltipTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:46:42.166Z" hostname="runnervmccnms" time="0.395">
+  <properties/>
+  <testcase name="theDelayIsKept" classname="app.nagmedar.ui.components.TooltipTest" time="0.038"/>
+  <testcase name="theKeyboardsFocusShowsTheName" classname="app.nagmedar.ui.components.TooltipTest" time="0.063"/>
+  <testcase name="tooltipsCanBeTurnedOff" classname="app.nagmedar.ui.components.TooltipTest" time="0.041"/>
+  <testcase name="withoutAKeyboardTheNameAlone" classname="app.nagmedar.ui.components.TooltipTest" time="0.056"/>
+  <testcase name="aRestingMouseShowsTheNameAndTheKeys" classname="app.nagmedar.ui.components.TooltipTest" time="0.053"/>
+  <testcase name="itWaitsForTheDelay" classname="app.nagmedar.ui.components.TooltipTest" time="0.057"/>
+  <testcase name="touchShowsNone" classname="app.nagmedar.ui.components.TooltipTest" time="0.029"/>
+  <testcase name="theNextButtonAlongShowsItsNameAtOnce" classname="app.nagmedar.ui.components.TooltipTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

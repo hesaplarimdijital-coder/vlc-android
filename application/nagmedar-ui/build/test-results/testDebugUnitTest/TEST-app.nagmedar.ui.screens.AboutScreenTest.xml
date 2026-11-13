@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.screens.AboutScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:23.066Z" hostname="runnervmccnms" time="0.496">
+  <properties/>
+  <testcase name="inEnglishToo" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.095"/>
+  <testcase name="theVersionsTheSourceAndThePeople" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.062"/>
+  <testcase name="licencesAreNamedShortAndInTurkish" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.08"/>
+  <testcase name="theGplOpens" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.13"/>
+  <testcase name="aLibraryIsFoundAndOpensToItsLicence" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.106"/>
+  <testcase name="theListIsS005s" classname="app.nagmedar.ui.screens.AboutScreenTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

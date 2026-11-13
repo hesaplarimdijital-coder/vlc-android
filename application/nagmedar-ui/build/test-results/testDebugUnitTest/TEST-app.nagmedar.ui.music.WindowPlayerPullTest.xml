@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.nagmedar.ui.music.WindowPlayerPullTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-13T22:47:05.216Z" hostname="runnervmccnms" time="0.097">
+  <properties/>
+  <testcase name="theLyricsAtTheirTopPulledDownCloseIt" classname="app.nagmedar.ui.music.WindowPlayerPullTest" time="0.095"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
