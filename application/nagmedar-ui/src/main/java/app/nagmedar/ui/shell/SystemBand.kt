@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -28,15 +27,19 @@ import app.nagmedar.ui.theme.NagTheme
 /**
  * 1.0.3 (Desktop Kit 2.0): the insets of the app's window root. The root pads the system's bars, the
  * display cutout and the on-screen keyboard ([padding]); while the shell is shown it leaves the
- * navigation bar at the window's bottom (three buttons or the gesture handle, [navigationBottom]) to
- * the shell, which draws its chrome behind it ([SystemBand]) and keeps its own controls above it.
+ * navigation bar at the window's bottom (three buttons or the gesture handle; 1.0.9: or whatever the
+ * system lays over that edge taller than it, [navigationBottom]) to the shell, which draws its chrome
+ * behind it ([SystemBand]) and keeps its own controls above it.
  * Outside the shell (the first run) the root pads that bar too.
  */
 @Immutable
 class WindowRootInsets internal constructor(
     /** What the root pads: the window's safe drawing area, less what is left to the shell. */
     val padding: WindowInsets,
-    /** The navigation bar at the window's bottom, less the keyboard over it, left to the shell; zero when the root pads it. */
+    /**
+     * What the system lays over the window's bottom edge (the navigation bar, or a taller cutout or system bar there),
+     * less the keyboard over it, left to the shell; zero when the root pads it.
+     */
     val navigationBottom: WindowInsets,
 )
 
@@ -51,8 +54,10 @@ fun rememberWindowRootInsets(belowCaption: Boolean, shellDrawsNavigation: Boolea
     val safe = WindowInsets.safeDrawing
     val captionBar = WindowInsets.captionBar
     val base = if (belowCaption) safe.exclude(captionBar) else safe
-    // the keyboard covers the navigation bar: what is left of the bar above it
-    val navigationBottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).exclude(WindowInsets.ime)
+    // 1.0.9 (Desktop Kit 2.9.0): everything the system lays over the window's bottom edge, less the keyboard over it.
+    // The navigation bar alone left the root a strip of its own background under the shell's chrome wherever a device
+    // reports a cutout or another system bar there taller than the navigation bar; the band now covers the tallest
+    val navigationBottom = safe.only(WindowInsetsSides.Bottom).exclude(WindowInsets.ime)
     return remember(base, navigationBottom, shellDrawsNavigation) {
         WindowRootInsets(
             padding = if (shellDrawsNavigation) RootPadding(base, navigationBottom) else base,
