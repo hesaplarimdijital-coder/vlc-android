@@ -466,6 +466,7 @@ private fun NagmedarMain(
                     if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.open(Destination.Search)
                 },
                 menus = { MenuBarMenus(menuSpecs(context, actions), menuBar) },
+                menuSpecs = { menuSpecs(context, actions) },
                 // media dropped on the player bar join the queue (S-406)
                 player = { navKind ->
                     PlayerBar(

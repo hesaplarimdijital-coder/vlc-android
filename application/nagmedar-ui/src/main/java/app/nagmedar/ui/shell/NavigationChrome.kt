@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -54,6 +55,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -74,6 +77,9 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.HoverTooltip
 import app.nagmedar.ui.components.InteractionState
+import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.MenuPopup
+import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.PaneDivider
@@ -519,6 +525,8 @@ fun PageTopBar(
     onBack: (() -> Unit)? = null,
     glass: GlassMode? = null,
     scrolled: () -> Boolean = { false },
+    /** 1.0.8 (Desktop Kit 2.8.0): the menu bar's menus where there is no menu bar (the rail), behind a "≡". */
+    menus: List<MenuSpec> = emptyList(),
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -581,7 +589,40 @@ fun PageTopBar(
             ) {
                 NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), { latestSearch?.invoke() }, Modifier.captionTarget(caption))
             }
+            if (menus.isNotEmpty()) TopBarMenus(menus, Modifier.captionTarget(caption))
         }
+    }
+}
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0, the design audit's finding 15): the menu bar's menus in a window too narrow for the bar (the
+ * rail's top bar: a tablet, a DeX window): a "≡" button ("Menüler") lists their titles, and a title opens its menu there.
+ */
+@Composable
+internal fun TopBarMenus(menus: List<MenuSpec>, modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf(false) }
+    var chosen by remember { mutableStateOf<MenuSpec?>(null) }
+    var height by remember { mutableIntStateOf(0) }
+    Box(modifier.onSizeChanged { height = it.height }) {
+        NagIconButton(NagIcons.Menu, stringResource(R.string.nag_menus), { open = true }, Modifier.testTag("top-bar-menus"), selected = open || chosen != null)
+        MenuPopup(
+            visible = open,
+            onDismiss = { open = false },
+            entries = menus.map { menu ->
+                MenuEntry.Item(menu.title, {
+                    open = false
+                    chosen = menu
+                })
+            },
+            offset = IntOffset(0, height),
+        )
+        val menu = chosen
+        MenuPopup(
+            visible = menu != null,
+            onDismiss = { chosen = null },
+            entries = menu?.entries?.invoke().orEmpty(),
+            offset = IntOffset(0, height),
+        )
     }
 }
 

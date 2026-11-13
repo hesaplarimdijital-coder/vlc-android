@@ -85,6 +85,7 @@ fun TestShell(
     chromeGlass: ChromeGlass = ChromeGlass.Product,
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, navigator -> SampleScreen(destination, navigator, moreActions) },
 ) {
+    val res = LocalContext.current.resources
     val navController = rememberNavController()
     val navigator = remember(navController) { ShellNavigator(navController) }
     // the start page reached as a person reaches it (1.0.1): a page through the tab it is opened from, so the
@@ -108,6 +109,8 @@ fun TestShell(
             val specs = remember(res) { menuBarSpecs(res, {}, { true }) }
             if (menuBar != null) MenuBarMenus(specs, menuBar) else MenuBarMenus(specs)
         },
+        // 1.0.8: the same menus behind the rail top bar's "≡" (with a pointer), as the app has them
+        menuSpecs = { menuBarSpecs(res, {}, { true }) },
         player = player ?: { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
         navigator = navigator,

@@ -59,6 +59,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.nagmedar.ui.components.BackSource
+import app.nagmedar.ui.components.MenuSpec
 import app.nagmedar.ui.components.rememberBackSwipes
 import app.nagmedar.ui.components.coveredByLayer
 import app.nagmedar.ui.theme.GlassMode
@@ -134,6 +135,8 @@ fun NagmedarShell(
     badges: NavBadges,
     onSearch: () -> Unit,
     menus: @Composable RowScope.() -> Unit,
+    /** 1.0.8 (Desktop Kit 2.8.0): the same menus as a list, behind a "≡" in the rail's top bar (with a pointer). */
+    menuSpecs: () -> List<MenuSpec> = { emptyList() },
     player: @Composable (NavKind) -> Unit,
     screen: @Composable (Destination, ShellNavigator) -> Unit,
     modifier: Modifier = Modifier,
@@ -391,6 +394,8 @@ fun NagmedarShell(
                         // the kit's top bar (C of the user's glass decision): glass while content passes under it
                         glass = if (chromeGlass == ChromeGlass.Kit && navKind == NavKind.BottomBar) chromeMode else null,
                         scrolled = { scroll.scrolled },
+                        // 1.0.8: the menu bar's menus where there is no menu bar, for a pointer as the sidebar's (S-302)
+                        menus = if (navKind == NavKind.Rail && pointer) menuSpecs() else emptyList(),
                     )
                 }
             },
