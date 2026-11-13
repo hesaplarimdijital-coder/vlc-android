@@ -1,0 +1,7 @@
+::warning title=Emulator: the system's ANR (back-button, step 2)::System UI System UI isn't responding Close app Wait
+::warning title=Emulator: the system's ANR (back-button, step 2)::Pixel Launcher Pixel Launcher isn't responding Close app Wait
+::warning title=Emulator: the system's ANR (back-button, step 2)::Pixel Launcher Pixel Launcher isn't responding Close app Wait
+::warning title=Emulator: the system's ANR (back-button, step 1)::com.google.android.apps.nexuslauncher Reason: Input dispatching timed out (c9c63c0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity is not responding. Waited 5000ms for FocusEvent(hasFocus=
+::warning title=Emulator: the system's ANR (back-button, step 1)::com.android.systemui Reason: executing service com.android.systemui/.SystemUIService, waited 20115ms
+::warning title=Emulator: the system's ANR (back-button, step 1)::com.google.android.gms.persistent Reason: executing service com.google.android.gms/com.google.android.location.internal.GoogleLocationManagerService, waited 20200ms
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 30 steps, 0 crash/ANR, 0 StrictMode, 0/20 checks failed, 6 system ANR/crash, 0 warnings, 7 min. Evidence: branch ci/emulator-api37.0-personal-back-button, report.md
