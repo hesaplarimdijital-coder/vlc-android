@@ -1,9 +1,7 @@
 package app.nagmedar.ui.shell
 
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
-import android.view.PixelCopy
+import android.graphics.Canvas
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
@@ -31,9 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
-import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.InputMode
-import app.nagmedar.ui.theme.LocalGlassMode
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -46,29 +41,22 @@ import org.robolectric.annotation.GraphicsMode
 import kotlin.math.max
 
 /**
- * 1.0.9 (Desktop Kit 2.9.0's window edge): nothing of the page shows below the phone's bars. The bottom glass (the
- * user's B: behind the mini player, the bottom bar and the band behind the system's buttons) reaches the window's
- * bottom edge, with three-button and gesture navigation, with the bars shown and slid away by a scroll, on a page of
- * Settings (the bars stand aside), and when the system's bottom insets do not agree with each other (a cutout or
- * another system bar at the bottom taller than the navigation bar: the root left the difference as a strip of its own
- * background under the chrome).
+ * 1.0.9 (Desktop Kit 2.9.0's window edge): the phone's chrome reaches the window's bottom edge, with nothing of the page
+ * and nothing of the root's own background below it. The bottom glass (the user's B: behind the mini player, the bottom
+ * bar and the band behind the system's buttons) and the band reach the edge with three-button and gesture navigation,
+ * with the bars shown and slid away by a scroll, on a 1440 px phone, on a page of Settings (the bars stand aside), and
+ * when the system's bottom insets do not agree with each other: a cutout or another system bar at the bottom taller
+ * than the navigation bar, whose extra pixels the root used to pad as a strip of its own background under the chrome.
  *
- * The window is drawn by the hardware renderer, as PixelCopy draws it under Robolectric's native graphics, and the
- * glass blurs as on a phone ([GlassMode.Blur] pinned: the device's mode is the translucent one in tests). So the
- * blur's own drawing is what is looked at: Haze records what it blurs at 0.79 of the surface's size in whole pixels
- * and draws it back scaled up, up to 0.6 px short of the bottom or end edge; 1.0.5 put the glass's opaque colour under
- * the blur for it (the owner's S24, 12 Nov: "arkası gözüküyor"), which no test could look at then. Desktop Kit's same
- * test was red without that colour, on the S24's last pixel row and a 1440 px phone's last column.
- *
- * The page is one green, which the chrome never is: through the glass it is blurred and tinted to a dark tone, a pixel
- * still clearly green is the page drawn without the chrome over it.
- *
- * On Android 16 (API 36), as the kit's: Robolectric's native runtime for the app's usual API 34 does not compile the
- * shader of Haze's noise and tint ("'color' is not a valid layout qualifier"), so the hardware renderer stopped there.
+ * The window is drawn as [SystemBandTest] draws it (the view into a bitmap), where glass is its translucent form over a
+ * page that is green from end to end; a pixel still clearly green is the page without the chrome over it. The kit's
+ * same test draws with the hardware renderer and the blur on, which here stopped at the drawing (its first run, CI
+ * 43519261081): Robolectric's native runtime for API 34, the Android these tests run on, does not compile the shader of
+ * Haze's noise and tint ("'color' is not a valid layout qualifier"), and Robolectric's Android 16, where the kit runs
+ * it, needs Java 21; the app's tests run on 17. So 1.0.5's opaque colour under the blur is not looked at here.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [36])
 class WindowEdgeTest {
 
     @get:Rule
@@ -97,36 +85,30 @@ class WindowEdgeTest {
         compose.waitForIdle()
     }
 
-    /**
-     * The app's root around the phone's shell in the dark palette, blurring, with the mini player as the app has it,
-     * [start] open over a list that is green from end to end.
-     */
+    /** The app's root around the phone's shell in the dark palette, with the mini player as the app has it, [start] over a green page. */
     private fun phone(start: Destination = Destination.Music) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             view = LocalView.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
                 WindowRoot(shell = true, belowCaption = false, modifier = Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    CompositionLocalProvider(LocalGlassMode provides GlassMode.Blur) {
-                        TestShell(WidthClass.Compact, startDestination = start, screen = { _, _ ->
-                            val padding = rememberShellContentPadding()
-                            LazyColumn(Modifier.fillMaxSize().testTag("list"), rememberLazyListState(10), padding) {
-                                items(120) { Box(Modifier.fillMaxWidth().height(56.dp).background(PAGE)) }
-                            }
-                        })
-                    }
+                    TestShell(WidthClass.Compact, startDestination = start, screen = { _, _ ->
+                        val padding = rememberShellContentPadding()
+                        LazyColumn(Modifier.fillMaxSize().testTag("list"), rememberLazyListState(10), padding) {
+                            items(120) { Box(Modifier.fillMaxWidth().height(56.dp).background(PAGE)) }
+                        }
+                    })
                 }
             }
         }
         compose.waitForIdle()
     }
 
-    /** The window as the hardware renderer draws it, from the content view's top left. */
-    private fun capture(): Bitmap {
-        val window = compose.activity.window
-        val decor = window.decorView
+    /** The window as drawn, from the content view's top left. */
+    private fun window(): Bitmap {
+        val decor = compose.activity.window.decorView
         val full = Bitmap.createBitmap(decor.width, decor.height, Bitmap.Config.ARGB_8888)
-        compose.runOnIdle { PixelCopy.request(window, full, {}, Handler(Looper.getMainLooper())) }
+        compose.runOnIdle { decor.draw(Canvas(full)) }
         val at = IntArray(2).also { view.getLocationInWindow(it) }
         return Bitmap.createBitmap(full, at[0], at[1], view.width, view.height)
     }
@@ -148,6 +130,22 @@ class WindowEdgeTest {
             if (xs.isEmpty()) null else "row $y: ${xs.size} px from x ${xs.first()} (${hex(bitmap.getPixel(xs.first(), y))})"
         }
         assertTrue("$what: the page shows under the chrome (${leaks.size} rows): ${leaks.take(4)}", leaks.isEmpty())
+    }
+
+    /**
+     * The band behind the system's [tallest] bottom inset is one surface down to the window's last row and to its last
+     * column: every row there as the band's first row below its rule, in the middle and at the end (no strip of the
+     * root's own background under it).
+     */
+    private fun assertBandToTheEdge(bitmap: Bitmap, tallest: Int, what: String) {
+        val top = bitmap.height - tallest + RULE_PX
+        val band = bitmap.getPixel(bitmap.width / 2, top)
+        val other = (top until bitmap.height).flatMap { y -> listOf(bitmap.width / 2, bitmap.width - 1).map { x -> Triple(x, y, bitmap.getPixel(x, y)) } }
+            .filter { (_, _, argb) -> argb != band }
+        assertTrue(
+            "$what: the band (${hex(band)}) ends before the window's edge: ${other.take(4).map { (x, y, argb) -> "($x, $y) ${hex(argb)}" }}",
+            other.isEmpty(),
+        )
     }
 
     /** Above the shell: the status bar shows the root's background, never the page. */
@@ -179,15 +177,17 @@ class WindowEdgeTest {
         phone()
         systemBars(status = STATUS_PX, navigation = 144, threeButtons = true)
         glassBottomReachesTheWindow("bars shown")
-        val shown = capture()
+        val shown = window()
         assertStatusBarClear(shown, STATUS_PX)
         assertCoveredFrom(shown, glassTopPx() + RULE_PX, "three buttons, bars shown")
+        assertBandToTheEdge(shown, 144, "three buttons, bars shown")
 
         scrollTheBarsAway()
         glassBottomReachesTheWindow("bars slid away")
-        val away = capture()
+        val away = window()
         assertStatusBarClear(away, STATUS_PX)
         assertCoveredFrom(away, glassTopPx() + RULE_PX, "three buttons, bars slid away")
+        assertBandToTheEdge(away, 144, "three buttons, bars slid away")
     }
 
     /** Gesture navigation: a 16 dp handle. */
@@ -197,21 +197,27 @@ class WindowEdgeTest {
         phone()
         systemBars(status = STATUS_PX, navigation = 48, threeButtons = false)
         glassBottomReachesTheWindow("bars shown")
-        assertCoveredFrom(capture(), glassTopPx() + RULE_PX, "gesture handle, bars shown")
+        val shown = window()
+        assertCoveredFrom(shown, glassTopPx() + RULE_PX, "gesture handle, bars shown")
+        assertBandToTheEdge(shown, 48, "gesture handle, bars shown")
 
         scrollTheBarsAway()
         glassBottomReachesTheWindow("bars slid away")
-        assertCoveredFrom(capture(), glassTopPx() + RULE_PX, "gesture handle, bars slid away")
+        val away = window()
+        assertCoveredFrom(away, glassTopPx() + RULE_PX, "gesture handle, bars slid away")
+        assertBandToTheEdge(away, 48, "gesture handle, bars slid away")
     }
 
-    /** A wider phone (1440 px): the glass also reaches the window's right edge. */
+    /** A wider phone (1440 px): the chrome also reaches the window's right edge. */
     @Test
     @Config(qualifiers = "tr-w480dp-h1040dp-xxhdpi")
     fun widerPhone() {
         phone()
         systemBars(status = STATUS_PX, navigation = 144, threeButtons = true)
         glassBottomReachesTheWindow("bars shown")
-        assertCoveredFrom(capture(), glassTopPx() + RULE_PX, "1440 px wide, bars shown")
+        val bitmap = window()
+        assertCoveredFrom(bitmap, glassTopPx() + RULE_PX, "1440 px wide, bars shown")
+        assertBandToTheEdge(bitmap, 144, "1440 px wide, bars shown")
     }
 
     /** A page of Settings: the bottom bar and the mini player stand aside (1.0.1), the band alone down to the edge. */
@@ -221,8 +227,9 @@ class WindowEdgeTest {
         phone(start = Destination.Settings)
         systemBars(status = STATUS_PX, navigation = 144, threeButtons = true)
         glassBottomReachesTheWindow("Settings")
-        val bitmap = capture()
+        val bitmap = window()
         assertCoveredFrom(bitmap, minOf(glassTopPx(), bitmap.height - 144) + RULE_PX, "Settings, the bars aside")
+        assertBandToTheEdge(bitmap, 144, "Settings, the bars aside")
     }
 
     /** The system's bottom insets disagree (a bottom cutout taller than the navigation bar): the chrome covers the taller. */
@@ -232,8 +239,9 @@ class WindowEdgeTest {
         phone()
         systemBars(status = STATUS_PX, navigation = 144, threeButtons = true, cutout = 150)
         glassBottomReachesTheWindow("cutout taller than the navigation bar")
-        val bitmap = capture()
+        val bitmap = window()
         assertCoveredFrom(bitmap, bitmap.height - 150, "cutout taller than the navigation bar")
+        assertBandToTheEdge(bitmap, 150, "cutout taller than the navigation bar")
     }
 
     private companion object {
