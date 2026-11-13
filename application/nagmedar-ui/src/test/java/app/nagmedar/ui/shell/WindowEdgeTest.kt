@@ -133,14 +133,14 @@ class WindowEdgeTest {
     }
 
     /**
-     * The band behind the system's [tallest] bottom inset is one surface down to the window's last row and to its last
-     * column: every row there as the band's first row below its rule, in the middle and at the end (no strip of the
-     * root's own background under it).
+     * The band behind the system's [tallest] bottom inset is one surface down to the window's last row and to its first
+     * and last columns: every row there as the band's first row below its rule, at the start, in the middle and at the
+     * end (no strip of the root's own background under it).
      */
     private fun assertBandToTheEdge(bitmap: Bitmap, tallest: Int, what: String) {
         val top = bitmap.height - tallest + RULE_PX
         val band = bitmap.getPixel(bitmap.width / 2, top)
-        val other = (top until bitmap.height).flatMap { y -> listOf(bitmap.width / 2, bitmap.width - 1).map { x -> Triple(x, y, bitmap.getPixel(x, y)) } }
+        val other = (top until bitmap.height).flatMap { y -> listOf(0, bitmap.width / 2, bitmap.width - 1).map { x -> Triple(x, y, bitmap.getPixel(x, y)) } }
             .filter { (_, _, argb) -> argb != band }
         assertTrue(
             "$what: the band (${hex(band)}) ends before the window's edge: ${other.take(4).map { (x, y, argb) -> "($x, $y) ${hex(argb)}" }}",
