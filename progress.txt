@@ -1,0 +1,9 @@
+297 s, 20 steps, pass auto-shots, 0 crashes
+13 auto-shots Podcasts ok
+14 auto-shots Podcasts: Discover ok
+15 auto-shots Discover: the popular shows ok
+16 auto-shots A show of the directory ("Dateline NBC") ok
+17 auto-shots Radio ok
+18 auto-shots Radio: the countries ok
+19 auto-shots A country's stations ("Amerika Birleşik Devletleri") ok
+20 auto-shots A station tapped: the car's player ("Classic Vinyl HD") ok

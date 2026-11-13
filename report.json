@@ -1,0 +1,323 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "auto-shots",
+   "title": "The app on the car's screen",
+   "status": "ok",
+   "shot": "shots/001-auto-shots-the-app-on-the-car-s-screen.png",
+   "dump": "dumps/001-auto-shots-the-app-on-the-car-s-screen.xml",
+   "changed": true,
+   "seconds": 9.3,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "auto-shots",
+   "title": "First run step 1 (Devam)",
+   "status": "ok",
+   "shot": "shots/002-auto-shots-first-run-step-1-devam.png",
+   "dump": "dumps/002-auto-shots-first-run-step-1-devam.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "auto-shots",
+   "title": "First run step 2 (Devam \u00b7 2 kaynak)",
+   "status": "ok",
+   "shot": "shots/003-auto-shots-first-run-step-2-devam-2-kaynak.png",
+   "dump": "dumps/003-auto-shots-first-run-step-2-devam-2-kaynak.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "auto-shots",
+   "title": "First run step 3 (Devam)",
+   "status": "ok",
+   "shot": "shots/004-auto-shots-first-run-step-3-devam.png",
+   "dump": "dumps/004-auto-shots-first-run-step-3-devam.xml",
+   "changed": true,
+   "seconds": 6.0,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "auto-shots",
+   "title": "First run step 4 (Ba\u015fla)",
+   "status": "ok",
+   "shot": "shots/005-auto-shots-first-run-step-4-ba-la.png",
+   "dump": "dumps/005-auto-shots-first-run-step-4-ba-la.xml",
+   "changed": true,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "auto-shots",
+   "title": "The app after its first run",
+   "status": "ok",
+   "shot": "shots/006-auto-shots-the-app-after-its-first-run.png",
+   "dump": "dumps/006-auto-shots-the-app-after-its-first-run.xml",
+   "changed": false,
+   "seconds": 6.1,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "auto-shots",
+   "title": "The car's media app: Na\u011fmedar's first tab",
+   "status": "ok",
+   "shot": "shots/007-auto-shots-the-car-s-media-app-na-medar-s-first-tab.png",
+   "dump": "dumps/007-auto-shots-the-car-s-media-app-na-medar-s-first-tab.xml",
+   "changed": true,
+   "seconds": 11.1,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "auto-shots",
+   "title": "Music",
+   "status": "ok",
+   "shot": "shots/008-auto-shots-music.png",
+   "dump": "dumps/008-auto-shots-music.xml",
+   "changed": false,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "auto-shots",
+   "title": "Music: the albums",
+   "status": "ok",
+   "shot": "shots/009-auto-shots-music-the-albums.png",
+   "dump": "dumps/009-auto-shots-music-the-albums.xml",
+   "changed": true,
+   "seconds": 8.3,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "auto-shots",
+   "title": "An album (\"Profile album 2\")",
+   "status": "ok",
+   "shot": "shots/010-auto-shots-an-album-profile-album-2.png",
+   "dump": "dumps/010-auto-shots-an-album-profile-album-2.xml",
+   "changed": true,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "auto-shots",
+   "title": "A track tapped: the car's player (\"Profile track 2.1\")",
+   "status": "ok",
+   "shot": "shots/011-auto-shots-a-track-tapped-the-car-s-player-profile-track-2-.png",
+   "dump": null,
+   "changed": false,
+   "seconds": 4.7,
+   "note": "; the picture only: this screen does not rest, so it was not read"
+  },
+  {
+   "n": 12,
+   "pass": "auto-shots",
+   "title": "The car's player, paused",
+   "status": "ok",
+   "shot": "shots/012-auto-shots-the-car-s-player-paused.png",
+   "dump": "dumps/012-auto-shots-the-car-s-player-paused.xml",
+   "changed": true,
+   "seconds": 7.0,
+   "note": ""
+  },
+  {
+   "n": 13,
+   "pass": "auto-shots",
+   "title": "Podcasts",
+   "status": "ok",
+   "shot": "shots/013-auto-shots-podcasts.png",
+   "dump": "dumps/013-auto-shots-podcasts.xml",
+   "changed": true,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 14,
+   "pass": "auto-shots",
+   "title": "Podcasts: Discover",
+   "status": "ok",
+   "shot": "shots/014-auto-shots-podcasts-discover.png",
+   "dump": "dumps/014-auto-shots-podcasts-discover.xml",
+   "changed": true,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 15,
+   "pass": "auto-shots",
+   "title": "Discover: the popular shows",
+   "status": "ok",
+   "shot": "shots/015-auto-shots-discover-the-popular-shows.png",
+   "dump": "dumps/015-auto-shots-discover-the-popular-shows.xml",
+   "changed": true,
+   "seconds": 13.6,
+   "note": ""
+  },
+  {
+   "n": 16,
+   "pass": "auto-shots",
+   "title": "A show of the directory (\"Dateline NBC\")",
+   "status": "ok",
+   "shot": "shots/016-auto-shots-a-show-of-the-directory-dateline-nbc.png",
+   "dump": "dumps/016-auto-shots-a-show-of-the-directory-dateline-nbc.xml",
+   "changed": true,
+   "seconds": 13.2,
+   "note": ""
+  },
+  {
+   "n": 17,
+   "pass": "auto-shots",
+   "title": "Radio",
+   "status": "ok",
+   "shot": "shots/017-auto-shots-radio.png",
+   "dump": "dumps/017-auto-shots-radio.xml",
+   "changed": true,
+   "seconds": 8.2,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "pass": "auto-shots",
+   "title": "Radio: the countries",
+   "status": "ok",
+   "shot": "shots/018-auto-shots-radio-the-countries.png",
+   "dump": "dumps/018-auto-shots-radio-the-countries.xml",
+   "changed": true,
+   "seconds": 13.3,
+   "note": ""
+  },
+  {
+   "n": 19,
+   "pass": "auto-shots",
+   "title": "A country's stations (\"Amerika Birle\u015fik Devletleri\")",
+   "status": "ok",
+   "shot": "shots/019-auto-shots-a-country-s-stations-amerika-birle-ik-devletleri.png",
+   "dump": "dumps/019-auto-shots-a-country-s-stations-amerika-birle-ik-devletleri.xml",
+   "changed": true,
+   "seconds": 13.2,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "pass": "auto-shots",
+   "title": "A station tapped: the car's player (\"Classic Vinyl HD\")",
+   "status": "ok",
+   "shot": "shots/020-auto-shots-a-station-tapped-the-car-s-player-classic-vinyl-.png",
+   "dump": null,
+   "changed": false,
+   "seconds": 9.5,
+   "note": "; the picture only: this screen does not rest, so it was not read"
+  },
+  {
+   "n": 21,
+   "pass": "auto-shots",
+   "title": "The car's player, paused",
+   "status": "ok",
+   "shot": "shots/021-auto-shots-the-car-s-player-paused.png",
+   "dump": "dumps/021-auto-shots-the-car-s-player-paused.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  },
+  {
+   "n": 22,
+   "pass": "auto-shots",
+   "title": "Recently played",
+   "status": "ok",
+   "shot": "shots/022-auto-shots-recently-played.png",
+   "dump": "dumps/022-auto-shots-recently-played.xml",
+   "changed": true,
+   "seconds": 8.0,
+   "note": ""
+  },
+  {
+   "n": 23,
+   "pass": "auto-shots",
+   "title": "The car's search",
+   "status": "ok",
+   "shot": "shots/023-auto-shots-the-car-s-search.png",
+   "dump": "dumps/023-auto-shots-the-car-s-search.xml",
+   "changed": true,
+   "seconds": 8.4,
+   "note": ""
+  },
+  {
+   "n": 24,
+   "pass": "auto-shots",
+   "title": "Search: \"Profile\" typed",
+   "status": "ok",
+   "shot": "shots/024-auto-shots-search-profile-typed.png",
+   "dump": "dumps/024-auto-shots-search-profile-typed.xml",
+   "changed": true,
+   "seconds": 10.2,
+   "note": ""
+  },
+  {
+   "n": 25,
+   "pass": "auto-shots",
+   "title": "Search: after Back (the keyboard down)",
+   "status": "ok",
+   "shot": "shots/025-auto-shots-search-after-back-the-keyboard-down.png",
+   "dump": "dumps/025-auto-shots-search-after-back-the-keyboard-down.xml",
+   "changed": true,
+   "seconds": 6.7,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "auto-shots",
+   "name": "the car's media app shows the app's tabs",
+   "ok": true,
+   "detail": "music, podcasts, radio, recent of Music, Podcasts, Radio, Recently played; the car's media app says: Alb\u00fcmler, M\u00fczik, Podcast, Radyo, Sanat\u00e7\u0131lar, Scroll down, Scroll up, Search, Son \u00e7al\u0131nanlar, Switch apps, T\u00fcm m\u00fczi\u011fi kar\u0131\u015ft\u0131rarak \u00e7al, com.android.car.ui.utils.ROTARY_CONTAINER, \u00c7alma listeleri",
+   "step": 7
+  },
+  {
+   "pass": "auto-shots",
+   "name": "a track tapped: the car's player names it",
+   "ok": true,
+   "detail": "tapped \"Profile track 2.1\"; the player says: Profile track 2.1, 1 / 8 \u00b7 Nagmedar Artist 1 \u00b7 Profile album 2, Profile album 2, 0:04, /, 3:00, Now Playing",
+   "step": 12
+  },
+  {
+   "pass": "auto-shots",
+   "name": "a track tapped: it played (the car's player's clock ran)",
+   "ok": true,
+   "detail": "the clock: 0:04; the app's session said it played: yes",
+   "step": 12
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 25
+  }
+ ],
+ "frames": [],
+ "seconds": 356,
+ "passes": "auto-shots",
+ "source": "f77a341a0c0017788b52c0987b5eebaaefcb7b20 (story/release-1.0.6, personal build, API 34, auto-shots), run 43342984526",
+ "system": [],
+ "sheet_trials": [],
+ "back_presses": [],
+ "page_openings": [],
+ "notice_swipes": []
+}

@@ -1,0 +1,1 @@
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 25 steps, 0 crash/ANR, 0 StrictMode, 0/4 checks failed, 0 system ANR/crash, 0 warnings, 5 min. Evidence: branch ci/emulator-api34-personal-auto-shots, report.md
