@@ -993,3 +993,65 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   decision one move behind (app and kit) and the kit's ShellScroll.settle() as a separate job if he wants it.
   Local: worktree $WT/notice-swipe (branch exp/notice-swipe) kept; $WT/release-1.0.6 and its branch removed by
   merge.sh. Next version: 1.0.7 = 4010007 / arm64 14010013.
+
+## 1.0.7 — Ctrl+K: every match (13 Nov)
+- REQUEST 13 Nov 08:14 Istanbul: "Bir de ctrl k arama sayfası düzgün çalışmıyor. Her sonucu vwrmiyor" (no example).
+  Reading taken: the palette (Ctrl+K; on windows >= 1200 dp the top bar's search box opens it too) does not list
+  everything in the library that matches.
+- CAUSE, proved on 1.0.6's code (locally, $SCRATCH/search/Repro106.kt.txt; on the emulator, run 43375366270, debug,
+  API 35, 14 of 30 checks red for the right reasons): media matched by the title only, fuzzily
+  (FuzzyMatcher on item.label); each kind cut to 6 (50 scoped) with nothing leading to the rest; the library re-read at
+  every opening, no media until read, and the list said nothing.
+- FIX (exp/search-all -> story/release-1.0.7, PR #117): palette media found by the search page's engine (LibrarySearch:
+  every word in title, artist or album), all listed; artists and albums as results (the Music view's groups, opened by
+  MusicLinks), in the palette and on the search page (offered to him for removal); commands/screens/settings keep
+  their best six with a "show all N" line (PaletteRow.More); one kept read for page and palette (rememberSearchData,
+  SearchData equality); "Kütüphane okunuyor…" while nothing is read; order artists, albums, tracks.
+- WALK: `search` pass (on demand), the 64-track library; the reader reads the top, the end (Up from the first row),
+  then down with overlapping readings; the emulator's IME is sent away by Back after typing (its setting is ignored).
+  Offline models: $SCRATCH/tools/palette_rows_model.py (by items), palette_rows_model2.py (by pixels, 1.0.7's scroll):
+  0 rows missed in 5991 lists, the selected line never cut.
+- REVIEWS (one each, independent). App: "ready, on one condition" (the walk) -> fixed in 3bc8a302 and b857a60a: the
+  selected line whole by pixels (showWhole: the first visible item can be one in the list's padding), a resting
+  pointer (Compose resends the last hover after a layout, AndroidComposeView.resendMotionEventOnLayout; the list now
+  chooses by position, after a move of the pointer's own: PointerChoice), the pane kept while "show all" is selected,
+  Enter repeats ignored, the media items made once of a read and a locale (PaletteMedia) and the fresh read compared
+  off the main thread; tests; two doc sentences. Left, written as a known limit: the touch IME covers the palette's
+  lower half (NagDialog has no IME inset). Kit: "fix first" -> desktop-kit PR #11 (2.5.0, stacked on #10): 0b025d5
+  (the tapped line chosen, rows(perGroup = 0) without bare headings, the clamp, Enter repeats, a test that could not
+  fail), 88779e4 (the resting pointer, the same as the app's), d77a862 (docs); each green (kit CI ~3 min).
+- TRIAL exp@870df536: CI 43388554690 green (every new test passed; the 7 search/palette screenshots differ from
+  1.0.6's references by the same percentages as the reference run's, so the new code draws the same); search walk
+  43388557941 (debug, API 37.0) 34/34. Earlier: personal a511e484 43377271048 33/33; IME driver 43380808632 34/34.
+- RELEASE c29180427f9d4c58e5b848a170b309c7d1950eb9 (story/release-1.0.7: d5e60f05 screenshots, three walk commits,
+  3bc8a302 + b857a60a the review's fixes, c2918042 docs; pushed once). CI 43391059972 green (2359 tests; 281 screenshots
+  equal to the references). PR walk 43391060006 (debug, API 35): tablet 67/67, phone 71/71. Personal search walk
+  43391071877 (API 37.0): 33/33 (profile 8 albums + 64 tracks; nagmedar artist 3 1/3/29; album 6 1/15; track 2.5
+  artist 1: 1; artist and album open in Music; "Show all 33" lists 33; the search page 1/3/29 and the album opens).
+  Personal main walk 43391068494: 37.0 tablet 66/66, 37.0 phone 71/71, 35 phone 71/71, 35 TABLET 1/66 red:
+  "workstation: after 'By size' the drive still lists its folders". Not the app's: step 063's screenshot lists the
+  drive's folders; the check looks for "Music", which after "By size" sits at the list's top edge in all three tablet
+  runs of this commit (a 10 px sliver in the two that passed, nothing in the red one: Movies' row top at the list's
+  top, 504 px). The same check was red once in 1.0.3's train (ca51919a). OPEN, both: the driver should look for the
+  drive's folders, not Music alone; the app's table does not go back to its top when the order changes (DeviceScreen
+  EntryTable, untouched since 32417c61, 1.0.3). Not walked: page-opens, notice-swipe, back-button, sheet-trials,
+  auto-shots (untouched screens).
+- DELIVERED 13 Nov 12:23 Istanbul (09:23 UTC). release_chain.sh: master fast-forwarded to c2918042 (PR #117 closed as
+  merged), personal release dispatched 09:05:31 (run 43398417579), ci/personal-release named master's sha at 09:22,
+  decrypted, apkcheck: app.nagmedar.debug, 1.0.7, 14010013, minSdk 34, target 37, not debuggable, v2, cert
+  d094907b…fecbbc, baseline.prof + profm, arm64-v8a, 97466632 bytes, SHA-256
+  aa71c29332e7183d4abf6dabd0bbfc76afb1e944270fabb5f54e4c8453e21997 (computed again locally before sending). master's
+  push run 43398416167 green. Sent with SendUserFile: the APK and ctrl-k-1.0.6-1.0.7.png (before: run 43375366270,
+  after: run 43391071877; "nagmedar artist 3" and "s"). PR #117's body: the review section and the runs.
+  Plan document: "1.0 cihaz testi" rev 12 (the 1.0.7 checks at the top: Tablette 12, Telefonda 2, Değişmemesi gerekenler
+  2, Bilinen sınırlar 2; heading block m1gesnh1vzq.23405; the intro .25 names 1.0.7), "1.0.3 planı" rev 38 (a 1.0.7
+  paragraph above 1.0.6's, block m1gesnh1vzq.13207).
+  Kit: desktop-kit PR #11 (draft, base fix/let-go-in-motion) at d77a862: 3eea375, deb18de, a33f043, 0b025d5, 88779e4,
+  d77a862, each green; body in Turkish with the review section. Not merged, not tagged (his).
+  NOT SEEN FROM HERE: his library's size and typing speed on the tablet; whether he wants the artist/album results
+  (offered to remove); the kit's sample app on a device; a real mouse over the palette (the resting-pointer fix is
+  proven by Robolectric tests and Compose's source, not on a device).
+  Left for his word: the kit commit author; remote branches exp/search-all, ci/emulator-search,
+  ci/emulator-api37.0-search, ci/emulator-api37.0-personal-search, ci/shots-pr-117 with the earlier list; merging and
+  tagging kit PRs #10 and #11. Local: worktree $WT/search (exp/search-all) kept; $WT/release-1.0.7 and its branch
+  removed by merge.sh. Next version: 1.0.8 = 4010008 / arm64 14010014.

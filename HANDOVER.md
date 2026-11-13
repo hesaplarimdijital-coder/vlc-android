@@ -277,3 +277,49 @@ for his merge and tag; the author question above; `exp/notice-swipe` (never merg
 `ci/emulator-api34-personal-auto-shots`, `ci/emulator-api37.0-notice-swipe`, `ci/emulator-notice-swipe` wait for his
 word with the earlier ones; MiniSwipeArea's decision one move behind (app and kit) and the kit's ShellScroll.settle()
 (read only) are offered as a separate job.
+
+## 1.0.7 (13 Nov 2026) — delivered
+The owner, 13 Nov 08:14: "Bir de ctrl k arama sayfası düzgün çalışmıyor. Her sonucu vwrmiyor" (no example). Reading
+taken: the palette (Ctrl+K; on windows >= 1200 dp the top bar's search box opens it too) does not list every match.
+`orch/LOG.md` has it in full; `orch/release-1.0.7/` has the PR's description, the device checks and the kit PR's
+description.
+
+- master `c2918042` (PR #117). The personal APK: `app.nagmedar.debug`, 1.0.7, versionCode 14010013, target 37, not
+  debuggable, v2, baseline profile inside, arm64-v8a, 97466632 bytes, SHA-256
+  `aa71c29332e7183d4abf6dabd0bbfc76afb1e944270fabb5f54e4c8453e21997`. Sent with a before/after picture of the palette.
+  Next version: 1.0.8 = 4010008 / arm64 14010014.
+- The cause (1.0.6): palette media matched by the title only, fuzzily; each kind cut to six (fifty scoped) with nothing
+  leading to the rest; the library read at every opening. Now: media by the search page's engine (`LibrarySearch`), all
+  listed; artists and albums as results (`SearchGroups.kt`, the Music view's groups, `MusicLinks`), also on the search
+  page; other kinds keep six with a "show all N" line (`PaletteRow.More`); one kept read (`rememberSearchData`).
+- The independent review's fixes (`3bc8a302`, `b857a60a`): the list follows the selection by pixels (`showWhole`: the
+  first item a LazyList reports visible can be one in its content padding); a resting pointer no longer takes the
+  selection back (Compose resends the last hover after every layout, `AndroidComposeView.resendMotionEventOnLayout`;
+  the list chooses by position after a move of the pointer's own, `PointerChoice`); Enter repeats ignored; the media
+  items kept with the read and the locale (`PaletteMedia`). The same in the kit: desktop-kit PR #11 (2.5.0, stacked on
+  #10), draft, the owner merges and tags.
+
+New in the kit of this branch:
+- `passes=search` (`emulator_smoke.py`, on demand): the 64-track library ("Profile track a.t", "Profile album a",
+  "Nagmedar Artist (a+1)/2"), four palette queries read row by row (`palette_all_rows`: the top, the end by Up from the
+  first row, then down with readings that share a row; halve the step on a gap) and compared with an oracle of the
+  search's rule (`search_expected`); an artist and an album opened from the palette; the commands' line read and
+  opened; the phone's search page. The emulator shows its on-screen keyboard whatever `show_ime_with_hard_keyboard`
+  says: the pass sends it away with Back after typing. Control on 1.0.6: run 43375366270 (14 of 30 red).
+- `tools/palette_rows_model.py` / `palette_rows_model2.py <emulator_smoke.py>`: offline models of the palette's list
+  (by items; by pixels with 1.0.7's scroll) to test the reader. `tools/search_pair.py`: before/after sheets.
+  `tools/search-harness/build.sh <worktree> [TestClass…]`: compiles the pure search sources and their tests with
+  Kotlin 2.0.21 from Gradle's own jars (`/opt/gradle-8.14.3/lib`) and runs them; Gradle itself cannot run here
+  (dl.google.com and repo1.maven.org are blocked).
+- Compose facts met: `uiautomator dump` sees a Compose Dialog's rows as separate text nodes (no test tags); plain
+  JUnit tests cannot call `android.net.Uri` ("not mocked": use AndroidJUnit4); `produceState`'s `value =` compares on
+  the main thread.
+- OPEN, found by this release's walk: the personal API 35 tablet job was red on "workstation: after 'By size' the
+  drive still lists its folders"; the screenshot lists the folders, the check's "Music" sat at the list's top edge (a
+  10 px sliver in the passing runs). The driver should look for the drive's folders; the app's device table does not
+  go back to its top when the order changes (since 1.0.3). Written as a known limit in the device checks.
+
+Left, told to the user: his tablet, his library and his keyboard decide; the artist/album results can be removed; the
+touch keyboard covers the palette's lower half (known limit); the kit's PRs wait for him; the author question; the
+branches `exp/search-all`, `ci/emulator-search`, `ci/emulator-api37.0-search`, `ci/emulator-api37.0-personal-search`,
+`ci/shots-pr-117` wait for his word with the earlier ones.
