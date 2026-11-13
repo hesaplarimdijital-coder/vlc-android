@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -135,17 +135,29 @@ fun NagButton(
     enabled: Boolean = true,
     fill: Color? = null,
     onFill: Color? = null,
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 17): an action that takes something away (clear the history, forget
+     * the library): its text, icon and edge in the danger colour, its hover and press in that colour too; never filled.
+     */
+    danger: Boolean = false,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
+    @Suppress("NAME_SHADOWING") val primary = primary && !danger
     val primaryFill = fill ?: colors.accent
     val primaryContent = onFill ?: colors.onAccent
     // with a mouse the hover and the press show at once (Desktop Kit 0.2.1)
     val background by animateInteractionColor(
         when {
+            // 1.0.8 (Desktop Kit 2.8.0): a button that cannot be pressed now has no fill of its own (a primary one keeps
+            // a quiet one), tertiary text and a faint edge; at half strength it read as a pale enabled one
+            !enabled -> if (primary) colors.hover else colors.surfaceRaised.copy(alpha = 0f)
+            danger && state.pressed -> colors.danger.copy(alpha = 0.22f).compositeOver(colors.surfaceRaised)
+            danger && state.hovered -> colors.danger.copy(alpha = 0.12f).compositeOver(colors.surfaceRaised)
+            danger -> colors.surfaceRaised
             // the fill moves toward its text colour: darker on the dark themes, lighter on the light one
             primary && state.pressed -> lerp(primaryFill, primaryContent, 0.24f)
             primary && state.hovered -> lerp(primaryFill, primaryContent, 0.12f)
@@ -155,19 +167,26 @@ fun NagButton(
             else -> colors.surfaceRaised
         },
     )
-    val content = if (primary) primaryContent else colors.text
+    val content = when {
+        !enabled -> colors.textTertiary
+        danger -> colors.danger
+        primary -> primaryContent
+        else -> colors.text
+    }
     Row(
         modifier = modifier
             // by touch a 48 dp target either way (S-310)
             .defaultMinSize(minWidth = dimens.minTarget, minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
             .pressScale(state.pressed)
-            // a button that cannot be pressed now looks so, fill and border too (1.0.1: faded after the fill, only its
-            // label faded, so a disabled primary button looked pressable); the layer is always there, so a button
-            // turning enabled changes no modifier of the chain and nothing has to be drawn anew but its alpha
-            .graphicsLayer { alpha = if (enabled) 1f else DISABLED_ALPHA }
             .focusRing(state, shape)
             .background(background, shape)
-            .then(if (primary) Modifier else Modifier.border(1.dp, colors.borderStrong, shape))
+            .then(
+                when {
+                    !enabled -> Modifier.border(1.dp, colors.border, shape)
+                    primary -> Modifier
+                    else -> Modifier.border(1.dp, if (danger) colors.danger.copy(alpha = 0.6f) else colors.borderStrong, shape)
+                },
+            )
             .nagClickable(interaction, onClick, enabled = enabled, role = Role.Button)
             .padding(horizontal = dimens.gapM),
         verticalAlignment = Alignment.CenterVertically,

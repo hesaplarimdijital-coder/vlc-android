@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -180,7 +179,7 @@ fun SelectionMark(selected: Boolean, modifier: Modifier = Modifier) {
         modifier
             .size(26.dp)
             .background(if (selected) colors.accent else colors.scrim, CircleShape)
-            .border(2.dp, if (selected) colors.accent else Color.White, CircleShape),
+            .border(2.dp, if (selected) colors.accent else colors.onOverlay, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         if (selected) Icon(NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(16.dp))

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.theme.NagMotion
+import app.nagmedar.ui.theme.NagPalette
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.rememberNagHaptics
 
@@ -217,7 +218,7 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
                         .border(if (isSelected) 2.dp else 1.dp, if (isSelected) colors.text else colors.borderStrong, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isSelected) Icon(NagIcons.Check, contentDescription = null, tint = Color(0xFF0E1420), modifier = Modifier.size(14.dp))
+                    if (isSelected) Icon(NagIcons.Check, contentDescription = null, tint = NagPalette.onSwatch, modifier = Modifier.size(14.dp))
                 }
                 // a colour has no words: a resting mouse brings its name (S-404), and the keyboard's focus (1.0.8)
                 HoverTooltip(state.hovered && !state.pressed, label, focused = state.focused && !state.pressed)
@@ -328,14 +329,26 @@ internal fun SwitchTrack(checked: Boolean, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(width = 38.dp, height = 24.dp)
-            .background(animateStateColor(if (checked) colors.accent else colors.borderStrong, "switchTrack"), RoundedCornerShape(12.dp)),
+            // 1.0.8 (Desktop Kit 2.8.0): off, the track is an input's edge (3:1 to the page)
+            .background(animateStateColor(if (checked) colors.accent else colors.controlBorder, "switchTrack"), RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.CenterStart,
     ) {
         Box(
             Modifier
                 .offset { IntOffset(thumbStart.value.roundToPx(), 0) }
                 .size(16.dp)
-                .background(animateStateColor(if (checked) colors.onAccent else colors.textSecondary, "switchThumbColor"), CircleShape),
+                // 1.0.8: on the light theme's darker off track the thumb is the surface's colour
+                .background(
+                    animateStateColor(
+                        when {
+                            checked -> colors.onAccent
+                            colors.isDark -> colors.textSecondary
+                            else -> colors.surface
+                        },
+                        "switchThumbColor",
+                    ),
+                    CircleShape,
+                ),
         )
     }
 }

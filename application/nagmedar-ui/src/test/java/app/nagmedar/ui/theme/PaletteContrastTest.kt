@@ -24,6 +24,29 @@ class PaletteContrastTest {
         assertTrue(failures.joinToString("\n"), failures.isEmpty())
     }
 
+    /** 1.0.8 (Desktop Kit 2.8.0, WCAG 1.4.11): an input's edge at rest is found at 3:1 on every surface it is drawn on. */
+    @Test
+    fun inputsCanBeFoundByTheirEdge() {
+        val failures = mutableListOf<String>()
+        for (mode in modes) {
+            val c = NagPalette.colors(mode, systemDark = false, accent = Accent.Blue)
+            for ((name, bg) in mapOf("background" to c.background, "chrome" to c.chrome, "surface" to c.surface, "raised" to c.surfaceRaised)) {
+                val ratio = contrast(c.controlBorder, bg)
+                if (ratio < 3.0) failures += "%s: control border on %s: %.2f:1".format(mode, name, ratio)
+            }
+        }
+        assertTrue(failures.joinToString("\n"), failures.isEmpty())
+    }
+
+    /** 1.0.8: a press is a step past the hover, on every theme. */
+    @Test
+    fun aPressShowsPastTheHover() {
+        for (mode in modes) {
+            val c = NagPalette.colors(mode, systemDark = false, accent = Accent.Blue)
+            assertTrue("$mode: ${contrast(c.pressed, c.hover)}", contrast(c.pressed, c.hover) >= 1.1)
+        }
+    }
+
     @Test
     fun theRulesCatchAPoorPalette() {
         val poor = NagPalette.dark(Accent.Blue).copy(textTertiary = Color(0xFF4A515A), accentText = Color(0xFF34466E))

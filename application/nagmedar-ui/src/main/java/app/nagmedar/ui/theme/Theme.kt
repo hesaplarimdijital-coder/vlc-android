@@ -190,6 +190,9 @@ fun lerpColors(a: NagColors, b: NagColors, t: Float): NagColors = when {
         inverseSurface = lerp(a.inverseSurface, b.inverseSurface, t),
         onInverseSurface = lerp(a.onInverseSurface, b.onInverseSurface, t),
         inverseAccent = lerp(a.inverseAccent, b.inverseAccent, t),
+        controlBorder = lerp(a.controlBorder, b.controlBorder, t),
+        overlayScrim = lerp(a.overlayScrim, b.overlayScrim, t),
+        onOverlay = lerp(a.onOverlay, b.onOverlay, t),
     )
 }
 

@@ -204,7 +204,7 @@ private fun Modifier.field(look: FieldLook, interaction: MutableInteractionSourc
         .alpha(if (look.enabled) 1f else DISABLED_ALPHA)
         .defaultMinSize(minHeight = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
         .then(if (look.filled) Modifier.background(colors.surface, shape) else Modifier)
-        .border(if (focused || failing) 2.dp else 1.dp, if (failing) colors.danger else if (focused) colors.accent else colors.borderStrong, shape)
+        .border(if (focused || failing) 2.dp else 1.dp, if (failing) colors.danger else if (focused) colors.accent else colors.controlBorder, shape)
         .semantics {
             contentDescription = look.label
             // TalkBack says what is wrong with the field with it; the line under it says it on screen

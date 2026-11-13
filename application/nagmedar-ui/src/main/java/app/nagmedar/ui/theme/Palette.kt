@@ -63,6 +63,16 @@ data class NagColors(
     val onInverseSurface: Color,
     /** Accent for text on [inverseSurface] (the undo bar's "Undo"). */
     val inverseAccent: Color,
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0, the design audit's high finding 5): the edge of an input at rest (a text field, a switch's
+     * off track): at least 3:1 against the background, the chrome and the surfaces, so the control can be found where it
+     * is (WCAG 1.4.11). [borderStrong] stays for the edges that only part things (buttons, panels, menus).
+     */
+    val controlBorder: Color = borderStrong,
+    /** 1.0.8: darkens artwork under what is drawn on it (a cover's check ring). */
+    val overlayScrim: Color = Color(0x59000000),
+    /** 1.0.8: icons and edges drawn on artwork, over [overlayScrim]. */
+    val onOverlay: Color = Color(0xFFFFFFFF),
 )
 
 object NagPalette {
@@ -91,7 +101,8 @@ object NagPalette {
         surface = Color(0xFF171B20),
         surfaceRaised = Color(0xFF1F252C),
         hover = Color(0xFF262C34),
-        pressed = Color(0xFF2A3038),
+        // 1.0.8 (Desktop Kit 2.8.0): a step past hover, so a press shows under the pointer (1.16:1 to hover; 1.06:1 before)
+        pressed = Color(0xFF30363F),
         border = Color(0xFF20262D),
         borderStrong = Color(0xFF2A3038),
         text = Color(0xFFE6E9ED),
@@ -112,6 +123,7 @@ object NagPalette {
         inverseSurface = Color(0xFFE6E9ED),
         onInverseSurface = Color(0xFF14181C),
         inverseAccent = tones.darkInverse,
+        controlBorder = Color(0xFF6A7480),
     )
 
     fun oled(tones: AccentTones) = dark(tones).copy(
@@ -120,7 +132,7 @@ object NagPalette {
         surface = Color(0xFF0A0C0F),
         surfaceRaised = Color(0xFF161A1F),
         hover = Color(0xFF1C2127),
-        pressed = Color(0xFF242A31),
+        pressed = Color(0xFF2A3038),
         border = Color(0xFF1A1F25),
         borderStrong = Color(0xFF262C34),
         selection = tones.oledSelection,
@@ -133,8 +145,9 @@ object NagPalette {
         chrome = Color(0xFFFFFFFF),
         surface = Color(0xFFFFFFFF),
         surfaceRaised = Color(0xFFFFFFFF),
-        hover = Color(0xFFEDF0F4),
-        pressed = Color(0xFFE2E5EA),
+        // 1.0.8 (Desktop Kit 2.8.0): hover shows on the page (1.14:1 to it; 1.10:1 before), a press a step further
+        hover = Color(0xFFE9EDF2),
+        pressed = Color(0xFFDADEE4),
         border = Color(0xFFE2E5EA),
         borderStrong = Color(0xFFD6DAE0),
         text = Color(0xFF12161B),
@@ -155,7 +168,11 @@ object NagPalette {
         inverseSurface = Color(0xFF1F252C),
         onInverseSurface = Color(0xFFE6E9ED),
         inverseAccent = tones.base,
+        controlBorder = Color(0xFF7E8794),
     )
+
+    /** 1.0.8 (Desktop Kit 2.8.0): the check on a colour swatch (the accent chooser): the swatches are all light enough for it. */
+    val onSwatch: Color = Color(0xFF0E1420)
 }
 
 /** CSS `color-mix(in srgb, a fraction, b)`: mixes in gamma-encoded sRGB like the mockups. */

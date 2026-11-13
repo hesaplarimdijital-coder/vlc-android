@@ -71,7 +71,7 @@ fun NagSearchField(
         modifier
             .heightIn(min = dimens.controlHeight.coerceAtLeast(dimens.minTarget))
             .background(colors.surface, shape)
-            .border(if (focused) 2.dp else 1.dp, if (focused) colors.focusRing else colors.borderStrong, shape)
+            .border(if (focused) 2.dp else 1.dp, if (focused) colors.focusRing else colors.controlBorder, shape)
             .padding(start = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
