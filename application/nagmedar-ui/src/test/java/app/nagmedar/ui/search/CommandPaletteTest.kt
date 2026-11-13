@@ -4,7 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -17,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -38,7 +42,8 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * S-305: the palette finds commands, screens, settings and media fuzzily and the Turkish way;
  * the arrows and Enter run a hit, Tab and the prefixes narrow the search, Escape closes, and with
- * no query it shows what ran lately.
+ * no query it shows what ran lately. 1.0.7: a kind that shows its best leads to the rest; down a list longer than
+ * the palette the selected row is whole; a pointer resting over the list leaves the selection to the arrows.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -62,9 +67,14 @@ class CommandPaletteTest {
             )
     }
 
-    private fun palette(recent: List<String> = emptyList(), reading: Boolean = false) {
+    /** 1.0.7: forty tracks, "Uzun 01" to "Uzun 40": a list several times as long as the palette. */
+    private fun long(): List<PaletteItem> = (1..40).map { n ->
+        PaletteItem("media:uzun$n", PaletteKind.Media, "Uzun %02d".format(n), "Parça · Deniz Aral", icon = NagIcons.Music) { ran += "media:uzun$n" }
+    }
+
+    private fun palette(recent: List<String> = emptyList(), reading: Boolean = false, more: List<PaletteItem> = emptyList()) {
         // while the library is read its media are not among the items
-        val items = items().filter { !reading || it.kind != PaletteKind.Media }
+        val items = (items() + more).filter { !reading || it.kind != PaletteKind.Media }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 if (open) {
@@ -87,6 +97,24 @@ class CommandPaletteTest {
         .map { node -> node.config.getOrNull(SemanticsProperties.Text)?.firstOrNull()?.text.orEmpty() }
 
     private val field get() = compose.onNodeWithContentDescription("Komut, ekran, ayar ya da medya ara")
+
+    private fun label(node: SemanticsNode): String = node.config.getOrNull(SemanticsProperties.Text)?.firstOrNull()?.text.orEmpty()
+
+    /** 1.0.7: the selected row, which the list has to have brought in. */
+    private fun selectedRow(): SemanticsNode = compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)).fetchSemanticsNodes()
+        .also { assertEquals("selected rows: ${it.map(::label)}", 1, it.size) }
+        .single()
+
+    private fun listBounds(): Rect = compose.onNodeWithTag("palette-list").fetchSemanticsNode().boundsInRoot
+
+    /** 1.0.7: nothing of the node is cut by the list's edges (a node's bounds are what shows of it). */
+    private fun assertWhole(node: SemanticsNode) {
+        val name = label(node)
+        val list = listBounds()
+        assertEquals("$name: what shows of its height", node.size.height.toFloat(), node.boundsInRoot.height, 0.5f)
+        assertTrue("$name is above the list's top", node.boundsInRoot.top >= list.top)
+        assertTrue("$name is under the list's bottom", node.boundsInRoot.bottom <= list.bottom)
+    }
 
     /** Labels of the rows, top to bottom, and which is selected. */
     private fun rows(): List<Pair<String, Boolean>> = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected))
@@ -215,6 +243,102 @@ class CommandPaletteTest {
         compose.waitForIdle()
         assertEquals(1, ran.size)
         assertTrue(ran.single(), ran.single().startsWith("command:"))
+    }
+
+    /**
+     * 1.0.7: down a list longer than the palette the selected row is whole and at the list's bottom (until then the cut
+     * line under it was the selected one); around the list's ends the first row comes with its title, the last one whole.
+     */
+    @Test
+    fun theSelectedRowIsWholeAllTheWayDownAndAround() {
+        palette(more = long())
+        field.performTextInput("@uzun")
+        compose.waitForIdle()
+        assertEquals("Uzun 01", label(selectedRow()))
+        for (n in 2..40) {
+            field.performKeyInput { pressKey(Key.DirectionDown) }
+            compose.waitForIdle()
+            val row = selectedRow()
+            assertEquals("Uzun %02d".format(n), label(row))
+            assertWhole(row)
+            // once the list has moved the row is its last whole line: the list moved as little as shows it
+            if (n >= 20) assertEquals("row $n above the list's padding", 6f, listBounds().bottom - row.boundsInRoot.bottom, 0.5f)
+        }
+        // down from the last: the first again, with the kind's title above it
+        field.performKeyInput { pressKey(Key.DirectionDown) }
+        compose.waitForIdle()
+        assertEquals("Uzun 01", label(selectedRow()))
+        assertWhole(selectedRow())
+        assertWhole(compose.onNodeWithText("MEDYA").fetchSemanticsNode())
+        // up from the first: the last, whole
+        field.performKeyInput { pressKey(Key.DirectionUp) }
+        compose.waitForIdle()
+        assertEquals("Uzun 40", label(selectedRow()))
+        assertWhole(selectedRow())
+        // and up the list the row is whole at each step, at the list's top once the list has moved
+        for (n in 39 downTo 20) {
+            field.performKeyInput { pressKey(Key.DirectionUp) }
+            compose.waitForIdle()
+            val row = selectedRow()
+            assertEquals("Uzun %02d".format(n), label(row))
+            assertWhole(row)
+        }
+        assertEquals("the row at the list's top, under its padding", 6f, selectedRow().boundsInRoot.top - listBounds().top, 0.5f)
+    }
+
+    /**
+     * 1.0.7: a pointer resting over the list leaves the selection to the arrows when they scroll the list under it (each
+     * line that came under it took the selection back, so the arrows never got past the list's edge); a move of its own
+     * and the pointer chooses again.
+     */
+    @Test
+    fun aRestingPointerLeavesTheSelectionToTheArrows() {
+        palette(more = long())
+        field.performTextInput("@uzun")
+        compose.waitForIdle()
+        val list = compose.onNodeWithTag("palette-list")
+        // the pointer comes to the third row and rests there: it chose the row
+        val third = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected)).fetchSemanticsNodes().single { label(it) == "Uzun 03" }
+        val rest = third.boundsInRoot.center - listBounds().topLeft
+        list.performMouseInput {
+            moveTo(rest - Offset(24f, 0f))
+            moveTo(rest)
+        }
+        compose.waitForIdle()
+        assertEquals("Uzun 03", label(selectedRow()))
+        // twenty rows down, the list moving under the pointer
+        repeat(20) {
+            field.performKeyInput { pressKey(Key.DirectionDown) }
+            compose.waitForIdle()
+        }
+        assertEquals("Uzun 23", label(selectedRow()))
+        assertWhole(selectedRow())
+        // the pointer moves: the row under it now, and the list stays where it is
+        val under = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected)).fetchSemanticsNodes()
+            .single { (rest + listBounds().topLeft).let { at -> at.y >= it.boundsInRoot.top && at.y < it.boundsInRoot.bottom } }
+        assertTrue(label(under), label(under) != "Uzun 23" && label(under) != "Uzun 03")
+        list.performMouseInput { moveTo(rest + Offset(8f, 0f)) }
+        compose.waitForIdle()
+        assertEquals(label(under), label(selectedRow()))
+        assertEquals(under.boundsInRoot, selectedRow().boundsInRoot)
+    }
+
+    /** 1.0.7: Enter held on the line shows them all once: its repeats run nothing (they ran the first of what the line listed). */
+    @Test
+    fun enterHeldOnTheLineRunsNothing() {
+        palette()
+        field.performTextInput("a")
+        compose.waitForIdle()
+        repeat(6) { field.performKeyInput { pressKey(Key.DirectionDown) } }
+        compose.waitForIdle()
+        assertTrue("no hit is selected on the line", rows().none { it.second })
+        // held for a second: the key repeats after half of it
+        field.performKeyInput { pressKey(Key.Enter, 1_000L) }
+        compose.waitForIdle()
+        assertTrue(ran.toString(), ran.isEmpty())
+        assertTrue(open)
+        assertTrue(more().isEmpty())
+        assertTrue(rows().size > 6)
     }
 
     /** 1.0.7: while the library is read for the first time its media are not there yet: said, where they would be listed. */

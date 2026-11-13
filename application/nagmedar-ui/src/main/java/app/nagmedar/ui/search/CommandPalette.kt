@@ -4,9 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -22,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -49,6 +52,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -90,7 +94,9 @@ import app.nagmedar.ui.theme.NagTheme
  *
  * 1.0.7: a kind that shows its best only ends with a line that says how many it has and shows them
  * all (a click, or Enter on it); [reading] says the library is still being read for the first time,
- * so its media are not among [items] yet: the list says so instead of "nothing matches".
+ * so its media are not among [items] yet: the list says so instead of "nothing matches". The selected line is
+ * kept whole in the list as the arrows move it ([showWhole]), and the pointer takes the selection by a move of
+ * its own only ([PointerChoice]).
  */
 @Composable
 fun CommandPalette(
@@ -131,19 +137,19 @@ fun PaletteSurface(
     val chosen = (chosenStop as? PaletteRow.Hit)?.hit
     val field = remember { FocusRequester() }
     val list = rememberLazyListState()
-    LaunchedEffect(query, scope) { selected = 0 }
-    // the selected row stays in view; rows count the group headers too
+    // 1.0.7: whether the pointer chooses the selected line: after a move of its own, not when the list moved under it
+    val pointer = remember { PointerChoice() }
+    val shown by rememberUpdatedState(results)
+    LaunchedEffect(query, scope) {
+        selected = 0
+        pointer.byKeys()
+    }
+    // the selected line stays in view, whole, with its group's title when it is the group's first (1.0.7: by pixels,
+    // showWhole); when the keys chose it or what is listed changed, not when the pointer did: the list would move under it
     LaunchedEffect(selected, results) {
-        if (stops.isEmpty()) return@LaunchedEffect
+        if (stops.isEmpty() || pointer.chooses) return@LaunchedEffect
         val row = results.rowOfStop[selected.coerceIn(0, stops.size - 1)]
-        val visible = list.layoutInfo.visibleItemsInfo
-        if (visible.isEmpty()) return@LaunchedEffect
-        val first = visible.first().index
-        val last = visible.last().index
-        when {
-            row <= first -> list.scrollToItem((row - 1).coerceAtLeast(0))
-            row >= last -> list.scrollToItem((row - (last - first) + 1).coerceAtLeast(0))
-        }
+        list.showWhole(row, titled = row > 0 && results.rows[row - 1] is PaletteRow.Header)
     }
     val run = { hit: PaletteHit ->
         onDismiss()
@@ -204,20 +210,25 @@ fun PaletteSurface(
                                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                                 when (event.key) {
                                     Key.DirectionDown -> {
+                                        pointer.byKeys()
                                         if (stops.isNotEmpty()) selected = (selected + 1).mod(stops.size)
                                         true
                                     }
                                     Key.DirectionUp -> {
+                                        pointer.byKeys()
                                         if (stops.isNotEmpty()) selected = (selected - 1).mod(stops.size)
                                         true
                                     }
                                     Key.Enter, Key.NumPadEnter -> {
                                         val all = onSearchAll
-                                        if (event.isShiftPressed && all != null) {
-                                            onDismiss()
-                                            all(parsePaletteQuery(query, null).first)
-                                        } else {
-                                            enter()
+                                        when {
+                                            // 1.0.7: a held Enter runs once: on "show all" its repeats would run the first of what that lists
+                                            event.nativeKeyEvent.repeatCount > 0 -> Unit
+                                            event.isShiftPressed && all != null -> {
+                                                onDismiss()
+                                                all(parsePaletteQuery(query, null).first)
+                                            }
+                                            else -> enter()
                                         }
                                         true
                                     }
@@ -262,7 +273,24 @@ fun PaletteSurface(
             Row(Modifier.weight(1f, fill = false)) {
                 LazyColumn(
                     state = list,
-                    modifier = Modifier.weight(1f).heightIn(min = 120.dp).testTag("palette-list"),
+                    modifier = Modifier.weight(1f).heightIn(min = 120.dp).testTag("palette-list")
+                        // 1.0.7: the line under the pointer is selected here, for the whole list, by where the pointer is in it
+                        // (until then each line selected itself when the pointer came over it, also when the list brought it there)
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull() ?: continue
+                                    val hovers = (event.type == PointerEventType.Enter || event.type == PointerEventType.Move) && !change.pressed
+                                    when {
+                                        event.type == PointerEventType.Exit -> Unit
+                                        // its wheel, a press, a drag: the pointer's own doing
+                                        !hovers -> pointer.byPointer()
+                                        pointer.hover(change.position) -> shown.stopAt(list, change.position.y)?.let { selected = it }
+                                    }
+                                }
+                            }
+                        },
                     contentPadding = PaddingValues(vertical = 6.dp),
                 ) {
                     // 1.0.7: by count, not a call for each hit: the library's search can find thousands
@@ -280,8 +308,8 @@ fun PaletteSurface(
                     ) { at ->
                         when (val row = rows[at]) {
                             is PaletteRow.Header -> GroupHeader(row.group)
-                            is PaletteRow.Hit -> HitRow(row.hit, selected = row.stop == selected, onHover = { selected = row.stop }, onClick = { run(row.hit) })
-                            is PaletteRow.More -> MoreRow(row.group, selected = row.stop == selected, onHover = { selected = row.stop }, onClick = { scope = row.group.kind })
+                            is PaletteRow.Hit -> HitRow(row.hit, selected = row.stop == selected, onClick = { run(row.hit) })
+                            is PaletteRow.More -> MoreRow(row.group, selected = row.stop == selected, onClick = { scope = row.group.kind })
                         }
                     }
                     // 1.0.7: while the library is read for the first time its media are not here yet: said, where they would be listed
@@ -299,9 +327,10 @@ fun PaletteSurface(
                         }
                     }
                 }
-                if (wide && chosen != null) {
+                if (wide && chosenStop != null) {
                     VerticalRule(Modifier.fillMaxHeight())
-                    Preview(chosen, Modifier.width(300.dp))
+                    // 1.0.7: the pane keeps its place while "show all" is selected: the list beside it would grow wide and narrow again
+                    if (chosen != null) Preview(chosen, Modifier.width(300.dp)) else Spacer(Modifier.width(300.dp))
                 }
             }
             // keys to press: with a keyboard at hand, while it drives the palette (not touch)
@@ -321,6 +350,85 @@ fun PaletteSurface(
     }
 }
 
+/**
+ * 1.0.7: scrolls this list as little as shows its line [index] whole, by pixels; with [titled] the line above it
+ * too (a group's title above its first hit). Until then the lines were counted, and the first line a list reports
+ * as visible can be one that shows in the list's own padding only: all the way down a long list the selected line
+ * was the cut one at its bottom, and from the first line up to the last it could stay under the list's edge.
+ */
+internal suspend fun LazyListState.showWhole(index: Int, titled: Boolean = false) {
+    // laid out again where it is: what it lists can be newer than its last layout, and the lines are looked for by their place
+    scrollToItem(firstVisibleItemIndex, firstVisibleItemScrollOffset)
+    val top = if (titled && index > 0) index - 1 else index
+    val lines = layoutInfo.visibleItemsInfo
+    if (lines.isEmpty()) return
+    val upper = lines.firstOrNull { it.index == top }
+    if (if (upper != null) upper.offset < 0 else top < lines.first().index) {
+        // above what is shown, or its top cut: its top to the list's
+        scrollToItem(top)
+        return
+    }
+    // below what is shown: to the list's top first (how tall it is is known once it is laid out), then, as one whose
+    // bottom is cut, down to the list's bottom
+    val below = lines.none { it.index == index }
+    if (below) scrollToItem(index)
+    val info = layoutInfo
+    val line = info.visibleItemsInfo.firstOrNull { it.index == index } ?: return
+    val over = line.offset + line.size - (info.viewportEndOffset - info.afterContentPadding)
+    if (over > 0 || (below && over < 0)) scrollBy(over.toFloat())
+}
+
+/** 1.0.7: which of the arrows' stops is drawn at [y] of [list] (from the list's top edge), if one is. */
+private fun PaletteResults.stopAt(list: LazyListState, y: Float): Int? {
+    val info = list.layoutInfo
+    // the lines' places are counted from under the list's padding
+    val at = y - info.beforeContentPadding
+    val line = info.visibleItemsInfo.firstOrNull { at >= it.offset && at < it.offset + it.size } ?: return null
+    return when (val row = rows.getOrNull(line.index)) {
+        is PaletteRow.Hit -> row.stop
+        is PaletteRow.More -> row.stop
+        else -> null
+    }
+}
+
+/**
+ * 1.0.7: whether the pointer chooses the selected line. After a layout Compose gives the pointer's last move again to
+ * what is under it now (for the hover states under a resting pointer), so each line the arrows scrolled under a
+ * resting pointer took the selection back: the arrows never got past the list's edge. The pointer chooses by a move
+ * of its own (or its wheel, a press); after a key chose a line or changed what is listed, not until it moves again.
+ */
+private class PointerChoice {
+    var chooses = false
+        private set
+    private var last = Offset.Unspecified
+    private var rested = Offset.Unspecified
+
+    /** A key chose a line, or changed what is listed. */
+    fun byKeys() {
+        chooses = false
+        rested = last
+    }
+
+    /** The pointer's wheel, a press, a drag. */
+    fun byPointer() {
+        chooses = true
+    }
+
+    /** The pointer is at [at] with nothing pressed: whether it chooses, which it does once it is away from where it rested. */
+    fun hover(at: Offset): Boolean {
+        last = at
+        if (!chooses) {
+            if (rested.isUnspecified) rested = at else if ((at - rested).getDistance() > MOVED_PX) chooses = true
+        }
+        return chooses
+    }
+
+    private companion object {
+        /** A move given again comes back at its place, to a rounding; a pointer that moved is a pixel away or more. */
+        const val MOVED_PX = 0.5f
+    }
+}
+
 @Composable
 private fun GroupHeader(group: PaletteGroup) {
     val colors = NagTheme.colors
@@ -333,12 +441,10 @@ private fun GroupHeader(group: PaletteGroup) {
 }
 
 @Composable
-private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onClick: () -> Unit) {
+private fun HitRow(hit: PaletteHit, selected: Boolean, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val hover = remember { MutableInteractionSource() }
-    val hovered by hover.collectIsHoveredAsState()
-    LaunchedEffect(hovered) { if (hovered) onHover() }
+    val interaction = remember { MutableInteractionSource() }
     val item = hit.item
     Row(
         Modifier
@@ -346,13 +452,12 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             .padding(horizontal = 6.dp)
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
             .background(animateStateColor(if (selected) colors.selection else colors.selection.copy(alpha = 0f), "hitRow"), RoundedCornerShape(dimens.radiusControl))
-            .hoverable(hover)
             .pointerHoverIcon(PointerIcon.Hand)
             // the field moves through the rows (↑↓); Tab changes the scope, so rows take no focus
             .focusProperties { canFocus = false }
             .ignoreSecondaryButtons()
-            // no ripple, as everywhere: the selection follows the pointer instead
-            .clickable(interactionSource = hover, indication = null, onClick = onClick)
+            // no ripple, as everywhere: the selection follows the pointer instead (the list sees to that)
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -381,24 +486,21 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
  * narrows the search to the kind, which lists every one of them.
  */
 @Composable
-private fun MoreRow(group: PaletteGroup, selected: Boolean, onHover: () -> Unit, onClick: () -> Unit) {
+private fun MoreRow(group: PaletteGroup, selected: Boolean, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val hover = remember { MutableInteractionSource() }
-    val hovered by hover.collectIsHoveredAsState()
-    LaunchedEffect(hovered) { if (hovered) onHover() }
+    val interaction = remember { MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 6.dp)
             .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
             .background(animateStateColor(if (selected) colors.selection else colors.selection.copy(alpha = 0f), "moreRow"), RoundedCornerShape(dimens.radiusControl))
-            .hoverable(hover)
             .pointerHoverIcon(PointerIcon.Hand)
             // as the hits: the field moves through the rows, rows take no focus
             .focusProperties { canFocus = false }
             .ignoreSecondaryButtons()
-            .clickable(interactionSource = hover, indication = null, onClick = onClick)
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .testTag("palette-more")
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
