@@ -1,0 +1,190 @@
+3142 W/dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=6 --zip-location=/data/app/~~S3ZzosC7JUuEVZI354RDig==/app.nagmedar.debug-LUO32L9PioJfc8blXflCcA==/base.apk --oat-fd=7 --oat-location=/data/app/~~S3ZzosC7JUuEVZI354RDig==/app.nagmedar.debug-LUO32L9PioJfc8blXflCcA==/oat/x86_64/base.odex --output-vdex-fd=8 --swap-fd=9 --class-loader-context-fds=10:11 --class-loader-context=PCL[]{PCL[/system_ext/framework/androidx.window.extensions.jar]#PCL[/system_ext/framework/androidx.window.sidecar.jar]} --classpath-dir=/data/app/~~S3ZzosC7JUuEVZI354RDig==/app.nagmedar.debug-LUO32L9PioJfc8blXflCcA== --instruction-set=x86_64 --instruction-set-features=default --instruction-set-variant=x86_64 --compiler-filter=verify --compilation-reason=install --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xtarget-sdk-version:37 --runtime-arg -Xhidden-api-policy:enabled --assume-value=Landroid/os/Build$VERSION;->SDK_INT:37 --no-allow-profile-code --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-name:app.nagmedar.debug,app-version-name:1.0.8,app-version-code:14010016,art-version:370546200
+1258 W/VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain app.nagmedar.debug
+3778 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3778 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+3778 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3778 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3778 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+3778 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3778 W/HWUI: Unknown dataspace 0
+3778 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+3778 W/VLC: [000074d24d23b410/1319] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2427f0/131d] libvlc access: cannot insert stream filter record
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3778 W/VLC: [000074d24d239490/131e] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2427f0/131f] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d23b410/1320] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d240870/1321] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d239490/1322] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2427f0/1323] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d23b410/1324] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d240870/1325] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d239490/1327] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2427f0/1328] libvlc access: cannot insert stream filter record
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3778 W/VLC: [000074d24d23b410/1329] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2427f0/132b] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d245070/133a] libvlc access: cannot insert stream filter record
+623 E/NotificationService: Package enqueue rate is 5.015208. Shedding 0|app.nagmedar.debug|43|null|10234. package=app.nagmedar.debug
+3778 W/VLC: [000074d24d2493f0/1347] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:24): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d245cd0/134d] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:25): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d2430f0/1352] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:26): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d245cd0/1354] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:27): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d2430f0/1356] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:28): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d244ad0/135c] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:29): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC: [000074d24d246810/135e] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d24a050/1363] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d246810/1369] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d24a050/136b] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d246810/136e] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d24b130/136f] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d247d70/1371] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d245cd0/1372] libvlc access: cannot insert stream filter record
+3778 W/VLC: [000074d24d2430f0/1374] libvlc access: cannot insert stream filter record
+3778 E/VLC: [000074d24d245cd0/1376] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+3778 E/VLC: [000074d17d2c4b70/1376] libvlc input: Your media can't be opened
+3778 E/VLC: [000074d17d2c4b70/1376] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+3778 W/VLC: [000074d24d24a4d0/1377] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:37): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3778 E/VLC: [000074d24d24a4d0/137d] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+3778 E/VLC: [000074d17d2c4b70/137d] libvlc input: Your media can't be opened
+3778 E/VLC: [000074d17d2c4b70/137d] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+3778 W/VLC: [000074d24d2453d0/137e] libvlc access: cannot insert stream filter record
+3778 W/AndroidMedialib: type=1400 audit(0.0:38): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/VLC/medialibrary: [T#128440511189184] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+3778 W/AndroidMedialib: type=1400 audit(0.0:39): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:40): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:41): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:56): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:57): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:58): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:60): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:74): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:75): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:76): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:77): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:78): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:86): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+3778 W/AndroidMedialib: type=1400 audit(0.0:87): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106618 scontext=u:r:untrusted_app:s0:c234,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityTaskManager: Force removing ActivityRecord{242359735 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+623 W/InputDispatcher: channel 'aae9792 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+623 E/InputDispatcher: channel 'aae9792 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+623 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+623 W/WindowManager: Exception thrown during dispatchAppVisibility Window{aae9792 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+623 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{fe7cfec #9 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@60520e0
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/ActivityTaskManager: Force removing ActivityRecord{101495034 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+623 W/InputDispatcher: channel 'c4cea50 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+623 E/InputDispatcher: channel 'c4cea50 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+623 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+623 W/WindowManager: Exception thrown during dispatchAppVisibility Window{c4cea50 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+623 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{bf3c6c7 #10 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@60520e0
+5466 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+5466 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+5466 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+5466 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+5466 W/HWUI: Unknown dataspace 0
+5466 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+5466 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+5466 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=app.nagmedar.debug
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: JANK_COMPOSER, jankTypeExperimental: UNKNOWN: 3, vsyncId: 10748, totalDuration: 502176970, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 11210, totalDuration: 431210453, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 11210, totalDuration: 431210453, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{22a5428 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 15916, totalDuration: 326015171, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 15916, totalDuration: 326015171, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/.nagmedar.debug: Suspending all threads took: 88.954ms
+5466 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 16747, totalDuration: 473465969, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 16747, totalDuration: 473465969, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{e7f82b0 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 19415, totalDuration: 215467957, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 19415, totalDuration: 215467957, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 19971, totalDuration: 237320192, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 19971, totalDuration: 237320192, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{d8da967 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 E/FrameTracker: force finish cuj, time out: J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 22808, totalDuration: 628955578, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 22808, totalDuration: 628955578, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{8b38d8a u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 E/FrameTracker: force finish cuj, time out: J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: JANK_COMPOSER, jankTypeExperimental: JANK_APPLICATION, vsyncId: 25170, totalDuration: 433990032, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{f035bb0 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 26560, totalDuration: 446847749, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 26560, totalDuration: 446847749, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 27158, totalDuration: 126101450, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 27158, totalDuration: 126101450, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{37295a9 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+5466 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 28443, totalDuration: 300695434, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: UNKNOWN: 3, vsyncId: 28443, totalDuration: 300695434, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+5466 W/FrameTracker: Missed SF frame:jankTypeLegacy: JANK_COMPOSER, jankTypeExperimental: UNKNOWN: 3, vsyncId: 28986, totalDuration: 174951511, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/WindowManager: container Window{2655244 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity}does not have a surface
+5466 W/RemoteInputConnectionImpl: requestCursorUpdates on inactive InputConnection
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/ActivityTaskManager: Force removing ActivityRecord{160214189 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t11 f}}: app died, no saved state
+623 W/InputDispatcher: channel 'a3d6551 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Consumer closed input channel or an error occurred.  events=0x9
+623 E/InputDispatcher: channel 'a3d6551 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity' ~ Channel is unrecoverably broken and will be disposed!
+623 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+623 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+623 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+623 W/WindowManager: removeAppToken: Attempted to remove non-existing token: Token{8506be2 ActivityRecord{160214189 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t11 f} isExiting}}
+623 W/WindowManager: Exception thrown during dispatchAppVisibility Window{a3d6551 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+623 E/WindowOrganizerController: Attempting to externally change a non-organized container: Task{23fe01b #11 type=standard A=10234:app.nagmedar.debug}={handlePackageUpdate:false,} playercount=2 taskorg=android.window.ITaskOrganizer$Stub$Proxy@60520e0
+8394 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+8394 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+8394 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+8394 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+8394 W/HWUI: Unknown dataspace 0
+8394 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+8394 W/libc: Access denied finding property "vendor.mesa.virtgpu.kumquat"
+8394 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+623 W/ActivityManager: Skipping manifest association check for null package. SourceUid: 10234, SourcePkg: null, TargetUid: 10234, TargetPkg: app.nagmedar.debug
+8394 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+8394 W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=app.nagmedar.debug
+8394 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 36717, totalDuration: 35605303, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+8394 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 36717, totalDuration: 35605303, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@app.nagmedar.debug>
+8394 W/FrameTracker: Missed App frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 37433, totalDuration: 165256705, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+8394 W/FrameTracker: Missed SF frame:jankTypeLegacy: UNKNOWN: 3, jankTypeExperimental: JANK_APPLICATION, vsyncId: 37433, totalDuration: 165256705, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@app.nagmedar.debug>
+623 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0

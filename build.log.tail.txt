@@ -1,0 +1,300 @@
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:124 'static field MINI_KIND: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:101:49 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/VersionMigration.kt:210:108 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/BaseModel.kt:73:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/PlaylistModel.kt:118:53 Unnecessary safe call on a non-null receiver of type 'MutableList<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/mobile/PlaylistViewModel.kt:94:46 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/vlc4/src/org/videolan/vlc/VlcTrackImpl.kt:29:5 'lateinit' is unnecessary: definitely initialized in constructors.
+
+> Task :application:vlc-android:compilePersonalKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:92:34 'static fun getDefaultAdapter(): BluetoothAdapter!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:308:30 'class Playlists : Any, BaseColumns, MediaStore.Audio.PlaylistsColumns' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:308:40 'static field ENTRY_CONTENT_TYPE: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/MediaSessionCallback.kt:319:53 'static field EXTRA_MEDIA_PLAYLIST: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1089:41 'static field FLAG_HANDLES_MEDIA_BUTTONS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1089:90 'static field FLAG_HANDLES_TRANSPORT_CONTROLS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/PlaybackService.kt:1107:54 'static field FLAG_HANDLES_TRANSPORT_CONTROLS: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:400:64 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:401:65 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:402:62 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:422:171 'static field BEHAVIOR_SHOW_BARS_BY_TOUCH: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AudioPlayerContainerActivity.kt:776:40 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/AuthorsActivity.kt:62:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:229:33 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:232:20 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseActivity.kt:238:75 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseFragment.kt:62:9 'fun setHasOptionsMenu(p0: Boolean): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/BaseFragment.kt:138:37 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:163:17 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:169:17 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:185:33 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:185:62 Condition is always 'false'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/EqualizerSettingsActivity.kt:257:96 'val position: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:199:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:609:37 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HeaderMediaListActivity.kt:646:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HistoryFragment.kt:141:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/HistoryFragment.kt:143:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/InfoActivity.kt:162:47 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/LibrariesActivity.kt:63:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:125:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:142:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:151:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:161:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:170:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/MoreFragment.kt:191:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/PlaylistFragment.kt:129:46 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SearchActivity.kt:60:65 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:142:59 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:148:13 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/SecondaryActivity.kt:154:58 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumTracksAdapter.kt:63:40 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumTracksAdapter.kt:104:43 'static fun getActionMasked(p0: MotionEvent!): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:164:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:169:25 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioAlbumsSongsFragment.kt:342:73 Unchecked cast of 'MedialibraryProvider<out MediaLibraryItem>' to 'MedialibraryProvider<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:85:5 'class PagedListAdapter<T : Any, VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>' is deprecated. PagedListAdapter is deprecated and has been replaced by PagingDataAdapter.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:259:53 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:259:96 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserAdapter.kt:309:43 'static fun getActionMasked(p0: MotionEvent!): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:288:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:292:87 'class PagedList<T : Any> : AbstractList<T>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:473:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioBrowserFragment.kt:492:73 Unchecked cast of 'MedialibraryProvider<out MediaLibraryItem>' to 'MedialibraryProvider<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:210:28 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:214:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:264:9 'var userVisibleHint: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:619:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:830:83 'static field SHOW_IMPLICIT: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayer.kt:899:81 'fun vibrate(p0: Long): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/AudioPlayerAnimator.kt:125:36 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/audio/PlaylistAdapter.kt:80:5 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:130:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:133:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FileBrowserFragment.kt:153:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FilePickerFragment.kt:139:80 Return in function with expression body and without explicit return type. Use block body '{...}' or add an explicit return type. This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KTLC-288.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/FilePickerFragment.kt:140:13 Return in function with expression body and without explicit return type. Use block body '{...}' or add an explicit return type. This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KTLC-288.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:188:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:189:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:197:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MLStorageBrowserFragment.kt:257:32 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:139:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:140:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:149:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MainBrowserFragment.kt:179:27 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:225:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:226:15 'fun onPrepareOptionsMenu(p0: Menu): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:235:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:275:30 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/MediaBrowserFragment.kt:277:34 'fun onOptionsItemSelected(p0: MenuItem): Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:74:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:76:15 'fun onCreateOptionsMenu(p0: Menu, p1: MenuInflater): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/NetworkBrowserFragment.kt:89:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/StorageBrowserFragment.kt:110:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/browser/StorageFragmentDelegate.kt:62:28 'constructor(): Handler' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/AboutVersionDialog.kt:100:32 'static field GET_SIGNATURES: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/AboutVersionDialog.kt:101:15 'field signatures: Array<(out) Signature!>?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/ContextSheet.kt:128:54 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/EqualizerFragmentDialog.kt:286:109 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Chip'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/PickTimeFragment.kt:160:34 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:164:48 'fun getSerializable(p0: String?): Serializable?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:164:83 Unchecked cast of 'Serializable?' to 'ArrayList<Playlist>?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/SavePlaylistDialog.kt:231:69 Unchecked cast of 'List<MediaLibraryItem>' to 'ArrayList<Playlist>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/UpdateDialog.kt:94:21 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/UpdateDialog.kt:122:19 'static field CPU_ABI: String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/VLCBottomSheetDialogFragment.kt:48:24 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/dialogs/VlcDialog.kt:52:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/AudioUtil.kt:105:48 'static fun getContentUriForPath(p0: String): Uri?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/BitmapUtil.kt:229:49 'static fun insertImage(p0: ContentResolver!, p1: String!, p2: String!, p3: String!): String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/BitmapUtil.kt:288:89 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/BookmarkListDelegate.kt:86:35 'fun announceForAccessibility(p0: CharSequence!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FeedbackUtil.kt:194:40 'fun getInstallerPackageName(p0: String): String?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FloatingActionButtonBehavior.kt:92:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/FloatingActionButtonBehavior.kt:93:15 'fun onNestedScroll(p0: CoordinatorLayout, p1: FloatingActionButton, p2: View, p3: Int, p4: Int, p5: Int, p6: Int, p7: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/OnRepeatListener.kt:88:210 Redundant call of conversion method.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:106:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:109:19 'fun onStopNestedScroll(p0: CoordinatorLayout, p1: V & Any, p2: View): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:126:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/PlayerBehavior.kt:129:19 'fun onNestedPreScroll(p0: CoordinatorLayout, p1: V & Any, p2: View, p3: Int, p4: Int, p5: IntArray): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:506:37 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:557:72 'static field SHOW_IMPLICIT: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/UiTools.kt:971:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/VectorDrawableUtil.kt:399:13 Expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/VectorDrawableUtil.kt:401:13 Expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/BaseHeadlessFragment.kt:40:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/BaseHeadlessFragment.kt:44:9 'var retainInstance: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:59:29 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:72:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/OtgAccess.kt:74:20 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:45:21 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:61:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/helpers/hf/WriteExternalDelegate.kt:62:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingScanningFragment.kt:43:22 'fun overridePendingTransition(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingThemeFragment.kt:67:145 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/onboarding/OnboardingViewModel.kt:13:127 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/BasePreferenceFragment.kt:68:28 'fun setTargetFragment(p0: Fragment?, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/BasePreferenceFragment.kt:74:20 'fun setTargetFragment(p0: Fragment?, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/search/PreferenceParser.kt:465:96 Unchecked cast of 'Any' to 'ArrayList<String>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/preferences/search/PreferenceParser.kt:473:84 Unnecessary safe call on a non-null receiver of type 'SettingsBackup'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/AccessibleSeekBar.kt:21:150 'static fun obtain(): AccessibilityEvent!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/FastScroller.kt:227:63 'fun onDetachedFromWindow(p0: RecyclerView!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/FastScroller.kt:391:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/gui/view/NumberPickerPreference.kt:61:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/MediaUtils.kt:70:41 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/MediaUtils.kt:392:37 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlayerController.kt:37:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlayerController.kt:37:68 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlayerController.kt:37:68 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlayerController.kt:282:32 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/media/PlaylistManager.kt:1153:27 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:252:22 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:256:22 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/BrowserProvider.kt:453:68 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/FileBrowserProvider.kt:168:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/NetworkProvider.kt:97:28 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/medialibrary/MedialibraryProvider.kt:82:78 'fun <Key : Any, Value : Any> DataSource.Factory<Key, Value>.toLiveData(config: PagedList.Config, initialLoadKey: Key? = ..., boundaryCallback: PagedList.BoundaryCallback<Value>? = ..., fetchExecutor: Executor = ...): LiveData<PagedList<Value>>' is deprecated. PagedList is deprecated and has been replaced by PagingData.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/providers/medialibrary/MedialibraryProvider.kt:185:32 'class PositionalDataSource<T : Any> : DataSource<Int, T>' is deprecated. PositionalDataSource is deprecated and has been replaced by PagingSource.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/AutoUpdate.kt:89:23 'static field CPU_ABI: String!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Browserutils.kt:63:37 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/DialogDelegates.kt:80:26 Inferred type 'VlcDialog<out Dialog.IdDialog, out ViewDataBinding>?' for when expression is not visible in this scope.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/FlagSet.kt:50:24 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'Array<(out) T! (of class FlagSet<T : Enum<T>, Flag>)>?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:122:32 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:340:52 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:340:67 'fun getMetrics(p0: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:345:52 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:345:67 'fun getMetrics(p0: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Kextensions.kt:429:80 'fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job' is deprecated. launchWhenStarted is deprecated as it can lead to wasted resources in some cases. Replace with suspending repeatOnLifecycle to run the block whenever the Lifecycle state is at least Lifecycle.State.STARTED.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/LocaleUtil.kt:82:29 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ModelsHelper.kt:169:39 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ModelsHelper.kt:180:39 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/Permissions.kt:92:29 'fun unsafeCheckOpNoThrow(p0: String, p1: Int, p2: String): Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:65 'static fun createVideoThumbnail(p0: String, p1: Int): Bitmap?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:113 'class Thumbnails : Any, BaseColumns' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:86:124 'static field MINI_KIND: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/ThumbnailsProvider.kt:101:49 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/util/VersionMigration.kt:210:108 'static field MODE_NIGHT_AUTO: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/BaseModel.kt:73:26 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/PlaylistModel.kt:118:53 Unnecessary safe call on a non-null receiver of type 'MutableList<MediaWrapper>'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/src/org/videolan/vlc/viewmodels/mobile/PlaylistViewModel.kt:94:46 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/vlc-android/vlc4/src/org/videolan/vlc/VlcTrackImpl.kt:29:5 'lateinit' is unnecessary: definitely initialized in constructors.
+
+> Task :application:vlc-android:compilePersonalJavaWithJavac
+> Task :application:vlc-android:compileReleaseJavaWithJavac
+> Task :application:vlc-android:mergePersonalGeneratedProguardFiles
+> Task :application:vlc-android:exportPersonalConsumerProguardFiles
+> Task :application:vlc-android:bundleLibCompileToJarRelease
+> Task :application:vlc-android:processPersonalJavaRes
+> Task :application:vlc-android:bundleLibCompileToJarPersonal
+> Task :application:vlc-android:bundleLibRuntimeToJarPersonal
+> Task :application:vlc-android:processReleaseJavaRes
+> Task :application:vlc-android:bundleLibRuntimeToJarRelease
+> Task :application:vlc-android:generateReleaseLintModel
+> Task :application:vlc-android:createFullJarRelease
+> Task :application:vlc-android:createFullJarPersonal
+> Task :application:vlc-android:generatePersonalLintModel
+> Task :application:vlc-android:extractPersonalAnnotations
+> Task :application:vlc-android:mergePersonalConsumerProguardFiles
+> Task :application:vlc-android:mergePersonalJavaResource
+> Task :application:vlc-android:extractReleaseAnnotations
+> Task :application:vlc-android:syncPersonalLibJars
+> Task :application:vlc-android:bundlePersonalLocalLintAar
+> Task :application:vlc-android:mergeReleaseGeneratedProguardFiles
+> Task :application:vlc-android:mergeReleaseConsumerProguardFiles
+> Task :application:vlc-android:mergeReleaseJavaResource
+> Task :application:vlc-android:syncReleaseLibJars
+> Task :application:vlc-android:bundleReleaseLocalLintAar
+> Task :application:vlc-android:generatePersonalLintVitalModel
+
+> Task :application:remote-access-server:compileReleaseKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:63:36 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ObsoleteCoroutinesApi' or '@OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:64:23 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ObsoleteCoroutinesApi' or '@OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class)'
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/RemoteAccessService.kt:74:48 The corresponding parameter in the supertype 'Observer' is named 'value'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessModelExtensions.kt:50:9 Elvis operator (?:) always returns the left operand of non-nullable type 'String'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingPlaylist.kt:107:40 Cast is redundant.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingResources.kt:223:82 Unnecessary safe call on a non-null receiver of type 'String'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingResources.kt:257:28 Unnecessary safe call on a non-null receiver of type 'String'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingResources.kt:257:47 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:252:16 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'DateFormat?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:256:22 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'DateFormat?'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/routing/RemoteAccessRoutingUtils.kt:256:42 Java type mismatch: inferred type is 'Date?', but 'Date' was expected.
+w: file:///home/runner/work/vlc-android/vlc-android/application/remote-access-server/src/main/java/org/videolan/vlc/remoteaccessserver/websockets/RemoteAccessWebSockets.kt:235:56 Unnecessary safe call on a non-null receiver of type 'PlaylistManager'.
+
+> Task :application:remote-access-server:compileReleaseJavaWithJavac
+> Task :application:remote-access-server:mergeReleaseGeneratedProguardFiles
+> Task :application:remote-access-server:exportReleaseConsumerProguardFiles
+> Task :application:remote-access-server:bundleLibCompileToJarRelease
+> Task :application:remote-access-server:bundleLibRuntimeToJarRelease
+> Task :application:app:dataBindingMergeDependencyArtifactsPersonal
+> Task :application:remote-access-server:processReleaseJavaRes
+> Task :application:remote-access-server:createFullJarRelease
+> Task :application:app:dataBindingGenBaseClassesPersonal
+> Task :application:remote-access-server:generateReleaseLintModel
+> Task :application:remote-access-server:extractReleaseAnnotations
+> Task :application:remote-access-server:mergeReleaseConsumerProguardFiles
+> Task :application:remote-access-server:mergeReleaseJavaResource
+> Task :application:remote-access-server:syncReleaseLibJars
+> Task :application:remote-access-server:bundleReleaseLocalLintAar
+> Task :application:remote-access-server:generateReleaseLintVitalModel
+> Task :application:remote-access-server:lintVitalAnalyzeRelease
+> Task :application:nagmedar-ui:compileReleaseKotlin
+> Task :application:vlc-android:lintVitalAnalyzePersonal
+
+> Task :application:nagmedar-ui:compileReleaseKotlin
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:415:59 Unnecessary safe call on a non-null receiver of type 'MultiSelection'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:415:83 Unnecessary safe call on a non-null receiver of type 'MultiSelection'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:596:48 Condition is always 'true'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:810:58 Unnecessary safe call on a non-null receiver of type 'TableSort'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:823:33 Unnecessary safe call on a non-null receiver of type '(TableSort) -> Unit'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:823:77 Unnecessary safe call on a non-null receiver of type 'TableSort'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/components/DenseTable.kt:833:26 Unnecessary safe call on a non-null receiver of type 'TableSort'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/library/TechLabels.kt:98:16 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/music/PlaylistsScreen.kt:321:101 Unnecessary safe call on a non-null receiver of type 'SmartListsState'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/playback/QueuePanel.kt:160:33 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/radio/RadioServers.kt:40:57 Unnecessary safe call on a non-null receiver of type 'String'.
+w: file:///home/runner/work/vlc-android/vlc-android/application/nagmedar-ui/src/main/java/app/nagmedar/ui/theme/SystemBars.kt:35:25 'var isStatusBarContrastEnforced: Boolean' is deprecated. Deprecated in Java.
+
+> Task :application:nagmedar-ui:compileReleaseJavaWithJavac
+> Task :application:nagmedar-ui:mergeReleaseGeneratedProguardFiles
+> Task :application:nagmedar-ui:exportReleaseConsumerProguardFiles
+> Task :application:nagmedar-ui:processReleaseJavaRes
+> Task :application:nagmedar-ui:bundleLibRuntimeToJarRelease
+> Task :application:nagmedar-ui:bundleLibCompileToJarRelease
+> Task :application:nagmedar-ui:generateReleaseLintModel
+> Task :application:nagmedar-ui:createFullJarRelease
+> Task :application:nagmedar-ui:extractReleaseAnnotations
+> Task :application:nagmedar-ui:mergeReleaseConsumerProguardFiles
+> Task :application:nagmedar-ui:mergeReleaseJavaResource
+> Task :application:app:compilePersonalKotlin
+> Task :application:nagmedar-ui:syncReleaseLibJars
+> Task :application:nagmedar-ui:bundleReleaseLocalLintAar
+> Task :application:nagmedar-ui:generateReleaseLintVitalModel
+> Task :application:app:compilePersonalJavaWithJavac
+> Task :application:app:mergePersonalGeneratedProguardFiles
+> Task :application:app:processPersonalJavaRes
+> Task :application:app:generatePersonalLintVitalReportModel
+> Task :application:app:mergePersonalJavaResource
+> Task :application:app:expandPersonalArtProfileWildcards
+> Task :application:nagmedar-ui:lintVitalAnalyzeRelease
+> Task :application:app:minifyPersonalWithR8
+> Task :application:app:lintVitalAnalyzePersonal
+> Task :application:app:lintVitalReportPersonal
+> Task :application:app:lintVitalPersonal
+> Task :application:app:convertShrunkResourcesToBinaryPersonal
+> Task :application:app:optimizePersonalResources
+> Task :application:app:l8DexDesugarLibPersonal
+> Task :application:app:compilePersonalArtProfile
+> Task :application:app:packagePersonal
+> Task :application:app:createPersonalApkListingFileRedirect
+> Task :application:app:assemblePersonal
+
+[Incubating] Problems report is available at: file:///home/runner/work/vlc-android/vlc-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 9m 12s
+600 actionable tasks: 600 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.2/userguide/configuration_cache_enabling.html
