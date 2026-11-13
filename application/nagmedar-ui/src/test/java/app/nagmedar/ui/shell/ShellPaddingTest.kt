@@ -2,6 +2,7 @@ package app.nagmedar.ui.shell
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -78,6 +79,27 @@ class ShellPaddingTest {
         assertTrue("top padding ${values.calculateTopPadding()}", values.calculateTopPadding() >= 48.dp)
         near(root.bottom - miniTop + 6.dp, values.calculateBottomPadding(), "bottom padding")
         assertEquals(0.dp, values.calculateLeftPadding(LayoutDirection.Ltr))
+    }
+
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0): a screen that chooses its layout in a BoxWithConstraints and asks for the padding inside
+     * it asks while the shell measures the screen; until then the screen was padded as well, so its list started a top
+     * bar's height too low and ended a bottom bar's height too high, for good.
+     */
+    @Test
+    fun aScreenAskingFromASubcompositionIsNotPaddedTwice() {
+        var padding: PaddingValues? = null
+        shell {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                padding = rememberShellContentPadding()
+                Box(Modifier.fillMaxSize().testTag("screen"))
+            }
+        }
+        val root = compose.onRoot().getBoundsInRoot()
+        val screen = compose.onNodeWithTag("screen").getBoundsInRoot()
+        near(root.top, screen.top, "screen top")
+        near(root.bottom, screen.bottom, "screen bottom")
+        assertTrue("top padding ${padding!!.calculateTopPadding()}", padding!!.calculateTopPadding() >= 48.dp)
     }
 
     @Test

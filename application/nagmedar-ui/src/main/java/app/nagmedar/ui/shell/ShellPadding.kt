@@ -212,13 +212,19 @@ internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollSt
     val screen = remember { ShellScreenState() }
     val density = LocalDensity.current
     val padding = remember(metrics, density, bars) { shellPaddingValues(metrics, density, bars) }
+    // 1.0.8 (Desktop Kit 2.8.0): read here as well as while measuring. A screen that asks for the padding from a
+    // subcomposition (BoxWithConstraints, SubcomposeLayout) asks while this frame is being measured: the change can no
+    // longer re-measure the frame (Compose drops a node's own re-measure request while it measures), and the padding
+    // stayed doubled for good. Read in composition, the change recomposes the frame and the new layout below measures
+    // again on the next frame
+    val handled = screen.handlers > 0
     CompositionLocalProvider(LocalShellScreen provides screen, LocalShellContentPadding provides padding) {
         Box(
             Modifier
                 .fillMaxSize()
                 .background(NagTheme.colors.background)
                 .layout { measurable, constraints ->
-                    if (screen.handlers > 0) {
+                    if (handled || screen.handlers > 0) {
                         val placeable = measurable.measure(constraints)
                         return@layout layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                     }
@@ -229,7 +235,10 @@ internal fun ShellScreenFrame(metrics: ShellChromeMetrics, scroll: ShellScrollSt
                     val inner = constraints.copy(minHeight = constraints.minHeight.coerceAtMost(maxHeight), maxHeight = maxHeight)
                     val placeable = measurable.measure(inner)
                     val height = if (constraints.hasBoundedHeight) constraints.maxHeight else placeable.height + top + bottom
-                    layout(placeable.width, height) { placeable.place(0, top) }
+                    // asked for during this very measure (see above): the screen pads itself, so it starts at the
+                    // window's top for the one frame until it is measured again with the whole window
+                    val y = if (screen.handlers > 0) 0 else top
+                    layout(placeable.width, height) { placeable.place(0, y) }
                 },
         ) { content() }
     }
