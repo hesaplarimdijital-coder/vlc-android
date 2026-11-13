@@ -411,7 +411,7 @@
     <string name="nag_unmute">Sesi aç</string>
 
     <!-- Ayarlar -->
-    <string name="nag_settings_appearance">Görünüm</string>
+    <string name="nag_settings_appearance">Görünüş</string>
     <string name="nag_settings_theme">Tema</string>
     <string name="nag_theme_system">Sistem</string>
     <string name="nag_theme_light">Açık</string>

@@ -763,7 +763,7 @@
     <string name="nag_search_syntax_exclude_example">-live</string>
 
     <!-- S-601: the players' controls -->
-    <string name="nag_player_close">Close the player</string>
+    <string name="nag_player_close">Collapse the player</string>
     <string name="nag_player_repeat_all">Repeat all</string>
     <string name="nag_player_repeat_one">Repeat this one</string>
 
