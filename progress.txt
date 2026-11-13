@@ -1,0 +1,9 @@
+280 s, 10 steps, pass notice-swipe, 0 crashes
+3 notice-swipe First run with the media step 2 (Continue · 2 sources) ok
+4 notice-swipe First run with the media step 3 (Continue) ok
+5 notice-swipe First run with the media step 4 (Start) ok
+6 notice-swipe After the scan ok
+7 notice-swipe Settings (the animations on) ok
+8 notice-swipe Settings at the library's Rescan button ok
+9 notice-swipe The Rescan notice ok
+10 notice-swipe A notice swiped far, the finger lifted at rest: the UI asked ok

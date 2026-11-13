@@ -1,0 +1,450 @@
+{
+ "verdict": "passed",
+ "steps": [
+  {
+   "n": 1,
+   "pass": "notice-swipe",
+   "title": "Launch (the walk's media pushed)",
+   "status": "ok",
+   "shot": "shots/001-notice-swipe-launch-the-walk-s-media-pushed.png",
+   "dump": "dumps/001-notice-swipe-launch-the-walk-s-media-pushed.xml",
+   "changed": true,
+   "seconds": 8.1,
+   "note": ""
+  },
+  {
+   "n": 2,
+   "pass": "notice-swipe",
+   "title": "First run with the media step 1 (Continue)",
+   "status": "ok",
+   "shot": "shots/002-notice-swipe-first-run-with-the-media-step-1-continue.png",
+   "dump": "dumps/002-notice-swipe-first-run-with-the-media-step-1-continue.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 3,
+   "pass": "notice-swipe",
+   "title": "First run with the media step 2 (Continue \u00b7 2 sources)",
+   "status": "ok",
+   "shot": "shots/003-notice-swipe-first-run-with-the-media-step-2-continue-2-sourc.png",
+   "dump": "dumps/003-notice-swipe-first-run-with-the-media-step-2-continue-2-sourc.xml",
+   "changed": true,
+   "seconds": 7.6,
+   "note": ""
+  },
+  {
+   "n": 4,
+   "pass": "notice-swipe",
+   "title": "First run with the media step 3 (Continue)",
+   "status": "ok",
+   "shot": "shots/004-notice-swipe-first-run-with-the-media-step-3-continue.png",
+   "dump": "dumps/004-notice-swipe-first-run-with-the-media-step-3-continue.xml",
+   "changed": true,
+   "seconds": 8.5,
+   "note": ""
+  },
+  {
+   "n": 5,
+   "pass": "notice-swipe",
+   "title": "First run with the media step 4 (Start)",
+   "status": "ok",
+   "shot": "shots/005-notice-swipe-first-run-with-the-media-step-4-start.png",
+   "dump": "dumps/005-notice-swipe-first-run-with-the-media-step-4-start.xml",
+   "changed": true,
+   "seconds": 6.6,
+   "note": ""
+  },
+  {
+   "n": 6,
+   "pass": "notice-swipe",
+   "title": "After the scan",
+   "status": "ok",
+   "shot": "shots/006-notice-swipe-after-the-scan.png",
+   "dump": "dumps/006-notice-swipe-after-the-scan.xml",
+   "changed": false,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 7,
+   "pass": "notice-swipe",
+   "title": "Settings (the animations on)",
+   "status": "ok",
+   "shot": "shots/007-notice-swipe-settings-the-animations-on.png",
+   "dump": "dumps/007-notice-swipe-settings-the-animations-on.xml",
+   "changed": true,
+   "seconds": 6.8,
+   "note": ""
+  },
+  {
+   "n": 8,
+   "pass": "notice-swipe",
+   "title": "Settings at the library's Rescan button",
+   "status": "ok",
+   "shot": "shots/008-notice-swipe-settings-at-the-library-s-rescan-button.png",
+   "dump": "dumps/008-notice-swipe-settings-at-the-library-s-rescan-button.xml",
+   "changed": true,
+   "seconds": 6.4,
+   "note": ""
+  },
+  {
+   "n": 9,
+   "pass": "notice-swipe",
+   "title": "The Rescan notice",
+   "status": "ok",
+   "shot": "shots/009-notice-swipe-the-rescan-notice.png",
+   "dump": "dumps/009-notice-swipe-the-rescan-notice.xml",
+   "changed": true,
+   "seconds": 5.9,
+   "note": ""
+  },
+  {
+   "n": 10,
+   "pass": "notice-swipe",
+   "title": "A notice swiped far, the finger lifted at rest: the UI asked",
+   "status": "ok",
+   "shot": "shots/010-notice-swipe-a-notice-swiped-far-the-finger-lifted-at-rest-th.png",
+   "dump": "dumps/010-notice-swipe-a-notice-swiped-far-the-finger-lifted-at-rest-th.xml",
+   "changed": true,
+   "seconds": 6.2,
+   "note": ""
+  },
+  {
+   "n": 11,
+   "pass": "notice-swipe",
+   "title": "A notice flung, the finger lifted in motion: the UI asked",
+   "status": "ok",
+   "shot": "shots/011-notice-swipe-a-notice-flung-the-finger-lifted-in-motion-the-u.png",
+   "dump": "dumps/011-notice-swipe-a-notice-flung-the-finger-lifted-in-motion-the-u.xml",
+   "changed": false,
+   "seconds": 6.3,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "pass": "notice-swipe",
+   "title": "A notice swiped a little, the finger lifted in motion: the UI asked",
+   "status": "ok",
+   "shot": "shots/012-notice-swipe-a-notice-swiped-a-little-the-finger-lifted-in-mo.png",
+   "dump": "dumps/012-notice-swipe-a-notice-swiped-a-little-the-finger-lifted-in-mo.xml",
+   "changed": true,
+   "seconds": 6.3,
+   "note": ""
+  }
+ ],
+ "crashes": [],
+ "errors": [],
+ "warnings": [],
+ "strictmode": 0,
+ "checks": [
+  {
+   "pass": "notice-swipe",
+   "name": "the emulator's touch screen takes a finger's raw events",
+   "ok": true,
+   "detail": "virtio_input_multi_touch_1 (/dev/input/event2), its place from the input reader's viewport: {'logical': [0, 0, 1080, 2340], 'physical': [911, 0, 1649, 1600], 'device': [2560, 1600]}",
+   "step": 6
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "Settings opens",
+   "ok": true,
+   "detail": "",
+   "step": 6
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "Settings has the library's Rescan button",
+   "ok": true,
+   "detail": "at (395, 1245)",
+   "step": 8
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "the Rescan button shows its notice",
+   "ok": true,
+   "detail": "\"Scanning the library again; the list stays as it is meanwhile\"",
+   "step": 9
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice swiped far, the finger lifted at rest: the raw swipe reached it",
+   "ok": true,
+   "detail": "the notice's bar before the swipe: 48 px; the last move the dispatcher sent: (1471, 1418) of the panel, the swipe's end there: (1471, 1418); the lift 303.4 ms after it (asked: 100 ms at the least)",
+   "step": 10
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice swiped far, the finger lifted at rest leaves",
+   "ok": true,
+   "detail": "its bar's left edge: 48 px before the swipe; no bar, no bar and no bar about 0.3 s, 0.9 s and 1.6 s after the lift; in the UI's tree afterwards: no; notices stay for the system's longer time here: yes",
+   "step": 10
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice flung, the finger lifted in motion: the raw swipe reached it",
+   "ok": true,
+   "detail": "the notice's bar before the swipe: 48 px; the last move the dispatcher sent: (1471, 1418) of the panel, the swipe's end there: (1471, 1418); the lift 0.1 ms after it (asked: 4 ms at the most)",
+   "step": 11
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice flung, the finger lifted in motion leaves",
+   "ok": true,
+   "detail": "its bar's left edge: 48 px before the swipe; no bar, no bar and no bar about 0.3 s, 0.9 s and 1.6 s after the lift; in the UI's tree afterwards: no; notices stay for the system's longer time here: yes",
+   "step": 11
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice swiped a little, the finger lifted in motion: the raw swipe reached it",
+   "ok": true,
+   "detail": "the notice's bar before the swipe: 48 px; the last move the dispatcher sent: (1193, 1418) of the panel, the swipe's end there: (1193, 1418); the lift 0.2 ms after it (asked: 4 ms at the most)",
+   "step": 12
+  },
+  {
+   "pass": "notice-swipe",
+   "name": "a notice swiped a little, the finger lifted in motion comes back to its place",
+   "ok": true,
+   "detail": "its bar's left edge: 48 px before the swipe; 48 px, 48 px and 48 px about 0.3 s, 0.9 s and 1.6 s after the lift; in the UI's tree afterwards: at x 90; notices stay for the system's longer time here: yes",
+   "step": 12
+  },
+  {
+   "pass": "all",
+   "name": "no film, series, video, Home, TV Lab or Whisper words on the app's screens",
+   "ok": true,
+   "detail": "",
+   "step": 12
+  }
+ ],
+ "frames": [],
+ "seconds": 321,
+ "passes": "notice-swipe",
+ "source": "96d1d59d63b1c9cd4188785660048d9f8f6bd858 (story/release-1.0.8, personal build, API 37.0, notice-swipe), run 43492272979",
+ "system": [],
+ "sheet_trials": [],
+ "back_presses": [],
+ "page_openings": [],
+ "notice_swipes": [
+  {
+   "pass": "notice-swipe",
+   "way": "swiped far, the finger lifted at rest",
+   "far": true,
+   "lift_with_last": false,
+   "leaves": true,
+   "shots": [
+    "shots/010-notice-swipe-notice-swiped-far-the-finger-lifted-at-rest-1.png",
+    "shots/010-notice-swipe-notice-swiped-far-the-finger-lifted-at-rest-2.png",
+    "shots/010-notice-swipe-notice-swiped-far-the-finger-lifted-at-rest-3.png",
+    "shots/010-notice-swipe-notice-swiped-far-the-finger-lifted-at-rest-4.png"
+   ],
+   "edges": [
+    48,
+    null,
+    null,
+    null
+   ],
+   "reached": true,
+   "as_meant": true,
+   "together_ms": 303.39199999999255,
+   "sent": [
+    [
+     323999.597,
+     "MOVE",
+     1335,
+     1418
+    ],
+    [
+     324062.446,
+     "MOVE",
+     1369,
+     1418
+    ],
+    [
+     324104.99,
+     "MOVE",
+     1403,
+     1418
+    ],
+    [
+     324175.983,
+     "MOVE",
+     1437,
+     1418
+    ],
+    [
+     324254.165,
+     "MOVE",
+     1471,
+     1418
+    ],
+    [
+     324557.557,
+     "UP",
+     1471,
+     1418
+    ]
+   ],
+   "raw": [
+    [
+     14495,
+     29057
+    ],
+    [
+     18833,
+     29057
+    ]
+   ],
+   "in_tree": false,
+   "tree_left": null,
+   "ok": true
+  },
+  {
+   "pass": "notice-swipe",
+   "way": "flung, the finger lifted in motion",
+   "far": true,
+   "lift_with_last": true,
+   "leaves": true,
+   "shots": [
+    "shots/011-notice-swipe-notice-flung-the-finger-lifted-in-motion-1.png",
+    "shots/011-notice-swipe-notice-flung-the-finger-lifted-in-motion-2.png",
+    "shots/011-notice-swipe-notice-flung-the-finger-lifted-in-motion-3.png",
+    "shots/011-notice-swipe-notice-flung-the-finger-lifted-in-motion-4.png"
+   ],
+   "edges": [
+    48,
+    null,
+    null,
+    null
+   ],
+   "reached": true,
+   "as_meant": true,
+   "together_ms": 0.1319999999832362,
+   "sent": [
+    [
+     339341.858,
+     "MOVE",
+     1335,
+     1418
+    ],
+    [
+     339414.076,
+     "MOVE",
+     1369,
+     1418
+    ],
+    [
+     339444.973,
+     "MOVE",
+     1403,
+     1418
+    ],
+    [
+     339487.595,
+     "MOVE",
+     1437,
+     1418
+    ],
+    [
+     339535.635,
+     "MOVE",
+     1471,
+     1418
+    ],
+    [
+     339535.767,
+     "UP",
+     1471,
+     1418
+    ]
+   ],
+   "raw": [
+    [
+     14495,
+     29057
+    ],
+    [
+     18833,
+     29057
+    ]
+   ],
+   "in_tree": false,
+   "tree_left": null,
+   "ok": true
+  },
+  {
+   "pass": "notice-swipe",
+   "way": "swiped a little, the finger lifted in motion",
+   "far": false,
+   "lift_with_last": true,
+   "leaves": false,
+   "shots": [
+    "shots/012-notice-swipe-notice-swiped-a-little-the-finger-lifted-in-moti-1.png",
+    "shots/012-notice-swipe-notice-swiped-a-little-the-finger-lifted-in-moti-2.png",
+    "shots/012-notice-swipe-notice-swiped-a-little-the-finger-lifted-in-moti-3.png",
+    "shots/012-notice-swipe-notice-swiped-a-little-the-finger-lifted-in-moti-4.png"
+   ],
+   "edges": [
+    48,
+    48,
+    48,
+    48
+   ],
+   "reached": true,
+   "as_meant": true,
+   "together_ms": 0.17000000004190952,
+   "sent": [
+    [
+     352448.751,
+     "MOVE",
+     1166,
+     1418
+    ],
+    [
+     352503.25,
+     "MOVE",
+     1173,
+     1418
+    ],
+    [
+     352558.172,
+     "MOVE",
+     1180,
+     1418
+    ],
+    [
+     352621.102,
+     "MOVE",
+     1187,
+     1418
+    ],
+    [
+     352689.627,
+     "MOVE",
+     1193,
+     1418
+    ],
+    [
+     352689.797,
+     "UP",
+     1193,
+     1418
+    ]
+   ],
+   "raw": [
+    [
+     14495,
+     29057
+    ],
+    [
+     15282,
+     29057
+    ]
+   ],
+   "in_tree": true,
+   "tree_left": 90,
+   "ok": true
+  }
+ ],
+ "searches": []
+}

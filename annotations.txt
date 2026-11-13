@@ -1,0 +1,1 @@
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 12 steps, 0 crash/ANR, 0 StrictMode, 0/11 checks failed, 0 system ANR/crash, 0 warnings, 5 min. Evidence: branch ci/emulator-api37.0-personal-notice-swipe, report.md
