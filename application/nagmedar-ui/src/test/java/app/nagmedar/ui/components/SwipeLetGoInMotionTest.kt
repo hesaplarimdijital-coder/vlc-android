@@ -45,14 +45,18 @@ import kotlin.math.abs
  * the Android 17 emulator with a finger's raw events (the walk's notice-swipe pass).
  *
  * The coroutines of these tests wait in a queue, as they do on a device's main thread
- * ([StandardTestDispatcher]). The default of Compose's tests runs each coroutine the moment it is
- * launched, an order no device has: that is why the swipes of [ComponentsBehaviourTest] never showed
- * this.
+ * ([StandardTestDispatcher]). The rule this module's tests are built on runs each coroutine the
+ * moment it is launched, an order no device has (Compose 1.12 deprecates that rule for one that
+ * queues): that is why the swipes of [ComponentsBehaviourTest] never showed this.
  *
  * Every swipe is made twice, with one move more the second time. Under these tests (not on a
  * device: there a bar follows every move) a bar that moves under the finger takes only every other
  * move of it after the first two, and 1.0.5's bar stayed aside only when the last move was one it
- * took: with one count or the other it is.
+ * took: with one count or the other it is. (Seen with a probe that printed each move the bar was
+ * given; why it is so was not found.)
+ *
+ * Each swipe also says that the finger had moved the bar when it let go: without that, a bar that
+ * never left its place would pass for one that came back.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -117,6 +121,9 @@ class SwipeLetGoInMotionTest {
         val rest = left(text)
         // 40 px a frame: 2500 px/s, twice what a fling asks for
         compose.onNodeWithText(text).performTouchInput { letGoInMotion(step, moves) }
+        // no frame has passed since the lift: the bar is where the finger had it
+        val under = left(text) - rest
+        if (abs(under) < 40f) return "the finger had not moved it ($under px from its place at the lift, $moves moves)"
         val ran = framesUntil(90, gone)
         return if (gone()) "gone" else "still there after $ran frames, ${left(text) - rest} px from its place ($moves moves)"
     }
@@ -158,6 +165,9 @@ class SwipeLetGoInMotionTest {
         val rest = left(LONG)
         for (moves in intArrayOf(8, 7)) {
             compose.onNodeWithText(LONG).performTouchInput { letGoInMotion(step = -6f, moves = moves) }
+            // no frame has passed since the lift: the bar is where the finger had it
+            val under = left(LONG) - rest
+            assertTrue("the finger had moved the bar when it let go ($under px from its place, $tier, $moves moves)", under < -6f)
             frames(1)
             assertEquals("a short swipe leaves the bar", 1, state.messages.size)
             val ran = framesUntil(120) { abs(left(LONG) - rest) < 0.5f }
