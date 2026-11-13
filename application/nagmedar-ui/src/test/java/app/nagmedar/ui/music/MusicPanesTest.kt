@@ -123,9 +123,14 @@ class MusicPanesTest {
         }
     }
 
-    /** The first of [prefix] 01, 02… on the screen now. */
-    private fun topOnScreen(prefix: String, count: Int): String =
-        (1..count).map { "$prefix %02d".format(it) }.first { onScreen(it) }
+    /** The number of the first of [prefix] 01, 02… on the screen now. */
+    private fun topOnScreen(prefix: String, count: Int): Int = (1..count).first { onScreen("$prefix %02d".format(it)) }
+
+    /**
+     * The list is where it was: its first row on the screen is the one before, or the next when the rows' heights in
+     * the other layout leave only the edge of it (the scroll keeps the first row and how far into it it is).
+     */
+    private fun assertStillAt(top: Int, now: Int) = assertTrue("the list's first row was $top, is $now", now == top || now == top + 1)
 
     @Test
     fun theAlbumsKeepTheirPlaceAsTheWindowWidensAndNarrows() {
@@ -134,15 +139,17 @@ class MusicPanesTest {
         compose.waitForIdle()
         val top = topOnScreen("Albüm", 60)
         assertFalse(onScreen("Albüm 01"))
-        // a tablet's width: the albums beside the first one's tracks, where they were
+        // a tablet's width: the albums beside the first one's tracks, where they were (the open album's header says
+        // "Albüm 01": the list's own rows are looked at)
         width = WidthClass.Expanded
         compose.waitForIdle()
-        assertTrue("$top on the screen", onScreen(top))
+        assertTrue(onScreen("Albüm %02d".format(top + 1)))
+        assertFalse("the albums are not back at their top", onScreen("Albüm 02"))
         assertTrue(onScreen("Parça 01"))
         // and back
         width = WidthClass.Compact
         compose.waitForIdle()
-        assertEquals(top, topOnScreen("Albüm", 60))
+        assertStillAt(top, topOnScreen("Albüm", 60))
     }
 
     @Test
@@ -161,11 +168,11 @@ class MusicPanesTest {
         compose.waitForIdle()
         assertEquals(library.groups(MusicView.Albums).first { it.title == "Albüm 03" }.key, state.group)
         compose.onNode(hasContentDescription("Listeye dön")).assertIsDisplayed()
-        assertEquals(top, topOnScreen("Parça", 40))
+        assertStillAt(top, topOnScreen("Parça", 40))
         // the medium width shows it alone as well, still where it was
         width = WidthClass.Medium
         compose.waitForIdle()
-        assertEquals(top, topOnScreen("Parça", 40))
+        assertStillAt(top, topOnScreen("Parça", 40))
     }
 
     @Test

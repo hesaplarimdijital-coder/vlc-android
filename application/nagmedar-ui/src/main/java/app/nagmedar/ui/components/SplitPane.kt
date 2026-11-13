@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,12 +33,15 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -80,6 +82,10 @@ fun rememberSplitState(initialStartWidth: Dp, key: String): SplitState {
  * Two panes side by side with a draggable divider (player | panel; 1.0.8: a list and what is chosen in it, Desktop Kit
  * 2.8.0's list and detail). The start pane keeps the width it is dragged to, within [minStart] and the room left for
  * [minEnd].
+ *
+ * 1.0.8: a plain layout, as the kit's is (it was a BoxWithConstraints): what a screen moves between its layouts (a list
+ * kept with its state, [app.nagmedar.ui.shell.MovableDetails]) stays in one composition. The divider's range is the one
+ * the last layout allowed.
  */
 @Composable
 fun HorizontalSplitPane(
@@ -91,28 +97,51 @@ fun HorizontalSplitPane(
     minEnd: Dp = 280.dp,
     dividerLabel: String = "",
 ) {
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        val handle = paneHandleWidth()
-        val maxStart = (maxWidth - handle - minEnd).coerceAtLeast(minStart)
-        val startWidth = state.startWidthDp.dp.coerceIn(minStart, maxStart)
-        Row(Modifier.fillMaxSize()) {
-            Box(Modifier.width(startWidth).fillMaxHeight()) { start() }
+    val handle = paneHandleWidth()
+    // the widest the start pane may be, in dp, as the last layout found it (until then: anything)
+    var maxStart by remember { mutableFloatStateOf(Float.MAX_VALUE) }
+    val range = minStart.value..maxStart.coerceAtLeast(minStart.value)
+    Layout(
+        modifier = modifier.fillMaxSize(),
+        content = {
+            Box(Modifier.layoutId(SPLIT_START)) { start() }
             PaneDivider(
-                widthDp = startWidth.value,
-                range = minStart.value..maxStart.value,
+                widthDp = state.startWidthDp.coerceIn(range),
+                range = range,
                 // several moves can arrive in one frame: add to the state, not to this composition's width
-                onResize = { towardsEnd ->
-                    state.startWidthDp = (state.startWidthDp.coerceIn(minStart.value, maxStart.value) + towardsEnd).coerceIn(minStart.value, maxStart.value)
-                },
-                onSet = { state.startWidthDp = it.coerceIn(minStart.value, maxStart.value) },
+                onResize = { towardsEnd -> state.startWidthDp = (state.startWidthDp.coerceIn(range) + towardsEnd).coerceIn(range) },
+                onSet = { state.startWidthDp = it.coerceIn(range) },
                 label = dividerLabel,
-                modifier = Modifier.width(handle),
+                modifier = Modifier.layoutId(SPLIT_DIVIDER).width(handle),
                 onResizeEnd = state::commit,
             )
-            Box(Modifier.weight(1f).fillMaxHeight()) { end() }
+            Box(Modifier.layoutId(SPLIT_END)) { end() }
+        },
+    ) { measurables, constraints ->
+        val w = constraints.maxWidth
+        val h = constraints.maxHeight
+        val handlePx = handle.roundToPx()
+        val minStartPx = minStart.roundToPx()
+        val maxStartPx = (w - handlePx - minEnd.roundToPx()).coerceAtLeast(minStartPx)
+        val widest = maxStartPx.toDp().value
+        // read once laid out: the divider's range for the next composition (a written state, only when it changes)
+        if (widest != maxStart) maxStart = widest
+        val startPx = state.startWidthDp.dp.roundToPx().coerceIn(minStartPx, maxStartPx)
+        val endPx = (w - startPx - handlePx).coerceAtLeast(0)
+        val startPane = measurables.first { it.layoutId == SPLIT_START }.measure(Constraints.fixed(startPx, h))
+        val divider = measurables.first { it.layoutId == SPLIT_DIVIDER }.measure(Constraints.fixed(handlePx, h))
+        val endPane = measurables.first { it.layoutId == SPLIT_END }.measure(Constraints.fixed(endPx, h))
+        layout(w, h) {
+            startPane.placeRelative(0, 0)
+            divider.placeRelative(startPx, 0)
+            endPane.placeRelative(startPx + handlePx, 0)
         }
     }
 }
+
+private const val SPLIT_START = "start"
+private const val SPLIT_DIVIDER = "divider"
+private const val SPLIT_END = "end"
 
 /** Width of a divider's grab area: wider for fingers than for a mouse. */
 @Composable
