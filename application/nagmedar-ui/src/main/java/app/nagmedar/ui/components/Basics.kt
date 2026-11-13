@@ -71,7 +71,8 @@ fun NagIconButton(
             tint = animateStateColor(if (enabled) tint else tint.copy(alpha = 0.4f), "iconTint"),
             modifier = Modifier.size(iconSize),
         )
-        HoverTooltip(state.hovered && !state.pressed, contentDescription, keys)
+        // 1.0.8 (Desktop Kit 2.8.0): it names itself to the keyboard's focus as well; inside a TooltipArea that one names it
+        if (!LocalInTooltipArea.current) HoverTooltip(state.hovered && !state.pressed, contentDescription, keys, focused = state.focused && !state.pressed)
     }
 }
 
@@ -116,7 +117,7 @@ fun NagPlayButton(
         ) {
             Icon(NagIcons.Play, contentDescription = contentDescription, tint = colors.onAccent, modifier = Modifier.size(dimens.icon))
         }
-        HoverTooltip(state.hovered && !state.pressed, contentDescription, null)
+        if (!LocalInTooltipArea.current) HoverTooltip(state.hovered && !state.pressed, contentDescription, null, focused = state.focused && !state.pressed)
     }
 }
 

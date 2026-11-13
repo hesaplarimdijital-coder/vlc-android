@@ -2,6 +2,7 @@ package app.nagmedar.ui.components
 
 import android.content.Context
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -9,12 +10,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -27,6 +32,7 @@ import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,7 +42,8 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * S-404: a mouse resting on an icon button shows its name and keys after the window's delay and
  * leaving takes them away; touch never shows them; the delay can be turned off and is kept; 1.0.1:
- * the keys only with a keyboard.
+ * the keys only with a keyboard. 1.0.8 (Desktop Kit 2.8.0): the keyboard's focus shows the name too,
+ * and the next button along shows its own at once.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -48,6 +55,26 @@ class TooltipTest {
     val compose = createComposeRule()
 
     private var delay by mutableStateOf<Long?>(TooltipDelay.Normal.millis)
+
+    private lateinit var inputModeManager: InputModeManager
+
+    /** 1.0.8: a tooltip of an earlier test does not hurry this test's first one. */
+    @Before
+    fun forgetEarlierTooltips() = TooltipTiming.reset()
+
+    private fun toolbar() {
+        compose.setContent {
+            inputModeManager = LocalInputModeManager.current
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
+                Row(Modifier.padding(40.dp)) {
+                    NagIconButton(NagIcons.Play, "Oynat", {})
+                    NagIconButton(NagIcons.Settings, "Ayarlar", {})
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+    }
 
     private fun button() {
         compose.setContent {
@@ -118,6 +145,30 @@ class TooltipTest {
         playButton.performMouseInput { moveTo(center) }
         compose.mainClock.advanceTimeBy(2000)
         assertFalse("off shows none", tooltipShown())
+    }
+
+    /** 1.0.8 (Desktop Kit 2.8.0): moving on along a toolbar, the next name shows at once. */
+    @Test
+    fun theNextButtonAlongShowsItsNameAtOnce() {
+        toolbar()
+        compose.onNodeWithContentDescription("Oynat").performMouseInput { moveTo(center) }
+        compose.mainClock.advanceTimeBy(300)
+        assertFalse("not before the delay", compose.onAllNodesWithText("Oynat").fetchSemanticsNodes().isNotEmpty())
+        compose.mainClock.advanceTimeBy(400)
+        compose.onNodeWithText("Oynat").assertExists()
+        compose.onNodeWithContentDescription("Ayarlar").performMouseInput { moveTo(center) }
+        compose.mainClock.advanceTimeBy(150)
+        compose.onNodeWithText("Ayarlar").assertExists()
+    }
+
+    /** 1.0.8 (Desktop Kit 2.8.0): the keyboard's focus reaching an icon button shows its name. */
+    @Test
+    fun theKeyboardsFocusShowsTheName() {
+        toolbar()
+        compose.runOnIdle { inputModeManager.requestInputMode(androidx.compose.ui.input.InputMode.Keyboard) }
+        compose.onNodeWithContentDescription("Ayarlar").performSemanticsAction(SemanticsActions.RequestFocus)
+        compose.mainClock.advanceTimeBy(700)
+        compose.onNodeWithText("Ayarlar").assertExists()
     }
 
     @Test

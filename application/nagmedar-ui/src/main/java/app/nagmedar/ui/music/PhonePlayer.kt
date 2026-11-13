@@ -632,7 +632,7 @@ private fun RoundIconButton(icon: ImageVector, contentDescription: String, onCli
         ) {
             Icon(icon, contentDescription = contentDescription, tint = colors.text, modifier = Modifier.size(dimens.icon))
         }
-        HoverTooltip(state.hovered && !state.pressed, contentDescription, null)
+        HoverTooltip(state.hovered && !state.pressed, contentDescription, null, focused = state.focused && !state.pressed)
     }
 }
 

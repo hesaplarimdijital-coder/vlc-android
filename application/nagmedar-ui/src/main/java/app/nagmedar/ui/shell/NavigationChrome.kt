@@ -78,6 +78,7 @@ import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.PaneDivider
 import app.nagmedar.ui.components.SectionCaption
+import app.nagmedar.ui.components.TooltipPlacement
 import app.nagmedar.ui.components.VerticalRule
 import app.nagmedar.ui.components.animateInteractionColor
 import app.nagmedar.ui.components.animateStateColor
@@ -487,8 +488,9 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
             }
         }
         if (collapsed) {
-            // only the icon shows: a resting mouse brings the name (S-404)
-            HoverTooltip(state.hovered && !state.pressed, label, badge)
+            // only the icon shows: a resting mouse brings the name (S-404); 1.0.8 (Desktop Kit 2.8.0): so does the
+            // keyboard's focus, and the name stands beside the entry
+            HoverTooltip(state.hovered && !state.pressed, label, badge, focused = state.focused && !state.pressed, placement = TooltipPlacement.End)
         }
     }
 }

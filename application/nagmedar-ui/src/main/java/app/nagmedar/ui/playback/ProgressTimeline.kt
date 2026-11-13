@@ -743,7 +743,7 @@ fun TransportButton(
                     .background(colors.accentText, CircleShape),
             )
         }
-        HoverTooltip(state.hovered && !state.pressed, contentDescription, keys)
+        HoverTooltip(state.hovered && !state.pressed, contentDescription, keys, focused = state.focused && !state.pressed)
     }
 }
 
@@ -790,6 +790,6 @@ fun PlayPauseCircle(playing: Boolean, onClick: () -> Unit, size: Dp, iconSize: D
                 modifier = Modifier.size(iconSize).offset(x = if (isPlaying) 0.dp else iconSize / 16),
             )
         }
-        HoverTooltip(state.hovered && !state.pressed, label, keys)
+        HoverTooltip(state.hovered && !state.pressed, label, keys, focused = state.focused && !state.pressed)
     }
 }
