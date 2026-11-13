@@ -27,7 +27,7 @@ class PaletteItem(
     val icon: ImageVector? = null,
     /** 1.0.7: what a media item is found by besides its label: a track's artist and album, an album's artist. */
     val words: String = "",
-    /** 1.0.7: among media that match equally well the lower comes first: an artist, then an album, then a track. */
+    /** 1.0.7: the media come in this order, the lower first: the artists, then the albums, then the tracks. */
     val order: Int = 0,
     val run: () -> Unit,
 ) {
@@ -119,8 +119,9 @@ fun parsePaletteQuery(raw: String, scope: PaletteKind?): Pair<String, PaletteKin
  * 1.0.7: media are found as the search page finds them ([search], S-311): every word of the query in the
  * title, the artist or the album, in any order. Until then only a track's title was looked at, letter by
  * letter: an artist's or an album's name found nothing. They are all listed, as is one kind asked for:
- * until then six of them were (fifty of a kind asked for) and nothing led to the rest. Media that match
- * equally well come as artists, albums, then tracks ([PaletteItem.order]), what ran lately first among them.
+ * until then six of them were (fifty of a kind asked for) and nothing led to the rest. They come as the
+ * search page lists them: the artists, then the albums, then the tracks ([PaletteItem.order]), each best
+ * first; among those that match alike, what ran lately, then the shorter title.
  */
 fun paletteResults(
     raw: String,
@@ -154,8 +155,9 @@ fun paletteResults(
         }
     }
     val words = SearchQuery.parse(query)
-    // the search's own order (best first, a shorter title before a longer one) stays among those of one rank;
-    // a hit's rank is made once, not at every comparison: a letter can find most of a large library
+    // artists, albums, tracks, each best first; the search's own order (a shorter title before a longer one) stays
+    // among those of one rank. A hit's rank is made once, not at every comparison: a letter can find most of a
+    // large library
     val media = pool.mapNotNull { it.searchable }.search(words)
         .map { hit -> hit to mediaRank(hit, recentRank) }
         .sortedBy { it.second }
@@ -171,10 +173,14 @@ fun paletteResults(
     return PaletteResults(groups, effective, fuzzy.size + media.size)
 }
 
-/** A media hit's rank, the lower first: how well the words matched, then an artist, an album, a track, then what ran lately. */
+/**
+ * A media hit's rank, the lower first: an artist, an album, a track ([PaletteItem.order]); then how well the words
+ * matched; then what ran lately. (An album found by its artist's name alone stays above a track whose title happens
+ * to hold a word of the query: "ada karan" finds "Sabaha Kadar" by the "ada" in "Kadar".)
+ */
 private fun mediaRank(hit: SearchHit<PaletteItem>, recentRank: Map<String, Int>): Long {
     val recent = (if (recentRank.isEmpty()) null else recentRank[hit.value.id]) ?: NOT_RECENT
-    return ((Int.MAX_VALUE - hit.match).toLong() shl 24) or (hit.value.order.coerceIn(0, 0xFF).toLong() shl 16) or recent.coerceIn(0, NOT_RECENT).toLong()
+    return (hit.value.order.coerceIn(0, 0xFF).toLong() shl 48) or ((Int.MAX_VALUE - hit.match).toLong() shl 16) or recent.coerceIn(0, NOT_RECENT).toLong()
 }
 
 private const val NOT_RECENT = 0xFFFF
