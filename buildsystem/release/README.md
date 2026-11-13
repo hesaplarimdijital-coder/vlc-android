@@ -12,7 +12,7 @@ Nağmedar 1.0 yalnızca sizin iki cihazınız (Galaxy S24, Galaxy Tab S11 Ultra;
 
 ### Sürüm numaraları
 
-Kök `build.gradle`: `versionName = '1.0.6'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010006. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
+Kök `build.gradle`: `versionName = '1.0.7'`, `versionCode = 4000000 + major·10000 + minor·100 + yama` = 4010007. Bir APK'nın kendi versionCode'u `10000000 + versionCode + ABI rakamı`dır (`application/app/build.gradle`; armeabi-v7a 5, arm64-v8a 6, x86 7, x86_64 8; ABI'ye bölünmemiş derleme 0).
 
 | Derleme | versionName | versionCode |
 | --- | --- | --- |
@@ -23,11 +23,12 @@ Kök `build.gradle`: `versionName = '1.0.6'`, `versionCode = 4000000 + major·10
 | Kişisel sürüm 1.0.3, arm64 | 1.0.3 | 14010009 |
 | Kişisel sürüm 1.0.4, arm64 | 1.0.4 | 14010010 |
 | Kişisel sürüm 1.0.5, arm64 | 1.0.5 | 14010011 |
-| Kişisel sürüm 1.0.6, arm64 | 1.0.6 | **14010012** |
-| Kişisel sürüm 1.0.6, x86_64 (yalnızca CI emülatörü) | 1.0.6 | 14010014 |
-| 1.0.6'dan derlenen debug | 1.0.6 | 14010006 |
+| Kişisel sürüm 1.0.6, arm64 | 1.0.6 | 14010012 |
+| Kişisel sürüm 1.0.7, arm64 | 1.0.7 | **14010013** |
+| Kişisel sürüm 1.0.7, x86_64 (yalnızca CI emülatörü) | 1.0.7 | 14010015 |
+| 1.0.7'den derlenen debug | 1.0.7 | 14010007 |
 
-Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.6 kuruluyken aynı sürümden bir debug derlemesi (14010006) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.7: 4010007, kişisel APK'sı 14010013). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
+Kişisel sürümün numarası yüklü debug derlemesininkinden büyük olduğundan Android onu güncelleme sayar. Tersi olmaz: kişisel 1.0.7 kuruluyken aynı sürümden bir debug derlemesi (14010007) daha küçük numaralı olduğundan onun üzerine kurulamaz. Sonraki sürüm için `versionName` ve `versionCode` artırılır (1.0.8: 4010008, kişisel APK'sı 14010014). Yama ile ABI rakamı aynı basamağa toplandığından iki ayrı derleme türünün numaraları çakışabilir (kişisel 1.0.1 ile debug 1.0.7 ikisi de 14010007); kişisel sürümler kendi aralarında hep sırayla büyür.
 
 ### Bir kez: teslim anahtarı
 
@@ -49,12 +50,12 @@ CI APK'yı sizin teslim anahtarınızın açık yarısıyla ([`delivery.pub`](de
    git fetch origin ci/personal-release
    git worktree add /tmp/nagmedar-teslim origin/ci/personal-release
    cat /tmp/nagmedar-teslim/README.md
-   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.6.apk
+   sh buildsystem/release/decrypt_apk.sh /tmp/nagmedar-teslim ~/nagmedar/delivery.key Nagmedar-1.0.7.apk
    git worktree remove /tmp/nagmedar-teslim
    ```
 
    Betik APK'nın SHA-256'sını zarftakiyle karşılaştırır; tutmazsa dosyayı siler.
-4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.6.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
+4. Kurun: USB hata ayıklamasıyla `adb install -r Nagmedar-1.0.7.apk`, ya da dosyayı cihaza kopyalayıp Dosyalarım'dan açın. Android “Güncelle” der; “Uygulama yüklenmedi” derse yüklü olan başka bir anahtarla imzalanmıştır (bu durumda kaldırmadan önce Ayarlar › Yedekleme'den yedek alın).
 
 Kurulum güncelleme olduğundan ilk açılışta kütüphane yeni sürüme göre bir kez gözden geçirilir: veritabanı 22'ye geçer, 0.5'ten kalan video ve TV Lab işleri, dosyaları (çeviri modelleriyle yaklaşık 1 GB) ve artık kullanılmayan klasör izinleri bir kez temizlenir. Müziğinize, podcast indirmelerinize, dökümlere ve radyo kayıtlarınıza dokunulmaz. 1.0.0'dan 1.0.1'e güncellemede veritabanı değişmez, her şey olduğu gibi kalır. 1.0.2'ye güncellemede veritabanı 23'e geçer (yalnız Whisper'ın sütunları çıkar; programlar, bölümler, dinleme yerleri ve indirmeler kalır) ve Whisper'ın bekleyen işleri, indirilmiş modelleri ve ürettiği dökümler bir kez silinir; yayınların kendi dökümlerine dokunulmaz. 1.0.3'e güncellemede veritabanı 24'e geçer (ses bilgisi tablosuna ReplayGain'in dört sütunu eklenir, satırlar kalır) ve her müzik dosyasının başlığı ReplayGain değerleri için arka planda bir kez yeniden okunur; film bilgisinin 0.5'ten kalan veritabanı silinir. Müzik listesi ilk açılışta bir kez eskisi gibi okunur ve cihazda saklanır; sonraki açılışlarda hemen gelir, kütüphane her açılışta yeniden taranmaz (Ayarlar › Kütüphane › “Kütüphaneyi yeniden tara” elle tarar). Sürümlerin notları [`CHANGELOG.md`](../../CHANGELOG.md) dosyasındadır.
 
@@ -99,6 +100,15 @@ gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/
 `notice-swipe` bir uyarıyı parmağın kaydırdığı gibi kaydırır: dokunma olayları emülatörün dokunmatik ekranına çekirdeğin verdiği biçimde yazılır (`adb` kök yetkisiyle), son hareket ve kalkış birlikte gelir. `input` ve UiAutomator her olayı uygulama işleyene kadar bekler; hareket hâlinde kalkan bir parmağın yaptığını yapamazlar. 1.0.3–1.0.5'te böyle bırakılan uyarı bırakıldığı yerde kalıyordu ve hiçbir geçiş bunu görmedi. Telefonun ekran boyutunda, animasyonlar açık gezer; uyarının yeri bırakıştan sonra piksellerden okunur.
 
 `auto-shots` başka bir emülatörde gezer: Android Automotive (API 34; `api_levels` girdisine bakmaz). Arabanın medya uygulaması uygulamanın oynatma hizmetine Android Auto'nun bağlandığı gibi bağlanır ve Android Auto'nun gezdiği ağacı çizer: sekmeler, listeler, çalan parça ve arabanın oynatıcısı. Android Auto'nun kendisi emülatörde çalıştırılamaz (masaüstü ana birimi, Play Store'a giriş yapılmış bir telefon ister); görüntüler arabanın sisteminin çizimidir. Geçiş 1.0.6'da bir çökmeyi buldu: arabanın medya uygulaması bağlanınca uygulama ölüyordu.
+
+1.0.7'den beri arama da gezilir:
+
+```sh
+gh api repos/hesaplarimdijital-coder/vlc-android/actions/workflows/emulator.yml/dispatches \
+  -f ref=master -f 'inputs[build]=personal' -f 'inputs[api_levels]=37.0' -f 'inputs[passes]=search'
+```
+
+`search` aramayı, her etiketini yürüyüşün bildiği kütüphaneyle gezer: 64 parça (“Profile track a.t”), sekiz albüm (“Profile album a”), dört sanatçı (“Nagmedar Artist 1–4”, ikişer albüm). Tabletin ekranında klavyenin Ctrl+K'si ile açılan palete bir sanatçının adı, bir albümün adı, her parçada geçen bir kelime ve bir parça adı sanatçısıyla birlikte yazılır; listelenen her satır okunur (listenin başı, sonu ve arası: seçim oklarla indirilir, her okuma bir öncekiyle ortak bir satır paylaşır; emülatörün ekran klavyesi yazdıktan sonra Geri ile kapatılır) ve kütüphanenin aramanın kuralına göre vermesi gerekenlerle karşılaştırılır: yazılan her kelime adda, sanatçıda ya da albümde. Bir sanatçı ve bir albüm paletten Müzik'te açılır; yalnız en iyileri gösterilen türün altındaki satır okunur ve Enter ile açılır. Sonra telefonun ekranında arama sayfası: sanatçının adı için sanatçılar, albümler ve parçalar, bir albümün açılması. 1.0.6'da palet parçayı yalnız adında arıyor ve her türden altı satır gösteriyordu; öteki geçişler palete tek bir sorgu yazıp ilk sonucu seçiyordu ve bunu görmedi. Kanıtı `ci/emulator-api37.0-personal-search` dalına yazılır; `inputs[ref]` ile eski bir sürüm aynı geçişle gezilebilir.
 
 ### Android 17 (API 37)
 
