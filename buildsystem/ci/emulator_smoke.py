@@ -1834,10 +1834,12 @@ class Smoke:
         return None
 
     def session_playing(self):
-        """The app's media session says it plays."""
+        """A media session of the app says it plays: "state=3" or, as newer systems write it, "state=PLAYING(3)" (1.0.6:
+        that second form was never matched, a word boundary was asked for after its bracket; and any of the app's records
+        counts, the first one need not be the one in use)."""
         out = self.sh("dumpsys media_session", timeout=30)
-        block = out[out.find("package=" + self.pkg):] if ("package=" + self.pkg) in out else ""
-        return bool(re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3)\b", block[:3000]))
+        return any(block.startswith(self.pkg) and re.search(r"state=PlaybackState \{state=(PLAYING\(3\)|3\b)", block[:3000])
+                   for block in re.split(r"(?m)^\s*package=", out)[1:])
 
     def big_player(self):
         """1.0.2: the transport bar's "open the player" opens the big player over the window (not the Music page);
@@ -2986,27 +2988,47 @@ class Smoke:
 
     # ---------------------------------------------------------------- 1.0.6: Android Auto's tree on a car's screen
 
+    def car_screen(self):
+        """The car's screen, and where its media app's small player begins when that is up: what lies under it is in
+        the tree all the same, and a tap there opens the player."""
+        nodes = self.nodes(self.dump())
+        bar = [n.b[1] for n in nodes if n.area and n.rid.endswith(":id/minimized_playback_controls")]
+        return nodes, min(bar) if bar else max((n.b[3] for n in nodes), default=768)
+
+    def car_page_down(self, nodes, floor, by_button=True):
+        """The list on: a page by its own button (a car's list has one), or without one (and when the button did not
+        help) by a swipe up over what shows of the list."""
+        button = [n for n in nodes if n.area and n.rid.endswith(":id/car_ui_scrollbar_page_down")]
+        if button and by_button:
+            self.sh("input tap %d %d" % button[0].center)
+        else:
+            w = max((n.b[2] for n in nodes), default=1024)
+            self.sh("input swipe %d %d %d %d 400" % (w // 2, floor - 60, w // 2, max(floor - 300, 180)))
+        time.sleep(1.2)
+
     def car_tap(self, labels, title, wait=3.0, below=0.0):
         """Taps what on the car's screen says one of [labels] (any app's: the car's media app draws the tree) and takes
         the step [title]; True when it was there, else a warning. [below]: only what is lower than this share of the
-        screen (the lists, not the tabs)."""
-        nodes = self.nodes(self.dump())
-        h = max((n.b[3] for n in nodes), default=768)
-        for label in labels:
-            hit = [n for n in nodes if n.area and n.center[1] >= h * below and (n.text.strip() == label or n.desc.strip() == label)]
+        screen (the lists, not the tabs). What the small player covers is paged up first."""
+        for attempt in range(5):
+            nodes, floor = self.car_screen()
+            h = max((n.b[3] for n in nodes), default=768)
+            said = [n for n in nodes if n.area and n.center[1] >= h * below and (n.text.strip() in labels or n.desc.strip() in labels)]
+            hit = [n for n in said if n.b[3] <= floor]
             if hit:
                 x, y = hit[0].center
                 self.step(title, lambda: self.sh("input tap %d %d" % (x, y)), wait=wait)
                 return True
+            self.car_page_down(nodes, floor, by_button=attempt < 2)
         self.warnings.append("[%s] \"%s\" is not on the car's screen (%s)" % (self.cur_pass, labels[0], title))
         return False
 
     def car_first_row(self, title, starts=None, wait=3.0, read=True):
         """Taps the first row of the list on the car's screen (the first text below the bar; with [starts], the first
         that begins so) and takes the step [title]; what the row says, or None with a warning."""
-        nodes = self.nodes(self.dump())
+        nodes, floor = self.car_screen()
         h = max((n.b[3] for n in nodes), default=768)
-        rows = sorted((n for n in nodes if n.area and n.text.strip() and n.center[1] > h * 0.22
+        rows = sorted((n for n in nodes if n.area and n.text.strip() and n.center[1] > h * 0.22 and n.b[3] <= floor
                        and n.pkg != self.pkg and (starts is None or n.text.strip().startswith(starts))),
                       key=lambda n: (n.center[1], n.center[0]))
         if not rows:
@@ -3051,21 +3073,22 @@ class Smoke:
     def car_player(self, title, starts=None, wait=4.0, named=True):
         """Taps the first row, a thing that plays: the car's player comes up over the list. A player that plays never
         rests (its time runs), so it is photographed as it is and read only once paused; Back then takes it down.
-        [named]: the paused player must say what the row said (not asked of a station: a stream names itself). True
-        when a row was tapped."""
+        [named]: the paused player must say what the row said and its clock must have run (not asked of a station: a
+        stream names itself and has no clock). True when a row was tapped."""
         said = self.car_first_row(title + ": the car's player", starts=starts, wait=wait, read=False)
         if not said:
             return False
         playing = self.session_playing()
-        if named:
-            self.check("%s: the app's session plays" % title.lower(), playing)
-        else:
-            self.log("%s: the app's session %s" % (title, "plays" if playing else "does not play (yet)"))
         paused = self.car_pause()
         nodes = self.step("The car's player, paused" if paused else "The car's player (it would not pause)", wait=1.5, read=paused)
         if paused and named:
             on = [n.text.strip() for n in nodes if n.text.strip()]
             self.check("%s: the car's player names it" % title.lower(), said in on, "tapped \"%s\"; the player says: %s" % (said, ", ".join(on[:10])))
+            clock = [t for t in on if re.match(r"^\d+:\d\d$", t)]
+            self.check("%s: it played (the car's player's clock ran)" % title.lower(), bool(clock) and clock[0] != "0:00",
+                       "the clock: %s; the app's session said it played: %s" % (" of ".join(clock[:2]) or "none", "yes" if playing else "no"))
+        else:
+            self.log("%s: the app's session %s" % (title, "said it played" if playing else "did not say it played"))
         self.car_back()
         return True
 
@@ -3146,7 +3169,7 @@ class Smoke:
                 if self.car_first_row("A country's stations", wait=8.0):
                     self.car_player("A station tapped", wait=9.0, named=False)
         if self.car_tabs(every, start):
-            # what was played: the track and the station
+            # the music that was played: the track
             self.car_tap(tabs["recent"], "Recently played")
             # the car's search, over music, shows and stations at once
             if self.car_tap(["Search"], "The car's search", wait=2.0):
