@@ -174,6 +174,7 @@ import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.NagmedarShell
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.NavRules
+import app.nagmedar.ui.shell.PhoneWindowPage
 import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.UnderShellBars
@@ -550,7 +551,9 @@ private fun NagmedarMain(
                             captionAbove = caption?.height ?: 0.dp,
                         )
                     }
+                    // 1.0.9 (Desktop Kit 2.9.0): the whole window on a phone, also when a shortcut opened it over the mini player
                     AnimatedVisibility(lyricsOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
+                        PhoneWindowPage(this)
                         PlayingLyricsFullScreen(onClose = { lyricsOpen = false }, modifier = Modifier.blockInputBelow())
                     }
                     // a media's information, asked for from a menu without a details pane (music, search)
@@ -558,8 +561,13 @@ private fun NagmedarMain(
                     // remote access's addresses, how it works, and the one-time code a new browser asks for
                     RemoteAccessHost()
                     // S-1005: the lyrics editor, over the lyrics
-                    if (LyricsEditorRequest.open) PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false }, modifier = Modifier.blockInputBelow())
+                    if (LyricsEditorRequest.open) {
+                        // 1.0.9 (Desktop Kit 2.9.0): its buttons at the window's bottom on a phone, no bottom bar under them
+                        PhoneWindowPage(null)
+                        PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false }, modifier = Modifier.blockInputBelow())
+                    }
                     AnimatedVisibility(visualizerOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
+                        PhoneWindowPage(this)
                         PlayingVisualizerFullScreen(onClose = { visualizerOpen = false }, modifier = Modifier.blockInputBelow())
                     }
                     // "Sıradaki" beside the screen (S-310); on a phone a page of its own over the whole window (1.0.1), which
