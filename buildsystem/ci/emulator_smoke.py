@@ -3043,6 +3043,16 @@ class Smoke:
         self.key(4, record=False)
         time.sleep(1.2)
 
+    def car_loaded(self, seconds=20.0):
+        """Waits until the car's list no longer says that it is loading ([seconds] at most); what the screen says then."""
+        end = time.time() + seconds
+        while True:
+            nodes = self.nodes(self.dump())
+            said = {n.text.strip() for n in nodes if n.text.strip()}
+            if not any(x.startswith("Loading content") for x in said) or time.time() >= end:
+                return said
+            time.sleep(2.0)
+
     def car_tabs(self, labels, start):
         """Back until the car's media app shows the app's tabs again (one of [labels]); [start] opens it once more when
         Back has left it. False when they do not come."""
@@ -3162,7 +3172,14 @@ class Smoke:
         if self.car_tabs(every, start) and self.car_tap(tabs["podcasts"], "Podcasts"):
             if self.car_tap([s["nag_auto_discover"]], "Podcasts: Discover", below=0.15):
                 if self.car_tap([s["nag_auto_popular_shows"]], "Discover: the popular shows", wait=8.0, below=0.15):
-                    self.car_first_row("A show of the directory", wait=8.0)
+                    # Apple's chart, asked over the network: a runner's emulator does not always reach it
+                    said = self.car_loaded()
+                    if s["nag_auto_podcasts_offline"] in said or any(x.startswith("Loading content") for x in said):
+                        self.warnings.append("[%s] the podcast directory's popular shows did not come here (the car says: %s)"
+                                             % (self.cur_pass, "; ".join(sorted(said))[:160]))
+                        self.step("Discover: the popular shows did not come", wait=0.5)
+                    else:
+                        self.car_first_row("A show of the directory", wait=8.0)
         # Radio: the lists, the countries, a country's stations, one of them played
         if self.car_tabs(every, start) and self.car_tap(tabs["radio"], "Radio"):
             if self.car_tap([s["nag_auto_countries"]], "Radio: the countries", wait=8.0, below=0.15):
