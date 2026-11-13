@@ -653,6 +653,8 @@
     <string name="nag_sorted_ascending">Artan sırada</string>
     <string name="nag_sorted_descending">Azalan sırada</string>
     <string name="nag_sort_by_column">%1$s sütununa göre sırala</string>
+    <string name="nag_grid_larger">Kapakları büyüt</string>
+    <string name="nag_grid_smaller">Kapakları küçült</string>
     <string name="nag_more_actions_for">%1$s için diğer işlemler</string>
     <string name="nag_play_next">Hemen sonra oynat</string>
     <string name="nag_add_to_queue">Sıraya ekle</string>

@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.data.PodcastFeedSummary
 import app.nagmedar.ui.R
+import app.nagmedar.ui.components.Around
 import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.LoadingState
 import app.nagmedar.ui.components.MenuEntry
@@ -78,13 +80,17 @@ import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.copyToClipboard
+import app.nagmedar.ui.components.gridZoom
 import app.nagmedar.ui.components.listAppear
+import app.nagmedar.ui.components.rememberGridStops
+import app.nagmedar.ui.components.rememberGridZoom
 import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.components.toneColors
+import app.nagmedar.ui.components.verticalScrollbar
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.openLink
@@ -568,15 +574,23 @@ private fun subscriptionMenu(res: android.content.res.Resources, summary: Podcas
 private fun SubscriptionGrid(subscriptions: List<PodcastFeedSummary>, actions: PodcastActions) {
     val dimens = NagTheme.dimens
     val appear = rememberListAppear()
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp),
-        modifier = Modifier.fillMaxSize().testTag("podcast-grid"),
-        contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
-        horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
-        verticalArrangement = Arrangement.spacedBy(dimens.gapM),
-    ) {
-        gridItemsIndexed(subscriptions, key = { _, summary -> summary.feed.id }) { index, summary ->
-            SubscriptionTile(summary, actions, Modifier.listAppear(appear, index))
+    // 1.0.8 (Desktop Kit 2.8.0): one stop of the Tab key, a scrollbar for the mouse, and covers as large as the user makes
+    // them (Ctrl with the wheel, a pinch, Ctrl with + and −)
+    val grid = rememberLazyGridState()
+    val stops = rememberGridStops(grid, subscriptions.map { it.feed.id })
+    val zoom = rememberGridZoom(150.dp, key = "podcasts")
+    stops.Around(Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(zoom.cellWidth),
+            state = grid,
+            modifier = Modifier.fillMaxSize().testTag("podcast-grid").then(stops.grid).verticalScrollbar(grid).gridZoom(zoom),
+            contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
+            horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
+            verticalArrangement = Arrangement.spacedBy(dimens.gapM),
+        ) {
+            gridItemsIndexed(subscriptions, key = { _, summary -> summary.feed.id }) { index, summary ->
+                SubscriptionTile(summary, actions, Modifier.listAppear(appear, index).then(stops.cell(summary.feed.id)))
+            }
         }
     }
 }

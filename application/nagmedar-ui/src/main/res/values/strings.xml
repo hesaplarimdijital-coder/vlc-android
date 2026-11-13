@@ -653,6 +653,8 @@
     <string name="nag_sorted_ascending">Sorted ascending</string>
     <string name="nag_sorted_descending">Sorted descending</string>
     <string name="nag_sort_by_column">Sort by %1$s</string>
+    <string name="nag_grid_larger">Larger covers</string>
+    <string name="nag_grid_smaller">Smaller covers</string>
     <string name="nag_more_actions_for">More actions for %1$s</string>
     <string name="nag_play_next">Play next</string>
     <string name="nag_add_to_queue">Add to queue</string>

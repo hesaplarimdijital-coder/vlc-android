@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.ActionMenuButton
+import app.nagmedar.ui.components.Around
 import app.nagmedar.ui.components.GradientTile
 import app.nagmedar.ui.components.IconMenuButton
 import app.nagmedar.ui.components.MenuButton
@@ -52,10 +54,14 @@ import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
+import app.nagmedar.ui.components.gridZoom
+import app.nagmedar.ui.components.rememberGridStops
+import app.nagmedar.ui.components.rememberGridZoom
 import app.nagmedar.ui.components.rememberMenuState
 import app.nagmedar.ui.components.moreActionsLabel
 import app.nagmedar.ui.components.listAppear
 import app.nagmedar.ui.components.rememberListAppear
+import app.nagmedar.ui.components.verticalScrollbar
 import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.input.ContextMenuArea
@@ -104,6 +110,9 @@ internal fun PlaylistOverview(
     val sortLabel = stringResource(R.string.nag_sort_by, sortNames.getValue(sort))
     // 1.0.3: on a phone the first cards arrive in turn
     val appear = rememberListAppear(layout)
+    val grid = rememberLazyGridState()
+    val stops = rememberGridStops(grid, cards.map { it.key }, selected = openKey)
+    val zoom = rememberGridZoom(156.dp, key = "playlists")
     Column(modifier.fillMaxSize().testTag("playlists-overview")) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs),
@@ -130,15 +139,20 @@ internal fun PlaylistOverview(
                     suggestions = listOf(StateAction(stringResource(R.string.nag_search_clear)) { onQuery("") }),
                 )
             }
-            layout == OverviewLayout.Grid -> LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 156.dp),
-                contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
-                horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
-                verticalArrangement = Arrangement.spacedBy(dimens.gapM),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                gridItemsIndexed(cards, key = { _, card -> card.key }) { index, card ->
-                    PlaylistGridCard(card, card.key == openKey, dates, onOpen, menu, Modifier.listAppear(appear, index))
+            // 1.0.8 (Desktop Kit 2.8.0): one stop of the Tab key, a scrollbar for the mouse, and covers as large as the user
+            // makes them (Ctrl with the wheel, a pinch, Ctrl with + and −)
+            layout == OverviewLayout.Grid -> stops.Around(Modifier.fillMaxSize()) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = zoom.cellWidth),
+                    state = grid,
+                    contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
+                    horizontalArrangement = Arrangement.spacedBy(dimens.gapM),
+                    verticalArrangement = Arrangement.spacedBy(dimens.gapM),
+                    modifier = Modifier.fillMaxSize().then(stops.grid).verticalScrollbar(grid).gridZoom(zoom),
+                ) {
+                    gridItemsIndexed(cards, key = { _, card -> card.key }) { index, card ->
+                        PlaylistGridCard(card, card.key == openKey, dates, onOpen, menu, Modifier.listAppear(appear, index).then(stops.cell(card.key)), stops.buttons)
+                    }
                 }
             }
             else -> LazyColumn(
@@ -184,6 +198,8 @@ private fun PlaylistGridCard(
     onOpen: (PlaylistCardData) -> Unit,
     menu: (PlaylistCardData) -> List<MenuEntry>,
     modifier: Modifier = Modifier,
+    /** 1.0.8: on its "⋯": reached from the card, not by Tab (the grid is one stop, [GridStops.buttons]). */
+    buttonModifier: Modifier = Modifier,
 ) {
     val colors = NagTheme.colors
     val moreActions = stringResource(R.string.nag_more_actions)
@@ -204,7 +220,7 @@ private fun PlaylistGridCard(
                     }
                     // under the pointer or the keyboard, or always where a finger is the pointer
                     if (touch || state.hovered || within || menuState.isOpen) {
-                        ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActionsLabel(card.name), { menu(card) }, Modifier.align(Alignment.TopEnd).padding(2.dp), card.name)
+                        ActionMenuButton(menuState, NagIcons.MoreHorizontal, moreActionsLabel(card.name), { menu(card) }, Modifier.align(Alignment.TopEnd).padding(2.dp).then(buttonModifier), card.name)
                     }
                 }
                 Spacer(Modifier.size(8.dp))

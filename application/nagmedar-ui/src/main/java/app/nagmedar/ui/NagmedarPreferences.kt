@@ -186,6 +186,12 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     }
 
     /** Desktop Kit 1.0: whether the workstation's inspector was hidden (Ctrl+I, its button). */
+    override fun gridCellWidth(key: String): Float? = prefs.getFloat(KEY_GRID_PREFIX + key, 0f).takeIf { it > 0f }
+
+    override fun saveGridCellWidth(key: String, widthDp: Float?) {
+        prefs.edit().apply { if (widthDp == null) remove(KEY_GRID_PREFIX + key) else putFloat(KEY_GRID_PREFIX + key, widthDp) }.apply()
+    }
+
     override fun paneCollapsed(key: String): Boolean = prefs.getBoolean(KEY_PANE_COLLAPSED_PREFIX + key, false)
 
     override fun savePaneCollapsed(key: String, collapsed: Boolean) {
@@ -200,6 +206,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
         const val KEY_TOOLTIP_DELAY = "nagmedar_tooltip_delay"
         const val KEY_PANE_PREFIX = "nagmedar_pane_width_"
         const val KEY_PANE_COLLAPSED_PREFIX = "nagmedar_pane_collapsed_"
+        const val KEY_GRID_PREFIX = "nagmedar_grid_cell_width_"
         const val KEY_PALETTE_RECENT = "nagmedar_palette_recent"
         const val KEY_SHORTCUTS = "nagmedar_shortcuts"
         const val RECENT_COMMANDS = 8

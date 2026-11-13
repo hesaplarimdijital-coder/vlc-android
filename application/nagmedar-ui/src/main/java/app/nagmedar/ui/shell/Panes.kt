@@ -70,6 +70,12 @@ interface PaneWidths {
     fun paneCollapsed(key: String): Boolean = false
 
     fun savePaneCollapsed(key: String, collapsed: Boolean) = Unit
+
+    /** 1.0.8 (Desktop Kit 2.8.0): the covers' least width the user chose for the grid [key] (its zoom), in dp, or null. */
+    fun gridCellWidth(key: String): Float? = null
+
+    /** 1.0.8: null forgets it (Ctrl+0): the grid follows its default width again. */
+    fun saveGridCellWidth(key: String, widthDp: Float?) = Unit
 }
 
 /** Without a store (previews, tests) a width lasts as long as the screen. */

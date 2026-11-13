@@ -32,12 +32,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -63,6 +67,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.TabNavigation
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.WORKSTATION_PANE
 import app.nagmedar.ui.shell.WidthClass
@@ -236,6 +241,8 @@ fun InspectorPane(
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_inspector)
     val index = selected.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
+    val latestIndex = rememberUpdatedState(index)
+    val tabFocus = remember(tabs.size) { List(tabs.size) { FocusRequester() } }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val reduced = NagTheme.motion.reduced
     // the selected tab is scrolled into sight when the tabs are wider than the pane
@@ -265,13 +272,18 @@ fun InspectorPane(
                     .selectableGroup()
                     .onKeyEvent { event ->
                         if (event.type != KeyEventType.KeyDown || tabs.isEmpty()) return@onKeyEvent false
-                        // the next tab is the one towards the end, in either direction of reading
-                        val step = when (event.key) {
-                            Key.DirectionRight -> if (rtl) -1 else 1
-                            Key.DirectionLeft -> if (rtl) 1 else -1
+                        // the next tab is the one towards the end, in either direction of reading; 1.0.8 (Desktop Kit
+                        // 2.8.0): Home and End go to the first and the last tab (the rightmost first in a right-to-left
+                        // row), and the focus goes with the selection
+                        val next = when (event.key) {
+                            Key.DirectionRight -> (index + (if (rtl) -1 else 1) + tabs.size) % tabs.size
+                            Key.DirectionLeft -> (index + (if (rtl) 1 else -1) + tabs.size) % tabs.size
+                            Key.MoveHome -> 0
+                            Key.MoveEnd -> tabs.size - 1
                             else -> return@onKeyEvent false
                         }
-                        onSelect((index + step + tabs.size) % tabs.size)
+                        onSelect(next)
+                        runCatching { tabFocus.getOrNull(next)?.requestFocus() }
                         true
                     },
                 verticalAlignment = Alignment.CenterVertically,
@@ -280,7 +292,12 @@ fun InspectorPane(
                     InspectorTabButton(
                         tab,
                         i == index,
-                        Modifier.onPlaced { placed ->
+                        Modifier
+                            .focusRequester(tabFocus[i])
+                            // 1.0.8 (Desktop Kit 2.8.0): the row is one stop of the Tab key, at the selected tab; the arrows
+                            // reach the others
+                            .focusProperties { canFocus = !TabNavigation.active || i == latestIndex.value }
+                            .onPlaced { placed ->
                             val x = placed.positionInParent().x.toInt()
                             val placedSpan = x..(x + placed.size.width)
                             // written only when it moved: a write each layout would compose again and again
