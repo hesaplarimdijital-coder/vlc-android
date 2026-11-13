@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -162,6 +164,7 @@ import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
 import app.nagmedar.ui.shell.DebugChrome
+import app.nagmedar.ui.shell.NavIconBadge
 import app.nagmedar.ui.shell.WindowRoot
 import app.nagmedar.ui.shell.rememberCaptionBar
 import app.nagmedar.ui.shell.Destination
@@ -183,6 +186,8 @@ import app.nagmedar.ui.theme.SystemBarsFollowTheme
 import app.nagmedar.ui.visual.PlayingVisualizerFullScreen
 import app.nagmedar.ui.widget.PlayerWidgetMigration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.MLServiceLocator
@@ -393,6 +398,16 @@ private fun NagmedarMain(
         val c = repository.sectionCounts()
         value = mapOf(Destination.Music to c.tracks.toString())
     }
+    // 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 1): the podcasts' new episodes: beside the Podcastler entry in the
+    // sidebar, and as a count on its icon in the phone's bar, the rail and the collapsed sidebar
+    val newEpisodes by remember(context) {
+        runCatching { PodcastCenter.repository(context.applicationContext).subscriptions().map { feeds -> feeds.sumOf { it.newCount } } }
+            .getOrDefault(flowOf(0))
+    }.collectAsState(initial = 0)
+    val newText = if (newEpisodes > 0) pluralStringResource(R.plurals.nag_pod_new, newEpisodes, newEpisodes) else null
+    val newSaid = if (newEpisodes > 0) pluralStringResource(R.plurals.nag_badge_new_episodes, newEpisodes, newEpisodes) else null
+    val sidebarBadges = if (newText != null) counts + (Destination.Podcasts to newText) else counts
+    val iconBadges = if (newEpisodes > 0) mapOf(Destination.Podcasts to NavIconBadge(newEpisodes, newSaid)) else emptyMap()
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
@@ -460,7 +475,8 @@ private fun NagmedarMain(
                 widthClass = widthClass,
                 sidebarCollapsed = prefs.sidebarCollapsed,
                 onSidebarCollapsedChange = prefs::updateSidebarCollapsed,
-                badges = counts,
+                badges = sidebarBadges,
+                iconBadges = iconBadges,
                 // the menu bar's field is the palette's; phones and tablets open the search page (S-311)
                 onSearch = {
                     if (NavKind.forWidth(widthClass) == NavKind.Sidebar) actions.perform(ShortcutId.CommandPalette) else navigator.open(Destination.Search)

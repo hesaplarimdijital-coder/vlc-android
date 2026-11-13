@@ -137,6 +137,8 @@ fun NagmedarShell(
     menus: @Composable RowScope.() -> Unit,
     /** 1.0.8 (Desktop Kit 2.8.0): the same menus as a list, behind a "≡" in the rail's top bar (with a pointer). */
     menuSpecs: () -> List<MenuSpec> = { emptyList() },
+    /** 1.0.8 (Desktop Kit 2.8.0): a count or a dot on the icons of the bottom bar, the rail and the collapsed sidebar. */
+    iconBadges: NavIconBadges = emptyMap(),
     player: @Composable (NavKind) -> Unit,
     screen: @Composable (Destination, ShellNavigator) -> Unit,
     modifier: Modifier = Modifier,
@@ -418,9 +420,10 @@ fun NagmedarShell(
                                 .then(if (playerOver || barsHidden) Modifier.clearAndSetSemantics {} else Modifier)
                                 .coveredByLayer(playerOver),
                             onGlass = onBottomGlass,
+                            iconBadges = iconBadges,
                         )
                     }
-                    NavKind.Rail -> NavRail(selected, navigator::selectTab)
+                    NavKind.Rail -> NavRail(selected, navigator::selectTab, iconBadges = iconBadges)
                     NavKind.Sidebar -> Sidebar(
                         selected = selected,
                         onSelect = navigator::selectTab,
@@ -428,6 +431,7 @@ fun NagmedarShell(
                         onToggleCollapsed = { onSidebarCollapsedChange(!sidebarCollapsed) },
                         badges = badges,
                         width = sidebarWidth,
+                        iconBadges = iconBadges,
                     )
                 }
             },

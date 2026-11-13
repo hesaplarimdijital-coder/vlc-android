@@ -19,26 +19,32 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -58,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -73,6 +80,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.sp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.HoverTooltip
@@ -105,6 +113,80 @@ import app.nagmedar.ui.theme.glass
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
 typealias NavBadges = Map<Destination, String>
 
+/**
+ * 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 1): a mark on a navigation entry's icon in the phone's bottom bar, the
+ * rail and the collapsed sidebar, where there is no room for text: a count of new things ([count] above 0; "99+" past
+ * 99) or, with a [count] of 0, a dot. TalkBack reads [description] after the entry's name ("Podcastler, 4 yeni bölüm");
+ * without one the count ("4 yeni"). In the open sidebar the entry's text badge ([NavBadges]) says it instead.
+ */
+@Immutable
+data class NavIconBadge(val count: Int = 0, val description: String? = null)
+
+/** [NavIconBadge]s by destination. */
+typealias NavIconBadges = Map<Destination, NavIconBadge>
+
+/** [destination]'s badge; "Daha fazla" gets a dot when a page it lists has one. */
+private fun badgeOf(destination: Destination, badges: NavIconBadges, shown: Collection<Destination>): NavIconBadge? =
+    badges[destination] ?: if (destination == Destination.More && Destination.overflow(shown).any { badges[it] != null }) NavIconBadge() else null
+
+/** What TalkBack says after an entry's name for [badge]. */
+@Composable
+private fun badgeDescription(badge: NavIconBadge): String = badge.description
+    ?: if (badge.count > 0) pluralStringResource(R.plurals.nag_badge_new, badge.count, badge.count) else stringResource(R.string.nag_badge_dot)
+
+/** TalkBack reads an entry with a [badge] as its [label] and the badge ("Podcastler, 4 yeni"). */
+@Composable
+private fun Modifier.badgeSemantics(label: String, badge: NavIconBadge?): Modifier {
+    if (badge == null) return this
+    val said = "$label, ${badgeDescription(badge)}"
+    return semantics { contentDescription = said }
+}
+
+/**
+ * The [badge] at the top end corner of a navigation icon of [iconSize]: a small accent pill with the count, or a dot.
+ * Drawn over the icon (it takes no room), outlined in [ring] so it stands apart from the icon under it.
+ */
+@Composable
+private fun BoxScope.IconBadge(badge: NavIconBadge?, iconSize: Dp, ring: Color) {
+    if (badge == null) return
+    val colors = NagTheme.colors
+    val half = iconSize / 2
+    if (badge.count > 0) {
+        val text = if (badge.count > 99) "99+" else badge.count.toString()
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                // its start edge a little inside the icon's end, its middle at the icon's top
+                .offset(x = half + 4.dp, y = -half)
+                .wrapContentSize(unbounded = true)
+                .heightIn(min = 16.dp)
+                .defaultMinSize(minWidth = 16.dp)
+                .border(1.5.dp, ring, RoundedCornerShape(50))
+                .background(colors.accent, RoundedCornerShape(50))
+                .padding(horizontal = 4.dp)
+                .testTag("nav-badge"),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text,
+                style = NagTheme.type.caption.copy(fontSize = 10.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold),
+                color = colors.onAccent,
+                maxLines = 1,
+            )
+        }
+    } else {
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .offset(x = half, y = -half + 1.dp)
+                .size(9.dp)
+                .border(1.5.dp, ring, CircleShape)
+                .background(colors.accent, CircleShape)
+                .testTag("nav-badge"),
+        )
+    }
+}
+
 @Composable
 fun BrandMark(modifier: Modifier = Modifier) {
     Image(
@@ -124,7 +206,14 @@ fun BrandMark(modifier: Modifier = Modifier) {
  * [onGlass]: it lies on the shell's bottom glass (the user's glass decision) and draws no surface.
  */
 @Composable
-fun BottomNavBar(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier, onGlass: Boolean = false) {
+fun BottomNavBar(
+    selected: Destination?,
+    onSelect: (Destination) -> Unit,
+    modifier: Modifier = Modifier,
+    onGlass: Boolean = false,
+    /** 1.0.8: a count or a dot on the entries' icons ([NavIconBadge]). */
+    iconBadges: NavIconBadges = emptyMap(),
+) {
     val colors = NagTheme.colors
     val label = stringResource(R.string.nag_main_navigation)
     Column(modifier.fillMaxWidth().then(if (onGlass) Modifier else Modifier.background(colors.chrome))) {
@@ -138,14 +227,19 @@ fun BottomNavBar(selected: Destination?, onSelect: (Destination) -> Unit, modifi
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Destination.bottomBar.forEach { destination ->
-                BottomBarItem(destination, selected = destination == selected, onClick = { onSelect(destination) })
+                BottomBarItem(
+                    destination,
+                    selected = destination == selected,
+                    badge = badgeOf(destination, iconBadges, Destination.bottomBar),
+                    onClick = { onSelect(destination) },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, onClick: () -> Unit) {
+private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, badge: NavIconBadge?, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
@@ -169,10 +263,13 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
                 tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
                 modifier = Modifier.size(dimens.icon),
             )
+            IconBadge(badge, dimens.icon, ring = colors.chrome)
         }
         Spacer(Modifier.height(4.dp))
+        val shortLabel = stringResource(destination.shortLabel)
         Text(
-            text = stringResource(destination.shortLabel),
+            text = shortLabel,
+            modifier = Modifier.badgeSemantics(shortLabel, badge),
             // the selected tab's label a shade heavier (Desktop Kit 0.2.0)
             style = if (selected) NagTheme.type.caption.copy(fontWeight = FontWeight.Medium) else NagTheme.type.caption,
             color = animateStateColor(if (selected) colors.text else colors.textSecondary, "navLabel"),
@@ -189,7 +286,7 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
  * the icon slightly. The pill is drawn behind, so its spring does not recompose the item.
  */
 @Composable
-private fun NavIndicator(selected: Boolean, state: InteractionState, shape: RoundedCornerShape, modifier: Modifier, content: @Composable () -> Unit) {
+private fun NavIndicator(selected: Boolean, state: InteractionState, shape: RoundedCornerShape, modifier: Modifier, content: @Composable BoxScope.() -> Unit) {
     val colors = NagTheme.colors
     // a fraction: the pill's spring stops a thousandth from its end (Part 2a's rule)
     val fraction = animateFloatAsState(if (selected) 1f else 0f, NagTheme.motion.spatial(NagMotion.FRACTION), label = "navIndicator")
@@ -227,7 +324,13 @@ private fun NavIndicator(selected: Boolean, state: InteractionState, shape: Roun
 // ---------------------------------------------------------------- medium/expanded: rail
 
 @Composable
-fun NavRail(selected: Destination?, onSelect: (Destination) -> Unit, modifier: Modifier = Modifier) {
+fun NavRail(
+    selected: Destination?,
+    onSelect: (Destination) -> Unit,
+    modifier: Modifier = Modifier,
+    /** 1.0.8: a count or a dot on the entries' icons ([NavIconBadge]). */
+    iconBadges: NavIconBadges = emptyMap(),
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_main_navigation)
@@ -247,11 +350,11 @@ fun NavRail(selected: Destination?, onSelect: (Destination) -> Unit, modifier: M
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Destination.rail.forEach { destination ->
-                    RailItem(destination, destination == selected) { onSelect(destination) }
+                    RailItem(destination, destination == selected, badgeOf(destination, iconBadges, Destination.rail + Destination.railFooter)) { onSelect(destination) }
                 }
             }
             Destination.railFooter.forEach { destination ->
-                RailItem(destination, destination == selected) { onSelect(destination) }
+                RailItem(destination, destination == selected, badgeOf(destination, iconBadges, Destination.rail + Destination.railFooter)) { onSelect(destination) }
             }
         }
         VerticalRule(Modifier.fillMaxHeight())
@@ -259,7 +362,7 @@ fun NavRail(selected: Destination?, onSelect: (Destination) -> Unit, modifier: M
 }
 
 @Composable
-private fun RailItem(destination: Destination, selected: Boolean, onClick: () -> Unit) {
+private fun RailItem(destination: Destination, selected: Boolean, badge: NavIconBadge?, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
@@ -282,16 +385,18 @@ private fun RailItem(destination: Destination, selected: Boolean, onClick: () ->
                 tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "navIcon"),
                 modifier = Modifier.size(dimens.icon),
             )
+            IconBadge(badge, dimens.icon, ring = colors.chrome)
         }
         Spacer(Modifier.height(2.dp))
+        val shortLabel = stringResource(destination.shortLabel)
         Text(
-            text = stringResource(destination.shortLabel),
+            text = shortLabel,
             style = NagTheme.type.caption,
             color = animateStateColor(if (selected) colors.text else colors.textSecondary, "navLabel"),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = 4.dp).badgeSemantics(shortLabel, badge),
         )
     }
 }
@@ -316,6 +421,8 @@ fun Sidebar(
     badges: NavBadges,
     modifier: Modifier = Modifier,
     width: PaneWidthState? = null,
+    /** 1.0.8: a count or a dot on the icons while the sidebar is collapsed ([NavIconBadge]). */
+    iconBadges: NavIconBadges = emptyMap(),
 ) {
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
@@ -343,6 +450,7 @@ fun Sidebar(
             badges = badges,
             width = shown.value,
             open = open,
+            iconBadges = iconBadges,
         )
         if (width != null && !collapsed) {
             // over the sidebar's padding and its edge, so the content does not move
@@ -372,6 +480,7 @@ private fun SidebarColumn(
     badges: NavBadges,
     width: Dp,
     open: Float,
+    iconBadges: NavIconBadges = emptyMap(),
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -405,7 +514,7 @@ private fun SidebarColumn(
                         Spacer(Modifier.height(dimens.gapS))
                     }
                     items.forEach { destination ->
-                        SidebarItem(destination, destination == selected, collapsed, badges[destination], open) { onSelect(destination) }
+                        SidebarItem(destination, destination == selected, collapsed, badges[destination], open, iconBadges[destination]) { onSelect(destination) }
                     }
                 }
             }
@@ -445,7 +554,15 @@ private fun SidebarColumn(
  * keeps its place and goes smoothly to where an expanded item has it.
  */
 @Composable
-private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: Boolean, badge: String?, open: Float, onClick: () -> Unit) {
+private fun SidebarItem(
+    destination: Destination,
+    selected: Boolean,
+    collapsed: Boolean,
+    badge: String?,
+    open: Float,
+    iconBadge: NavIconBadge? = null,
+    onClick: () -> Unit,
+) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
@@ -455,6 +572,9 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
     // a collapsed item centres its icon; the same start padding keeps it still while the sidebar opens
     val collapsedStart = ((dimens.sidebarCollapsedWidth - 12.dp - dimens.icon) / 2).coerceAtLeast(0.dp)
     val showLabel = !collapsed && open > 0.5f
+    // 1.0.8: the icon's mark only while the sidebar is collapsed: open, the entry's text badge says it
+    val shownIconBadge = if (collapsed) iconBadge else null
+    val iconBadgeText = shownIconBadge?.let { badgeDescription(it) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -464,19 +584,22 @@ private fun SidebarItem(destination: Destination, selected: Boolean, collapsed: 
             .background(stateBackground(state, selected), shape)
             .semantics {
                 this.selected = selected
-                if (collapsed) contentDescription = label
+                if (collapsed) contentDescription = if (iconBadgeText != null) "$label, $iconBadgeText" else label
             }
             .nagClickable(interaction, onClick, role = Role.Tab)
             .padding(start = lerp(collapsedStart, 10.dp, open), end = if (showLabel) 10.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
     ) {
-        Icon(
-            destination.icon,
-            contentDescription = null,
-            tint = animateStateColor(if (selected) colors.accentText else colors.textSecondary, "sidebarIcon"),
-            modifier = Modifier.size(dimens.icon),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                destination.icon,
+                contentDescription = null,
+                tint = animateStateColor(if (selected) colors.accentText else colors.textSecondary, "sidebarIcon"),
+                modifier = Modifier.size(dimens.icon),
+            )
+            IconBadge(shownIconBadge, dimens.icon, ring = colors.chrome)
+        }
         if (showLabel) {
             Spacer(Modifier.width(10.dp))
             Row(Modifier.weight(1f).alpha(labelAlpha(open)), verticalAlignment = Alignment.CenterVertically) {

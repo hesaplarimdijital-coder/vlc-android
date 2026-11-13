@@ -39,6 +39,7 @@ import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalFloatingPlayer
 import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.NagmedarShell
+import app.nagmedar.ui.shell.NavIconBadges
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.ShellNavigator
@@ -83,6 +84,8 @@ fun TestShell(
     glass: Boolean = false,
     /** 1.0.3: the phone's bottom chrome on the shell's one glass, as the app draws it ([ChromeGlass.Product], the user's B). */
     chromeGlass: ChromeGlass = ChromeGlass.Product,
+    /** 1.0.8: a count or a dot on the navigation's icons. */
+    iconBadges: NavIconBadges = emptyMap(),
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, navigator -> SampleScreen(destination, navigator, moreActions) },
 ) {
     val res = LocalContext.current.resources
@@ -111,6 +114,7 @@ fun TestShell(
         },
         // 1.0.8: the same menus behind the rail top bar's "≡" (with a pointer), as the app has them
         menuSpecs = { menuBarSpecs(res, {}, { true }) },
+        iconBadges = iconBadges,
         player = player ?: { kind -> SamplePlayerBar(kind, info = playerInfo, queueOpen = queueOpen) },
         navController = navController,
         navigator = navigator,
