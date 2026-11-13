@@ -1,0 +1,4 @@
+::warning title=Emulator: the system's ANR (phone-en, step 2)::Pixel Launcher Pixel Launcher isn't responding Close app Wait
+::warning title=Emulator: the system's ANR (phone-en, step 2)::Pixel Launcher Pixel Launcher isn't responding Close app Wait
+::warning title=Emulator: the system's ANR (phone-en, step 1)::com.google.android.apps.nexuslauncher Reason: Input dispatching timed out (Application does not have a focused window).
+::notice title=Emulator Ekran görüntüleri ve rapor::passed: 144 steps, 0 crash/ANR, 0 StrictMode, 0/71 checks failed, 3 system ANR/crash, 5 warnings, 31 min. Evidence: branch ci/emulator-phone, report.md
