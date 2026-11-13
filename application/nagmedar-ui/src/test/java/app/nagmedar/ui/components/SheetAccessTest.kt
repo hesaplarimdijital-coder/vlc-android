@@ -128,6 +128,44 @@ class SheetAccessTest {
         compose.onNodeWithText("Bir").assertDoesNotExist()
     }
 
+    /**
+     * A sheet opened from another's content (a row's "⋯" in the music inspector's sheet on a phone) leaves that one open:
+     * closing it would take the new one away with its content (the independent review of 1.0.8).
+     */
+    @Test
+    fun aSheetOpenedFromAnothersContentLeavesItOpen() {
+        var inner by mutableStateOf(false)
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                TestShell(WidthClass.Compact, screen = { _, _ ->
+                    Text("ekran")
+                    GlassBottomSheet(visible = first, onDismiss = { first = false }, label = "Denetçi") {
+                        NagButton("Menüyü aç", { inner = true })
+                        GlassBottomSheet(visible = inner, onDismiss = { inner = false }, label = "Menü") { Text("menü-içeriği") }
+                    }
+                    GlassBottomSheet(visible = second, onDismiss = { second = false }, label = "İkinci") { Text("ikinci-içerik") }
+                })
+            }
+        }
+        first = true
+        compose.waitForIdle()
+        compose.onNodeWithText("Menüyü aç").performClick()
+        compose.waitForIdle()
+        assertTrue("the sheet it was opened from stays", first)
+        compose.onNodeWithText("menü-içeriği").assertExists()
+        // closing the inner one leaves the outer one as it was
+        inner = false
+        compose.waitForIdle()
+        assertTrue(first)
+        compose.onNodeWithText("Menüyü aç").assertExists()
+        // a sheet opened from the screen still closes it
+        second = true
+        compose.waitForIdle()
+        assertFalse(first)
+        compose.onNodeWithText("ikinci-içerik").assertExists()
+    }
+
     /** Desktop Kit 2.8.0 (the audit's high finding 2): Tab and Shift+Tab do not reach the screen behind an open sheet. */
     @Test
     fun aSheetKeepsTheKeyboardsFocus() {

@@ -309,18 +309,26 @@ internal class ShellOverlayHost {
      */
     val focusMemory = FocusMemory()
 
-    /** 1.0.8 (Desktop Kit 2.8.0): the sheet that is up and how to close it: a newer sheet closes it ([sheetOpened]). */
-    private var sheet: Pair<Any, () -> Unit>? = null
+    /** 1.0.8 (Desktop Kit 2.8.0): an open sheet, the sheet it was opened from, if any, and how to close it. */
+    private class OpenSheet(val token: Any, val parent: Any?, val dismiss: () -> Unit)
 
-    /** 1.0.8: the sheet [token] opened: the one that was up closes, so sheets never pile up. */
-    fun sheetOpened(token: Any, dismiss: () -> Unit) {
-        val previous = sheet
-        sheet = token to dismiss
-        if (previous != null && previous.first !== token) previous.second()
+    /** 1.0.8: the sheets that are up: one, or one opened from another's content (a row's "⋯" in the inspector's sheet). */
+    private val sheets = ArrayList<OpenSheet>()
+
+    /**
+     * 1.0.8: the sheet [token] opened from the content of the sheet [parent] (null: from the screen): every other sheet
+     * that is up closes, so sheets never pile up, but not the ones it was opened from: their content holds it.
+     */
+    fun sheetOpened(token: Any, parent: Any?, dismiss: () -> Unit) {
+        val ancestors = generateSequence(parent) { p -> sheets.firstOrNull { it.token === p }?.parent }.toList()
+        val others = sheets.filter { open -> open.token !== token && ancestors.none { it === open.token } }
+        sheets.removeAll { it.token === token }
+        sheets += OpenSheet(token, parent, dismiss)
+        others.forEach { it.dismiss() }
     }
 
     fun sheetClosed(token: Any) {
-        if (sheet?.first === token) sheet = null
+        sheets.removeAll { it.token === token }
     }
 
     companion object {

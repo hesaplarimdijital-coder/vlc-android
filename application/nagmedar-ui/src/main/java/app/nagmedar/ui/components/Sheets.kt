@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -453,14 +454,18 @@ fun GlassBottomSheet(
     val latestVisible by rememberUpdatedState(visible)
     val host = shellOverlayHere()
     if (host != null) {
-        // 1.0.8: one sheet at a time: opening this one closes the one that was up
+        // 1.0.8: one sheet at a time: opening this one closes the one that was up, unless this one is opened from its
+        // content (a menu's sheet from a row in it), which would close the menu with it
         val token = remember { Any() }
+        val parent = LocalSheetToken.current
         DisposableEffect(host, visible) {
-            if (visible) host.sheetOpened(token) { latestDismiss() }
+            if (visible) host.sheetOpened(token, parent) { latestDismiss() }
             onDispose { if (visible) host.sheetClosed(token) }
         }
         OverlayLayer(host, ShellOverlayHost.SHEET) {
-            SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, { latestVisible }, content, host.systemBottomPx)
+            CompositionLocalProvider(LocalSheetToken provides token) {
+                SheetSurface(progress, drag, label, modifier, inShell = true, { latestDismiss() }, { latestVisible }, content, host.systemBottomPx)
+            }
         }
         ReturnFocusOnClose(host, visible)
         BackHandler(enabled = visible) { latestDismiss() }
@@ -842,3 +847,6 @@ private fun SheetSurface(
 
 /** A downward fling this fast closes a sheet wherever it is. */
 private val FLING_CLOSE = 800.dp
+
+/** 1.0.8: the sheet whose content this is (a sheet opened from it leaves it open), null outside any. */
+private val LocalSheetToken = staticCompositionLocalOf<Any?> { null }
