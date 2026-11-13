@@ -54,6 +54,16 @@ violations). The walk, in passes (a size and a language each):
                and lifted at rest it leaves; flung and lifted in motion (the last move and the lift
                together) it leaves; swiped a little and lifted in motion it comes back. Read by the
                bar's place in the pixels 0.3 s, 0.9 s and 1.6 s after the lift (notice_swipe)
+  search       (on demand, either build; an older app by the workflow's ref input) 1.0.7: the search with
+               the walk's library in the device's Music (64 tracks, eight albums, four artists, and the
+               tone). On the tablet's screen the palette (Ctrl+K) is asked for an artist's name, an
+               album's, a word of every title and a title with its artist: every row it lists is read
+               (the selection moved down through the list) and compared with what the library holds by
+               the search's own rule, every word in the title, the artist or the album (search_expected);
+               an artist and an album found are opened in the Music view; a kind that shows its best
+               only says how many it has and Enter on that line lists them. On the phone's screen the
+               search page is asked for the artist: its artists, albums and tracks, and an album opened.
+               The report's "The search" lists every query with what was listed and what was missing
   auto-shots   (on demand; the workflow boots an Android Automotive image for it) 1.0.6: the tree
                Android Auto browses, drawn by a car's own media app bound to the playback service:
                its tabs, the music's albums, an album, a track played and the car's player, the
@@ -261,6 +271,7 @@ class Smoke:
         self.notice_swipes = []  # 1.0.6: a notice swiped with a finger's raw events (notice_swipe)
         self.raw_touch_why = ""  # 1.0.6: why the touch screen takes no raw events here (raw_touch)
         self.notices_stay = False  # 1.0.6: the system's longer time for notices is in force (pass_notice_swipe)
+        self.searches = []  # 1.0.7: what each query of the search pass listed, beside what the library holds (pass_search)
         self.other_app_expected = False  # 1.0.6: the steps are of another app's screen on purpose (pass_auto_shots)
         for d in ("shots", "dumps", "raw"):
             os.makedirs(os.path.join(self.out, d), exist_ok=True)
@@ -3589,6 +3600,289 @@ class Smoke:
                 old = before[k].strip()
                 self.sh("settings delete secure %s" % k if old in ("", "null") else "settings put secure %s %s" % (k, old))
 
+    # ---------------------------------------------------------------- 1.0.7: the search
+
+    @staticmethod
+    def search_library():
+        """The walk's tracks as the workflow tags them: (title, artist, album) of the 64, eight an album, two albums an
+        artist. (The tone beside them, "Smoke tone" of "Nagmedar QA", has no word of the pass's queries.)"""
+        return [("Profile track %d.%d" % (a, t), "Nagmedar Artist %d" % ((a + 1) // 2), "Profile album %d" % a)
+                for a in range(1, 9) for t in range(1, 9)]
+
+    @staticmethod
+    def search_expected(tracks, query):
+        """What a search for [query] must list of [tracks] (title, artist, album), by the rule the app's search states
+        (S-311): every word of the query in the title, the artist or the album, in any order, whatever the case. An artist
+        is found by the name, an album by its name or its artist's, a track by its title, its artist's or its album's.
+        {"artists", "albums", "tracks"}: the names of each."""
+        words = query.lower().split()
+        has = lambda *texts: all(any(w in t.lower() for t in texts) for w in words)
+        return {"artists": {a for _, a, _ in tracks if has(a)},
+                "albums": {al for _, a, al in tracks if has(al, a)},
+                "tracks": {t for t, a, al in tracks if has(t, a, al)}}
+
+    def type_text(self, text):
+        """Types [text] into the focused field (`input text`, where a space is written %s)."""
+        self.sh("input text '%s'" % text.replace(" ", "%s"))
+
+    def palette_rows(self, nodes):
+        """The palette's rows on screen, top to bottom: (label, detail, the label's node). A row's detail stands right
+        under its label, at the same left edge. The selected hit shown again beside the list (a wide window) is no row:
+        its detail begins with its kind's name."""
+        s = self.strings[self.lang]
+        kinds = tuple(s[k] + " · " for k in ("nag_palette_commands", "nag_palette_screens", "nag_palette_settings", "nag_palette_media"))
+        texts = sorted((n for n in self.app_nodes(nodes) if n.text.strip()), key=lambda n: (n.b[1], n.b[0]))
+        rows = []
+        for a in texts:
+            under = [b for b in texts if b is not a and abs(b.b[0] - a.b[0]) <= 2 and abs(b.b[1] - a.b[3]) <= 3]
+            if under and not under[0].text.startswith(kinds):
+                rows.append((a.text.strip(), under[0].text.strip(), a))
+        return rows
+
+    def palette_all_rows(self, title):
+        """Every row of the palette's list for what is typed: read, then the selection moved down (the list follows it) and
+        read again, by fewer rows each time than the reading before showed, so none passes unread; until two readings in
+        a row bring no new row (the selection came round to the top). ([(label, detail)] in the order first seen, the
+        last nodes read)."""
+        seen, order, idle = set(), [], 0
+        nodes = self.step(title, wait=1.0)
+        for _ in range(120):
+            rows = self.palette_rows(nodes)
+            new = [(label, detail) for label, detail, _ in rows if (label, detail) not in seen]
+            seen.update(new)
+            order.extend(new)
+            # a reading that failed (no tree) is no reading: once more
+            idle = 0 if new or not nodes else idle + 1
+            if idle >= 2 or self.over_time():
+                break
+            if nodes:
+                # the selected row is kept at the list's foot: two rows fewer than were read whole, and no row is skipped
+                self.sh("input keyevent " + " ".join(["20"] * max(1, min(8, len(rows) - 2))))
+            nodes = self.nodes(self.settle(0.4))
+        return order, nodes
+
+    def search_kinds(self):
+        """The first word of a media row's detail in the palette, by what the row is."""
+        s = self.strings[self.lang]
+        return {"artists": s["nag_column_artist"], "albums": s["nag_column_album"], "tracks": s["nag_palette_track"]}
+
+    def search_record(self, where, query, what, want, found):
+        """One query's row of the report and its checks: what was listed of each kind, beside what the library holds.
+        [found]: a set of names for each kind, or a count where only the count is read (the search page's headings)."""
+        missing, extra, ok = [], [], True
+        counts = {}
+        for kind in ("artists", "albums", "tracks"):
+            got = found.get(kind)
+            if isinstance(got, set):
+                lost, more = sorted(want[kind] - got), sorted(got - want[kind])
+                missing += lost
+                extra += more
+                counts[kind] = len(got)
+                good = not lost and not more
+                detail = "%d listed%s%s" % (len(got), "; missing: %s%s" % (", ".join(lost[:6]), " …" if len(lost) > 6 else "") if lost else "",
+                                            "; not in the library's answer: %s" % ", ".join(more[:6]) if more else "")
+            else:
+                counts[kind] = got
+                good = got == len(want[kind])
+                detail = "%s listed" % ("no heading read:" if got is None else got)
+            ok = ok and good
+            self.check("%s \"%s\" (%s): the %d %s that match are all listed, and nothing else" % (where, query, what, len(want[kind]), kind), good, detail)
+        self.searches.append({"pass": self.cur_pass, "where": where, "query": query, "what": what, "found": counts,
+                              "want": {k: len(v) for k, v in want.items()}, "missing": missing, "extra": extra, "ok": ok})
+        return ok
+
+    def palette_open(self, title, query):
+        """Ctrl+K, and [query] typed once the palette's field is there; the library's media waited for (the palette says
+        while it reads them; an older app says nothing: a few seconds). False when no palette opened."""
+        s = self.strings[self.lang]
+        field = s["nag_palette_placeholder"]
+        self.combo(113, 39)  # Ctrl+K
+        nodes = self.step(title, wait=1.0)
+        if not self.check("Ctrl+K opens the palette (%s)" % title, any(field in (n.desc.strip(), n.text.strip()) for n in self.app_nodes(nodes))):
+            return False
+        self.type_text(query)
+        time.sleep(1.5)
+        reading = s.get("nag_palette_reading")
+        if reading:
+            self.wait_for(lambda ns: ns and not any(n.text.strip() == reading for n in self.app_nodes(ns)), 30)
+        else:
+            time.sleep(6)
+        return True
+
+    def palette_close(self):
+        self.key(111)  # Escape
+        nodes = self.step("The palette closed", wait=0.8)
+        field = self.strings[self.lang]["nag_palette_placeholder"]
+        if any(field in (n.desc.strip(), n.text.strip()) for n in self.app_nodes(nodes)):
+            self.key(111)
+            self.step("The palette closed (Escape again)", wait=0.8)
+
+    def search_palette_query(self, query, what, library):
+        """The palette asked for [query]: every media row it lists, beside what the library holds."""
+        if not self.palette_open("Ctrl+K: %s" % what, query):
+            return
+        rows, _ = self.palette_all_rows("Palette: %s" % query)
+        found = {kind: {label for label, detail in rows if detail == word or detail.startswith(word + " · ")}
+                 for kind, word in self.search_kinds().items()}
+        self.search_record("Ctrl+K", query, what, self.search_expected(library, query), found)
+        self.palette_close()
+
+    def search_palette_opens(self, query, name, tracks_of, what):
+        """[query]'s first hit must be [name] (an artist, an album); Enter on it: the palette closes and the Music view shows
+        its tracks, those whose titles begin as one of [tracks_of] does, and no other of the walk's."""
+        if not self.palette_open("Ctrl+K: %s" % what, query):
+            return
+        nodes = self.step("Palette: %s" % query, wait=1.0)
+        rows = self.palette_rows(nodes)
+        kinds = self.search_kinds()
+        first = rows[0] if rows else ("", "", None)
+        word = kinds["artists"] if what.startswith("an artist") else kinds["albums"]
+        if not self.check("Ctrl+K \"%s\": the first hit is %s" % (query, what), first[0] == name and first[1].startswith(word + " · "),
+                          "the first row: %s (%s)" % (first[0] or "none", first[1] or "nothing under it")):
+            self.palette_close()
+            return
+        self.key(66)  # Enter
+        nodes = self.step("Enter: %s opens in the Music" % name, wait=1.5)
+        nodes, _ = self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 8)
+        shown = sorted({n.text.strip() for n in self.app_nodes(nodes) if n.text.startswith("Profile track")})
+        titled = any(n.text.strip() == name for n in self.app_nodes(nodes))
+        self.check("Enter on %s (%s) opens its tracks in the Music view" % (name, what),
+                   titled and bool(shown) and all(t.startswith(tracks_of) for t in shown),
+                   "%s; %d of the walk's tracks in sight: %s" % ("its name shows" if titled else "its name does not show", len(shown), ", ".join(shown[:4])))
+
+    def search_palette_more(self):
+        """A kind that shows its best only: under the commands' six a line says how many there are; the arrows stop at it
+        and Enter on it lists every one of them."""
+        s = self.strings[self.lang]
+        if not self.palette_open("Ctrl+K: a letter many commands have", "s"):
+            return
+        nodes = self.step("Palette: s", wait=1.0)
+        line = self.fmt_regex(s["nag_palette_show_all"]) if "nag_palette_show_all" in s else None
+        title = s["nag_palette_commands"].upper()
+        heads = [n for n in self.app_nodes(nodes) if n.text.strip() == title]
+        # the heading's count stands at its right, on its line
+        count = next((int(n.text.strip()) for h in heads for n in self.app_nodes(nodes)
+                      if n.text.strip().isdigit() and abs(n.b[1] - h.b[1]) <= 3 and n.b[0] >= h.b[2] - 3), None)
+        shown = [n for n in self.app_nodes(nodes) if line and line.match(n.text.strip())]
+        said = int(re.sub(r"\D", "", shown[0].text)) if shown and re.sub(r"\D", "", shown[0].text) else None
+        if not self.check("the commands show their best and a line that says how many there are", count is not None and count > 6 and said == count,
+                          "the heading counts %s; %s" % (count, "the line: %s" % shown[0].text.strip() if shown else "no such line")):
+            self.palette_close()
+            return
+        # six hits down from the first is the line; Enter on it
+        self.sh("input keyevent 20 20 20 20 20 20")
+        self.key(66)
+        rows, nodes = self.palette_all_rows("Enter on the line: every command")
+        left = [n for n in self.app_nodes(nodes) if line.match(n.text.strip())]
+        others = [n.text.strip() for n in self.app_nodes(nodes)
+                  if n.text.strip() in (s["nag_palette_screens"].upper(), s["nag_palette_settings"].upper(), s["nag_palette_media"].upper())]
+        self.check("Enter on that line lists every one of the commands, and the commands alone", len(rows) == count and not left and not others,
+                   "%d rows read of %d%s%s" % (len(rows), count, "; the line is still there" if left else "", "; other kinds: %s" % ", ".join(others) if others else ""))
+        self.palette_close()
+
+    def search_page(self, library):
+        """The phone's search page asked for an artist: its headings count the artists, the albums and the tracks found; an
+        album of them opens in the Music view."""
+        s = self.strings[self.lang]
+        query, what = "nagmedar artist 3", "an artist's name"
+        nodes = self.open_music()
+        search = [n for n in self.app_nodes(nodes) if n.desc.strip() == s["nag_search"]]
+        if not self.check("the phone's top bar has the search", bool(search)):
+            return
+        nodes = self.step("The search page", lambda: self.tap(search[0]), wait=1.2)
+        self.type_text(query)
+        time.sleep(2.5)
+        if self.keyboard_shown():
+            # (a Back while it is up sends it away; without one it would leave the page)
+            self.key(4, record=False)
+            time.sleep(1.0)
+        nodes = self.step("Search page: %s" % query, wait=1.0)
+        # the headings: "ARTISTS · 1", "ALBUMS · 3", "TRACKS · 29" (an older app: "MUSIC · 29", its tracks alone)
+        names = {"artists": [s["nag_music_view_artists"]], "albums": [s["nag_music_view_albums"]],
+                 "tracks": [s["nag_music_view_tracks"]] + ([s["nag_search_music"]] if "nag_search_music" in s else [])}
+        found = {k: None for k in names}
+        album, swiped = None, False
+        for swipe in range(6):
+            for n in self.app_nodes(nodes):
+                m = re.match(r"^(.+) · (\d+)$", n.text.strip())
+                for kind, titles in names.items():
+                    if m and m.group(1) in [t.upper() for t in titles]:
+                        found[kind] = int(m.group(2))
+            album = album or next((n for n in self.app_nodes(nodes) if n.text.strip() == "Profile album 5"), None)
+            # an older app has no artists and albums to wait for: its tracks' heading is the first and the last
+            if all(v is not None for v in found.values()) or (found["tracks"] is not None and swipe >= 2):
+                break
+            self.swipe_up(nodes)
+            swiped = True
+            nodes = self.nodes(self.settle(0.6))
+        want = self.search_expected(library, query)
+        self.search_record("the search page", query, what, want, {k: (0 if v is None and found["tracks"] is not None else v) for k, v in found.items()})
+        if not self.check("the search page lists the album \"Profile album 5\" among what it found", album is not None):
+            return
+        if swiped:
+            self.scroll_to_top()
+        nodes = self.nodes(self.settle(0.6))
+        album = next((n for n in self.app_nodes(nodes) if n.text.strip() == "Profile album 5"), None)
+        if album is None:
+            self.check("the album's row is back in sight at the page's top", False)
+            return
+        nodes = self.step("The album tapped on the search page", lambda: self.tap(album), wait=1.5)
+        nodes, _ = self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 8)
+        shelf = [n.b for n in self.by_id(nodes, "recent-shelf")]
+        shown = sorted({n.text.strip() for n in self.app_nodes(nodes) if n.text.startswith("Profile track") and not any(self.inside(n, b) for b in shelf)})
+        self.check("the album tapped on the search page opens its tracks in the Music view",
+                   bool(shown) and all(t.startswith("Profile track 5.") for t in shown) and any(n.text.strip() == "Profile album 5" for n in self.app_nodes(nodes)),
+                   "%d of the walk's tracks in sight: %s" % (len(shown), ", ".join(shown[:4])))
+
+    def pass_search(self):
+        """1.0.7, on demand (passes=search, either build; the workflow's ref input walks an older app with this walk): the
+        search with the walk's library in the device's Music, whose every tag the walk knows (64 tracks "Profile track
+        a.t" of eight albums "Profile album a", two albums each of "Nagmedar Artist 1" to "4", and the tone). The
+        owner's report of 13 Nov: "ctrl k arama sayfası düzgün çalışmıyor. Her sonucu vermiyor". In 1.0.6 the palette
+        looked for a track in its title alone (an artist's or an album's name found nothing), showed six of however many
+        it found (fifty of the media asked for) and offered neither artists nor albums.
+        On the tablet's screen, with a keyboard's Ctrl+K: four queries, each row of each read and compared with what the
+        library holds (search_palette_query); an artist and an album opened from the palette (search_palette_opens); the
+        line under a kind that shows its best only (search_palette_more). Then the phone's screen: the search page
+        (search_page). The report's "The search" has every query."""
+        self.cur_pass, self.lang = "search", "en"
+        self.sh("am force-stop " + self.pkg)
+        self.set_display(None, None)
+        self.rotate(0)
+        self.ensure_library()
+        # a keyboard's Ctrl+K, as on the owner's tablet with its keyboard: no on-screen keyboard over half the palette
+        ime = self.sh("settings get secure show_ime_with_hard_keyboard")
+        self.sh("settings put secure show_ime_with_hard_keyboard 0")
+        try:
+            self.launch()
+            nodes = self.open_music()
+            # the scan may still be going: the walk's tracks are waited for, then the Music's count of them
+            library = self.search_library()
+            counted = re.compile(r"^(\d+) tracks?$")
+            count_of = lambda ns: next((int(counted.match(n.text.strip()).group(1)) for n in self.app_nodes(ns) if counted.match(n.text.strip())), None)
+            self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 40)
+            nodes, _ = self.wait_for(lambda ns: (count_of(ns) or 0) >= len(library), 60)
+            if not self.check("the Music holds the walk's %d tracks, which the search is compared with" % len(library),
+                              (count_of(nodes) or 0) >= len(library), "the Music counts %s" % count_of(nodes)):
+                return
+            for query, what in (("profile", "a word of every title and album"), ("nagmedar artist 3", "an artist's name"),
+                                ("album 6", "an album's name"), ("track 2.5 artist 1", "a title with its artist")):
+                if self.over_time():
+                    return
+                self.search_palette_query(query, what, library)
+            self.search_palette_opens("nagmedar artist 3", "Nagmedar Artist 3", ("Profile track 5.", "Profile track 6."), "an artist, by the name")
+            self.search_palette_opens("profile album 7", "Profile album 7", ("Profile track 7.",), "an album, by its name")
+            self.search_palette_more()
+            # the phone's search page, on a screen of the owner's phone's size
+            self.sh("am force-stop " + self.pkg)
+            self.set_display("1080x2340", "480")
+            self.launch()
+            self.search_page(library)
+        finally:
+            self.sh("am force-stop " + self.pkg)
+            self.set_display(None, None)
+            self.sh("settings delete secure show_ime_with_hard_keyboard" if ime in ("", "null") else "settings put secure show_ime_with_hard_keyboard %s" % ime)
+
     def pass_sheet_trials(self):
         """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
         1.0.2's `input swipe … 300` and by drag() in turn, each trial with the moves the system delivered (dumpsys
@@ -3826,6 +4120,18 @@ class Smoke:
                     r["pass"], r["what"], cells[0], cells[1], cells[2], "yes" if r["in_tree"] else "**no**", moved,
                     "ok" if r["ok"] else "**FAILED**"))
             md.append("")
+        if self.searches:
+            md.append("## The search (1.0.7: what each query listed, beside what the walk's library holds by the search's rule: "
+                      "every word in the title, the artist or the album)\n")
+            md.append("| pass | where | query | artists listed / in the library | albums | tracks | missing | listed but not in the library | result |")
+            md.append("|------|-------|-------|---------------------------------|--------|--------|---------|-------------------------------|--------|")
+            for r in self.searches:
+                cut = lambda names: (", ".join(names[:6]) + (" … (%d)" % len(names) if len(names) > 6 else "")) or "none"
+                md.append("| %s | %s | `%s` (%s) | %s | %s | %s | %s | %s | %s |" % (
+                    r["pass"], r["where"], r["query"], r["what"],
+                    *("%s / %d" % ("not read" if r["found"][k] is None else r["found"][k], r["want"][k]) for k in ("artists", "albums", "tracks")),
+                    cut(r["missing"]), cut(r["extra"]), "ok" if r["ok"] else "**FAILED**"))
+            md.append("")
         if self.notice_swipes:
             md.append("## A notice swiped by raw touch events (1.0.6: the bar's left edge in px, read from the screen; "
                       "\"no bar\": it has left)\n")
@@ -3899,7 +4205,7 @@ class Smoke:
                        "warnings": self.warnings, "strictmode": self.strict_total, "checks": self.checks,
                        "frames": self.jank, "seconds": dur, "passes": self.a.passes, "source": self.a.source,
                        "system": self.system_events, "sheet_trials": self.sheet_trials, "back_presses": self.back_presses,
-                       "page_openings": self.page_openings, "notice_swipes": self.notice_swipes}, f, indent=1)
+                       "page_openings": self.page_openings, "notice_swipes": self.notice_swipes, "searches": self.searches}, f, indent=1)
         ann = []
         for c in self.crashes:
             head = c["text"].splitlines()
