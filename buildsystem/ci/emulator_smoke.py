@@ -3725,8 +3725,9 @@ class Smoke:
         return ok
 
     def palette_open(self, title, query):
-        """Ctrl+K, and [query] typed once the palette's field is there; the library's media waited for (the palette says
-        while it reads them; an older app says nothing: a few seconds). False when no palette opened."""
+        """Ctrl+K, and [query] typed once the palette's field is there; the on-screen keyboard sent away; the library's
+        media waited for (the palette says while it reads them; an older app says nothing: a few seconds). False when
+        no palette opened."""
         s = self.strings[self.lang]
         field = s["nag_palette_placeholder"]
         self.combo(113, 39)  # Ctrl+K
@@ -3735,6 +3736,11 @@ class Smoke:
             return False
         self.type_text(query)
         time.sleep(1.5)
+        if self.keyboard_shown():
+            # the owner's tablet has its keyboard: no on-screen one over half the palette (the emulator shows its own
+            # whatever its settings say). A Back while it is up sends it away and leaves the palette open
+            self.key(4, record=False)
+            time.sleep(0.8)
         reading = s.get("nag_palette_reading")
         if reading:
             self.wait_for(lambda ns: ns and not any(n.text.strip() == reading for n in self.app_nodes(ns)), 30)
@@ -3743,6 +3749,7 @@ class Smoke:
         return True
 
     def palette_close(self):
+        """Escape closes the palette; once more when it is still there (an on-screen keyboard that was up takes the first)."""
         self.key(111)  # Escape
         nodes = self.step("The palette closed", wait=0.8)
         field = self.strings[self.lang]["nag_palette_placeholder"]
@@ -3883,9 +3890,6 @@ class Smoke:
         self.set_display(None, None)
         self.rotate(0)
         self.ensure_library()
-        # a keyboard's Ctrl+K, as on the owner's tablet with its keyboard: no on-screen keyboard over half the palette
-        ime = self.sh("settings get secure show_ime_with_hard_keyboard")
-        self.sh("settings put secure show_ime_with_hard_keyboard 0")
         try:
             self.launch()
             nodes = self.open_music()
@@ -3914,7 +3918,6 @@ class Smoke:
         finally:
             self.sh("am force-stop " + self.pkg)
             self.set_display(None, None)
-            self.sh("settings delete secure show_ime_with_hard_keyboard" if ime in ("", "null") else "settings put secure show_ime_with_hard_keyboard %s" % ime)
 
     def pass_sheet_trials(self):
         """1.0.3, on demand (passes=sheet-trials): the phone's track sheet dragged down from its middle again and again, by
