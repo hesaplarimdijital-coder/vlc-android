@@ -55,8 +55,13 @@ class EpisodeServices(
     val settings: () -> PodcastSettings = { PodcastSettings() },
     /** Heard when the subscriptions change from none to some or back: the refresh job is scheduled or cancelled. */
     val onSubscribed: (Boolean) -> Unit = {},
-    /** 1.0.8: a round over every subscription, the periodic job's ([PodcastRefresher]), for a pull on the list; none without it. */
-    val refreshAll: (suspend () -> RefreshReport)? = null,
+    /**
+     * 1.0.8: a round over every subscription, the periodic job's ([PodcastRefresher]), for a pull on the list; none
+     * without it. Null when a round is running already (the app's, [refreshing]).
+     */
+    val refreshAll: (suspend () -> RefreshReport?)? = null,
+    /** 1.0.8: a round over the subscriptions is running, the app's (a pull's or the periodic job's). */
+    val refreshing: StateFlow<Boolean> = MutableStateFlow(false),
 )
 
 /**
@@ -155,6 +160,8 @@ class PodcastController(
     /** Follows the subscriptions, the downloads and the player in Room and the services until cancelled. */
     suspend fun follow() = coroutineScope {
         launch { imports.state.collect { importing = it } }
+        // 1.0.8: the app's round, whoever started it: a screen opened again shows it too
+        launch { services.refreshing.collect { refreshingAll = it } }
         launch { services.progress.collect { downloadProgress = it } }
         launch {
             // the place of the episode whose page is open: a look a few times a second, only while one is
@@ -630,15 +637,18 @@ class PodcastController(
     /**
      * 1.0.8 (Desktop Kit 2.8.0): every subscription read again now, as the periodic job reads them (the shows that
      * download by themselves get their newest queued); a notice says what came of it. Runs on [background]: leaving the
-     * screen does not stop it.
+     * screen does not stop it. One round runs at a time in the app ([EpisodeServices.refreshing]): a pull while one runs,
+     * from this screen or opened again, starts nothing more.
      */
     fun refreshAll() {
         val round = services.refreshAll ?: return
         if (refreshingAll) return
+        // at once, before the app's round says it runs
         refreshingAll = true
         background.launch {
             try {
-                val report = round()
+                // null: a round was running already (the periodic job's), which the disc shows
+                val report = round() ?: return@launch
                 Notices.show(
                     context,
                     when {
@@ -652,7 +662,7 @@ class PodcastController(
             } catch (e: Exception) {
                 Notices.show(context, R.string.nag_pod_refresh_failed)
             } finally {
-                refreshingAll = false
+                refreshingAll = services.refreshing.value
             }
         }
     }

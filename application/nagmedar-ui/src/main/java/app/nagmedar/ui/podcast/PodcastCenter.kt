@@ -13,7 +13,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.MLServiceLocator
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
@@ -129,6 +132,38 @@ object PodcastCenter {
             repository(app), NagmedarDatabase.get(app).podcasts(), { settingsStore(app).read() },
             downloads(app), cleaner(app), protectedNow = ::playingEpisodes,
         )
+    }
+
+    /** 1.0.8: one round over the subscriptions at a time, in the whole app (a pull on the screen, the periodic job). */
+    private val round = Mutex()
+    private val roundRunning = MutableStateFlow(false)
+
+    /** 1.0.8: a round over the subscriptions is running (a pull's or the periodic job's): the screens show it. */
+    val refreshing: StateFlow<Boolean> = roundRunning.asStateFlow()
+
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0's pull to refresh): a round now, as the periodic job's; null without one when a round is
+     * running already (the screen shows that one), so a pull on a screen opened again never starts a second.
+     */
+    suspend fun refreshNow(context: Context): RefreshReport? {
+        if (!round.tryLock()) return null
+        return try {
+            roundRunning.value = true
+            refresher(context).run()
+        } finally {
+            roundRunning.value = false
+            round.unlock()
+        }
+    }
+
+    /** 1.0.8: the periodic job's round: after the one running, if any, never beside it. */
+    suspend fun scheduledRound(context: Context): RefreshReport = round.withLock {
+        roundRunning.value = true
+        try {
+            refresher(context).run()
+        } finally {
+            roundRunning.value = false
+        }
     }
 
     /** S-1104: the chapters and transcripts of episodes, kept in the app's cache. */

@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.launch
 import org.junit.After
@@ -404,5 +405,32 @@ class PodcastControllerTest {
         eventually("opened") { controller.model.page != null }
         assertEquals(1, db.podcasts().feedList().size)
         assertNull(controller.model.subscribing[FeedUrl.key(result.feedUrl)])
+    }
+
+    /**
+     * 1.0.8 (the independent review): one round over the subscriptions at a time in the app. A screen opened again
+     * while a round runs (a pull's, the periodic job's) shows it and starts no other; once it ends a pull asks again.
+     */
+    @Test
+    fun aRoundRunningInTheAppIsShownAndNotStartedAgain() {
+        val running = MutableStateFlow(true)
+        var rounds = 0
+        val repository = PodcastRepository(db.podcasts(), source, io = Dispatchers.Unconfined)
+        val search = PodcastSearch(directory({ true }) { emptyList() }, directory({ true }) { emptyList() })
+        val again = PodcastController(
+            repository, search, scope, context, undo, background, imports,
+            services = EpisodeServices(refreshAll = { rounds++; null }, refreshing = running),
+        ) { _, _ -> }
+        val following = scope.launch { again.follow() }
+        assertTrue(again.model.refreshing)
+        again.refreshAll()
+        assertEquals(0, rounds)
+        running.value = false
+        assertFalse(again.model.refreshing)
+        // the app's round may still be running elsewhere (null: none started, nothing said)
+        again.refreshAll()
+        assertEquals(1, rounds)
+        assertFalse(again.model.refreshing)
+        following.cancel()
     }
 }

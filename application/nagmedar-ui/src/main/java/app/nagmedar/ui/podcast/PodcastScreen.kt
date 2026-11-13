@@ -145,8 +145,10 @@ fun PodcastsScreen(undo: UndoBarState?) {
                 progress = PodcastCenter.tracker.progress,
                 settings = { PodcastCenter.settingsStore(app).read() },
                 onSubscribed = { PodcastCenter.schedule(app) },
-                // 1.0.8: a pull on the subscriptions runs the periodic job's round now (its news told in a notice)
-                refreshAll = { PodcastCenter.refresher(app).run() },
+                // 1.0.8: a pull on the subscriptions runs the periodic job's round now (its news told in a notice), one
+                // at a time in the app
+                refreshAll = { PodcastCenter.refreshNow(app) },
+                refreshing = PodcastCenter.refreshing,
             ),
         )
     }

@@ -62,7 +62,8 @@ object DownloadConstraints {
 /** S-1103: the periodic job: reads the feeds, tells the news, queues the automatic downloads and tidies the storage. */
 class PodcastRefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
-        val report = PodcastCenter.refresher(applicationContext).run()
+        // 1.0.8: after a pull's round, if one is running, never beside it
+        val report = PodcastCenter.scheduledRound(applicationContext)
         val notifier = PodcastNotifier(applicationContext)
         notifier.showNews(report.notices)
         report.cleanup?.takeIf { it.nearLimit || it.overLimit }?.let { notifier.showStorageNear(it.keptBytes, it.limitBytes) }
