@@ -1,7 +1,10 @@
 package app.nagmedar.ui.shell
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -15,13 +18,18 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.TestShell
+import app.nagmedar.ui.components.ExpandablePlayer
+import app.nagmedar.ui.components.ExpandablePlayerState
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.rememberExpandablePlayerState
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,11 +51,23 @@ class PrimaryActionTest {
 
     private var made = 0
 
+    private lateinit var player: ExpandablePlayerState
+
     private fun shell(widthClass: WidthClass, inputMode: InputMode = InputMode.Touch) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = inputMode) {
-                TestShell(widthClass, screen = { _, _ ->
+                player = rememberExpandablePlayerState()
+                TestShell(widthClass, player = { kind ->
+                    if (kind == NavKind.BottomBar) {
+                        ExpandablePlayer(
+                            player,
+                            mini = { Box(Modifier.fillMaxWidth().height(72.dp)) { Text("Sabaha Kadar") } },
+                            full = { Box(Modifier.fillMaxSize()) { Text("büyük oynatıcı") } },
+                            modifier = Modifier.testTag("mini"),
+                        )
+                    }
+                }, screen = { _, _ ->
                     ShellPrimaryAction("Yeni liste", NagIcons.Plus) { made++ }
                     val padding = rememberShellContentPadding()
                     LazyColumn(Modifier.fillMaxSize().testTag("list"), contentPadding = padding) {
@@ -69,6 +89,20 @@ class PrimaryActionTest {
         compose.waitForIdle()
         compose.onNodeWithText("Yeni liste").assertDoesNotExist()
         compose.onNodeWithContentDescription("Yeni liste").assertExists()
+    }
+
+    /** Under the expanded player it is gone: not tapped, focused nor read out (the independent review of 1.0.8). */
+    @Test
+    fun theExpandedPlayerTakesItAway() {
+        shell(WidthClass.Compact)
+        compose.onNodeWithTag("primary-action").assertExists()
+        compose.onNodeWithTag("mini").performClick()
+        compose.waitForIdle()
+        assertTrue(player.isExpanded)
+        compose.onNodeWithTag("primary-action").assertDoesNotExist()
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        compose.waitForIdle()
+        compose.onNodeWithTag("primary-action").assertExists()
     }
 
     @Test

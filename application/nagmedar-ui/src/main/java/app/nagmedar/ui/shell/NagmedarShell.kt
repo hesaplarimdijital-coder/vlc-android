@@ -551,6 +551,8 @@ fun NagmedarShell(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .offset { IntOffset(0, scroll.offsetPx.roundToInt().coerceIn(0, metrics.navPx + metrics.playerPx)) },
+                                // the expanded player (or a page over the window) lies over it: not tapped nor read out there
+                                covered = playerOver,
                             )
                         } else {
                             SideEffect { metrics.actionPx = 0 }

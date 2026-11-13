@@ -157,7 +157,9 @@ internal fun PrimaryActionButton(action: PrimaryAction, extended: Boolean, heigh
 /**
  * The phone's floating button: at the end, a margin above what [modifier] keeps it above, gone (scaled down into its
  * corner) while not [shown] or without an [action]; with the label while [extended]. Its height with the margin goes to
- * [metrics] (lists end above it, the notices sit over it). An expanding player covers it.
+ * [metrics] (lists end above it, the notices sit over it). An expanding player covers it: it fades with the player's
+ * way up and, once it is [covered] (the player expanded, a page over the window), it is gone, neither tapped, focused
+ * nor read out, its room kept for when the player goes down again.
  */
 @Composable
 internal fun PhoneActionButton(
@@ -167,16 +169,18 @@ internal fun PhoneActionButton(
     metrics: ShellChromeMetrics,
     expandProgress: () -> Float,
     modifier: Modifier,
+    covered: Boolean = false,
 ) {
     val dimens = NagTheme.dimens
     val tier = LocalMotionTier.current
     // the last action stays on the button while it goes
     val last = remember { LastAction() }
     if (action != null) last.value = action
-    val visible = action != null && shown
+    val placed = action != null && shown
+    val visible = placed && !covered
     // its room, also when it comes back before its way out has ended (the size does not change then, so no new
-    // measurement says it)
-    SideEffect { metrics.actionPx = if (visible) last.height else 0 }
+    // measurement says it); kept while the player covers it
+    SideEffect { metrics.actionPx = if (placed) last.height else 0 }
     val corner = TransformOrigin(1f, 1f)
     AnimatedVisibility(
         visible = visible,
@@ -190,7 +194,7 @@ internal fun PhoneActionButton(
             Modifier
                 .onSizeChanged {
                     last.height = it.height
-                    if (visible) metrics.actionPx = it.height
+                    if (placed) metrics.actionPx = it.height
                 }
                 .padding(end = dimens.gapL, bottom = dimens.gapL),
         ) {
