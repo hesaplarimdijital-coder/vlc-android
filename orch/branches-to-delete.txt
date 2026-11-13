@@ -1,3 +1,9 @@
+# Branches the owner allowed to be deleted (13 Nov 2026, 14:16: "Silmen gerekiyorsa dalları sil"), NOT deleted:
+# this session's git proxy refused the deletion push (HTTP 403, a policy denial; not retried, not routed around).
+# 115 story/* (each contained in master, checked with GitHub's compare), exp/notice-swipe, exp/page-blank,
+# exp/search-all (never merged as such; exp/search-all's commits are in master as cherry-picks), and the on-demand
+# evidence branches asked about in 1.0.5 to 1.0.7. Name, last commit. With a clone where deleting is allowed:
+#   git push origin --delete $(grep -v '^#' branches-to-delete.txt | cut -d' ' -f1)
 ci/emulator-api34-personal-auto-shots 6a78322658fad86268c3cefeedbf11f29d87553f
 ci/emulator-api37.0-notice-swipe 65f85d4e2f52b675936bf52aa0500266ae9cacef
 ci/emulator-api37.0-personal-notice-swipe 5c52849aba038c28f91299630c96466959a5fc0d
