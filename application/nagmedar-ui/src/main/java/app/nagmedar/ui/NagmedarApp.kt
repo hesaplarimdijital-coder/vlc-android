@@ -84,6 +84,7 @@ import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaInfoHost
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.SectionSourcesDialog
+import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.lyrics.LyricsSession
 import app.nagmedar.ui.lyrics.LyricsTrack
 import app.nagmedar.ui.lyrics.PlayingLyricsFullScreen
@@ -91,6 +92,7 @@ import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.music.MusicLink
 import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.music.rememberMusicInspector
 import app.nagmedar.ui.music.MusicScreen
@@ -150,7 +152,9 @@ import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.PaletteItem
 import app.nagmedar.ui.search.SearchScreen
 import app.nagmedar.ui.search.commandItems
+import app.nagmedar.ui.search.groupItems
 import app.nagmedar.ui.search.mediaItems
+import app.nagmedar.ui.search.rememberSearchData
 import app.nagmedar.ui.search.screenItems
 import app.nagmedar.ui.search.settingItems
 import app.nagmedar.ui.shell.CaptionBar
@@ -666,9 +670,17 @@ private fun NagmedarMain(
     // VLC's "Resume playback: Ask" for music, radio and streams: their question, which nothing answered here
     ResumePromptHost()
     if (paletteOpen) {
-        // the library's media come when the palette opens; commands, screens and settings at once
-        val media by produceState(emptyList<PaletteItem>()) {
-            value = mediaItems(context.resources, repository.tracks()) { item -> PlaybackActions.playList(context, listOf(item), 0) }
+        // commands, screens and settings at once. 1.0.7: the library's media as the search page has them (its artists,
+        // albums and tracks, kept between the palette's openings and shared with the page): each opening read the
+        // library again and had no media until it was read. Their items are made away from the main thread and kept too.
+        val library by rememberSearchData(repository)
+        val media by rememberRead<List<PaletteItem>>(repository.lastRead, "palette-media", library) {
+            val data = library ?: return@rememberRead
+            value = withContext(Dispatchers.Default) {
+                // an artist or an album opens as the players' links do: its tracks in the Music view
+                groupItems(context.resources, data.groups) { group -> MusicLinks.open(MusicLink(group.view, listOf(group.group))) } +
+                    mediaItems(context.resources, data.tracks.mapNotNull { it.media }) { item -> PlaybackActions.playList(context, listOf(item), 0) }
+            }
         }
         // every line of "All settings", read from its XML away from the main thread
         val preferences by produceState(emptyList<PaletteItem>()) {
@@ -682,7 +694,7 @@ private fun NagmedarMain(
                 screenItems(context.resources, navigator::navigate) +
                 settingItems(context.resources, prefs, wallpaperAccent) +
                 preferences +
-                media
+                media.orEmpty()
         }
         CommandPalette(
             items = items,
@@ -696,6 +708,7 @@ private fun NagmedarMain(
                 searchQuery = query
                 navigator.open(Destination.Search)
             },
+            reading = media == null,
         )
     }
 }

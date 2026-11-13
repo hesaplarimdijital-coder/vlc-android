@@ -8,6 +8,7 @@ import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.input.ShortcutGroup
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
@@ -16,7 +17,7 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
 /*
  * What the command palette offers in the app (S-305): the shortcuts the shell can run, every
- * screen, the appearance settings, and the library's videos and tracks.
+ * screen, the appearance settings, and the library's tracks (1.0.7: its artists and albums too).
  */
 
 /** The shortcuts [available] now, with their menu and keys; the palette's own shortcut is left out. */
@@ -90,14 +91,52 @@ fun settingItems(res: Resources, prefs: NagmedarPreferences, wallpaperAccent: Bo
     return themes + accents + densities
 }
 
-/** The library's tracks, with their artist. */
-fun mediaItems(res: Resources, media: List<MediaWrapper>, play: (MediaWrapper) -> Unit): List<PaletteItem> = media.map { item ->
-    PaletteItem(
-        id = "media:${item.uri}",
-        kind = PaletteKind.Media,
-        label = item.title ?: item.uri?.lastPathSegment.orEmpty(),
-        detail = listOfNotNull(res.getString(R.string.nag_palette_track), item.artistName?.takeIf { it.isNotBlank() }).joinToString(" · "),
-        icon = NagIcons.Music,
-        run = { play(item) },
-    )
+/**
+ * The library's tracks, with their artist and album: "Parça · Ada Karan · Gece Mavisi". 1.0.7: found by those
+ * too, the words the search page looks at ([TrackItem.words]); until then by the title alone.
+ */
+fun mediaItems(res: Resources, media: List<MediaWrapper>, play: (MediaWrapper) -> Unit): List<PaletteItem> {
+    val kind = res.getString(R.string.nag_palette_track)
+    return media.map { item ->
+        val track = item.toTrackItem()
+        PaletteItem(
+            id = "media:${item.uri}",
+            kind = PaletteKind.Media,
+            label = track.title,
+            detail = listOf(kind, track.artist, track.album).filter { it.isNotBlank() }.joinToString(" · "),
+            icon = NagIcons.Music,
+            words = track.words,
+            order = 2,
+            run = { play(item) },
+        )
+    }
+}
+
+/**
+ * 1.0.7: the library's artists and albums ([groups]: the search's, [SearchData.groups]), "Sanatçı · 4 albüm ·
+ * 38 parça" and "Albüm · Ada Karan · 9 parça": an album is found by its artist too. A hit opens its tracks
+ * in the Music view ([onOpen]).
+ */
+fun groupItems(res: Resources, groups: List<GroupItem>, onOpen: (GroupItem) -> Unit): List<PaletteItem> {
+    val artist = res.getString(R.string.nag_column_artist)
+    val album = res.getString(R.string.nag_column_album)
+    return groups.map { group ->
+        val isArtist = group.view == MusicView.Artists
+        val tracks = res.getQuantityString(R.plurals.nag_tracks_count, group.tracks, group.tracks)
+        val parts = if (isArtist) {
+            listOf(artist, res.getQuantityString(R.plurals.nag_music_albums, group.albums, group.albums), tracks)
+        } else {
+            listOf(album, group.artist, tracks)
+        }
+        PaletteItem(
+            id = group.key,
+            kind = PaletteKind.Media,
+            label = group.title,
+            detail = parts.filter { it.isNotBlank() }.joinToString(" · "),
+            icon = if (isArtist) NagIcons.Artists else NagIcons.Albums,
+            words = group.artist,
+            order = if (isArtist) 0 else 1,
+            run = { onOpen(group) },
+        )
+    }
 }

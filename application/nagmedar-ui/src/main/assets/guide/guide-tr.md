@@ -211,7 +211,7 @@ Tarayıcıya hangi bölümlerin (müzik, çalma listeleri, arama), dosya ve ağ 
 Geniş pencerede (DeX, harici ekran) Nağmedar masaüstü gibi çalışır: üstte menü çubuğu, solda kenar çubuğu, altta oynatıcı çubuğu.
 
 - **Menü çubuğu:** Medya, Oynatma, Ses, Araçlar, Görünüm ve Yardım menüleri; her öğenin yanında tuşu yazar. Alt'a tek başına ya da F10'a basınca klavye menü çubuğuna geçer. Yardım menüsünde bu rehber ve kısayol kartı vardır.
-- **Komut paleti** ({key:CommandPalette}): komutlar, ekranlar, görünüm ayarları ve kütüphanedeki parçalar tek kutuda aranır.
+- **Komut paleti** ({key:CommandPalette}): komutlar, ekranlar, görünüm ayarları ve kütüphanedeki sanatçılar, albümler ve parçalar tek kutuda aranır. Bir parça adından, sanatçısından ya da albümünden bulunur; kütüphanede eşleşen her şey listelenir.
 - **Fare:** sağ tık (ya da Menü tuşu) bağlam menüleri açar; Ctrl ve Shift ile tıklamak birden çok öğe seçer; boş yerde sürükleyerek lastik bantla seçersiniz. Fare geri ve ileri tuşları ekranlar arasında gezinir.
 - **Sürükle ve bırak:** dışarıdan dosya bırakmak oynatır, medyayı oynatıcı çubuğuna bırakmak sıraya ekler. Parçaları dosya olarak dışarı sürüklemek için fareyle (ya da kalemle) satırın üstünde yaklaşık yarım saniye basılı tutun, sonra çekin; hızlı bir basıp çekme sürükleme başlatmaz.
 - **Pencere:** {key:ToggleSidebar} kenar çubuğunu daraltır, {key:ToggleInspector} Müzik'in ayrıntı panelini gizler ya da gösterir, {key:OpenInNewWindow} aynı ekranı yeni pencerede açar. Pencerenin yeri ve boyutu hatırlanır.

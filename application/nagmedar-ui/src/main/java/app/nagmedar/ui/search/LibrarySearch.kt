@@ -59,7 +59,11 @@ class Searchable<T>(val value: T, val kind: SearchKind, title: String, extra: St
     internal val text: String = if (extra.isEmpty()) this.title else this.title + " \u0000 " + foldForSearch(extra)
 }
 
-class SearchHit<T>(val value: T, val kind: SearchKind, val score: Int)
+/**
+ * A found item. [score] ranks the hits; 1.0.7: [match] is how well the words matched alone, before a
+ * shorter title breaks the ties (the palette orders artists, albums and tracks that match equally well by it).
+ */
+class SearchHit<T>(val value: T, val kind: SearchKind, val score: Int, val match: Int = score)
 
 /** The items matching [query], best first: words at the start of the title, then at word starts, then inside words. */
 fun <T> List<Searchable<T>>.search(query: SearchQuery): List<SearchHit<T>> {
@@ -88,7 +92,7 @@ fun <T> List<Searchable<T>>.search(query: SearchQuery): List<SearchHit<T>> {
         if (!matched) continue
         if (query.excluded.any { item.text.contains(it) }) continue
         // a shorter title with the same words first
-        hits += SearchHit(item.value, item.kind, score * 100 - item.title.length.coerceAtMost(99))
+        hits += SearchHit(item.value, item.kind, score * 100 - item.title.length.coerceAtMost(99), score)
     }
     hits.sortByDescending { it.score }
     return hits

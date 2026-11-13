@@ -37,6 +37,8 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * S-305: the command palette over the shell: a query in a DeX window, with the selected hit
  * beside the list; on a tablet by touch; on a phone with no query, the recent items first.
+ * 1.0.7: the tablet's query is an artist's name: the artist, the album and the tracks it finds;
+ * the DeX window's commands end with the line that shows them all.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -51,10 +53,13 @@ class PaletteScreenshotTest {
     @Composable
     private fun items(): List<PaletteItem> {
         val res = LocalContext.current.resources
+        // 1.0.7: an artist and an album among the media, each track with its artist and album (it is found by them)
         return commandItems(res, { ShortcutRegistry[it].scope == ShortcutScope.Global && it !in later }, {}) + screenItems(res) {} + listOf(
-            PaletteItem("media:kuzey", PaletteKind.Media, "Kuzeyden Esen", "Parça · Ada Karan", icon = NagIcons.Music) {},
-            PaletteItem("media:sabaha", PaletteKind.Media, "Sabaha Kadar", "Parça · Ada Karan", icon = NagIcons.Music) {},
-            PaletteItem("media:acik", PaletteKind.Media, "Açık Deniz", "Parça · Deniz Aral", icon = NagIcons.Music) {},
+            PaletteItem("artist:ada karan", PaletteKind.Media, "Ada Karan", "Sanatçı · 1 albüm · 2 parça", icon = NagIcons.Artists, order = 0) {},
+            PaletteItem("album:ada karan/gece mavisi", PaletteKind.Media, "Gece Mavisi", "Albüm · Ada Karan · 2 parça", icon = NagIcons.Albums, words = "Ada Karan", order = 1) {},
+            PaletteItem("media:kuzey", PaletteKind.Media, "Kuzeyden Esen", "Parça · Ada Karan · Gece Mavisi", icon = NagIcons.Music, words = "Ada Karan Gece Mavisi", order = 2) {},
+            PaletteItem("media:sabaha", PaletteKind.Media, "Sabaha Kadar", "Parça · Ada Karan · Gece Mavisi", icon = NagIcons.Music, words = "Ada Karan Gece Mavisi", order = 2) {},
+            PaletteItem("media:acik", PaletteKind.Media, "Açık Deniz", "Parça · Deniz Aral · Liman Işıkları", icon = NagIcons.Music, words = "Deniz Aral Liman Işıkları", order = 2) {},
         )
     }
 
@@ -81,7 +86,7 @@ class PaletteScreenshotTest {
     fun dexQuery() = capture("palette-dex-dark", WidthClass.Large, ThemeMode.Dark, InputMode.Pointer, "aç", emptyList())
 
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
-    fun tabletQuery() = capture("palette-tablet-light", WidthClass.Expanded, ThemeMode.Light, InputMode.Touch, "kuzey", emptyList())
+    fun tabletQuery() = capture("palette-tablet-light", WidthClass.Expanded, ThemeMode.Light, InputMode.Touch, "ada karan", emptyList())
 
     @Test @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phoneRecent() = capture(

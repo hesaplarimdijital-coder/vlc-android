@@ -724,6 +724,9 @@
     <string name="nag_palette_shortcut">Shortcut</string>
     <string name="nag_palette_setting">%1$s: %2$s</string>
     <string name="nag_palette_track">Track</string>
+    <!-- 1.0.7: a kind that shows its best only; the library still being read -->
+    <string name="nag_palette_show_all">Show all %1$d</string>
+    <string name="nag_palette_reading">Reading the library…</string>
     <plurals name="nag_palette_count">
         <item quantity="one">%d result</item>
         <item quantity="other">%d results</item>

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -61,8 +62,9 @@ class CommandPaletteTest {
             )
     }
 
-    private fun palette(recent: List<String> = emptyList()) {
-        val items = items()
+    private fun palette(recent: List<String> = emptyList(), reading: Boolean = false) {
+        // while the library is read its media are not among the items
+        val items = items().filter { !reading || it.kind != PaletteKind.Media }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 if (open) {
@@ -71,12 +73,18 @@ class CommandPaletteTest {
                         recent = recent,
                         onRun = { it.run() },
                         onDismiss = { open = false },
+                        reading = reading,
                     )
                 }
             }
         }
         compose.waitForIdle()
     }
+
+    /** 1.0.7: the lines under the kinds that show their best only ("14 sonucun hepsini göster"), top to bottom. */
+    private fun more(): List<String> = compose.onAllNodesWithTag("palette-more").fetchSemanticsNodes()
+        .sortedBy { it.boundsInRoot.top }
+        .map { node -> node.config.getOrNull(SemanticsProperties.Text)?.firstOrNull()?.text.orEmpty() }
 
     private val field get() = compose.onNodeWithContentDescription("Komut, ekran, ayar ya da medya ara")
 
@@ -162,6 +170,69 @@ class CommandPaletteTest {
         // commands only
         assertTrue(rows().all { (label, _) -> label.isNotEmpty() })
         compose.onNodeWithText("Sabaha Kadar").assertDoesNotExist()
+    }
+
+    /** 1.0.7: six commands of many were shown and nothing led to the rest but the kinds' chips. */
+    @Test
+    fun aKindThatShowsItsBestLeadsToTheRest() {
+        palette()
+        field.performTextInput("a")
+        compose.waitForIdle()
+        // the commands' six, then the line that says how many there are
+        val line = more().first()
+        val total = Regex("""^(\d+) sonucun hepsini göster$""").find(line)?.groupValues?.get(1)?.toInt()
+        assertTrue(line, total != null && total > 6)
+        compose.onAllNodesWithTag("palette-more").fetchSemanticsNodes().minByOrNull { it.boundsInRoot.top }!!
+            .let { node -> compose.onNode(SemanticsMatcher("the first line") { it.id == node.id }).performClick() }
+        compose.waitForIdle()
+        // the commands alone, more than six of them, and no such line: the palette stays open, nothing ran
+        assertTrue(more().isEmpty())
+        assertTrue("${rows().size} rows", rows().size > 6)
+        assertTrue(open)
+        assertTrue(ran.isEmpty())
+    }
+
+    /** 1.0.7: the arrows stop at that line and Enter on it shows them all. */
+    @Test
+    fun theArrowsStopAtTheLineAndEnterShowsThemAll() {
+        palette()
+        field.performTextInput("a")
+        compose.waitForIdle()
+        assertTrue(more().isNotEmpty())
+        // six hits down from the first: the line
+        repeat(6) { field.performKeyInput { pressKey(Key.DirectionDown) } }
+        compose.waitForIdle()
+        assertTrue("no hit is selected on the line", rows().none { it.second })
+        field.performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        assertTrue(open)
+        assertTrue(ran.isEmpty())
+        assertTrue(more().isEmpty())
+        assertTrue(rows().size > 6)
+        // the first of them is selected again, and Enter runs it
+        assertTrue(rows().first().second)
+        field.performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        assertEquals(1, ran.size)
+        assertTrue(ran.single(), ran.single().startsWith("command:"))
+    }
+
+    /** 1.0.7: while the library is read for the first time its media are not there yet: said, where they would be listed. */
+    @Test
+    fun whileTheLibraryIsReadItSaysSo() {
+        palette(reading = true)
+        field.performTextInput("kuzey")
+        compose.waitForIdle()
+        compose.onNodeWithText("Kütüphane okunuyor…").assertExists()
+        compose.onNodeWithText("Eşleşen bir şey yok").assertDoesNotExist()
+        // commands asked for: the library is not waited for
+        field.performTextInput("qq")
+        compose.waitForIdle()
+        compose.onNodeWithText("Kütüphane okunuyor…").assertExists()
+        field.performKeyInput { pressKey(Key.Tab) }
+        compose.waitForIdle()
+        compose.onNodeWithText("Kütüphane okunuyor…").assertDoesNotExist()
+        compose.onNodeWithText("Eşleşen bir şey yok").assertExists()
     }
 
     @Test

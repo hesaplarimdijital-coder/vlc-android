@@ -83,9 +83,14 @@ import app.nagmedar.ui.theme.NagTheme
 
 /**
  * The command palette (Ctrl+K, S-305): one field that finds commands, screens, settings and
- * media, fuzzy and Turkish-folded. The arrows move through the hits and Enter runs one, Tab
- * changes what is searched ("> ", "/", "#", "@" do it from the field), Escape closes. With no
- * query it lists what was run lately. A wide window shows the selected hit beside the list.
+ * media, Turkish-folded (commands, screens and settings fuzzily; media as the search page finds
+ * them, 1.0.7). The arrows move through the hits and Enter runs one, Tab changes what is searched
+ * ("> ", "/", "#", "@" do it from the field), Escape closes. With no query it lists what was run
+ * lately. A wide window shows the selected hit beside the list.
+ *
+ * 1.0.7: a kind that shows its best only ends with a line that says how many it has and shows them
+ * all (a click, or Enter on it); [reading] says the library is still being read for the first time,
+ * so its media are not among [items] yet: the list says so instead of "nothing matches".
  */
 @Composable
 fun CommandPalette(
@@ -94,9 +99,10 @@ fun CommandPalette(
     onRun: (PaletteItem) -> Unit,
     onDismiss: () -> Unit,
     onSearchAll: ((String) -> Unit)? = null,
+    reading: Boolean = false,
 ) {
     NagDialog(onDismissRequest = onDismiss) {
-        PaletteSurface(items, recent, onRun, onDismiss, onSearchAll = onSearchAll)
+        PaletteSurface(items, recent, onRun, onDismiss, onSearchAll = onSearchAll, reading = reading)
     }
 }
 
@@ -110,6 +116,7 @@ fun PaletteSurface(
     initialQuery: String = "",
     /** Shift+Enter (S-311): the search page with the query, for everything the library holds. */
     onSearchAll: ((String) -> Unit)? = null,
+    reading: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -118,25 +125,17 @@ fun PaletteSurface(
     var scope by remember { mutableStateOf<PaletteKind?>(null) }
     var selected by remember { mutableIntStateOf(0) }
     val results = remember(query, scope, items, recent) { paletteResults(query, scope, items, recent) }
-    val hits = results.hits
-    val chosen = hits.getOrNull(selected.coerceIn(0, (hits.size - 1).coerceAtLeast(0)))
+    // 1.0.7: what the arrows stop at: the hits, and the "show all" line under a kind that shows its best only
+    val stops = results.stops
+    val chosenStop = stops.getOrNull(selected.coerceIn(0, (stops.size - 1).coerceAtLeast(0)))
+    val chosen = (chosenStop as? PaletteRow.Hit)?.hit
     val field = remember { FocusRequester() }
     val list = rememberLazyListState()
     LaunchedEffect(query, scope) { selected = 0 }
     // the selected row stays in view; rows count the group headers too
     LaunchedEffect(selected, results) {
-        if (hits.isEmpty()) return@LaunchedEffect
-        var row = 0
-        var seen = 0
-        for (group in results.groups) {
-            row++
-            if (selected < seen + group.hits.size) {
-                row += selected - seen
-                break
-            }
-            seen += group.hits.size
-            row += group.hits.size
-        }
+        if (stops.isEmpty()) return@LaunchedEffect
+        val row = results.rowOfStop[selected.coerceIn(0, stops.size - 1)]
         val visible = list.layoutInfo.visibleItemsInfo
         if (visible.isEmpty()) return@LaunchedEffect
         val first = visible.first().index
@@ -149,6 +148,16 @@ fun PaletteSurface(
     val run = { hit: PaletteHit ->
         onDismiss()
         onRun(hit.item)
+    }
+    // Enter: the selected hit runs; "show all" narrows the search to its kind, which lists every one
+    val enter: () -> Unit = {
+        when (chosenStop) {
+            is PaletteRow.Hit -> run(chosenStop.hit)
+            is PaletteRow.More -> {
+                scope = chosenStop.group.kind
+            }
+            else -> Unit
+        }
     }
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(12.dp))
     BoxWithConstraints(
@@ -186,7 +195,7 @@ fun PaletteSurface(
                         textStyle = NagTheme.type.title.copy(color = colors.text),
                         cursorBrush = SolidColor(colors.accent),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                        keyboardActions = KeyboardActions(onGo = { chosen?.let(run) }),
+                        keyboardActions = KeyboardActions(onGo = { enter() }),
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(field)
@@ -195,11 +204,11 @@ fun PaletteSurface(
                                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                                 when (event.key) {
                                     Key.DirectionDown -> {
-                                        if (hits.isNotEmpty()) selected = (selected + 1).mod(hits.size)
+                                        if (stops.isNotEmpty()) selected = (selected + 1).mod(stops.size)
                                         true
                                     }
                                     Key.DirectionUp -> {
-                                        if (hits.isNotEmpty()) selected = (selected - 1).mod(hits.size)
+                                        if (stops.isNotEmpty()) selected = (selected - 1).mod(stops.size)
                                         true
                                     }
                                     Key.Enter, Key.NumPadEnter -> {
@@ -208,7 +217,7 @@ fun PaletteSurface(
                                             onDismiss()
                                             all(parsePaletteQuery(query, null).first)
                                         } else {
-                                            chosen?.let(run)
+                                            enter()
                                         }
                                         true
                                     }
@@ -256,19 +265,34 @@ fun PaletteSurface(
                     modifier = Modifier.weight(1f).heightIn(min = 120.dp).testTag("palette-list"),
                     contentPadding = PaddingValues(vertical = 6.dp),
                 ) {
-                    var index = 0
-                    results.groups.forEach { group ->
-                        val first = index
-                        item(key = "header-${group.kind}") { GroupHeader(group) }
-                        group.hits.forEachIndexed { i, hit ->
-                            val at = first + i
-                            item(key = "${group.kind}-${hit.item.id}") {
-                                HitRow(hit, selected = at == selected, onHover = { selected = at }, onClick = { run(hit) })
+                    // 1.0.7: by count, not a call for each hit: the library's search can find thousands
+                    val rows = results.rows
+                    items(
+                        count = rows.size,
+                        key = { rows[it].key },
+                        contentType = { at ->
+                            when (rows[at]) {
+                                is PaletteRow.Header -> 0
+                                is PaletteRow.Hit -> 1
+                                is PaletteRow.More -> 2
                             }
+                        },
+                    ) { at ->
+                        when (val row = rows[at]) {
+                            is PaletteRow.Header -> GroupHeader(row.group)
+                            is PaletteRow.Hit -> HitRow(row.hit, selected = row.stop == selected, onHover = { selected = row.stop }, onClick = { run(row.hit) })
+                            is PaletteRow.More -> MoreRow(row.group, selected = row.stop == selected, onHover = { selected = row.stop }, onClick = { scope = row.group.kind })
                         }
-                        index += group.hits.size
                     }
-                    if (hits.isEmpty()) {
+                    // 1.0.7: while the library is read for the first time its media are not here yet: said, where they would be listed
+                    val typed = parsePaletteQuery(query, scope).first.isNotEmpty()
+                    val awaited = reading && (results.scope == PaletteKind.Media || (results.scope == null && typed))
+                    if (awaited) {
+                        item(key = "reading") {
+                            Text(stringResource(R.string.nag_palette_reading), style = NagTheme.type.body, color = colors.textTertiary,
+                                modifier = Modifier.padding(16.dp))
+                        }
+                    } else if (stops.isEmpty()) {
                         item(key = "none") {
                             Text(stringResource(R.string.nag_palette_nothing), style = NagTheme.type.body, color = colors.textTertiary,
                                 modifier = Modifier.padding(16.dp))
@@ -349,6 +373,40 @@ private fun HitRow(hit: PaletteHit, selected: Boolean, onHover: () -> Unit, onCl
             Spacer(Modifier.width(8.dp))
             KeyCap(it)
         }
+    }
+}
+
+/**
+ * 1.0.7: under a kind that shows its best only: how many it has. A click (or Enter, the arrows stop at it)
+ * narrows the search to the kind, which lists every one of them.
+ */
+@Composable
+private fun MoreRow(group: PaletteGroup, selected: Boolean, onHover: () -> Unit, onClick: () -> Unit) {
+    val colors = NagTheme.colors
+    val dimens = NagTheme.dimens
+    val hover = remember { MutableInteractionSource() }
+    val hovered by hover.collectIsHoveredAsState()
+    LaunchedEffect(hovered) { if (hovered) onHover() }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp)
+            .heightIn(min = dimens.rowHeight.coerceAtLeast(dimens.minTarget))
+            .background(animateStateColor(if (selected) colors.selection else colors.selection.copy(alpha = 0f), "moreRow"), RoundedCornerShape(dimens.radiusControl))
+            .hoverable(hover)
+            .pointerHoverIcon(PointerIcon.Hand)
+            // as the hits: the field moves through the rows, rows take no focus
+            .focusProperties { canFocus = false }
+            .ignoreSecondaryButtons()
+            .clickable(interactionSource = hover, indication = null, onClick = onClick)
+            .testTag("palette-more")
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // under the hits' labels
+        Spacer(Modifier.width(dimens.iconLarge + 10.dp))
+        Text(stringResource(R.string.nag_palette_show_all, group.total), style = NagTheme.type.body,
+            color = if (selected) colors.onSelection else colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

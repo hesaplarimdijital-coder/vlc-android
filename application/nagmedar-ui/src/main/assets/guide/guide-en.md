@@ -211,7 +211,7 @@ Which parts (music, playlists, search), file and network browsers, history, play
 In a wide window (DeX, an external display) Nağmedar works like a desktop app: a menu bar on top, a sidebar on the left, the player bar at the bottom.
 
 - **Menu bar:** the Media, Playback, Audio, Tools, View and Help menus, each item with its keys beside it. Pressing Alt alone, or F10, hands the keyboard to the menu bar. The Help menu has this guide and the shortcut card.
-- **Command palette** ({key:CommandPalette}): commands, screens, appearance settings and the library's tracks are searched in one box.
+- **Command palette** ({key:CommandPalette}): commands, screens, appearance settings and the library's artists, albums and tracks are searched in one box. A track is found by its title, its artist or its album; everything in the library that matches is listed.
 - **Mouse:** a right click (or the Menu key) opens context menus; Ctrl or Shift with a click selects several items; dragging on an empty area selects with a rubber band. The mouse's back and forward buttons move between screens.
 - **Drag and drop:** dropping a file from outside plays it, dropping media on the player bar adds it to the queue. To drag tracks out as files, hold the mouse button (or the pen) on a row for about half a second, then move; a quick press and move starts no drag.
 - **Windows:** {key:ToggleSidebar} collapses the sidebar, {key:ToggleInspector} hides or shows Music's inspector, {key:OpenInNewWindow} opens the same screen in a new window. The window's place and size are remembered.

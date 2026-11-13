@@ -724,6 +724,9 @@
     <string name="nag_palette_shortcut">Kısayol</string>
     <string name="nag_palette_setting">%1$s: %2$s</string>
     <string name="nag_palette_track">Parça</string>
+    <!-- 1.0.7: a kind that shows its best only; the library still being read -->
+    <string name="nag_palette_show_all">%1$d sonucun hepsini göster</string>
+    <string name="nag_palette_reading">Kütüphane okunuyor…</string>
     <plurals name="nag_palette_count">
         <item quantity="one">%d sonuç</item>
         <item quantity="other">%d sonuç</item>
