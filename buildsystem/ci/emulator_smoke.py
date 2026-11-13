@@ -3639,26 +3639,59 @@ class Smoke:
                 rows.append((a.text.strip(), under[0].text.strip(), a))
         return rows
 
-    def palette_all_rows(self, title):
-        """Every row of the palette's list for what is typed: read, then the selection moved down (the list follows it) and
-        read again, by fewer rows each time than the reading before showed, so none passes unread; until two readings in
-        a row bring no new row (the selection came round to the top). ([(label, detail)] in the order first seen, the
-        last nodes read)."""
-        seen, order, idle = set(), [], 0
-        nodes = self.step(title, wait=1.0)
-        for _ in range(120):
-            rows = self.palette_rows(nodes)
-            new = [(label, detail) for label, detail, _ in rows if (label, detail) not in seen]
-            seen.update(new)
-            order.extend(new)
-            # a reading that failed (no tree) is no reading: once more
-            idle = 0 if new or not nodes else idle + 1
-            if idle >= 2 or self.over_time():
-                break
-            if nodes:
-                # the selected row is kept at the list's foot: two rows fewer than were read whole, and no row is skipped
-                self.sh("input keyevent " + " ".join(["20"] * max(1, min(8, len(rows) - 2))))
+    def palette_read(self):
+        """The palette's rows on screen now, [(label, detail)]; the screen read again when a reading has no tree. (rows, nodes)."""
+        nodes = []
+        for _ in range(3):
             nodes = self.nodes(self.settle(0.4))
+            if nodes:
+                break
+        return [(label, detail) for label, detail, _ in self.palette_rows(nodes)], nodes
+
+    def palette_all_rows(self, title):
+        """Every row of the palette's list for what is typed, [(label, detail)] in the order first seen, and the last
+        nodes read. The list shows what fits; the selection moves through it by the arrows and the list follows it.
+        Read at its top; then at its end (Up from the first row goes round to the last); when the top's first row is
+        still in sight there, everything is. Else from the top again, the selection moved down by fewer rows than a
+        reading shows, each reading sharing a row with the one before (when one does not, the step is taken back and
+        halved: no row passes unread), until a reading shares a row with the end's."""
+        nodes = self.step(title, wait=1.0)
+        top = [(label, detail) for label, detail, _ in self.palette_rows(nodes)]
+        if not top:
+            return [], nodes
+        order = list(top)
+
+        def add(rows):
+            order.extend(r for r in rows if r not in order)
+
+        self.key(19, record=False)  # Up: round to the last row
+        end, nodes = self.palette_read()
+        add(end)
+        if top[0] in end:
+            self.key(20, record=False)
+            return order, nodes
+        self.key(20, record=False)  # Down: round to the first row again
+        before, nodes = self.palette_read()
+        add(before)
+        step = max(1, min(8, len(before) - 2))
+        for _ in range(400):
+            if set(before) & set(end) or self.over_time():
+                break
+            self.sh("input keyevent " + " ".join(["20"] * step))
+            rows, nodes = self.palette_read()
+            if rows and not set(rows) & set(before) and step > 1:
+                # rows passed between the two readings (the titles of other kinds take room too): back, and by half
+                self.sh("input keyevent " + " ".join(["19"] * step))
+                step = max(1, step // 2)
+                before, nodes = self.palette_read()
+                add(before)
+                continue
+            add(rows)
+            if rows:
+                before = rows
+                step = max(1, min(8, len(rows) - 2, step * 2))
+        else:
+            self.warnings.append("[%s] %s: the palette's list was not read to its end (%d rows read)" % (self.cur_pass, title, len(order)))
         return order, nodes
 
     def search_kinds(self):
