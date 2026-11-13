@@ -1,0 +1,9 @@
+368 s, 30 steps, pass search, 0 crashes
+23 search The palette closed (Escape again) ok
+24 search Ctrl+K: an artist, by the name ok
+25 search Palette: nagmedar artist 3 ok
+26 search The palette closed ok
+27 search The palette closed (Escape again) ok
+28 search Ctrl+K: an album, by its name ok
+29 search Palette: profile album 7 ok
+30 search The palette closed ok
