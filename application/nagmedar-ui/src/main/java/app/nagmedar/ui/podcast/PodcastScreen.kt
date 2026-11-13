@@ -73,6 +73,7 @@ import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.PullToRefresh
 import app.nagmedar.ui.components.NoResultsState
 import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
@@ -108,6 +109,7 @@ import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
+import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.tools.AppScope
 
@@ -141,6 +143,8 @@ fun PodcastsScreen(undo: UndoBarState?) {
                 progress = PodcastCenter.tracker.progress,
                 settings = { PodcastCenter.settingsStore(app).read() },
                 onSubscribed = { PodcastCenter.schedule(app) },
+                // 1.0.8: a pull on the subscriptions runs the periodic job's round now (its news told in a notice)
+                refreshAll = { PodcastCenter.refresher(app).run() },
             ),
         )
     }
@@ -200,7 +204,7 @@ fun PodcastsContent(
             val shown = page ?: retained
             // 1.0.8: the panes' own choice, which needs the room of both as well as a wide window
             if (LocalDetailBeside.current && episodeOpen && shown != null) {
-                PodcastPageView(shown, fullScreen = false, actions = actions, downloads = model.downloads, selected = model.episodeId)
+                PodcastPageView(shown, fullScreen = false, actions = actions, downloads = model.downloads, selected = model.episodeId, refreshing = model.refreshingOf(shown))
             } else {
                 PodcastList(model, actions, focus)
             }
@@ -215,7 +219,7 @@ fun PodcastsContent(
                 DetailTransition(
                     detail = model.episodeId,
                     onBack = actions.onCloseEpisode,
-                    list = { shownPage?.let { PodcastPageView(it, fullScreen = true, actions = actions, downloads = model.downloads) } },
+                    list = { shownPage?.let { PodcastPageView(it, fullScreen = true, actions = actions, downloads = model.downloads, refreshing = model.refreshingOf(it)) } },
                 ) { _ ->
                     // closing, the page that was open stays until it has gone
                     EpisodeDetailPane(if (model.episodeId == null) model.copy(episode = held.ui) else model, fullScreen = true, actions, listening)
@@ -223,7 +227,7 @@ fun PodcastsContent(
             } else if (episodeOpen) {
                 EpisodeDetailPane(model, fullScreen = false, actions, listening)
             } else {
-                shownPage?.let { PodcastPageView(it, fullScreen = false, actions = actions, downloads = model.downloads) }
+                shownPage?.let { PodcastPageView(it, fullScreen = false, actions = actions, downloads = model.downloads, refreshing = model.refreshingOf(it)) }
             }
         },
         widthKey = if (episodeOpen) "podcast-episode" else "podcast-page",
@@ -252,6 +256,7 @@ private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focu
     var grid by rememberSaveable { mutableStateOf(wide) }
     val showingSubscriptions = model.search is SearchUi.Idle
     val canToggleView = showingSubscriptions && !subscriptions.isNullOrEmpty()
+    val touch = NagTheme.inputMode == InputMode.Touch
     val add: @Composable () -> Unit = {
         if (wide) {
             NagButton(stringResource(R.string.nag_pod_add), actions.onAdd, icon = NagIcons.Plus, modifier = Modifier.testTag("podcast-add"))
@@ -297,7 +302,10 @@ private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focu
         }
         SearchRow(model.query, model.search, actions, focus, trailing = besideSearch.takeIf { phone })
         when (val search = model.search) {
-            SearchUi.Idle -> Subscriptions(subscriptions, grid, actions, focus)
+            // 1.0.8 (Desktop Kit 2.8.0): a finger pulling the subscriptions down reads every one again
+            SearchUi.Idle -> PullToRefresh(model.refreshing, actions.onRefresh, enabled = touch && !subscriptions.isNullOrEmpty()) {
+                Subscriptions(subscriptions, grid, actions, focus)
+            }
             SearchUi.Searching -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                 LoadingState(stringResource(R.string.nag_pod_searching), Modifier.padding(top = NagTheme.dimens.gapL), posters = 0)
             }

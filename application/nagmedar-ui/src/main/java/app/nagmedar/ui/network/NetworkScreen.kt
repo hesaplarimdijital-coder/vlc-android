@@ -72,6 +72,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
+import app.nagmedar.ui.components.PullToRefresh
 import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.StateAction
@@ -616,7 +617,8 @@ private fun FolderPane(
                         )
                     }
                 } else {
-                    EntryTable(view, model, actions)
+                    // 1.0.8 (Desktop Kit 2.8.0): a finger pulling the folder down reads it again (F5 and the button besides)
+                    PullToRefresh(refreshing = false, onRefresh = model::refresh) { EntryTable(view, model, actions) }
                 }
             }
         }

@@ -55,6 +55,8 @@ class EpisodeServices(
     val settings: () -> PodcastSettings = { PodcastSettings() },
     /** Heard when the subscriptions change from none to some or back: the refresh job is scheduled or cancelled. */
     val onSubscribed: (Boolean) -> Unit = {},
+    /** 1.0.8: a round over every subscription, the periodic job's ([PodcastRefresher]), for a pull on the list; none without it. */
+    val refreshAll: (suspend () -> RefreshReport)? = null,
 )
 
 /**
@@ -105,6 +107,10 @@ class PodcastController(
     private var episodeJob: Job? = null
     private var extrasJob: Job? = null
 
+    /** 1.0.8 (Desktop Kit 2.8.0's pull to refresh): every subscription, or one show, being read again on a pull. */
+    private var refreshingAll by mutableStateOf(false)
+    private var refreshingShow by mutableStateOf<Long?>(null)
+
     private var searchJob: Job? = null
     private var pageJob: Job? = null
 
@@ -137,7 +143,10 @@ class PodcastController(
                 null
             }
             val shown = settingsFeedId?.let { id -> list?.firstOrNull { it.feed.id == id }?.feed }
-            return PodcastScreenModel(list, query, found, subscribing.toMap(), page, add, importing, openEpisodeId, detail, downloadProgress, shown)
+            return PodcastScreenModel(
+                list, query, found, subscribing.toMap(), page, add, importing, openEpisodeId, detail, downloadProgress, shown,
+                refreshing = refreshingAll, refreshingShow = refreshingShow,
+            )
         }
 
     /** The place of the playing episode, read apart from [model] so that only the pages that draw it follow it. */
@@ -616,6 +625,55 @@ class PodcastController(
         }
     }
 
+    // ------------------------------------------------------------ refresh
+
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0): every subscription read again now, as the periodic job reads them (the shows that
+     * download by themselves get their newest queued); a notice says what came of it. Runs on [background]: leaving the
+     * screen does not stop it.
+     */
+    fun refreshAll() {
+        val round = services.refreshAll ?: return
+        if (refreshingAll) return
+        refreshingAll = true
+        background.launch {
+            try {
+                val report = round()
+                Notices.show(
+                    context,
+                    when {
+                        report.allFailed -> res.getString(R.string.nag_pod_refresh_failed)
+                        report.news > 0 -> res.getQuantityString(R.plurals.nag_pod_refresh_news, report.news, report.news)
+                        else -> res.getString(R.string.nag_pod_refresh_none)
+                    },
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Notices.show(context, R.string.nag_pod_refresh_failed)
+            } finally {
+                refreshingAll = false
+            }
+        }
+    }
+
+    /** 1.0.8: the open show read again now; only a failure is told (the new episodes show in its list). */
+    fun refreshShow(feedId: Long) {
+        if (refreshingShow != null) return
+        refreshingShow = feedId
+        scope.launch {
+            try {
+                if (repository.refresh(feedId) is RefreshResult.Failed) Notices.show(context, R.string.nag_pod_refresh_show_failed)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Notices.show(context, R.string.nag_pod_refresh_show_failed)
+            } finally {
+                refreshingShow = null
+            }
+        }
+    }
+
     /** What the screen calls back to. */
     fun actions(onCopy: (String) -> Unit, onOpenLink: (String) -> Unit, onImport: () -> Unit, onExport: () -> Unit) = PodcastActions(
         onQueryChange = ::onQueryChange,
@@ -655,6 +713,8 @@ class PodcastController(
         onSetKeepLatest = ::setKeepLatest,
         onSetPlayback = ::setPlayback,
         onSetVolumeBoost = ::setVolumeBoost,
+        onRefresh = ::refreshAll,
+        onRefreshShow = ::refreshShow,
     )
 
     private companion object {

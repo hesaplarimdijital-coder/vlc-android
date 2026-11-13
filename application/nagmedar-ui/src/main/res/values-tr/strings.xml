@@ -1835,6 +1835,15 @@
     <string name="nag_pod_set_keep_all">Tümü</string>
     <string name="nag_pod_settings">Podcastler</string>
     <string name="nag_pod_settings_hint">Aboneliklerin yenilenmesi, bildirimleri ve indirmeleri, bölüm sayfasının atlama düğmeleri.</string>
+    <!-- 1.0.8 (Desktop Kit 2.8.0): pull to refresh: the disc read out while it turns, and what a pull's round came to -->
+    <string name="nag_refreshing">Yenileniyor</string>
+    <plurals name="nag_pod_refresh_news">
+        <item quantity="one">%d yeni bölüm</item>
+        <item quantity="other">%d yeni bölüm</item>
+    </plurals>
+    <string name="nag_pod_refresh_none">Yeni bölüm yok</string>
+    <string name="nag_pod_refresh_failed">Akışlar okunamadı. Bağlantıyı denetleyin.</string>
+    <string name="nag_pod_refresh_show_failed">Programın akışı okunamadı</string>
     <string name="nag_pod_settings_refresh">Yeni bölümlere bak</string>
     <string name="nag_pod_settings_refresh_hint">Arka planda, ağ varken ve pil azalmamışken.</string>
     <string name="nag_pod_settings_wifi">Yalnızca Wi-Fi\'da</string>

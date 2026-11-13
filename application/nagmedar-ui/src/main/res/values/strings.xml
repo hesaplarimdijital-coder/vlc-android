@@ -1841,6 +1841,15 @@
     <string name="nag_pod_set_keep_all">All</string>
     <string name="nag_pod_settings">Podcasts</string>
     <string name="nag_pod_settings_hint">Refreshing the subscriptions, their notifications and downloads, and the skip buttons of the episode page.</string>
+    <!-- 1.0.8 (Desktop Kit 2.8.0): pull to refresh: the disc read out while it turns, and what a pull's round came to -->
+    <string name="nag_refreshing">Refreshing</string>
+    <plurals name="nag_pod_refresh_news">
+        <item quantity="one">%d new episode</item>
+        <item quantity="other">%d new episodes</item>
+    </plurals>
+    <string name="nag_pod_refresh_none">No new episodes</string>
+    <string name="nag_pod_refresh_failed">The feeds could not be read. Check the connection.</string>
+    <string name="nag_pod_refresh_show_failed">The show\'s feed could not be read</string>
     <string name="nag_pod_settings_refresh">Look for new episodes</string>
     <string name="nag_pod_settings_refresh_hint">In the background, with a network and a battery that is not low.</string>
     <string name="nag_pod_settings_wifi">Only on Wi-Fi</string>

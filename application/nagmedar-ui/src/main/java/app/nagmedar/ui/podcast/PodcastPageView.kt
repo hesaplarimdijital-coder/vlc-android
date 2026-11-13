@@ -44,6 +44,7 @@ import app.nagmedar.data.PodcastEpisode
 import app.nagmedar.data.PodcastFeed
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.components.ListAppear
 import app.nagmedar.ui.components.LoadingState
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MoreButton
@@ -51,6 +52,7 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIconButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagPlayButton
+import app.nagmedar.ui.components.PullToRefresh
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.ToneBadge
 import app.nagmedar.ui.components.collectState
@@ -92,6 +94,8 @@ internal fun PodcastPageView(
     actions: PodcastActions,
     downloads: Map<Long, DownloadProgress> = emptyMap(),
     selected: Long? = null,
+    /** 1.0.8: the show being read again (a pull on its page, or every subscription's). */
+    refreshing: Boolean = false,
 ) {
     val res = LocalContext.current.resources
     val dimens = NagTheme.dimens
@@ -99,6 +103,22 @@ internal fun PodcastPageView(
     val dates = remember(res.configuration) { DateFormat.getDateInstance(DateFormat.MEDIUM, res.locale()) }
     // 1.0.3: on a phone a show's episodes arrive in turn (again once they are read after the skeleton)
     val appear = rememberListAppear(feed.id, page.episodes == null)
+    // 1.0.8 (Desktop Kit 2.8.0): a finger pulling the page down reads the show again
+    PullToRefresh(refreshing, { actions.onRefreshShow(feed.id) }) { PageList(page, fullScreen, actions, downloads, selected, appear, dates) }
+}
+
+@Composable
+private fun PageList(
+    page: PodcastPage,
+    fullScreen: Boolean,
+    actions: PodcastActions,
+    downloads: Map<Long, DownloadProgress>,
+    selected: Long?,
+    appear: ListAppear,
+    dates: DateFormat,
+) {
+    val dimens = NagTheme.dimens
+    val feed = page.summary.feed
     LazyColumn(
         Modifier.fillMaxSize().background(NagTheme.colors.background).testTag("podcast-page"),
         contentPadding = PaddingValues(bottom = dimens.gapL) + LocalShellBottomPadding.current,

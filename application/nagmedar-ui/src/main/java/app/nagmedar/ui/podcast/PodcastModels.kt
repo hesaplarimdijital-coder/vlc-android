@@ -129,9 +129,16 @@ data class PodcastScreenModel(
     val downloads: Map<Long, DownloadProgress> = emptyMap(),
     /** S-1103, S-1104: the show whose settings window is open. */
     val showSettings: PodcastFeed? = null,
+    /** 1.0.8: every subscription being read again on a pull ([PodcastActions.onRefresh]). */
+    val refreshing: Boolean = false,
+    /** 1.0.8: the show being read again on a pull on its page ([PodcastActions.onRefreshShow]). */
+    val refreshingShow: Long? = null,
 ) {
     /** The feeds subscribed to, by [FeedUrl.key]: each under the address it is stored at and the ones it was reached by. */
     val subscribedKeys: Set<String> = subscriptions.orEmpty().flatMapTo(HashSet()) { it.feed.addressKeys() }
+
+    /** 1.0.8: whether [page]'s show is being read again: on its own pull, or with every subscription. */
+    fun refreshingOf(page: PodcastPage): Boolean = refreshing || refreshingShow == page.summary.feed.id
 }
 
 /** What the screen asks of its owner; every one does nothing by default, so that previews and tests give only what they look at. */
@@ -182,4 +189,8 @@ class PodcastActions(
     val onSetPlayback: (Long, Float, Int, Int) -> Unit = { _, _, _, _ -> },
     /** S-1104: the show's volume boost ([VolumeBoost]). */
     val onSetVolumeBoost: (Long, Int) -> Unit = { _, _ -> },
+    /** 1.0.8 (Desktop Kit 2.8.0): a finger pulled the subscriptions down: every one read again now. */
+    val onRefresh: () -> Unit = {},
+    /** 1.0.8: a finger pulled a show's page down: the show read again now. */
+    val onRefreshShow: (Long) -> Unit = {},
 )
