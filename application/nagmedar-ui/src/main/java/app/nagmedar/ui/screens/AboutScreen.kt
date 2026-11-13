@@ -346,7 +346,7 @@ internal fun FilterField(
             .fillMaxWidth()
             .heightIn(min = dimens.minTarget.coerceAtLeast(40.dp))
             .background(colors.surface, shape)
-            .border(1.dp, colors.borderStrong, shape)
+            .border(1.dp, colors.controlBorder, shape)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

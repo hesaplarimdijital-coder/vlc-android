@@ -409,7 +409,7 @@ private fun RadioSearchField(text: String, onChange: (String) -> Unit, onSearch:
             .fillMaxWidth()
             .heightIn(min = dimens.minTarget.coerceAtLeast(44.dp))
             .background(colors.surface, shape)
-            .border(1.dp, colors.borderStrong, shape)
+            .border(1.dp, colors.controlBorder, shape)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -326,7 +326,7 @@ private fun StreamAddress(url: String, onChange: (String) -> Unit) {
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.borderStrong, RoundedCornerShape(8.dp))
+                .border(1.dp, colors.controlBorder, RoundedCornerShape(8.dp))
                 .padding(horizontal = 12.dp, vertical = 10.dp)
                 .semantics { contentDescription = label }
                 .testTag("alarm-stream")

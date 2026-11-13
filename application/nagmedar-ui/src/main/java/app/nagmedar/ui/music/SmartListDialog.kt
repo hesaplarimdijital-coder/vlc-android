@@ -314,7 +314,7 @@ private fun SmallField(
         modifier = modifier
             .then(if (width != null) Modifier.width(width) else Modifier.fillMaxWidth())
             .heightIn(min = dimens.minTarget.coerceAtLeast(dimens.controlHeight))
-            .border(1.dp, colors.borderStrong, RoundedCornerShape(dimens.radiusControl))
+            .border(1.dp, colors.controlBorder, RoundedCornerShape(dimens.radiusControl))
             .padding(horizontal = 10.dp, vertical = 8.dp)
             .semantics { contentDescription = label }
             .tabMovesFocus(focusManager),
