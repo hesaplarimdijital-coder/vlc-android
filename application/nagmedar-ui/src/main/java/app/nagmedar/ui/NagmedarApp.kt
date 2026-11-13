@@ -76,6 +76,7 @@ import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.input.ShortcutScope
 import app.nagmedar.ui.input.menuBarSpecs
+import app.nagmedar.ui.input.noteFocusKeys
 import app.nagmedar.ui.input.rememberInputModeState
 import app.nagmedar.ui.input.trackInputMode
 import app.nagmedar.ui.library.LibraryAccess
@@ -225,7 +226,9 @@ fun NagmedarApp(
                 .background(NagTheme.colors.background)
                 // the test tags as resource ids, for UI Automator and the macrobenchmarks (S-1404)
                 .semantics { testTagsAsResourceId = true }
-                .trackInputMode(inputMode),
+                .trackInputMode(inputMode)
+                // 1.0.8 (Desktop Kit 2.8.0): which key moves the focus: a table, a cover grid and a tab strip are one Tab stop
+                .noteFocusKeys(),
         ) {
             if (prefs.firstRunDone) {
                 // Ctrl and Shift held with a click select several items (S-405)

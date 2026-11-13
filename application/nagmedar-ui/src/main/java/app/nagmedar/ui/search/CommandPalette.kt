@@ -83,6 +83,7 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.components.animateStateColor
 import app.nagmedar.ui.components.ignoreSecondaryButtons
+import app.nagmedar.ui.components.verticalScrollbar
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -273,7 +274,8 @@ fun PaletteSurface(
             Row(Modifier.weight(1f, fill = false)) {
                 LazyColumn(
                     state = list,
-                    modifier = Modifier.weight(1f).heightIn(min = 120.dp).testTag("palette-list")
+                    // 1.0.8 (Desktop Kit 2.8.0): a scrollbar for the mouse
+                    modifier = Modifier.weight(1f).heightIn(min = 120.dp).testTag("palette-list").verticalScrollbar(list)
                         // 1.0.7: the line under the pointer is selected here, for the whole list, by where the pointer is in it
                         // (until then each line selected itself when the pointer came over it, also when the list brought it there)
                         .pointerInput(Unit) {

@@ -59,14 +59,14 @@ class DragStartTest {
     private var started = 0
     private var clicks = 0
 
-    private fun source() {
+    private fun source(atOnce: Boolean = false) {
         compose.setContent {
             NagmedarTheme(inputMode = InputMode.Pointer) {
                 Box(
                     Modifier
                         .size(200.dp)
                         .testTag("row")
-                        .pointerInput(Unit) { awaitEachGesture { if (awaitHeldDrag() != null) started++ } }
+                        .pointerInput(Unit) { awaitEachGesture { if (awaitHeldDrag(atOnce = { atOnce }) != null) started++ } }
                         .clickable { clicks++ },
                 )
             }
@@ -115,6 +115,44 @@ class DragStartTest {
         compose.mainClock.advanceTimeBy(100)
         compose.waitForIdle()
         assertEquals("the drag is no click", 0, clicks)
+    }
+
+    /** 1.0.8 (Desktop Kit 2.8.0): a selected row drags at once with a mouse; a click is still a click. */
+    @Test
+    fun aMouseOnARowThatDragsAtOnceNeedsNoRest() {
+        source(atOnce = true)
+        row().performMouseInput {
+            moveTo(center)
+            press()
+            moveBy(Offset(30f, 0f))
+        }
+        compose.waitForIdle()
+        assertEquals(1, started)
+        row().performMouseInput { release() }
+        compose.mainClock.advanceTimeBy(100)
+        compose.waitForIdle()
+        assertEquals("the drag is no click", 0, clicks)
+        row().performMouseInput {
+            press()
+            release()
+        }
+        compose.mainClock.advanceTimeBy(100)
+        compose.waitForIdle()
+        assertEquals("a click without a move is a click", 1, clicks)
+        assertEquals(1, started)
+    }
+
+    /** 1.0.8: a finger keeps its scrolling and its menu where a mouse drags at once. */
+    @Test
+    fun aFingerStillStartsNoDragWhereAMouseWouldAtOnce() {
+        source(atOnce = true)
+        row().performTouchInput {
+            down(center)
+            moveBy(Offset(40f, 0f))
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(0, started)
     }
 
     @Test

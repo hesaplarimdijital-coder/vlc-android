@@ -11,7 +11,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -121,3 +128,43 @@ private fun isPrecisePointer(device: InputDevice?): Boolean {
     return (sources and InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE ||
         (sources and InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD
 }
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0, the design audit's high finding 2): whether the keyboard's focus is being moved with Tab right
+ * now: the window's root notes every key that goes down ([noteFocusKeys]). A collection that is one Tab stop
+ * ([app.nagmedar.ui.components.DenseTable], a cover grid, a tab strip) lets Tab reach only its current item and leaves
+ * the others to the arrow keys; a focus asked for in any other way (a click, the arrow keys, the app) reaches every one.
+ */
+internal object TabNavigation {
+    var active = false
+        private set
+
+    fun see(event: KeyEvent) {
+        val tab = event.key == Key.Tab
+        when (event.type) {
+            KeyEventType.KeyDown -> active = tab
+            // the focus has moved by the time Tab comes up: a later request for the focus (the app's, the arrows') is not
+            // held to the one stop
+            KeyEventType.KeyUp -> if (tab) active = false
+        }
+    }
+
+    /** Forgets the last key (a press; tests run one after another in one process). */
+    fun reset() {
+        active = false
+    }
+}
+
+/** 1.0.8: on the window's root: notes which key moves the focus ([TabNavigation]); a press forgets it. */
+fun Modifier.noteFocusKeys(): Modifier = this
+    .onPreviewKeyEvent {
+        TabNavigation.see(it)
+        false
+    }
+    .pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                if (awaitPointerEvent(PointerEventPass.Initial).type == PointerEventType.Press) TabNavigation.reset()
+            }
+        }
+    }

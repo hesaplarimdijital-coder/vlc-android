@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -349,7 +351,6 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusControl)
-    val box = RoundedCornerShape(3.dp)
     val haptics = rememberNagHaptics()
     Row(
         modifier = modifier
@@ -372,16 +373,53 @@ fun NagCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> Unit, label: Str
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            Modifier
-                .size(16.dp)
-                .background(animateStateColor(if (checked) colors.accent else colors.accent.copy(alpha = 0f), "checkFill"), box)
-                .border(1.5.dp, animateStateColor(if (checked) colors.accent else colors.textTertiary, "checkBorder"), box),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (checked) Icon(NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(12.dp))
-        }
+        CheckBox(on = checked)
         Spacer(Modifier.width(8.dp))
         Text(label, style = NagTheme.type.label, color = if (enabled) colors.text else colors.textTertiary, maxLines = 2)
+    }
+}
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0): a check box without a label: on, off or [ToggleableState.Indeterminate] (a dash: some of
+ * the rows), a table's in a finger's select mode. A null [onClick] draws it without handling clicks (the row around it
+ * toggles it); with one it is a finger's target of its own.
+ */
+@Composable
+fun NagCheckMark(state: ToggleableState, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
+    val dimens = NagTheme.dimens
+    val interaction = remember { MutableInteractionSource() }
+    val interactionState = interaction.collectState()
+    val halo = RoundedCornerShape(dimens.radiusControl)
+    Box(
+        modifier
+            .size(if (onClick != null) dimens.minTarget.coerceAtLeast(28.dp) else 24.dp)
+            .then(
+                if (onClick == null) Modifier else Modifier
+                    .focusRing(interactionState, halo)
+                    .background(stateBackground(interactionState), halo)
+                    .pointerHoverIcon(PointerIcon.Hand)
+                    .hoverable(interaction)
+                    .focusMemory()
+                    .triStateToggleable(state, interaction, indication = null, role = Role.Checkbox, onClick = onClick),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        CheckBox(on = state != ToggleableState.Off, dash = state == ToggleableState.Indeterminate)
+    }
+}
+
+/** The box of [NagCheckbox] and [NagCheckMark]: filled with the accent and ticked (or a dash) when on. */
+@Composable
+private fun CheckBox(on: Boolean, dash: Boolean = false) {
+    val colors = NagTheme.colors
+    val box = RoundedCornerShape(3.dp)
+    Box(
+        Modifier
+            .size(16.dp)
+            .background(animateStateColor(if (on) colors.accent else colors.accent.copy(alpha = 0f), "checkFill"), box)
+            .border(1.5.dp, animateStateColor(if (on) colors.accent else colors.textTertiary, "checkBorder"), box),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (on) Icon(if (dash) NagIcons.Minus else NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(12.dp))
     }
 }

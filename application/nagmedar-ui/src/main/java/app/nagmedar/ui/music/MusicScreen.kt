@@ -272,8 +272,11 @@ interface MusicActions {
     /** A track's context menu; [select] starts selecting by touch. */
     fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> = emptyList()
 
-    /** A track dragged out with the mouse, with [others] when it is among those selected (S-406). */
-    fun rowModifier(track: Track, others: () -> List<Track>): Modifier = Modifier
+    /**
+     * A track dragged out with the mouse, with [others] when it is among those selected (S-406). 1.0.8: where [atOnce]
+     * says so at the press (a selected row) a mouse drags without resting first.
+     */
+    fun rowModifier(track: Track, atOnce: () -> Boolean = { false }, others: () -> List<Track>): Modifier = Modifier
 
     /** S-804: [tracks] to a playlist, chosen or made in a window; null where there is none. */
     val addToPlaylist: ((List<Track>) -> Unit)? get() = null
@@ -605,7 +608,7 @@ internal class ServiceMusicActions(
         return if (at > 0) entries.subList(0, at) + added + entries.subList(at, entries.size) else entries + added
     }
 
-    override fun rowModifier(track: Track, others: () -> List<Track>): Modifier =
+    override fun rowModifier(track: Track, atOnce: () -> Boolean, others: () -> List<Track>): Modifier =
         Modifier.onMiddleClick {
             queue(listOf(track))
             Notices.show(context, context.resources.getQuantityString(R.plurals.nag_drop_queued, 1, 1))
@@ -616,6 +619,7 @@ internal class ServiceMusicActions(
             },
             // S-808: a CUE sheet's track is dragged as its file
             files = { others().map { Uri.parse(CueUri.file(it.uri)) } },
+            atOnce = atOnce,
         )
 }
 
@@ -1161,11 +1165,13 @@ private fun TrackPane(
                 }
             },
             rowMenuLabel = stringResource(R.string.nag_more_actions),
+            // 1.0.8 (Desktop Kit 2.8.0): a mouse drags a selected row at once; from another row it draws a selection frame
             rowModifier = { track ->
-                actions.rowModifier(track) {
+                actions.rowModifier(track, atOnce = { track.uri in selection }) {
                     if (track.uri in selection && selection.count > 1) shown.filter { it.uri in selection } else listOf(track)
                 }
             },
+            selection = selection,
             // a title's menu: the columns shown, the one clicked moved (Desktop Kit 1.0)
             headerMenu = if (compact) null else ({ index -> columnMenu(state, labels, words, columns.getOrNull(index)) }),
             headerMenuLabel = columnsLabel,

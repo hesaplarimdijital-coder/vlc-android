@@ -59,8 +59,12 @@ import kotlin.math.roundToInt
  * starts nothing and a slow click stays a click. The drag carries a [DragCard] with the label and,
  * for several files, their number in the accent colour. Touch keeps its drags for scrolling and its
  * long press for the menu.
+ *
+ * 1.0.8 (Desktop Kit 2.8.0, the design audit's finding 8): where [atOnce] says so at the press (a selected row, a table
+ * without a selection frame) a mouse drags as soon as it moves, without the rest; a press on a row that is not selected
+ * draws the table's frame instead. A pen keeps the rest, so that it still scrolls the list it moves on.
  */
-fun Modifier.fileDragSource(label: () -> String, files: () -> List<Uri>): Modifier = composed {
+fun Modifier.fileDragSource(label: () -> String, files: () -> List<Uri>, atOnce: () -> Boolean = { false }): Modifier = composed {
     val view = LocalView.current
     val context = LocalContext.current
     val look = rememberUpdatedState(
@@ -68,9 +72,10 @@ fun Modifier.fileDragSource(label: () -> String, files: () -> List<Uri>): Modifi
     )
     val currentLabel = rememberUpdatedState(label)
     val currentFiles = rememberUpdatedState(files)
+    val currentAtOnce = rememberUpdatedState(atOnce)
     pointerInput(view) {
         awaitEachGesture {
-            awaitHeldDrag() ?: return@awaitEachGesture
+            awaitHeldDrag(atOnce = { currentAtOnce.value() }) ?: return@awaitEachGesture
             val uris = currentFiles.value().mapNotNull { shareable(context, it) }
             if (uris.isEmpty()) return@awaitEachGesture
             val text = currentLabel.value()
@@ -87,9 +92,13 @@ fun Modifier.fileDragSource(label: () -> String, files: () -> List<Uri>): Modifi
  * pen goes down, rests within the touch slop for the system's touch and hold delay, then moves past
  * it: that move is returned, consumed, so the list does not scroll by it. Null for a finger, another
  * button, a press let go or moved away before the delay (a click, a quick drag) or let go after it
- * (a slow click), and a press whose moves something in the row took (a playlist row's handle).
+ * (a slow click), and a press whose moves something in the row took (a playlist row's handle). 1.0.8: a mouse whose
+ * press [atOnce] lets through skips the rest; a press whose moves something around took (the scrollbar, a table's
+ * frame) is none.
  */
-internal suspend fun AwaitPointerEventScope.awaitHeldDrag(): PointerInputChange? {
+internal suspend fun AwaitPointerEventScope.awaitHeldDrag(atOnce: () -> Boolean = { false }): PointerInputChange? {
+    // the row's click takes the press itself (the main pass reaches it first): a press is no drag only once something
+    // takes its moves (1.0.8: the scrollbar, a table's frame)
     val down = awaitFirstDown(requireUnconsumed = false)
     if (down.type != PointerType.Mouse && down.type != PointerType.Stylus && down.type != PointerType.Eraser) return null
     val buttons = currentEvent.buttons
@@ -97,6 +106,17 @@ internal suspend fun AwaitPointerEventScope.awaitHeldDrag(): PointerInputChange?
     // a pen's button opens menus, as the mouse's second one does
     if (buttons.isSecondaryPressed) return null
     val slop = viewConfiguration.touchSlop
+    if (down.type == PointerType.Mouse && atOnce()) {
+        // 1.0.8 (Desktop Kit 2.8.0): a mouse without the rest: the drag starts as soon as it moves; let go first and it was a click
+        while (true) {
+            val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: return null
+            if (!change.pressed || change.isConsumed) return null
+            if ((change.position - down.position).getDistance() > slop) {
+                change.consume()
+                return change
+            }
+        }
+    }
     // still for the whole delay: null; let go, moved away or taken before it ends: true
     val ledEarly = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
         while (true) {

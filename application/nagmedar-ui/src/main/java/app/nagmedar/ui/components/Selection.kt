@@ -138,6 +138,25 @@ class MultiSelection {
         keys = base + touched
     }
 
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0): the rows a table's frame touches: alone, toggled in [base] (Ctrl: the selection there
+     * was) or added to it ([add], Shift); [anchor], the row the frame started on, is where a Shift+click range starts.
+     */
+    fun frame(touched: Set<Any>, base: Set<Any>, toggle: Boolean, add: Boolean, anchor: Any?) {
+        keys = when {
+            toggle -> (base - touched) + (touched - base)
+            add -> base + touched
+            else -> touched
+        }
+        this.anchor = anchor
+    }
+
+    /** 1.0.8: Esc while a frame is drawn: the selection there was before it. */
+    fun restore(keys: Set<Any>, anchor: Any?) {
+        this.keys = keys
+        this.anchor = anchor
+    }
+
     fun clear() {
         keys = emptySet()
         anchor = null

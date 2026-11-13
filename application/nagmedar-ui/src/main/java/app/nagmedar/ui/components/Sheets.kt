@@ -833,7 +833,9 @@ private fun SheetSurface(
                     Box(Modifier.padding(top = 4.dp).size(width = 36.dp, height = 4.dp).background(colors.borderStrong, RoundedCornerShape(2.dp)))
                 }
             }
-            Column(Modifier.verticalScroll(rememberScrollState()), content = content)
+            // 1.0.8 (Desktop Kit 2.8.0): a scrollbar for the mouse along a long sheet
+            val scroll = rememberScrollState()
+            Column(Modifier.verticalScrollbar(scroll).verticalScroll(scroll), content = content)
         }
     }
 }

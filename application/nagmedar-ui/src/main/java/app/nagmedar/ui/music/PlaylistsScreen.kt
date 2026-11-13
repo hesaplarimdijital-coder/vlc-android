@@ -717,6 +717,9 @@ private fun PlaylistTable(
         reorder = reorder,
         handleLabel = { line -> res.getString(R.string.nag_queue_handle, line.track.title) },
         selectedKeys = selection.keys,
+        selection = selection,
+        // 1.0.8 (Desktop Kit 2.8.0): Shift+↑ and Shift+↓ grow the selection, as in the library's table
+        onExtendSelection = if (compact) null else ({ line, delta -> selection.extend(line.key, keys, delta) }),
         // 1.0.3 (Desktop Kit 2.1): the press decides, not the layout: a finger's tap plays, a mouse's click selects
         onRowClick = { line, index ->
             when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
@@ -760,7 +763,8 @@ private fun PlaylistTable(
                         CustomAccessibilityAction(takeOut) { remove(setOf(line.key)); true },
                     )
                 }
-                .then(actions.rowModifier(line.track) { listOf(line.track) })
+                // 1.0.8 (Desktop Kit 2.8.0): a mouse drags a selected line at once; from another line it draws a selection frame
+                .then(actions.rowModifier(line.track, atOnce = { line.key in selection }) { listOf(line.track) })
         },
         // the last rows rest clear of the phone's bars (Desktop Kit 1.0)
         contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,

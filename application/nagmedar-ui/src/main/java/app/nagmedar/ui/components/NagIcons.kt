@@ -34,6 +34,8 @@ object NagIcons {
     val ChevronLeft: ImageVector by lazy { icon("ChevronLeft", stroke("m10 4-4 4 4 4"), mirrored = true) }
     val ChevronRight: ImageVector by lazy { icon("ChevronRight", stroke("m6 4 4 4-4 4"), mirrored = true) }
     val Check: ImageVector by lazy { icon("Check", stroke("m3.5 8.5 3 3 6-7")) }
+    /** 1.0.8: a check box's third state (some of the rows). */
+    val Minus: ImageVector by lazy { icon("Minus", stroke("M4 8h8")) }
     val Play: ImageVector by lazy { icon("Play", fill("M5 3.2v9.6L13 8z")) }
     val Resume: ImageVector by lazy { icon("Resume", stroke("M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8")) }
     val Forward: ImageVector by lazy { icon("Forward", stroke("M13 8a5 5 0 1 1-1.6-3.7M13 2.5v2.8h-2.8")) }

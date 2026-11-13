@@ -233,6 +233,8 @@ fun MenuPopup(
                     else -> 1f
                 }
             }
+            // 1.0.8 (Desktop Kit 2.8.0): a long menu shows a mouse where it is and lets it drag there
+            val menuScroll = rememberScrollState()
             Column(
                 modifier = Modifier
                     .graphicsLayer {
@@ -283,7 +285,8 @@ fun MenuPopup(
                     .onFocusChanged { menuFocused = it.isFocused }
                     .focusRequester(menu)
                     .focusTarget()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScrollbar(menuScroll)
+                    .verticalScroll(menuScroll)
                     .padding(4.dp),
             ) {
                 shownEntries.forEachIndexed { index, entry ->

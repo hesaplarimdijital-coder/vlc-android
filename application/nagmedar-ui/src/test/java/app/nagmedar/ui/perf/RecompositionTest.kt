@@ -108,7 +108,7 @@ class RecompositionTest {
             override fun queue(tracks: List<Track>) = Unit
 
             // called as each row of the table is composed
-            override fun rowModifier(track: Track, others: () -> List<Track>): Modifier {
+            override fun rowModifier(track: Track, atOnce: () -> Boolean, others: () -> List<Track>): Modifier {
                 rows++
                 return Modifier
             }

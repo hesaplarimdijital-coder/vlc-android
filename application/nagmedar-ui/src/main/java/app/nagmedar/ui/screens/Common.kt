@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
+import app.nagmedar.ui.components.verticalScrollbar
 import app.nagmedar.ui.shell.Destination
 import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
@@ -134,9 +136,11 @@ fun MoreScreen(destinations: List<Destination>, onSelect: (Destination) -> Unit,
     val sections = NavSection.entries.mapNotNull { section ->
         destinations.filter { it.section == section }.takeIf { it.isNotEmpty() }?.let { section to it }
     }
-    // the list scrolls under the phone's bars (Desktop Kit 1.0)
+    // the list scrolls under the phone's bars (Desktop Kit 1.0); 1.0.8 (Desktop Kit 2.8.0): a scrollbar for the mouse
+    val list = rememberLazyListState()
     LazyColumn(
-        Modifier.fillMaxSize().testTag("more-page"),
+        Modifier.fillMaxSize().testTag("more-page").verticalScrollbar(list),
+        state = list,
         contentPadding = LocalShellTopPadding.current + PaddingValues(vertical = dimens.gapS) + LocalShellBottomPadding.current,
     ) {
         sections.forEachIndexed { index, (section, pages) ->

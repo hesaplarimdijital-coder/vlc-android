@@ -195,7 +195,8 @@ internal fun SmartPane(
                     rowMenu = { track, index -> actions.menu(track, play = { actions.play(tracks, index) }, select = null) },
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
                     rowMenuAsSheet = true,
-                    rowModifier = { track -> actions.rowModifier(track) { listOf(track) } },
+                    // 1.0.8 (Desktop Kit 2.8.0): no selection frame here: a mouse drags a row at once
+                    rowModifier = { track -> actions.rowModifier(track, atOnce = { true }) { listOf(track) } },
                     contentPadding = PaddingValues(bottom = 8.dp) + LocalShellBottomPadding.current,
                     // a phone's rows end with "⋯": the same menu as the long press, as a sheet
                     rowMoreButton = currentWidthClass() == WidthClass.Compact,
