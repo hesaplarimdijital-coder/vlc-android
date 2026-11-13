@@ -810,8 +810,8 @@ internal class SwipeAway {
 
     /**
      * Carries it to [to] from where it is, at [velocity] px/s to begin with; [onFrame] is told each
-     * place on the way. Ends before it has arrived (cancelled) when the finger takes the notice
-     * again: only the way itself is stopped then, a job of its own, never the caller's coroutine.
+     * place on the way. When the finger takes the notice again before it has arrived, the way is
+     * cancelled and this call with it: what the caller had after it does not run.
      */
     suspend fun settle(to: Float, spec: AnimationSpec<Float>, velocity: Float, onFrame: (Float) -> Unit = {}) {
         settling?.cancel()
