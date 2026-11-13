@@ -1161,7 +1161,9 @@ private fun TrackPane(
     val keys = remember(shown) { shown.map { it.uri } }
     LaunchedEffect(keys) { selection.retain(keys) }
     SelectionCommands(selection, keys)
-    // 1.0.3 (Desktop Kit 2.3.0): on a phone the first rows arrive in turn: a newly opened group's, another way in's
+    // 1.0.3 (Desktop Kit 2.3.0): on a phone the first rows arrive in turn when what the pane shows changes under it
+    // (another way in); 1.0.8: each group has a pane of its own, which appears with its rows (another group chosen
+    // beside the groups comes with the panes' fade, as the kit's list and detail does)
     val appear = rememberListAppear(state.view, group.key)
     // 1.0.3 (Desktop Kit 2.2): Back clears a selection being made: any by touch or in "Seç", several with a mouse
     ClearSelectionOnBack(selection, touchLayout = !pointer)

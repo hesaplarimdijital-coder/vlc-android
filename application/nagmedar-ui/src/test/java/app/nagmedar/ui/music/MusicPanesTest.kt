@@ -1,6 +1,7 @@
 package app.nagmedar.ui.music
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,11 +100,19 @@ class MusicPanesTest {
         }
     }
 
-    private fun show(state: MusicBrowserState, store: PaneWidths = Store()) {
+    /** An inspector as the app always has one: the music view then lies in the workstation's layout. */
+    private val inspector = MusicInspectorContent(
+        tags = { _ -> Text("etiketler") },
+        signal = { _ -> Text("sinyal") },
+        lyrics = { _ -> Text("sözler") },
+        queue = { Text("sıra") },
+    )
+
+    private fun show(state: MusicBrowserState, store: PaneWidths = Store(), withInspector: Boolean = false) {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
                 CompositionLocalProvider(LocalWidthClass provides width, LocalPaneWidths provides store) {
-                    MusicBrowser(library, state, actions, Modifier)
+                    MusicBrowser(library, state, actions, Modifier, inspector = inspector.takeIf { withInspector })
                 }
             }
         }
@@ -148,6 +157,36 @@ class MusicPanesTest {
         assertTrue(onScreen("Parça 01"))
         // and back
         width = WidthClass.Compact
+        compose.waitForIdle()
+        assertStillAt(top, topOnScreen("Albüm", 60))
+    }
+
+    /**
+     * As in the app, with the inspector (the independent review of 1.0.8): the music view lies in the workstation's
+     * layout, and a large window docks the inspector beside the albums and their tracks.
+     */
+    @Test
+    fun theAlbumsKeepTheirPlaceBesideTheInspector() {
+        show(MusicBrowserState(view = MusicView.Albums), withInspector = true)
+        listWith(60).performScrollToNode(hasText("Albüm 45"))
+        compose.waitForIdle()
+        val top = topOnScreen("Albüm", 60)
+        width = WidthClass.Large
+        compose.waitForIdle()
+        assertTrue(onScreen("Albüm %02d".format(top + 1)))
+        assertFalse("the albums are not back at their top", onScreen("Albüm 02"))
+        assertTrue(onScreen("Parça 01"))
+        // the inspector docked beside them
+        assertTrue(onScreen("etiketler"))
+        compose.onNodeWithText("Albüm %02d".format(top + 2)).performClick()
+        compose.waitForIdle()
+        listWith(40).performScrollToNode(hasText("Parça 40"))
+        compose.waitForIdle()
+        val tracksTop = topOnScreen("Parça", 40)
+        width = WidthClass.Compact
+        compose.waitForIdle()
+        assertStillAt(tracksTop, topOnScreen("Parça", 40))
+        compose.onNode(hasContentDescription("Listeye dön")).performClick()
         compose.waitForIdle()
         assertStillAt(top, topOnScreen("Albüm", 60))
     }

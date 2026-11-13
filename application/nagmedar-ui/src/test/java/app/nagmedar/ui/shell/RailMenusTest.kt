@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.R
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
@@ -47,8 +48,9 @@ class RailMenusTest {
         // the menus' titles; a title opens its menu
         compose.onNodeWithText("Medya").performClick()
         compose.waitForIdle()
-        // the list of titles closed, Medya's menu is up in its place
+        // the list of titles closed, Medya's menu is up in its place, with its own entries
         compose.onNodeWithText("Oynatma").assertDoesNotExist()
+        compose.onNodeWithText(compose.activity.getString(R.string.nag_sc_open_file)).assertExists()
     }
 
     @Test

@@ -238,8 +238,10 @@ private fun Modifier.scrollbar(adapter: ScrollbarAdapter): Modifier {
         }
         .drawWithContent {
             drawContent()
+            // hidden: nothing of the list is looked at (a grid's lines are counted on every frame it scrolls otherwise)
+            if (alpha <= 0f) return@drawWithContent
             val shown = adapter.shown
-            if (alpha <= 0f || shown >= 1f) return@drawWithContent
+            if (shown >= 1f) return@drawWithContent
             val top = adapter.insetStart.toFloat()
             val bottom = size.height - adapter.insetEnd
             val length = (bottom - top).coerceAtLeast(0f)
