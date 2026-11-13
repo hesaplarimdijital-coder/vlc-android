@@ -1064,3 +1064,69 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   denial; not retried, not routed around through the API). Nothing deleted. The list with last commits and a
   one-line command: orch/branches-to-delete.txt on orch/handover. Told to him: he deletes them, or a session where
   deleting is allowed.
+
+## 13 Nov 19:19 – 14 Nov ~01:00 (Istanbul) — 1.0.8 = Desktop Kit 2.8.0 port
+- 19:19 "Desktop kit 2.8.0 e göre güncelle"; first answer "Karşılığı olanlar (Önerilen)"; 19:44 interrupt "Vazgeçtim hepsini taşı"
+  → port ALL of 2.5.0..2.8.0 (TokenField told as not added: no address field). FAB question → "Yeni liste (Önerilen)":
+  only Playlists' "Yeni liste" becomes the main action.
+- Branch story/release-1.0.8, PR #118 (37 commits on c2918042, the last cb0f20a2). Per-kit-commit status in orch/port-1.0.8.md.
+  Extended in place (same names): DenseTable, ListDetailPanes, HorizontalSplitPane, SwipeToRemove, sheets, tooltips,
+  PageTopBar, NagButton, SettingRow, AlertBanner, WorkstationLayout, PaneWidths. New (no counterpart before):
+  PullToRefresh, GridZoom/GridStops, TabHop, Scrollbar, ShellPrimaryAction, NavIconBadge, HeightClass, OnReselect,
+  MovableDetails, nagmedar-ui/src/main/baseline-prof.txt.
+- N/A with reasons (CHANGELOG "Taşınmayanlar"): text field cursor, notice duration/close, navigation that changes, grid
+  empty state, split placeholder, row preview, swipe's second action, TokenField; also punctuation chords (S-410), top
+  bar on rail, WebView glass, detail list state.
+- CI found: Alignment import (432e39ea); IconsTest Minus + ComponentStatesTest two roots (8ac37d65); MusicPanesTest
+  selectors + ReselectTest's short "Podcast" label (9e55522e); a REAL crash: the music view's movable group list moved
+  into HorizontalSplitPane's BoxWithConstraints subcomposition ("Cannot insert LayoutNode … already has a parent") →
+  the split pane became a plain Layout like the kit's (c7bbc37b). Screenshots: CI 43488970710 showed custom fields'
+  old faint edge → controlBorder on seven fields (47bd5ca3); PR run 43494155786: 129/281 changed, each reviewed
+  (ci/shots-pr-118), references = that run (7a7603b5); the tablet shell reference still had 1.0's "TV Lab" (under the
+  0.1 % tolerance).
+- Independent review (one subagent, whole diff): fixed — nested sheet closed by "one sheet" (0b8e77e2), main action
+  under the expanded player (39bcc664), refresh round kept per screen (a754249e: PodcastCenter.refreshNow/
+  scheduledRound with a Mutex, refreshing StateFlow), swipe-to-remove's duplicate item blank a second (58e37890),
+  hidden scrollbar measuring every frame + two tests not as the app is laid out (43e4d57c). Left: network pull's disc
+  never spins (the folder's place shows the connecting state), split range one frame late on a width change, a phone
+  group's tracks do not appear in sequence (kit rule).
+- Walks on 96d1d59d (personal): page-opens 43492255207, back-button 43492260080, sheet-trials 43492264696, search
+  43492268874, notice-swipe 43492272979 green; main 43492250730: phones (35, 37.0) green, BOTH tablets red on
+  "[workstation] after 'By size' the drive still lists its folders" (shot 064: the list's end, Movies..Alarms, Music
+  above). The app's fault since 1.0.3 (red once in 1.0.3's train and once in 1.0.7's, each put down to the check):
+  DenseTable's rows are keyed; a LazyColumn keeps the first visible key (Alarms, first by name) in view wherever the new
+  order puts it; folders count 0 bytes, so By size (descending) puts them in reverse name order, Alarms last → the list
+  showed its end. Fix 627633e6: DenseTable(order = sort) + SideEffect requestScrollToItem(0) before the new order is
+  measured; DeviceScreen passes model.sort. Test DenseTableRequestsTest.anotherOrderStartsTheRowsAtTheTop.
+  627633e6's message (and the first comment/notes) said "smallest folders, Music the largest": wrong (no folder sizes);
+  cb0f20a2 corrected the comment and the notes (kit: 9ec4f4b).
+- Final head b1c0a9da → cb0f20a2 (notes + a comment only). CI 43500824445 (b1c0a9da) and 43508507598 (cb0f20a2): both
+  arms green, 2427 tests passed (counted from "test ended: … SUCCESS" lines), 281 screenshots same. Walks on
+  b1c0a9da (personal): main 43500813342 — API 35 phone 141 steps 0/71, API 35 tablet 134 0/66, 37.0 phone 145 0/71,
+  37.0 tablet 134 0/66 (By size: the list at its top, shot 064); sheet-trials 43500817348 78 steps 0/1 (one GMS ANR,
+  the system's); page-opens 43503835478 32 steps 0/37; back-button 43503840365 30 steps 0/20 (6 system ANRs). Not
+  re-walked: search (only its box's border colour changed), notice-swipe (notices untouched). Jank warnings 71–100 %
+  (emulator, informational, as in 1.0).
+- Kit (desktop-kit PR #17, draft, branch fix/nested-sheets-and-table-order on main 2a6c41a, author his identity), each
+  pushed alone and green: db44994 nested sheets (CI 43501053459), ea66374 table order (43501610828), 10c7f85 main action
+  covered (43502624298), 500f54c hidden scrollbar (43503030333), 4beaee4 2.9.0 release notes (43503627627), 9ec4f4b the
+  By size wording (43508343489). Screenshots 50 same, design_check "115 known findings, none new". Body in Turkish
+  (informal), merging and tagging 2.9.0 are his. 2.9.0 is not tagged yet (tags: 2.8.0 latest); main already has
+  HideBottomNavigation (#14) and the window edge fix (#16).
+- RELEASE: release_chain.sh release-1.0.8 cb0f20a28b5cc76d1ee0413a7fa00f06d799324f 1.0.8 — master fast-forwarded to
+  cb0f20a2 (PR #118 closed as merged), personal release dispatched 21:38:23 UTC (run 43512473812), master push run
+  43512473698. ci/personal-release named cb0f20a2 at 21:54:50 UTC
+  (ready after 17 min), decrypted, apkcheck: app.nagmedar.debug, 1.0.8, 14010014, minSdk 34, target 37, not debuggable,
+  v2, cert d094907b…fecbbc, baseline.prof + profm, arm64-v8a, 97589860 bytes, SHA-256
+  57fe542b3a7c8ed17945c3fdf4b73a1783e488f370a3833500b7420bef557fd1 (computed again locally before sending). master's
+  push run 43512473698 green. DELIVERED 14 Nov ~00:57 Istanbul (21:57 UTC) with SendUserFile.
+  PR #118's body: the review, the walk's bug, the runs, the kit (PATCH via gh api; its old footer replaced by the
+  session's attribution lines).
+  Plan document: "1.0 cihaz testi" rev 14 (the 1.0.8 checks at the top: heading m1gesnh1vzq.26646, Telefonda 15,
+  Tablette ve DeX'te 11, Değişmemesi gerekenler 2; the intro .25 names 1.0.8), "1.0.3 planı" rev 39 (a 1.0.8 paragraph
+  above 1.0.7's, block m1gesnh1vzq.14843).
+  NOT SEEN FROM HERE: the pull's and the swipe's haptics on the S24, a real mouse (frame selection, drag, wheel zoom),
+  DeX window resizing, One UI itself; the kit's sample app on a device.
+  Left for his word: kit PR #17 (merge, tag 2.9.0); remote branches story/release-1.0.8 (merged), ci/shots-pr-118,
+  the evidence branches ci/emulator-*-personal-* rewritten by every walk, with the 128 in orch/branches-to-delete.txt.
+  Local: $WT/release-1.0.8 and its branch removed by merge.sh. Next version: 1.0.9 = 4010009 / arm64 14010015.

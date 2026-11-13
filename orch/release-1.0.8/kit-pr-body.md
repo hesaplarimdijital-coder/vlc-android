@@ -1,0 +1,15 @@
+Nağmedar 1.0.8'e kitin 2.8.0'ını taşırken bulunan kit hataları. Nağmedar'da düzeltildiler; kuralımız gereği kitte de düzeltiliyor. Her adım kendi commit'i, her biri CI'da yeşil; davranışı değişenlerin kendi testi var.
+
+## Adımlar
+1. **Sayfanın içinden açılan sayfa onu kapatmasın** (db44994). 2.8.0'ın "tek sayfa" kuralı (6e70608), bir sayfanın içeriğinden açılan sayfayı (telefonda sayfadaki bir satırın "⋯" menüsü) açarken o sayfayı kapatıyordu; menünün sahibi o sayfanın içeriği olduğu için menü de bir an sonra gidiyordu (azaltılmış harekette hiç görünmüyordu). Sayfa artık hangi sayfanın içinden açıldığını biliyor (`LocalSheetToken`); kabuk ötekileri eskisi gibi kapatıyor, ama açıldığı sayfaları değil. Test: `SheetAccessTest.aSheetOpenedFromAnothersContentLeavesItOpen`.
+2. **Sıra değişince tablo baştan başlasın** (ea66374). Nağmedar'ın emülatör yürüyüşünde boyuta göre sıralanan bir sürücü, listesinin başını değil sonunu gösterdi. `DenseTable`'ın satırları anahtarlı; `LazyColumn` ilk görünen satırı, yeni sıra onu nereye koyarsa koysun görünür tutuyor: en üstündeki bir tablo öbür yöne sıralanınca sonunu gösteriyordu. Yeni `order` parametresi (varsayılanı `sort`, sona eklendi) değişince bir `SideEffect` satırlar yeni sırayla yerleşmeden başa dönmeyi istiyor; hiçbir kare öbür yeri göstermiyor. Satırları başka bir şeye göre de dizen uygulama (telefonda başlıklar sıra göstermiyorsa bir menünün sırası) `order`'a onu veriyor. Test: `DenseTableRequestsTest.anotherOrderStartsTheRowsAtTheTop`.
+3. **Genişlemiş oynatıcının altındaki yüzen düğme gitsin** (10c7f85). Nağmedar'ın bağımsız incelemesi buldu: telefonun yüzen düğmesi oynatıcı açılırken soluyor ama yerinde kalıyordu; oynatıcının alt ucuna dokunmak ekranın ana eylemini başlatabiliyor, TalkBack ve Tab ona ulaşıyordu. `PhoneActionButton(covered)` (iç API): oynatıcı tam açılınca düğme gidiyor, yeri ayrılı kalıyor; oynatıcı inince listeler kaymıyor. Test: `PrimaryActionTest.theExpandedPlayerTakesItAway`.
+4. **Gizli kaydırma çubuğu hiçbir şeye bakmasın** (500f54c). Yine bağımsız incelemeden: çubuk gizliyken de her çiziminde listenin yerleşimini okuyordu; fare kipinde bir ızgara kaydıkça her karede satırlarını sayıyordu. Gizliyken çizim hiçbir şey okumadan dönüyor; belirirken yeniden çiziliyor. Görünüş değişmiyor; mevcut `ScrollbarTest` ve ekran görüntüleri bunu tutuyor.
+5. **Sürüm notları** (4beaee4): dördü de CHANGELOG'da 2.9.0'ın "Hatalar"ında.
+6. **Söz düzeltmesi** (9ec4f4b): ea66374'ün mesajı, yorumu ve sürüm notu, sürücünün en küçük klasörlerini gösterdiğini, en büyüklerinin görünmediğini söylüyordu. Öyle değil: Nağmedar'da klasörün boyutu sayılmıyor, bu sırada klasörler adlarının tersine diziliyor; liste adına göre ilk klasörü (yeni sırada sonuncu) görünür tutup listenin sonunu gösteriyordu. Yorum ve not düzeltildi; düzeltmenin kendisi aynı.
+
+Tabletin ve DeX'in görünüşü değişmiyor; ekran görüntüsü farkı yok. Birleştirme ve 2.9.0 etiketi senin.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+https://claude.ai/code/session_01CCjCQf9dHq1sPdX5uoz8qa

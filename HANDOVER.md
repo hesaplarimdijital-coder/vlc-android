@@ -327,3 +327,27 @@ His answers (13 Nov 14:16): the kit's commits are his: the kit clone's `user.nam
 and #11 stay. He allowed the branches to be deleted, but this session cannot: the git proxy answers a deletion push
 with 403 (a policy denial, like force-push). `orch/branches-to-delete.txt` lists the 128 (names and last commits) with
 the command; he deletes them, or a session where deleting is allowed does.
+
+## 1.0.8 (14 Nov 2026) — delivered
+The owner, 13 Nov 19:19: "Desktop kit 2.8.0 e göre güncelle"; first "Karşılığı olanlar", at 19:44 "Vazgeçtim hepsini
+taşı" (all of 2.5.0..2.8.0 that has a counterpart; TokenField not ported, no address field). The phone's main action:
+"Yeni liste" only (his answer). `orch/LOG.md` has it in full; `orch/port-1.0.8.md` maps every kit commit;
+`orch/release-1.0.8/` has the PR's description, the device checks and the kit PR's description.
+
+- master `cb0f20a2` (PR #118, 37 commits). The personal APK: `app.nagmedar.debug`, 1.0.8, versionCode 14010014, target
+  37, not debuggable, v2, baseline profile inside, arm64-v8a, 97589860 bytes, SHA-256
+  `57fe542b3a7c8ed17945c3fdf4b73a1783e488f370a3833500b7420bef557fd1`. Next version: 1.0.9 = 4010009 / arm64 14010015.
+- New in the app (kit counterparts): `PullToRefresh`, `GridZoom`/`GridStops`, `TabHop`, `Scrollbar`,
+  `ShellPrimaryAction`, `NavIconBadge`, `HeightClass`, `OnReselect`, `MovableDetails` (Panes.kt: a detail's content
+  moved between layouts with its state), `nagmedar-ui/src/main/baseline-prof.txt`. `HorizontalSplitPane` is a plain
+  `Layout` (a subcomposition crashed when the music view's movable list moved into it); `rememberSplitState(width, key)`
+  keeps the divider in `PaneWidths`. `PodcastCenter.refreshNow`/`scheduledRound` share one Mutex, `refreshing` is a
+  StateFlow the screen follows.
+- The walk found a bug of 1.0.3's: `DenseTable` kept the first visible key in view when the order changed (keyed
+  LazyColumn), so This device sorted By size showed its end. `DenseTable(order = sort)` + `requestScrollToItem(0)` in a
+  SideEffect. The workstation pass's By size check was this bug each time it was red (1.0.3, 1.0.7, 1.0.8).
+- Kit: desktop-kit PR #17 (draft, six commits, each green): nested sheets, table order, main action under the expanded
+  player, hidden scrollbar, 2.9.0 notes, a wording fix. He merges and tags 2.9.0.
+
+Left, told to the user: what only his devices show (haptics, a real mouse, DeX resizing, One UI); kit PR #17; the
+remote branches with the earlier list.
