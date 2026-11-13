@@ -189,7 +189,11 @@ fun rememberSearchData(repository: MediaRepository): State<SearchData?> {
         val all = repository.tracks()
         // the artists and albums are the Music view's, which opens them: of its folders when it has some of its own
         val music = if (repository.sources().of(LibrarySection.Music).isEmpty()) all else repository.tracks(LibrarySection.Music)
-        value = withContext(Dispatchers.Default) { searchData(all, music, locale) }
+        // compared away from the main thread, where giving the value would compare them: a library read again that has
+        // not changed stays the one that is kept, and what was made of it (the palette's items) with it
+        val known = value
+        val fresh = withContext(Dispatchers.Default) { searchData(all, music, locale).takeUnless { it == known } }
+        if (fresh != null) value = fresh
     }
 }
 

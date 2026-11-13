@@ -14,6 +14,7 @@ import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.ThemeMode
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import java.util.Locale
 
 /*
  * What the command palette offers in the app (S-305): the shortcuts the shell can run, every
@@ -139,4 +140,14 @@ fun groupItems(res: Resources, groups: List<GroupItem>, onOpen: (GroupItem) -> U
             run = { onOpen(group) },
         )
     }
+}
+
+/**
+ * 1.0.7: the palette's media items with what they were made of: the library as it was read (the very object the
+ * search keeps, [SearchData]) and the language their lines are in. An opening of the palette that finds both as they
+ * were lists [items] again as they are: until then each opening made them all again and gave the palette a new
+ * list, for a library read once.
+ */
+class PaletteMedia(private val of: SearchData, private val locale: Locale, val items: List<PaletteItem>) {
+    fun madeOf(data: SearchData, locale: Locale): Boolean = of === data && this.locale == locale
 }

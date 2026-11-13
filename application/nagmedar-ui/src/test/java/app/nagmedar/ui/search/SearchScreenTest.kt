@@ -17,12 +17,15 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.util.Locale
 
 /**
  * S-311: tracks found the Turkish way; network shares only when asked; nothing found said so.
@@ -105,6 +108,29 @@ class SearchScreenTest {
         compose.waitForIdle()
         compose.onNodeWithText("ALBÜMLER · 1").assertExists()
         compose.onNodeWithText("SANATÇILAR", substring = true).assertDoesNotExist()
+    }
+
+    /** 1.0.7: a library read again that has not changed equals the one that is kept, so it stays; a changed one does not. */
+    @Test
+    fun aLibraryReadAgainIsTheOneKeptUntilItChanges() {
+        val kept = SearchSamples.data
+        fun again(tracks: List<TrackItem> = kept.tracks.map { it.copy() }, groups: List<GroupItem> = kept.groups.map { it.copy() }) = SearchData(tracks, groups)
+        assertEquals(kept, again())
+        assertEquals(kept.hashCode(), again().hashCode())
+        assertNotEquals(kept, again(tracks = kept.tracks.dropLast(1)))
+        assertNotEquals(kept, again(tracks = kept.tracks.map { if (it.title == "Fener") it.copy(title = "Fener (Canlı)") else it }))
+        assertNotEquals(kept, again(groups = kept.groups.map { if (it.view == MusicView.Artists) it.copy(tracks = it.tracks + 1) else it }))
+    }
+
+    /** 1.0.7: the palette's media items are made once of a read, in a language: of that very read, not of one that equals it. */
+    @Test
+    fun thePalettesMediaAreMadeOnceOfAReadInALanguage() {
+        val read = SearchSamples.data
+        val turkish = Locale.forLanguageTag("tr")
+        val media = PaletteMedia(read, turkish, emptyList())
+        assertTrue(media.madeOf(read, turkish))
+        assertFalse(media.madeOf(read, Locale.ENGLISH))
+        assertFalse(media.madeOf(SearchData(read.tracks, read.groups), turkish))
     }
 
     @Test

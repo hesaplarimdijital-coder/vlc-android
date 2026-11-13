@@ -84,6 +84,7 @@ import app.nagmedar.ui.library.LocalLibraryAccess
 import app.nagmedar.ui.library.MediaInfoHost
 import app.nagmedar.ui.library.MediaRepository
 import app.nagmedar.ui.library.SectionSourcesDialog
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.rememberRead
 import app.nagmedar.ui.lyrics.LyricsSession
 import app.nagmedar.ui.lyrics.LyricsTrack
@@ -150,6 +151,7 @@ import app.nagmedar.ui.input.mayBePlayable
 import app.nagmedar.ui.input.planDrop
 import app.nagmedar.ui.search.CommandPalette
 import app.nagmedar.ui.search.PaletteItem
+import app.nagmedar.ui.search.PaletteMedia
 import app.nagmedar.ui.search.SearchScreen
 import app.nagmedar.ui.search.commandItems
 import app.nagmedar.ui.search.groupItems
@@ -672,14 +674,20 @@ private fun NagmedarMain(
     if (paletteOpen) {
         // commands, screens and settings at once. 1.0.7: the library's media as the search page has them (its artists,
         // albums and tracks, kept between the palette's openings and shared with the page): each opening read the
-        // library again and had no media until it was read. Their items are made away from the main thread and kept too.
+        // library again and had no media until it was read. Their items are made away from the main thread and kept too,
+        // with the read and the language they were made of: an opening that finds both as they were makes none again
         val library by rememberSearchData(repository)
-        val media by rememberRead<List<PaletteItem>>(repository.lastRead, "palette-media", library) {
+        val locale = currentLocale()
+        val media by rememberRead<PaletteMedia>(repository.lastRead, "palette-media", library, locale) {
             val data = library ?: return@rememberRead
+            if (value?.madeOf(data, locale) == true) return@rememberRead
             value = withContext(Dispatchers.Default) {
-                // an artist or an album opens as the players' links do: its tracks in the Music view
-                groupItems(context.resources, data.groups) { group -> MusicLinks.open(MusicLink(group.view, listOf(group.group))) } +
-                    mediaItems(context.resources, data.tracks.mapNotNull { it.media }) { item -> PlaybackActions.playList(context, listOf(item), 0) }
+                PaletteMedia(
+                    data, locale,
+                    // an artist or an album opens as the players' links do: its tracks in the Music view
+                    groupItems(context.resources, data.groups) { group -> MusicLinks.open(MusicLink(group.view, listOf(group.group))) } +
+                        mediaItems(context.resources, data.tracks.mapNotNull { it.media }) { item -> PlaybackActions.playList(context, listOf(item), 0) },
+                )
             }
         }
         // every line of "All settings", read from its XML away from the main thread
@@ -694,7 +702,7 @@ private fun NagmedarMain(
                 screenItems(context.resources, navigator::navigate) +
                 settingItems(context.resources, prefs, wallpaperAccent) +
                 preferences +
-                media.orEmpty()
+                media?.items.orEmpty()
         }
         CommandPalette(
             items = items,
