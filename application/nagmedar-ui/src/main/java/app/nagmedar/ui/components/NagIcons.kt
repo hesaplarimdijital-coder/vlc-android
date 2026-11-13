@@ -122,6 +122,7 @@ object NagIcons {
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
         Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
         Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters,
+        Minus,
     )
 }
 

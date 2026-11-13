@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -197,7 +198,9 @@ class ComponentStatesTest {
     }
 
     private fun parkMouse() {
-        compose.onRoot().performMouseInput { moveTo(Offset(2f, 2f)) }
+        // the window's root: 1.0.8's tooltips name an icon button on the keyboard's focus too, in a window of their own
+        // that may still be fading out
+        compose.onAllNodes(isRoot())[0].performMouseInput { moveTo(Offset(2f, 2f)) }
     }
 
     private fun captureStates(sample: Sample): List<Bitmap> {
