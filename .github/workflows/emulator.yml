@@ -66,7 +66,7 @@ on:
         type: string
         default: ''
       passes:
-        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials, back-button, page-opens, notice-swipe on demand; auto-shots on an Android Automotive image)'
+        description: 'Passes of the walk (tablet-en,phone-en,workstation,phone-tr; sheet-trials, back-button, page-opens, notice-swipe, search on demand; auto-shots on an Android Automotive image)'
         type: string
         default: 'tablet-en,phone-en,workstation,phone-tr'
       build:
