@@ -2,6 +2,24 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.0.9 (14 Kasım 2026)
+
+Desktop Kit 2.9.0'ın getirdikleri (14 Kasım: “Şimdi 2.9.0 yükselt”). Kitin 2.8.0'dan 2.9.0'a üç değişikliği var: biri Nağmedar'da 1.0.5'ten beri vardı, biri bu sürümde geldi, üçüncüsünün Nağmedar'da karşılığı yok.
+
+### Pencerenin alt kenarı
+- Telefonda sistem düğmelerinin arkasındaki şerit, sistemin pencerenin alt kenarına koyduğu en uzun payı kaplar. Önceden yalnız gezinme çubuğunun payını alıyordu: bir cihaz alt kenarda gezinme çubuğundan uzun bir kesik ya da başka bir sistem çubuğu bildirirse, aradaki fark uygulamanın kendi zemininden bir şerit olarak alt camın altında kalıyordu. Klavye açıkken eskisi gibi: şerit olmaz, uygulama klavyenin üstünde biter. Alt kenarda gezinme çubuğundan uzun bir pay bildirmeyen telefonda görünüş değişmez.
+- Alt camın en alt piksel satırında sayfanın keskin görünmesi (kitin 2.9.0'da Kitap Bulucu için düzelttiği hata) Nağmedar'da 1.0.5'te düzeltilmişti (12 Kasım: “arkası gözüküyor”): cam, bulanıklığın altına kendi opak rengini çizer. 1.0.5 bunu emülatörde göremediğini yazmıştı; bu sürümün yeni testi pencereyi donanım çizicisiyle, cam bulanıklaştırırken çizip bakar (aşağıda, Test).
+
+### Taşınmayan
+- `HideBottomNavigation()`: telefonda kendi “Vazgeç / Kaydet” çubuğu olan tam ekran bir iş açıkken alt gezinmeyi kaldırır. Nağmedar'da öyle bir ekran yok: pencerenin tamamını kaplayan işler (söz düzenleyicisi, tam ekran sözler, görselleştirici, telefonda Sıradaki) kabuğun üstünde açılır; formlar (sunucu, yayının adı, akıllı liste) pencerenin ortasında küçük pencerelerdir; Ayarlar ve sayfaları 1.0.1'den beri telefonda alt çubuğu ve mini oynatıcıyı kenara çeker.
+
+### Sürüm
+- `versionCode` 4010009; kişisel arm64 APK'sı 14010015 (1.0.8'in 14010014'ünün üzerine güncelleme olarak kurulur). Baseline Profile değişmedi: değişen yol, kabuğun 1.0.8'de eklenen geniş kurallarının içinde.
+
+### Test
+- `WindowEdgeTest` (kitin 2.9.0'daki testi, uygulamanın düzeniyle): uygulamanın kökü, kabuk, mini oynatıcı ve telefonun tek alt camı bulanıklaştırırken, baştan sona yeşil bir sayfanın üstünde; pencere, Robolectric'in yerel grafiğinde PixelCopy'nin kullandığı donanım çizicisiyle çizilir. Üç düğme (S24'ün boyutu), hareketle gezinme, çubuklar açık ve kaydırınca gizli, 1440 piksel genişlik, bir Ayarlar sayfası (çubuklar kenarda) ve birbirini tutmayan paylar (gezinme çubuğundan uzun bir alt kesik). Kitin aynı testi, camın altındaki opak renk olmadan S24'ün son piksel satırında ve 1440 piksellik telefonun son sütununda kırmızıydı.
+- Test düzeltmeden önce tek başına koşuldu (CI 43519261081, `62ac5161`): tutmayan paylarda alt cam 778 dp'de, pencere 780 dp'de bitiyordu (düzeltilen hata). Öteki dört durum çizerken durdu: Robolectric'in API 34 için yerel çalışma ortamı Haze'in gürültü ve renk gölgelendiricisini derleyemiyor (“'color' is not a valid layout qualifier”). Test bu yüzden, kitinki gibi, Android 16'da (API 36) koşar; uygulamanın öteki testleri 34'te kalır.
+
 ## 1.0.8 (13 Kasım 2026)
 
 Desktop Kit 2.8.0'ın getirdikleri Nağmedar'a taşındı (13 Kasım: “Desktop kit 2.8.0 e göre güncelle”, sonra “Vazgeçtim hepsini taşı”): kitin tasarım denetiminin bulguları ve DeskMail'in istekleri, Nağmedar'da karşılığı olan her yerde, Nağmedar'ın kendi bileşenleri genişletilerek. Karşılığı olmayanlar sonda, nedenleriyle.
