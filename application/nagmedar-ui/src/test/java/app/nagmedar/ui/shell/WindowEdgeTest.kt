@@ -62,9 +62,13 @@ import kotlin.math.max
  *
  * The page is one green, which the chrome never is: through the glass it is blurred and tinted to a dark tone, a pixel
  * still clearly green is the page drawn without the chrome over it.
+ *
+ * On Android 16 (API 36), as the kit's: Robolectric's native runtime for the app's usual API 34 does not compile the
+ * shader of Haze's noise and tint ("'color' is not a valid layout qualifier"), so the hardware renderer stopped there.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [36])
 class WindowEdgeTest {
 
     @get:Rule
