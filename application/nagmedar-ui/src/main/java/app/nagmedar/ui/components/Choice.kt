@@ -31,7 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.Layout
@@ -231,19 +236,52 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
  * Label and control on one settings line. When the control leaves the label less room than the
  * label needs, up to [MinLabelWidth] (a phone), the control goes under its label instead of
  * squeezing it; a short label keeps a wide control beside it (Desktop Kit 0.2.0).
+ *
+ * 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 17): with [onClick] the whole line is one button that opens something (a
+ * page of its own): a chevron ends it, after [control] if there is one (a value), and hover, press and the focus ring
+ * reach a little past its edges, so its text stays in the column of the lines around it. The control may be left out.
  */
 @Composable
-fun SettingRow(title: String, modifier: Modifier = Modifier, subtitle: String? = null, control: @Composable () -> Unit) {
+fun SettingRow(
+    title: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    onClick: (() -> Unit)? = null,
+    control: @Composable () -> Unit = {},
+) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val tint = animateStateColor(stateBackground(state), "settingRow")
+    val reach = dimens.gapS
+    val radius = dimens.radiusControl
+    val ring = colors.focusRing
+    val clickable = if (onClick == null) Modifier else Modifier
+        // the tint and the focus ring reach past the line's edges: its text keeps the column of the lines around it
+        .drawBehind {
+            val out = reach.toPx()
+            val corner = CornerRadius(radius.toPx())
+            if (tint.alpha > 0f) drawRoundRect(tint, topLeft = Offset(-out, 0f), size = Size(size.width + 2 * out, size.height), cornerRadius = corner)
+            if (state.focused) {
+                drawRoundRect(ring, topLeft = Offset(-out, 0f), size = Size(size.width + 2 * out, size.height), cornerRadius = corner, style = Stroke(2.dp.toPx()))
+            }
+        }
+        .nagClickable(interaction, onClick)
     Layout(
-        modifier = modifier.padding(vertical = dimens.gapS),
+        modifier = modifier.then(clickable).heightIn(min = if (onClick != null) dimens.minTarget else 0.dp).padding(vertical = dimens.gapS),
         content = {
             Column {
                 Text(title, style = NagTheme.type.bodyStrong, color = colors.text)
                 if (subtitle != null) Text(subtitle, style = NagTheme.type.labelSmall, color = colors.textTertiary)
             }
-            Box { control() }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                control()
+                if (onClick != null) {
+                    Spacer(Modifier.width(dimens.gapXs))
+                    Icon(NagIcons.ChevronRight, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(dimens.icon))
+                }
+            }
         },
     ) { measurables, constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)

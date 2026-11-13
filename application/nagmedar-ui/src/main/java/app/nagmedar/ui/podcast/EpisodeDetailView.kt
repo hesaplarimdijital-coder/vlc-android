@@ -330,7 +330,7 @@ private fun DownloadButton(ui: EpisodeDetailUi, actions: PodcastActions, modifie
         DownloadUi.None -> NagButton(stringResource(R.string.nag_pod_download), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = tagged)
         DownloadUi.Failed -> NagButton(stringResource(R.string.nag_pod_download_retry), { actions.onDownload(episode.id) }, icon = NagIcons.Downloads, modifier = tagged)
         DownloadUi.Queued, is DownloadUi.Running -> NagButton(stringResource(R.string.nag_pod_download_stop), { actions.onCancelDownload(episode.id) }, icon = NagIcons.Close, modifier = tagged)
-        is DownloadUi.Done -> NagButton(stringResource(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, modifier = tagged)
+        is DownloadUi.Done -> NagButton(stringResource(R.string.nag_pod_download_delete), { actions.onDeleteDownload(episode.id) }, icon = NagIcons.Delete, modifier = tagged, danger = true)
     }
 }
 

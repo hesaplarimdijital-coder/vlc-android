@@ -160,7 +160,7 @@ private fun PageTop(page: PodcastPage, fullScreen: Boolean, actions: PodcastActi
                 feed.link?.let { link -> NagButton(stringResource(R.string.nag_pod_web_page), { actions.onOpenLink(link) }, icon = NagIcons.Network) }
                 feed.fundingUrl?.let { url -> NagButton(stringResource(R.string.nag_pod_support), { actions.onOpenLink(url) }, icon = NagIcons.Star) }
                 NagButton(stringResource(R.string.nag_pod_show_settings), { actions.onShowSettings(feed.id) }, icon = NagIcons.Settings, modifier = Modifier.testTag("podcast-settings"))
-                NagButton(stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, modifier = Modifier.testTag("podcast-unsubscribe"))
+                NagButton(stringResource(R.string.nag_pod_unsubscribe), { actions.onUnsubscribe(feed.id) }, modifier = Modifier.testTag("podcast-unsubscribe"), danger = true)
             }
         }
         feed.description?.let { description ->

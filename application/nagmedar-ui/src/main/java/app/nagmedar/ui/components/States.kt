@@ -485,6 +485,7 @@ fun defaultStateIcon(tone: StateTone): ImageVector = when (tone) {
  * A warning or error that interrupts without blocking: "Bit-perfect devre dışı". Read out at
  * once (assertive live region); the last action is outlined as the way back.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AlertBanner(
     tone: StateTone,
@@ -520,7 +521,13 @@ fun AlertBanner(
             Text(message, style = NagTheme.type.labelSmall, color = colors.textSecondary)
             if (actions.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                // 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 6): two actions that do not fit side by side (a phone's
+                // narrow banner) go onto two lines, at the end
+                FlowRow(
+                    Modifier.align(Alignment.End),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     actions.forEachIndexed { index, action ->
                         ToneTextButton(action, tone, outlined = actions.size > 1 && index == actions.lastIndex)
                     }

@@ -322,7 +322,7 @@ fun ServerDialogSurface(draft: ServerDraft, onSave: () -> Unit, onCancel: () -> 
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (draft.editing != null) NagButton(stringResource(R.string.nag_net_remove_server), onRemove)
+                if (draft.editing != null) NagButton(stringResource(R.string.nag_net_remove_server), onRemove, danger = true)
                 Spacer(Modifier.weight(1f))
                 NagButton(stringResource(R.string.nag_sc_cancel), onCancel)
                 NagButton(stringResource(R.string.nag_net_save), save, primary = true, modifier = Modifier.testTag("server-save"))

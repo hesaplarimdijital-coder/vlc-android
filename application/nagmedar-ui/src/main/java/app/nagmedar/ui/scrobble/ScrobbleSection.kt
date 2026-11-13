@@ -132,7 +132,7 @@ private fun ServiceBlock(row: ScrobbleRow, signIn: SignInState, actions: Scrobbl
                 if (row.held) {
                     NagButton(stringResource(R.string.nag_scrobble_sign_in_again), { actions.openSignIn(row.id) }, modifier = Modifier.testTag("$tag-sign-in"))
                 }
-                NagButton(stringResource(R.string.nag_scrobble_forget), { actions.forget(row.id) }, modifier = Modifier.testTag("$tag-forget"))
+                NagButton(stringResource(R.string.nag_scrobble_forget), { actions.forget(row.id) }, modifier = Modifier.testTag("$tag-forget"), danger = true)
             }
         }
         val form = signIn

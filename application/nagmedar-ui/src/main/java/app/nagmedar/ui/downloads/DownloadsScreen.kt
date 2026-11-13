@@ -219,7 +219,7 @@ private fun EpisodeRow(
             DownloadState.RUNNING, DownloadState.QUEUED -> NagButton(stringResource(R.string.nag_sc_cancel), onCancel, icon = NagIcons.Close)
             DownloadState.DONE -> {
                 NagButton(stringResource(R.string.nag_play), onPlay, icon = NagIcons.Play, primary = true, enabled = feed != null)
-                NagButton(stringResource(R.string.nag_downloads_delete), onRemove, icon = NagIcons.Delete)
+                NagButton(stringResource(R.string.nag_downloads_delete), onRemove, icon = NagIcons.Delete, danger = true)
             }
             else -> {
                 NagButton(stringResource(R.string.nag_downloads_retry), onRetry, icon = NagIcons.Repeat, primary = true)
