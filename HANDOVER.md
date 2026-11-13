@@ -320,6 +320,10 @@ New in the kit of this branch:
   go back to its top when the order changes (since 1.0.3). Written as a known limit in the device checks.
 
 Left, told to the user: his tablet, his library and his keyboard decide; the artist/album results can be removed; the
-touch keyboard covers the palette's lower half (known limit); the kit's PRs wait for him; the author question; the
-branches `exp/search-all`, `ci/emulator-search`, `ci/emulator-api37.0-search`, `ci/emulator-api37.0-personal-search`,
-`ci/shots-pr-117` wait for his word with the earlier ones.
+touch keyboard covers the palette's lower half (known limit); the kit's PRs wait for him.
+
+His answers (13 Nov 14:16): the kit's commits are his: the kit clone's `user.name`/`user.email` are his own identity
+(`hesaplarimdijital-coder`, as on his merge commits); set them again in a new clone; the commits already on kit PRs #10
+and #11 stay. He allowed the branches to be deleted, but this session cannot: the git proxy answers a deletion push
+with 403 (a policy denial, like force-push). `orch/branches-to-delete.txt` lists the 128 (names and last commits) with
+the command; he deletes them, or a session where deleting is allowed does.

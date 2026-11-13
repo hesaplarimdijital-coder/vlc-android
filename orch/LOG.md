@@ -1055,3 +1055,12 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   ci/emulator-api37.0-search, ci/emulator-api37.0-personal-search, ci/shots-pr-117 with the earlier list; merging and
   tagging kit PRs #10 and #11. Local: worktree $WT/search (exp/search-all) kept; $WT/release-1.0.7 and its branch
   removed by merge.sh. Next version: 1.0.8 = 4010008 / arm64 14010014.
+- 13 Nov 14:16, the owner: "Kitin yazarı ben olayım. Silmen gerekiyorsa dalları sil".
+  Kit author: the kit clone's git config is now `hesaplarimdijital-coder <his address>` (the identity of his own merge
+  commits on the kit's main); the commits already on kit PRs #10 and #11 stay as they are (no history rewriting).
+  Branches: 128 to delete (115 story/*, each contained in master per GitHub's compare; exp/notice-swipe, exp/page-blank,
+  exp/search-all; ten on-demand evidence branches). A file-driven bulk `git push --delete` was stopped by the session's
+  auto-mode check ("unverifiable deletion scope"); five named ones then got HTTP 403 from the git proxy (a policy
+  denial; not retried, not routed around through the API). Nothing deleted. The list with last commits and a
+  one-line command: orch/branches-to-delete.txt on orch/handover. Told to him: he deletes them, or a session where
+  deleting is allowed.
