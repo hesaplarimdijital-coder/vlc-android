@@ -486,7 +486,11 @@ fun NagmedarShell(
                                         tier = currentTier,
                                     ) {
                                         ShellScreenFrame(metrics, scroll, bars = !NavRules.hidesBars(destination, currentKind)) {
-                                            currentScreen(destination, navigator)
+                                            // 1.0.8: the screen hears its tab's entry tapped again (OnReselect)
+                                            val page = remember(destination, navigator) { ShellTabPage(destination, navigator.reselects) }
+                                            CompositionLocalProvider(LocalShellTabPage provides page) {
+                                                currentScreen(destination, navigator)
+                                            }
                                         }
                                     }
                                 }

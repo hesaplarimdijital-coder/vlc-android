@@ -113,6 +113,7 @@ import app.nagmedar.ui.playback.PlaySource
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -946,6 +947,8 @@ private fun GroupList(
     val res = LocalContext.current.resources
     val reduced = NagTheme.motion.reduced
     val compact = currentWidthClass() == WidthClass.Compact
+    // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the groups go to their top
+    OnReselect { if (reduced) listState.scrollToItem(0) else listState.animateScrollToItem(0) }
     // 1.0.3: on a phone the first groups arrive in turn, again for another way in, not when a group's tracks close
     val appear = rememberListAppear(state.view)
     LaunchedEffect(state.reveal, groups) {
@@ -1138,10 +1141,15 @@ private fun TrackPane(
         }
         HorizontalRule()
         val columnsLabel = stringResource(R.string.nag_music_columns)
+        // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the tracks go to their top
+        val tableState = rememberLazyListState()
+        val reducedMotion = NagTheme.motion.reduced
+        OnReselect { if (reducedMotion) tableState.scrollToItem(0) else tableState.animateScrollToItem(0) }
         DenseTable(
             columns = tableColumns,
             rows = shown,
             key = { it.uri },
+            state = tableState,
             selectedKeys = selection.keys,
             sort = sort?.let { s -> columns.indexOf(s.column).takeIf { it >= 0 }?.let { TableSort(it, s.ascending) } },
             onSortChange = { s -> state.sort = MusicSort(columns[s.column], s.ascending) },

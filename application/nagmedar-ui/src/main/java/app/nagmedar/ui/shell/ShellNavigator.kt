@@ -1,8 +1,15 @@
 package app.nagmedar.ui.shell
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 /** How the shell came to the page on screen, which picks the transition that plays (1.0.1). */
 enum class NavMove {
@@ -103,6 +110,12 @@ class ShellNavigator(private val navController: NavHostController) {
     /** Where back went from, latest last: the mouse's forward button returns there (S-408). */
     private val forwardRoutes = ArrayDeque<String>()
 
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0, the design audit's GEZ-16): the tab on screen chosen again on its first page: its screen
+     * hears it ([OnReselect]) and goes to its top, as Android's own apps do.
+     */
+    internal val reselects = MutableSharedFlow<Destination>(extraBufferCapacity = 1)
+
     /** The navigation chrome of the window; set by the shell. */
     var navKind: NavKind = NavKind.BottomBar
 
@@ -171,6 +184,9 @@ class ShellNavigator(private val navController: NavHostController) {
             if (currentRoute != destination.route) {
                 moving(NavMove.Reselect)
                 navController.popBackStack(destination.route, inclusive = false)
+            } else {
+                // 1.0.8: on the tab's first page already: the screen goes to its top
+                reselects.tryEmit(destination)
             }
             return
         }
@@ -231,4 +247,21 @@ class ShellNavigator(private val navController: NavHostController) {
         go(Destination.fromRoute(route))
         return true
     }
+}
+
+/** 1.0.8: the screen of [destination] in the shell, and the taps on its tab's entry again ([OnReselect]). */
+internal class ShellTabPage(val destination: Destination, val reselects: SharedFlow<Destination>)
+
+internal val LocalShellTabPage = staticCompositionLocalOf<ShellTabPage?> { null }
+
+/**
+ * 1.0.8 (Desktop Kit 2.8.0): runs [action] when the user taps the entry of the screen already shown (in the bottom bar,
+ * the rail or the sidebar) while its first page is on screen, as Android's own apps do: scroll a list back to its top.
+ * It only hears its own tab's entry; outside the shell nothing happens.
+ */
+@Composable
+fun OnReselect(action: suspend () -> Unit) {
+    val page = LocalShellTabPage.current ?: return
+    val latest by rememberUpdatedState(action)
+    LaunchedEffect(page) { page.reselects.collect { if (it == page.destination) latest() } }
 }

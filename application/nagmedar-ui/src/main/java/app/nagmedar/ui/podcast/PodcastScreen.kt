@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -96,6 +97,7 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.openLink
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.DetailTransition
+import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.detailSharedCard
 import app.nagmedar.ui.shell.detailSharedElement
 import app.nagmedar.ui.shell.ListDetailPanes
@@ -577,6 +579,9 @@ private fun SubscriptionGrid(subscriptions: List<PodcastFeedSummary>, actions: P
     // 1.0.8 (Desktop Kit 2.8.0): one stop of the Tab key, a scrollbar for the mouse, and covers as large as the user makes
     // them (Ctrl with the wheel, a pinch, Ctrl with + and −)
     val grid = rememberLazyGridState()
+    val reduced = NagTheme.motion.reduced
+    // 1.0.8: the Podcastler entry tapped again: to the top
+    OnReselect { if (reduced) grid.scrollToItem(0) else grid.animateScrollToItem(0) }
     val stops = rememberGridStops(grid, subscriptions.map { it.feed.id })
     val zoom = rememberGridZoom(150.dp, key = "podcasts")
     stops.Around(Modifier.fillMaxSize()) {
@@ -645,8 +650,13 @@ private fun SubscriptionTile(summary: PodcastFeedSummary, actions: PodcastAction
 private fun SubscriptionList(subscriptions: List<PodcastFeedSummary>, actions: PodcastActions) {
     val dimens = NagTheme.dimens
     val appear = rememberListAppear()
+    // 1.0.8 (Desktop Kit 2.8.0): the Podcastler entry tapped again: to the top; a scrollbar for the mouse
+    val list = rememberLazyListState()
+    val reduced = NagTheme.motion.reduced
+    OnReselect { if (reduced) list.scrollToItem(0) else list.animateScrollToItem(0) }
     LazyColumn(
-        Modifier.fillMaxSize().testTag("podcast-list"),
+        Modifier.fillMaxSize().testTag("podcast-list").verticalScrollbar(list),
+        state = list,
         contentPadding = PaddingValues(horizontal = dimens.pagePadding, vertical = dimens.gapS) + LocalShellBottomPadding.current,
         verticalArrangement = Arrangement.spacedBy(dimens.gapXs),
     ) {

@@ -67,6 +67,7 @@ import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -111,6 +112,9 @@ internal fun PlaylistOverview(
     // 1.0.3: on a phone the first cards arrive in turn
     val appear = rememberListAppear(layout)
     val grid = rememberLazyGridState()
+    val reducedMotion = NagTheme.motion.reduced
+    // 1.0.8: the Çalma listeleri entry tapped again: to the top
+    OnReselect { if (reducedMotion) grid.scrollToItem(0) else grid.animateScrollToItem(0) }
     val stops = rememberGridStops(grid, cards.map { it.key }, selected = openKey)
     val zoom = rememberGridZoom(156.dp, key = "playlists")
     Column(modifier.fillMaxSize().testTag("playlists-overview")) {
