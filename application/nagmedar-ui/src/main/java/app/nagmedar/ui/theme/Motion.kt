@@ -94,11 +94,13 @@ class NagMotion private constructor(val reduced: Boolean) {
         if (reduced) snap() else tween(durationMillis, easing = EmphasizedAccelerate)
 
     /**
-     * Sizes and places that follow a state (indicator pills, panels): a hint of bounce, settles fast. 1.0.3: a
-     * pixel value passes [PIXEL] as [visibilityThreshold] (see [gesture]), so the spring stops once it looks still.
+     * Sizes and places that follow a state (indicator pills, tab underlines, panels): settles fast without a
+     * visible bounce (1.0.8, Desktop Kit 2.8.0: 0.9 at 700; until then 0.85, a bounce the kit's design standard
+     * keeps for expressive moments, not for a selection that moves). 1.0.3: a pixel value passes [PIXEL] as
+     * [visibilityThreshold] (see [gesture]), so the spring stops once it looks still.
      */
     fun <T> spatial(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
-        if (reduced) snap() else spring(dampingRatio = 0.85f, stiffness = 700f, visibilityThreshold = visibilityThreshold)
+        if (reduced) snap() else spring(dampingRatio = 0.9f, stiffness = 700f, visibilityThreshold = visibilityThreshold)
 
     /** Small elements (a pressed control, the slider's thumb): quicker, hardly any bounce; [visibilityThreshold] as for [spatial]. */
     fun <T> fastSpatial(visibilityThreshold: T? = null): FiniteAnimationSpec<T> =
@@ -358,6 +360,16 @@ class NagMotion private constructor(val reduced: Boolean) {
          */
         fun <T> open(visibilityThreshold: T? = null): SpringSpec<T> =
             spring(dampingRatio = 0.9f, stiffness = 700f, visibilityThreshold = visibilityThreshold)
+
+        /**
+         * 1.0.8 (Desktop Kit 2.8.0): the phone's spring for a whole page sliding in or out (a detail over its
+         * list): critically damped, so the page lands without passing its place. On [open]'s 0.9 a page crossing
+         * a phone's width passed its place by about 2 px and came back as it landed, which over a page of text
+         * reads as a shiver. A little stiffer than [open], so it arrives about as soon. [visibilityThreshold] as
+         * for [gesture].
+         */
+        fun <T> page(visibilityThreshold: T? = null): SpringSpec<T> =
+            spring(dampingRatio = 1f, stiffness = 800f, visibilityThreshold = visibilityThreshold)
 
         /** The tier of a window: springs on a phone, the timed curves from tablet width up, nothing with [reduced] motion. */
         fun tier(widthClass: WidthClass, reduced: Boolean = false): MotionTier = when {

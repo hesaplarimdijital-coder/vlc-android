@@ -29,9 +29,10 @@ import kotlinx.coroutines.delay
  * LazyColumn { itemsIndexed(rows) { index, row -> Row(Modifier.listAppear(appear, index)) { … } } }
  * ```
  *
- * The keys of [rememberListAppear] say when the list is new (another way into the library, another
- * album's tracks): its rows then arrive in turn again. A list kept composed under its detail keeps
- * its arrival, so it does not arrive again when the detail closes.
+ * The keys of [rememberListAppear] say when the list's rows arrive (another way into the library, another
+ * album's tracks, the episodes after loading): its rows then arrive in turn. 1.0.8 (Desktop Kit 2.8.0): only
+ * then; the rows a list appears with are simply there. A list kept composed under its detail keeps its
+ * arrival, so it does not arrive again when the detail closes.
  */
 @Stable
 class ListAppear internal constructor(internal val enabled: Boolean) {
@@ -56,11 +57,20 @@ class ListAppear internal constructor(internal val enabled: Boolean) {
     }
 }
 
-/** The [ListAppear] of a list; a new one when [keys] change (see [ListAppear]). */
+/**
+ * The [ListAppear] of a list: its rows arrive in turn once [keys] change after the list first appeared (see
+ * [ListAppear]); until then, and without keys, they are simply there. 1.0.8 (Desktop Kit 2.8.0): a list that
+ * appears with its rows already there (a tab opened again, a screen come back to, a list without keys) shows
+ * them at once: the same rows rising every time a screen is opened is decoration, not information. Until then
+ * every list's first appearance played.
+ */
 @Composable
 fun rememberListAppear(vararg keys: Any?): ListAppear {
     val enabled = LocalMotionTier.current == MotionTier.Gesture
-    val appear = remember(enabled, *keys) { ListAppear(enabled) }
+    // the keys the list first appeared with: its rows were there with it
+    val first = remember { keys.toList() }
+    val arrived = keys.toList() != first
+    val appear = remember(enabled, arrived, *keys) { ListAppear(enabled && arrived) }
     LaunchedEffect(appear) {
         delay(ListAppear.WINDOW_MS)
         appear.settled = true

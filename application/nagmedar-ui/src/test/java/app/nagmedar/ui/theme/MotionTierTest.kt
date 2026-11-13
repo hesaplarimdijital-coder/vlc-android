@@ -102,6 +102,37 @@ class MotionTierTest {
         assertTrue("the detail arrives in $arrived ms, $bare ms at a hundredth", arrived < 240 && bare > arrived)
     }
 
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0): a whole page (a detail over its list) lands without passing its place, about as soon
+     * as open()'s spring, on which it passed it by about 2 px of a phone's width and came back.
+     */
+    @Test
+    fun aPageLandsWithoutPassingItsPlace() {
+        val page = NagMotion.page<Float>(NagMotion.FRACTION)
+        assertEquals(1f, page.dampingRatio)
+        assertEquals(800f, page.stiffness)
+        val width = 1080f
+        fun way(spec: SpringSpec<Float>): Pair<Float, Long> {
+            val curve = spec.vectorize(Float.VectorConverter)
+            val start = AnimationVector1D(0f)
+            val end = AnimationVector1D(1f)
+            val speed = AnimationVector1D(0f)
+            val nanos = curve.getDurationNanos(start, end, speed)
+            var most = 0f
+            var at = 0L
+            while (at <= nanos) {
+                most = maxOf(most, curve.getValueFromNanos(at, start, end, speed).value)
+                at += 2_000_000L
+            }
+            return most * width to nanos / 1_000_000
+        }
+        val (pageMost, pageMs) = way(page)
+        val (openMost, openMs) = way(NagMotion.open(NagMotion.FRACTION))
+        assertTrue("open() passes the place by ${openMost - width} px", openMost - width > 1f)
+        assertTrue("page() passes it by ${pageMost - width} px", pageMost - width < 0.01f)
+        assertTrue("page() arrives in $pageMs ms, open() in $openMs ms", pageMs <= openMs + 60)
+    }
+
     @Test
     fun fadesStayTimedAndSnapWithReducedMotion() {
         val fade = tween<Float>(150)

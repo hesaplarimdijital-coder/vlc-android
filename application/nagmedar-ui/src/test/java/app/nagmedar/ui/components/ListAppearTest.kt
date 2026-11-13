@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +32,11 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** 1.0.3 (Desktop Kit 2.3.0): the first rows of a phone's list arrive in turn; later rows, wider windows and reduced motion: they are there. */
+/**
+ * 1.0.3 (Desktop Kit 2.3.0): the first rows of a phone's list arrive in turn; later rows, wider windows and reduced
+ * motion: they are there. 1.0.8 (Desktop Kit 2.8.0): only when the list's data comes in after it appeared; a list that
+ * appears with its rows shows them at once.
+ */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
@@ -41,20 +46,31 @@ class ListAppearTest {
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     private var rows by mutableIntStateOf(6)
+    private var loaded by mutableStateOf(false)
 
-    private fun list(tier: MotionTier) {
+    /** A list that shows its rows once [loaded]; [arrive] loads them a frame after the list appeared. */
+    private fun list(tier: MotionTier, arrive: Boolean = true) {
+        loaded = !arrive
         compose.mainClock.autoAdvance = false
         compose.setContent {
             NagmedarTheme(inputMode = InputMode.Touch) {
                 CompositionLocalProvider(LocalMotionTier provides tier) {
-                    val appear = rememberListAppear()
+                    val appear = rememberListAppear(loaded)
                     Column {
-                        repeat(rows) { i ->
-                            Box(Modifier.listAppear(appear, i).fillMaxWidth().height(40.dp).background(Color.Red).testTag("row$i"))
+                        if (loaded) {
+                            repeat(rows) { i ->
+                                Box(Modifier.listAppear(appear, i).fillMaxWidth().height(40.dp).background(Color.Red).testTag("row$i"))
+                            }
                         }
                     }
                 }
             }
+        }
+        if (arrive) {
+            frame()
+            compose.runOnIdle { loaded = true }
+            // the recomposer wakes with the first frame, the rows are composed with the second
+            frame()
         }
     }
 
@@ -84,6 +100,15 @@ class ListAppearTest {
         frame()
         frame()
         assertEquals(6 * 40f, top("row6").value, 0.5f)
+    }
+
+    /** 1.0.8: a tab opened again, a screen come back to: the rows were there with the list, and are at once. */
+    @Test
+    fun aListThatAppearsWithItsRowsShowsThemAtOnce() {
+        list(MotionTier.Gesture, arrive = false)
+        frame()
+        assertEquals(40f, top("row1").value, 0.5f)
+        assertEquals(3 * 40f, top("row3").value, 0.5f)
     }
 
     @Test

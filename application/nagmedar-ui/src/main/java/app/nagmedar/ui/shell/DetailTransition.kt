@@ -267,7 +267,7 @@ fun Modifier.detailShade(state: DetailMotionState): Modifier {
 /**
  * 1.0.3 (Desktop Kit 2.4.0, "Ayrıntı opak kayarak gelir"): on a phone the detail opens as Android's own list →
  * detail does. Opaque from its first frame, it slides in from the end edge by the whole width on the opening
- * spring ([NagMotion.open]), over the list; the list is not faded: on the same spring it sinks to [LIST_SCALE]
+ * spring ([NagMotion.page] since 1.0.8, critically damped; [NagMotion.open] before), over the list; the list is not faded: on the same spring it sinks to [LIST_SCALE]
  * and darkens under [SCRIM] of the theme's scrim, so the scrim keeps to the detail's edge and the list's text
  * never shows through the detail. Closing is the same way back: the detail slides out over the end edge, the
  * list rises out of the scrim. (Desktop Kit 2.3.0 had the detail come 12 % of the way fading in while the list
@@ -552,7 +552,9 @@ internal fun rememberDepth(open: Boolean): DepthState {
     // anew at every rest: their key is the state the transition has arrived at (no way changes it before its end)
     val values = key(depth.seekable.currentState) {
         // the detail's way, and with it the list's sinking and its scrim
-        val detailShift = transition.animateFloat(transitionSpec = { NagMotion.open(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
+        // 1.0.8 (Desktop Kit 2.8.0): a whole page does not overshoot; on open()'s 0.9 it slid 2 px past its place
+        // and back as it landed, which over a page of text read as a shiver
+        val detailShift = transition.animateFloat(transitionSpec = { NagMotion.page(NagMotion.FRACTION) }, label = "detailShift") { if (it) 0f else 1f }
         // with a card the two fade through, the one going away gone before the other appears
         val gone = tween<Float>(DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardAccelerate)
         val appears = tween<Float>(DetailDepth.FADE_IN_MS, delayMillis = DetailDepth.FADE_OUT_MS, easing = NagMotion.StandardDecelerate)

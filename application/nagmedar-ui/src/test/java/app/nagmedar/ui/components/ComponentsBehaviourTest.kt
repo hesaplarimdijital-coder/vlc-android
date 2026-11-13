@@ -56,7 +56,7 @@ import kotlin.math.abs
 /**
  * 1.0.3 (Desktop Kit 2.0–2.3) frame by frame and touch by touch, as the kit's own tests: hover and
  * press colours at once with a mouse, easing by touch and only in opacity to and from clear; a
- * phone's lighter press that bounces back; the vibrations of the switches, check boxes, chips and
+ * phone's lighter press (1.0.8: back without a bounce); the vibrations of the switches, check boxes, chips and
  * segments by touch only; undo bars swiped away at the finger's speed; the slider's and the text
  * field's names for TalkBack.
  */
@@ -176,8 +176,9 @@ class ComponentsBehaviourTest {
         compose.waitForIdle()
     }
 
+    /** 1.0.8 (Desktop Kit 2.8.0): letting go no longer bounces a touch over the rest. */
     @Test
-    fun aPhonesPressIsLighterAndBouncesBack() {
+    fun aPhonesPressIsLighterAndComesBackWithoutABounce() {
         pressable(MotionTier.Gesture)
         compose.runOnIdle { pressed = true }
         repeat(30) { frame() }
@@ -188,7 +189,7 @@ class ComponentsBehaviourTest {
             frame()
             widest = maxOf(widest, width())
         }
-        assertTrue("letting go bounces a touch over the rest: $widest", widest > 100.02f)
+        assertTrue("letting go passed the rest size: $widest", widest <= 100.01f)
         assertEquals(100f, width(), 0.5f)
     }
 

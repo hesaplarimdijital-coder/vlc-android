@@ -7,7 +7,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -163,9 +162,10 @@ private class InteractionFade(initial: Color, private var selected: Boolean, lab
  * Touch feedback in place of a ripple: the element shrinks while a finger holds it and springs back
  * on release (Desktop Kit 0.2.0). By touch only: with a mouse nothing moves, as on a desktop. On a
  * phone (Desktop Kit 2.3) the press goes three quarters as deep as [scale] (the finger covers the
- * control: the shrink is felt more than seen) and letting go bounces back a touch over the rest;
- * wider windows keep [scale] and a plain spring both ways. Drawn in the layer, so the press does not
- * recompose what it scales.
+ * control: the shrink is felt more than seen); wider windows keep [scale]. Both come back on the same
+ * quick spring without passing the rest size (1.0.8, Desktop Kit 2.8.0: until then a phone's control
+ * bounced a touch over it on release; a control is not a toy). Drawn in the layer, so the press does
+ * not recompose what it scales.
  */
 @Composable
 fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
@@ -178,7 +178,7 @@ fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
         else -> scale
     }
     // a scale is a fraction: its spring stops a thousandth from the end (Part 2a's rule)
-    val spec = if (phone && !pressed) PressRelease else NagTheme.motion.fastSpatial(NagMotion.FRACTION)
+    val spec = NagTheme.motion.fastSpatial(NagMotion.FRACTION)
     val value = animateFloatAsState(target, spec, label = "pressScale")
     // with a pointer nothing scales: no layer either
     if (!touch) return this
@@ -191,8 +191,6 @@ fun Modifier.pressScale(pressed: Boolean, scale: Float = 0.96f): Modifier {
 /** How deep a phone's press goes for a control asking for [scale]: three quarters of the way (0.96 → 0.97). */
 internal fun phonePressScale(scale: Float): Float = 1f - (1f - scale) * 0.75f
 
-/** A phone's press let go: back to the rest with a light bounce over it, settled within a thousandth. */
-private val PressRelease = spring(dampingRatio = 0.75f, stiffness = 1200f, visibilityThreshold = NagMotion.FRACTION)
 
 /**
  * Click handling shared by all Nağmedar controls: hand cursor, hover tracking, no ripple
