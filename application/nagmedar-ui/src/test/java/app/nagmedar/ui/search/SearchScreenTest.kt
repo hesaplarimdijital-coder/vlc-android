@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.music.MusicView
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
@@ -25,6 +26,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * S-311: tracks found the Turkish way; network shares only when asked; nothing found said so.
+ * 1.0.7: the artists and the albums are found too (an album by its artist as well) and open.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -35,6 +37,7 @@ class SearchScreenTest {
     val compose = createComposeRule()
 
     private val played = mutableListOf<String>()
+    private val opened = mutableListOf<GroupItem>()
     private var query by mutableStateOf("")
 
     private fun page() {
@@ -46,6 +49,7 @@ class SearchScreenTest {
                     query = query,
                     onQueryChange = { query = it },
                     onPlayTrack = { track, _ -> played += "track:${track.title}" },
+                    onOpenGroup = { opened += it },
                 )
             }
         }
@@ -69,13 +73,38 @@ class SearchScreenTest {
         query = "kuzey"
         compose.waitForIdle()
         compose.onNodeWithText("“kuzey” için", substring = true).assertExists()
-        compose.onNodeWithText("MÜZİK · 1").assertExists()
+        compose.onNodeWithText("PARÇALAR · 1").assertExists()
+        // no artist and no album is called so
+        compose.onNodeWithText("SANATÇILAR", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("ALBÜMLER", substring = true).assertDoesNotExist()
         compose.onNode(hasText("Kuzeyden Esen", substring = true) and hasClickAction()).performClick()
         assertEquals(listOf("track:Kuzeyden Esen"), played)
         // "isik" finds "Işık"
         query = "isik"
         compose.waitForIdle()
         assertTrue(shown("Işıklar") >= 1)
+    }
+
+    /** 1.0.7: the artist by the name, the album by its artist's, then the artist's tracks; each of the two opens. */
+    @Test
+    fun artistsAndAlbumsAreFoundAndOpen() {
+        page()
+        query = "ada"
+        compose.waitForIdle()
+        compose.onNodeWithText("“ada” için 4 sonuç", substring = true).assertExists()
+        compose.onNodeWithText("SANATÇILAR · 1").assertExists()
+        compose.onNodeWithText("ALBÜMLER · 1").assertExists()
+        compose.onNodeWithText("PARÇALAR · 2").assertExists()
+        // "1 albüm · 2 parça" under the artist, "Ada Karan · 2 parça" under the album
+        compose.onNode(hasText("1 albüm · 2 parça") and hasClickAction()).performClick()
+        compose.onNode(hasText("Ada Karan · 2 parça") and hasClickAction()).performClick()
+        assertEquals(listOf(MusicView.Artists to "Ada Karan", MusicView.Albums to "Gece Mavisi"), opened.map { it.view to it.title })
+        assertTrue(played.isEmpty())
+        // the album by its own name
+        query = "liman"
+        compose.waitForIdle()
+        compose.onNodeWithText("ALBÜMLER · 1").assertExists()
+        compose.onNodeWithText("SANATÇILAR", substring = true).assertDoesNotExist()
     }
 
     @Test
@@ -100,7 +129,7 @@ class SearchScreenTest {
         compose.onNodeWithText("-live").assertExists()
         query = "type:music kuzey"
         compose.waitForIdle()
-        assertEquals(1, shown("MUSIC ·"))
+        assertEquals(1, shown("TRACKS ·"))
     }
 
     @Test
@@ -112,7 +141,7 @@ class SearchScreenTest {
     }
 }
 
-/** Four tracks, one of them on a NAS. */
+/** Four tracks, one of them on a NAS; 1.0.7: their two artists and two albums. */
 object SearchSamples {
     val data: SearchData by lazy {
         SearchData(
@@ -121,6 +150,12 @@ object SearchSamples {
                 TrackItem("file:///Music/Ada Karan/Kuzeyden Esen.flac", "Kuzeyden Esen", "Ada Karan", "Gece Mavisi", 231_000),
                 TrackItem("file:///Music/Deniz Aral/Fener.flac", "Fener", "Deniz Aral", "Liman Işıkları", 302_000),
                 TrackItem("smb://nas/Muzik/Deniz Aral/Fener (NAS).flac", "Fener (NAS)", "Deniz Aral", "Liman Işıkları", 302_000),
+            ),
+            groups = listOf(
+                GroupItem("artist:ada karan", MusicView.Artists, "ada karan", "Ada Karan", albums = 1, tracks = 2),
+                GroupItem("artist:deniz aral", MusicView.Artists, "deniz aral", "Deniz Aral", albums = 1, tracks = 2),
+                GroupItem("album:ada karan/gece mavisi", MusicView.Albums, "album:ada karan\u0000gece mavisi", "Gece Mavisi", artist = "Ada Karan", tracks = 2),
+                GroupItem("album:deniz aral/liman isiklari", MusicView.Albums, "album:deniz aral\u0000liman ışıkları", "Liman Işıkları", artist = "Deniz Aral", tracks = 2),
             ),
         )
     }

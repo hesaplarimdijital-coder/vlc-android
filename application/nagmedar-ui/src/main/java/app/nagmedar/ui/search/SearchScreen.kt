@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,7 @@ import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.lazyKeys
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.input.ContextMenuArea
+import app.nagmedar.ui.library.LibrarySection
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.tabMovesFocus
 import app.nagmedar.ui.components.toActionGroups
@@ -73,6 +75,11 @@ import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.library.mediaMenu
 import app.nagmedar.ui.library.formatDuration
 import app.nagmedar.ui.library.rememberRead
+import app.nagmedar.ui.music.MusicLibrary
+import app.nagmedar.ui.music.MusicLink
+import app.nagmedar.ui.music.MusicLinks
+import app.nagmedar.ui.music.MusicView
+import app.nagmedar.ui.music.toTrack
 import app.nagmedar.ui.playback.Artwork
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.shell.LocalShellBottomPadding
@@ -81,7 +88,10 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.theme.NagTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import java.util.Locale
 
 /** A track as the search page lists it. */
 @Immutable
@@ -92,12 +102,29 @@ data class TrackItem(
     val album: String,
     val durationMs: Long,
     val media: MediaWrapper? = null,
-)
+    /** 1.0.7: who its album is filed under. */
+    val albumArtist: String = "",
+) {
+    /**
+     * What a track is found by besides its title, for the search page and the palette alike: its artist, its
+     * album, and (1.0.7) who its album is filed under when that is someone else.
+     */
+    val words: String
+        get() = listOf(artist, albumArtist.takeUnless { it.equals(artist, ignoreCase = true) }.orEmpty(), album).filter { it.isNotBlank() }.joinToString(" ")
+}
 
-/** Everything the search page looks in: the tracks. */
+/**
+ * Everything the search looks in: the tracks and (1.0.7) the music library's artists and albums ([groups]).
+ * Equal to another that holds the same: a library read again that has not changed changes nothing on screen.
+ */
 @Immutable
-class SearchData(val tracks: List<TrackItem>) {
-    internal val trackIndex: List<Searchable<TrackItem>> = tracks.map { Searchable(it, SearchKind.Music, it.title, "${it.artist} ${it.album}") }
+class SearchData(val tracks: List<TrackItem>, val groups: List<GroupItem> = emptyList()) {
+    internal val trackIndex: List<Searchable<TrackItem>> = tracks.map { Searchable(it, SearchKind.Music, it.title, it.words) }
+    internal val groupIndex: List<Searchable<GroupItem>> = groups.map { Searchable(it, SearchKind.Music, it.title, it.artist) }
+
+    override fun equals(other: Any?): Boolean = other is SearchData && other.tracks == tracks && other.groups == groups
+
+    override fun hashCode(): Int = 31 * tracks.size + groups.size
 }
 
 /** What a query found, by kind; [hiddenOnNetwork] counts hits on network shares left out. */
@@ -107,8 +134,11 @@ class SearchResults(
     val tracks: List<TrackItem>,
     val hiddenOnNetwork: Int,
     val millis: Long,
+    /** 1.0.7: the artists and the albums found, each best first. */
+    val artists: List<GroupItem> = emptyList(),
+    val albums: List<GroupItem> = emptyList(),
 ) {
-    val count: Int get() = tracks.size
+    val count: Int get() = artists.size + albums.size + tracks.size
 }
 
 /** A key on a network share (smb://, upnp://, nfs://, ftp…): searched only when asked for. */
@@ -131,24 +161,53 @@ fun searchLibrary(data: SearchData, raw: String, includeNetwork: Boolean): Searc
         includeNetwork || !network
     }
     val shownTracks = tracks.local { it.key }
+    // an artist or an album with nothing on the device goes with its tracks (they are what is counted)
+    val groups = data.groupIndex.search(query).map { it.value }.filter { includeNetwork || !it.onNetwork }
     return SearchResults(
         query = query,
         tracks = shownTracks.map { it.value },
         hiddenOnNetwork = hidden,
         millis = (SearchClock.nanoTime() - start) / 1_000_000,
+        artists = groups.filter { it.view == MusicView.Artists },
+        albums = groups.filter { it.view == MusicView.Albums },
     )
 }
 
 /**
- * The search page (S-311): the library's tracks, with a chip for the files on network shares
- * (off until asked).
+ * 1.0.7: the library as the search looks at it, for the search page and the palette alike: kept while the
+ * window lives ([MediaRepository.lastRead]), so whichever opens next has it in its first frame and reads it
+ * again behind what it shows (the palette read the library at each opening and had no media until then).
+ * The very first time the Music's list kept on the device stands in until the library is read; null before.
+ */
+@Composable
+fun rememberSearchData(repository: MediaRepository): State<SearchData?> {
+    val locale = currentLocale()
+    return rememberRead<SearchData>(repository.lastRead, "search", locale) {
+        if (value == null) {
+            repository.keptMusic(repository.musicScope())?.media?.let { kept -> value = withContext(Dispatchers.Default) { searchData(kept, kept, locale) } }
+        }
+        val all = repository.tracks()
+        // the artists and albums are the Music view's, which opens them: of its folders when it has some of its own
+        val music = if (repository.sources().of(LibrarySection.Music).isEmpty()) all else repository.tracks(LibrarySection.Music)
+        value = withContext(Dispatchers.Default) { searchData(all, music, locale) }
+    }
+}
+
+/** Every track of [all], and the artists and albums of [music] as the Music view groups them. */
+internal fun searchData(all: List<MediaWrapper>, music: List<MediaWrapper>, locale: Locale): SearchData {
+    val byUri = music.associateBy { it.uri?.toString().orEmpty() }
+    val library = MusicLibrary(music.map { it.toTrack(null) }, locale)
+    return SearchData(all.map { it.toTrackItem() }, searchGroups(library) { byUri[it.uri] })
+}
+
+/**
+ * The search page (S-311): the library's tracks and (1.0.7) its artists and albums, with a chip for the
+ * files on network shares (off until asked).
  */
 @Composable
 fun SearchScreen(repository: MediaRepository, query: String, onQueryChange: (String) -> Unit) {
     val context = LocalContext.current
-    val data by rememberRead<SearchData>(repository.lastRead, "search") {
-        value = SearchData(repository.tracks().map { it.toTrackItem() })
-    }
+    val data by rememberSearchData(repository)
     SearchContent(
         data = data ?: SearchData(emptyList()),
         query = query,
@@ -157,16 +216,19 @@ fun SearchScreen(repository: MediaRepository, query: String, onQueryChange: (Str
             val medias = list.mapNotNull { it.media }
             item.media?.let { media -> PlaybackActions.playList(context, medias, medias.indexOf(media).coerceAtLeast(0)) }
         },
+        // as the players' artist and album links: the Music view opens the group
+        onOpenGroup = { group -> MusicLinks.open(MusicLink(group.view, listOf(group.group))) },
     )
 }
 
-private fun MediaWrapper.toTrackItem() = TrackItem(
+internal fun MediaWrapper.toTrackItem() = TrackItem(
     key = uri.toString(),
     title = title ?: uri?.lastPathSegment.orEmpty(),
     artist = artistName.orEmpty(),
     album = albumName.orEmpty(),
     durationMs = length,
     media = this,
+    albumArtist = albumArtistName.orEmpty(),
 )
 
 /** The page for [data], fed by the screen or by tests. */
@@ -176,6 +238,7 @@ fun SearchContent(
     query: String,
     onQueryChange: (String) -> Unit,
     onPlayTrack: (TrackItem, List<TrackItem>) -> Unit,
+    onOpenGroup: (GroupItem) -> Unit = {},
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -235,8 +298,11 @@ fun SearchContent(
                 )
             }
         }
+        // 1.0.7: the artists and the albums found, then the tracks
+        section(R.string.nag_music_view_artists, results.artists, { it.key }) { GroupHit(it, results.query) { onOpenGroup(it) } }
+        section(R.string.nag_music_view_albums, results.albums, { it.key }) { GroupHit(it, results.query) { onOpenGroup(it) } }
         val tracks = results.tracks
-        section(R.string.nag_search_music, tracks, { "track-${it.key}" }) { TrackHit(it, results.query) { onPlayTrack(it, tracks) } }
+        section(R.string.nag_music_view_tracks, tracks, { "track-${it.key}" }) { TrackHit(it, results.query) { onPlayTrack(it, tracks) } }
         if (results.hiddenOnNetwork > 0 && !includeNetwork) {
             item(key = "network") { NetworkCard(results.hiddenOnNetwork) { includeNetwork = true } }
         }
@@ -360,6 +426,42 @@ private fun TrackHit(item: TrackItem, query: SearchQuery, onClick: () -> Unit) {
                 color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Text(formatDuration(item.durationMs), style = NagTheme.type.mono, color = colors.textTertiary)
+    }
+}
+
+/** 1.0.7: an artist ("4 albüm · 38 parça") or an album (its cover, "Ada Karan · 9 parça"); a click opens it in the Music view. */
+@Composable
+private fun GroupHit(item: GroupItem, query: SearchQuery, onClick: () -> Unit) {
+    val colors = NagTheme.colors
+    val tracks = pluralStringResource(R.plurals.nag_tracks_count, item.tracks, item.tracks)
+    val artists = item.view == MusicView.Artists
+    val albums = pluralStringResource(R.plurals.nag_music_albums, item.albums, item.albums)
+    // an album is found by its artist too: the name is marked, the count beside it is not
+    val artist = marked(item.artist, query)
+    val line = buildAnnotatedString {
+        when {
+            artists -> append("$albums · $tracks")
+            item.artist.isEmpty() -> append(tracks)
+            else -> {
+                append(artist)
+                append(" · $tracks")
+            }
+        }
+    }
+    HitRow(onClick, item.title, null) {
+        if (artists) {
+            Box(Modifier.size(40.dp).background(colors.surface, RoundedCornerShape(NagTheme.dimens.radiusControl)), contentAlignment = Alignment.Center) {
+                Icon(NagIcons.Artists, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(NagTheme.dimens.icon))
+            }
+        } else {
+            Artwork(item.media, size = 40.dp, video = false)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(marked(item.title, query), style = NagTheme.type.bodyStrong, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(line, style = NagTheme.type.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        Icon(NagIcons.ChevronRight, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(NagTheme.dimens.icon))
     }
 }
 

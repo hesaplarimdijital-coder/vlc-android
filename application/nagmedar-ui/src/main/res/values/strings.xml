@@ -745,7 +745,6 @@
         <item quantity="other">%d more files on network shares</item>
     </plurals>
     <string name="nag_search_nothing">Nothing found for “%s”</string>
-    <string name="nag_search_music">Music</string>
     <string name="nag_search_syntax">Search syntax</string>
     <string name="nag_search_syntax_phrase">exact phrase</string>
     <string name="nag_search_syntax_exclude">leave out</string>

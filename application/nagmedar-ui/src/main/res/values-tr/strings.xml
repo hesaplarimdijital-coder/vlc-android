@@ -745,7 +745,6 @@
         <item quantity="other">Ağda %d dosya daha</item>
     </plurals>
     <string name="nag_search_nothing">“%s” için sonuç yok</string>
-    <string name="nag_search_music">Müzik</string>
     <string name="nag_search_syntax">Arama sözdizimi</string>
     <string name="nag_search_syntax_phrase">tam ifade</string>
     <string name="nag_search_syntax_exclude">hariç tut</string>
