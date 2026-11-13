@@ -264,9 +264,10 @@ fun <T> DenseTable(
     order: Any? = sort,
 ) {
     // 1.0.8: another order starts the rows at the top. Keyed rows keep the one first in view in view, wherever the new
-    // order puts it: a drive sorted by size showed its smallest folders, the largest out of sight above them (the
-    // emulator walk's workstation pass, seen in 1.0.7 and on both tablets of 1.0.8's). Before the rows are laid out
-    // in their new order, so no frame shows the other place.
+    // order puts it: a drive sorted by size kept its first folder by name (Alarms) in view, last in that order, and
+    // showed the end of its list, the folders now first (Music among them) out of sight above (the emulator walk's
+    // workstation pass, seen in 1.0.7 and on both tablets of 1.0.8's). Before the rows are laid out in their new order,
+    // so no frame shows the other place.
     val seenOrder = remember { OrderSeen(order) }
     SideEffect {
         if (seenOrder.order != order) {
