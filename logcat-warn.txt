@@ -1,0 +1,377 @@
+720 W/ziparchive: Unable to open '/data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.dm': No such file or directory
+720 W/ziparchive: Unable to open '/data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.dm': No such file or directory
+3141 W/dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=7 --zip-location=/data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk --oat-fd=8 --oat-location=/data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/oat/x86_64/base.odex --output-vdex-fd=9 --swap-fd=10 --class-loader-context-fds=11:12 --class-loader-context=PCL[]{PCL[/system_ext/framework/androidx.window.extensions.jar]#PCL[/system_ext/framework/androidx.window.sidecar.jar]} --classpath-dir=/data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA== --instruction-set=x86_64 --instruction-set-features=default --instruction-set-variant=x86_64 --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xtarget-sdk-version:37 --runtime-arg -Xhidden-api-policy:enabled --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-name:app.nagmedar.debug,app-version-name:1.0.9,app-version-code:14010017,art-version:350820300
+1098 W/ndroid.settings: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1452 W/gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 2 weak references
+1098 W/ndroid.settings: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1452 W/gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+559 W/system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+559 W/system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1452 W/gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+3584 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+3584 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+3584 E/.nagmedar.debug: Not starting debugger since process cannot load the jdwp agent.
+3584 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+3584 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+3584 W/HWUI: Unknown dataspace 0
+3584 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+1452 W/gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1098 W/ndroid.settings: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1098 W/ndroid.settings: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1423 W/ogle.android.as: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+3584 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda67.invoke$app$nagmedar$ui$onboarding$FirstRunKt$$ExternalSyntheticLambda33(java.lang.Object, java.lang.Object, java.lang.Object)
+3584 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda67.invoke$app$nagmedar$ui$onboarding$FirstRunKt$$ExternalSyntheticLambda33(java.lang.Object, java.lang.Object, java.lang.Object)
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+3584 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+3584 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+3584 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+3584 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+1452 W/gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+3584 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@40c0bd3
+559 W/ActivityTaskManager: Force removing ActivityRecord{3604b49 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t8 f}}: app died, no saved state
+559 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+559 W/InputManager-JNI: Input channel object '824a51e app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity (client)' was disposed without first being removed with the input manager!
+559 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+559 W/WindowManager: Exception thrown during dispatchAppVisibility Window{824a51e u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+7928 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+7928 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+7928 E/.nagmedar.debug: Not starting debugger since process cannot load the jdwp agent.
+7928 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+7928 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+7928 W/HWUI: Unknown dataspace 0
+7928 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+7928 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+7928 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+7928 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+7928 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@fca62b
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+7928 W/VLC: [0000722e0bc50c70/225e] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc2c7f0/225f] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc41a90/2260] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc3c630/2261] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc50c70/2262] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc2c7f0/2263] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc41a90/2264] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc3c630/2265] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc50c70/2266] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc2c7f0/2267] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc41a90/2268] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc3c630/2269] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc50c70/226a] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc2c7f0/226b] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc41a90/226c] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc3c630/226d] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc50c70/226e] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc4b4b0/2270] libvlc access: cannot insert stream filter record
+559 E/NotificationService: Package enqueue rate is 5.1494784. Shedding 0|app.nagmedar.debug|43|null|10209. package=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc3cbd0/2275] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:54): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc3cbd0/2277] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:55): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc5c970/2278] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:56): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc59370/227a] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:57): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc5c970/227c] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc59370/227e] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:58): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc30a50/227f] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:59): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc51690/2281] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:60): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc30a50/2283] libvlc access: cannot insert stream filter record
+7928 W/AndroidMedialib: type=1400 audit(0.0:61): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106626 scontext=u:r:untrusted_app:s0:c209,c256,c512,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0 app=app.nagmedar.debug
+7928 W/VLC: [0000722e0bc30a50/2285] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc59b50/2288] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc59490/228a] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc51210/228b] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc51e70/228e] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc51210/2290] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc59130/2291] libvlc access: cannot insert stream filter record
+7928 E/VLC: [0000722e0bc59b50/2293] libvlc access: cannot open file /storage/emulated/0/Android/obb/ (Permission denied)
+7928 E/VLC: [0000722e8bd694c0/2293] libvlc input: Your media can't be opened
+7928 E/VLC: [0000722e8bd694c0/2293] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/obb/'. Check the log for details.
+7928 W/VLC/medialibrary: [T#125538994952384] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+7928 W/VLC: [0000722e0bc3cbd0/2294] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc53850/2296] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc51210/2298] libvlc access: cannot insert stream filter record
+7928 E/VLC: [0000722e0bc53850/229a] libvlc access: cannot open file /storage/emulated/0/Android/data/ (Permission denied)
+7928 E/VLC: [0000722e8bd694c0/229a] libvlc input: Your media can't be opened
+7928 E/VLC: [0000722e8bd694c0/229a] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/0/Android/data/'. Check the log for details.
+7928 W/VLC/medialibrary: [T#125538994952384] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/0/Android/data/: Failed to browse network directory: Unknown error: I/O error
+7928 W/VLC: [0000722e0bc532b0/229b] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc59eb0/229d] libvlc access: cannot insert stream filter record
+7928 W/VLC: [0000722e0bc532b0/229f] libvlc access: cannot insert stream filter record
+7928 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda67.invoke$app$nagmedar$ui$onboarding$FirstRunKt$$ExternalSyntheticLambda33(java.lang.Object, java.lang.Object, java.lang.Object)
+7928 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.NagmedarAppKt$$ExternalSyntheticLambda67.invoke$app$nagmedar$ui$onboarding$FirstRunKt$$ExternalSyntheticLambda33(java.lang.Object, java.lang.Object, java.lang.Object)
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+7928 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+559 W/ActivityTaskManager: Force removing ActivityRecord{906c9f5 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t9 f}}: app died, no saved state
+559 W/InputManager-JNI: Input channel object 'da65ca9 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity (client)' was disposed without first being removed with the input manager!
+559 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+559 W/WindowManager: Exception thrown during dispatchAppVisibility Window{da65ca9 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/ActivityTaskManager: Force removing ActivityRecord{75c9edc u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t10 f}}: app died, no saved state
+559 W/InputManager-JNI: Input channel object '6046ce0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity (client)' was disposed without first being removed with the input manager!
+559 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+559 W/WindowManager: Exception thrown during dispatchAppVisibility Window{6046ce0 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+9252 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+9252 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+9252 E/.nagmedar.debug: Not starting debugger since process cannot load the jdwp agent.
+9252 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+9252 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+9252 W/HWUI: Unknown dataspace 0
+9252 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inShadowParams
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@a981748
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+9252 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+9252 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+9252 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+9252 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+9252 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+9252 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioController$5.invokeSuspend(java.lang.Object)
+9252 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioController$5.invokeSuspend(java.lang.Object)
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/droid.bluetooth: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+920 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name radii_selector
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name corner_and_radius_outsets
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name aa_bloat_and_coverage
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 3 name radii_x
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 4 name radii_y
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 5 name skew
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 6 name translate_and_localrotate
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 7 name color
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@78f262f
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@71c2d10
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@1a03152
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@34661f1
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/VLC/VLCApplication: onTrimMemory, level: 20
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@9fd0637
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+9252 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1195 W/s.nexuslauncher: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+559 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 0
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@9fd0637
+9252 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=android.app.Activity$$ExternalSyntheticLambda0@28d5616
+559 W/InputManager-JNI: Input channel object 'bc16719 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity (client)' was disposed without first being removed with the input manager!
+559 W/system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+559 W/ActivityTaskManager: Force removing ActivityRecord{8dbcf65 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity t11 f}}: app died, no saved state
+559 W/InputManager-JNI: Input channel object '24bc479 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity (client)' was disposed without first being removed with the input manager!
+559 W/ActivityTaskManager: Unable to send transaction to client proc app.nagmedar.debug: no app thread
+1070 W/MediaPlayerList: app.nagmedar.debug is already the active player
+1070 W/MediaPlayerList: app.nagmedar.debug is already the active player
+1070 W/AudioMediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+559 W/WindowManager: Exception thrown during dispatchAppVisibility Window{24bc479 u0 app.nagmedar.debug/app.nagmedar.ui.NagmedarActivity EXITING}
+1070 W/AudioMediaPlayerWrapper: The session was destroyed app.nagmedar.debug
+11817 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+11817 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+11817 E/.nagmedar.debug: Not starting debugger since process cannot load the jdwp agent.
+11817 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+11817 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+11817 W/HWUI: Unknown dataspace 0
+11817 W/HWUI: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+11817 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+11817 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+11817 W/.nagmedar.debug: Missing inline cache for void androidx.navigation.internal.NavControllerImpl.updateBackStackLifecycle$navigation_runtime()
+11817 E/ActivityThread: Failed to find provider info for androidx.car.app.connection
+11817 W/CarApp.Conn: Null response from content provider when checking connection to the car, treating as disconnected
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+1070 W/AudioMediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/droid.bluetooth: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onPlaybackStateChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onQueueChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+11817 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioController$5.invokeSuspend(java.lang.Object)
+11817 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioController$5.invokeSuspend(java.lang.Object)
+920 E/MediaResumeListener: Cannot resume with ComponentInfo{app.nagmedar.debug/org.videolan.vlc.PlaybackService}
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name radii_selector
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name corner_and_radius_outsets
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name aa_bloat_and_coverage
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 3 name radii_x
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 4 name radii_y
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 5 name skew
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 6 name translate_and_localrotate
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 7 name color
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/AudioMediaPlayerWrapper: onMetadataChanged(): app.nagmedar.debug tried to update with no new data
+1070 W/droid.bluetooth: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inShadowParams
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@f3a71bf
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@c46ae5f
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@da57a09
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.compose.ui.window.Api33Impl$$ExternalSyntheticLambda0@f5b185d
+11817 W/.nagmedar.debug: Cleared Reference was only reachable from finalizer (only reported once)
+1382 W/.apps.wellbeing: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
+11817 W/VLC/VLCApplication: onTrimMemory, level: 20
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@db7b97
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+11817 W/WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@db7b97
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+11817 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+11817 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioViewsKt$$ExternalSyntheticLambda32.invoke()
+11817 W/.nagmedar.debug: Missing inline cache for java.lang.Object app.nagmedar.ui.radio.RadioViewsKt$$ExternalSyntheticLambda32.invoke()
+559 W/system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~9cr-TwvMgZgo-7u4EwsZcA==/app.nagmedar.debug-rJD5-LgfIrGqPFfd5n9pOA==/base.apk' with 1 weak references
