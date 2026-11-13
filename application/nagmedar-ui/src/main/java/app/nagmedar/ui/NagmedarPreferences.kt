@@ -194,6 +194,8 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 
     override fun paneCollapsed(key: String): Boolean = prefs.getBoolean(KEY_PANE_COLLAPSED_PREFIX + key, false)
 
+    override fun paneCollapsed(key: String, default: Boolean): Boolean = prefs.getBoolean(KEY_PANE_COLLAPSED_PREFIX + key, default)
+
     override fun savePaneCollapsed(key: String, collapsed: Boolean) {
         prefs.edit().putBoolean(KEY_PANE_COLLAPSED_PREFIX + key, collapsed).apply()
     }

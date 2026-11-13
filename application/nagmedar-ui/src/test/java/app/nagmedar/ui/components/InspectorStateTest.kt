@@ -42,6 +42,21 @@ class InspectorStateTest {
         assertEquals(listOf(340f to false, 340f to true), kept)
     }
 
+    /** 1.0.8: in a window too narrow to dock it, the button brings the inspector up as a sheet, and nothing is kept. */
+    @Test
+    fun aNarrowWindowsToggleOpensTheSheet() {
+        val state = state(collapsed = true)
+        state.docked = false
+        assertTrue(state.hidden)
+        state.toggle()
+        assertTrue(state.sheetOpen)
+        assertEquals(false, state.hidden)
+        assertEquals("the docked pane's choice stays", true, state.collapsed)
+        state.toggle()
+        assertEquals(false, state.sheetOpen)
+        assertTrue(kept.isEmpty())
+    }
+
     @Test
     fun aStoredWidthOutsideTheBoundsComesBackWithin() {
         val state = state(width = 900f)

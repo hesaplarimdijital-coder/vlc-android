@@ -69,6 +69,9 @@ interface PaneWidths {
     /** Whether the pane [key] was hidden; shown when nothing was saved. */
     fun paneCollapsed(key: String): Boolean = false
 
+    /** 1.0.8: whether the pane [key] was hidden; [default] when nothing was saved. */
+    fun paneCollapsed(key: String, default: Boolean): Boolean = default || paneCollapsed(key)
+
     fun savePaneCollapsed(key: String, collapsed: Boolean) = Unit
 
     /** 1.0.8 (Desktop Kit 2.8.0): the covers' least width the user chose for the grid [key] (its zoom), in dp, or null. */

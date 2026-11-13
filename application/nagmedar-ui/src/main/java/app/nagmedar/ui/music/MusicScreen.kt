@@ -388,13 +388,13 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     }
     val state = rememberMusicBrowserState()
     val inspectorState = rememberInspectorState()
-    val workstation = inspector != null && currentWidthClass() >= WidthClass.Expanded
     Column(Modifier.fillMaxSize()) {
         PageHeader(
             title = stringResource(R.string.nag_nav_music),
             subtitle = library?.let { pluralStringResource(R.plurals.nag_tracks_count, it.tracks.size, it.tracks.size) },
         ) {
-            if (workstation) InspectorToggleButton(inspectorState)
+            // 1.0.8 (Desktop Kit 2.8.0): below the docking width the inspector comes up as a sheet
+            if (inspector != null) InspectorToggleButton(inspectorState)
         }
         // S-1010: the converter's job under way, or what the last one came to
         ConvertHost(
@@ -800,7 +800,7 @@ fun MusicBrowser(
     val selection = rememberMultiSelection()
     // a phone's group closing keeps the order its tracks were shown in
     val closing = remember { ClosingOrder() }
-    if (workstation) InspectorCommands(inspectorState::toggle)
+    if (inspector != null) InspectorCommands(inspectorState::toggle)
     val panes: @Composable () -> Unit = {
         when {
             // nothing played yet (no filter hiding what was)
@@ -862,7 +862,7 @@ fun MusicBrowser(
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
         MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact, probing = probing)
-        if (!workstation || inspector == null) {
+        if (inspector == null) {
             panes()
         } else {
             // the selected track (the last clicked of several), else what plays
@@ -875,6 +875,7 @@ fun MusicBrowser(
                 inspector = { MusicInspectorPane(inspectorState, inspector, subject) },
                 // the table keeps the room for its title beside the fixed columns (and the groups beside it): the inspector gives way
                 minMain = if (wide) 760.dp else 560.dp,
+                sheetTitle = stringResource(R.string.nag_inspector),
             )
         }
     }

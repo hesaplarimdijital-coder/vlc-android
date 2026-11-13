@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -53,6 +54,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -114,16 +116,32 @@ class InspectorState(
         commit()
     }
 
-    fun toggle() = updateCollapsed(!collapsed)
+    /**
+     * 1.0.8 (Desktop Kit 2.8.0, the design audit's finding 11): in a window narrower than the layout's showFrom, the
+     * inspector is up as a sheet over the main pane.
+     */
+    var sheetOpen by mutableStateOf(false)
+
+    /** Whether the [WorkstationLayout] shows the inspector beside the main pane (its window is wide enough). */
+    internal var docked by mutableStateOf(true)
+
+    /** Whether the inspector is out of sight, beside the main pane or as a sheet. */
+    val hidden: Boolean get() = if (docked) collapsed else !sheetOpen
+
+    /** Shows or hides the inspector: beside the main pane, or as a sheet in a narrow window (1.0.8). */
+    fun toggle() {
+        if (docked) updateCollapsed(!collapsed) else sheetOpen = !sheetOpen
+    }
 }
 
 /**
  * An [InspectorState] whose width and visibility are kept under [key] in the window's pane store
  * ([LocalPaneWidths]: the app's preferences), so they come back after a restart; the tab lasts as
- * long as the window.
+ * long as the window. 1.0.8 (Desktop Kit 2.8.0): [defaultCollapsed] starts it hidden until the user first shows it; the
+ * stored choice wins once there is one.
  */
 @Composable
-fun rememberInspectorState(key: String = WORKSTATION_PANE, defaultWidth: Dp = 384.dp): InspectorState {
+fun rememberInspectorState(key: String = WORKSTATION_PANE, defaultWidth: Dp = 384.dp, defaultCollapsed: Boolean = false): InspectorState {
     val store = LocalPaneWidths.current
     val commit: (Float, Boolean) -> Unit = { width, collapsed ->
         store.savePaneWidth(key, width)
@@ -134,11 +152,14 @@ fun rememberInspectorState(key: String = WORKSTATION_PANE, defaultWidth: Dp = 38
         restore = { InspectorState(it[0] as Float, it[1] as Boolean, it[2] as Int, commit) },
     )
     return rememberSaveable(key, store, saver = saver) {
-        InspectorState(store.paneWidth(key) ?: defaultWidth.value, store.paneCollapsed(key), 0, commit)
+        InspectorState(store.paneWidth(key) ?: defaultWidth.value, store.paneCollapsed(key, defaultCollapsed), 0, commit)
     }
 }
 
 private const val MAIN = "main"
+
+/** How much of the window's height the inspector's sheet takes in a narrow window (1.0.8). */
+private const val INSPECTOR_SHEET_SHARE = 0.7f
 private const val DIVIDER = "divider"
 private const val INSPECTOR = "inspector"
 
@@ -148,7 +169,12 @@ private const val INSPECTOR = "inspector"
  * usually an [InspectorPane]). The divider between them is dragged, or moved with the arrow keys
  * when focused (S-303's [PaneDivider]); [state] keeps the width. Hidden, the inspector slides shut
  * (300 ms on the emphasized curve, at once with reduced motion). [main] keeps at least [minMain]:
- * the inspector gives way first. Below [showFrom] (phones, narrow windows) only [main] shows.
+ * the inspector gives way first.
+ *
+ * 1.0.8 (Desktop Kit 2.8.0, the design audit's finding 11): below [showFrom] (a phone, a tablet in split screen, a narrow
+ * DeX window) [main] has the window, and the inspector comes up as a sheet over it ([InspectorToggleButton],
+ * [InspectorState.sheetOpen]) under [sheetTitle]: what is in it stays reachable at every width. A window that widens
+ * while the sheet is up shows the inspector beside the main pane instead.
  */
 @Composable
 fun WorkstationLayout(
@@ -160,8 +186,24 @@ fun WorkstationLayout(
     minInspector: Dp = 260.dp,
     maxInspector: Dp = 560.dp,
     showFrom: WidthClass = WidthClass.Expanded,
+    sheetTitle: String? = null,
 ) {
     val shown = currentWidthClass() >= showFrom
+    SideEffect { state.docked = shown }
+    // the sheet that was up becomes the pane beside the main one
+    LaunchedEffect(shown) {
+        if (shown && state.sheetOpen) {
+            state.sheetOpen = false
+            state.updateCollapsed(false)
+        }
+    }
+    if (!shown) {
+        val height = LocalConfiguration.current.screenHeightDp.dp * INSPECTOR_SHEET_SHARE
+        GlassBottomSheet(visible = state.sheetOpen, onDismiss = { state.sheetOpen = false }, label = sheetTitle) {
+            // a pane that scrolls on its own: the sheet gives it a height
+            Box(Modifier.fillMaxWidth().height(height)) { inspector() }
+        }
+    }
     val visible = shown && !state.collapsed
     val tier = LocalMotionTier.current
     val progress = remember { Animatable(if (visible) 1f else 0f) }
@@ -358,15 +400,17 @@ private fun InspectorTabButton(tab: InspectorTab, selected: Boolean, modifier: M
     }
 }
 
-/** A toolbar button that shows or hides the inspector of [state] (Ctrl+I). */
+/** A toolbar button that shows or hides the inspector of [state] (Ctrl+I): beside the main pane, or as a sheet in a narrow window. */
 @Composable
 fun InspectorToggleButton(state: InspectorState, modifier: Modifier = Modifier) {
+    // 1.0.8: beside the main pane, or as a sheet in a narrow window
+    val hidden = state.hidden
     NagIconButton(
         icon = NagIcons.SidebarToggle,
-        contentDescription = stringResource(if (state.collapsed) R.string.nag_inspector_show else R.string.nag_inspector_hide),
+        contentDescription = stringResource(if (hidden) R.string.nag_inspector_show else R.string.nag_inspector_hide),
         onClick = state::toggle,
         modifier = modifier.testTag("inspector-toggle"),
-        selected = !state.collapsed,
+        selected = !hidden,
         shortcut = ShortcutId.ToggleInspector,
     )
 }
