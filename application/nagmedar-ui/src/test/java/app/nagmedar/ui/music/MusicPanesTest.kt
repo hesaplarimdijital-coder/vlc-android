@@ -7,8 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
@@ -108,8 +110,10 @@ class MusicPanesTest {
         compose.waitForIdle()
     }
 
-    /** The scrolling list that shows [text] now. */
-    private fun listShowing(text: String) = compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasText(text)))
+    /** The scrolling list of [rows] rows (the albums are 60, an album's tracks 40). */
+    private fun listWith(rows: Int) = compose.onNode(
+        hasScrollToNodeAction() and SemanticsMatcher("$rows rows") { it.config.getOrNull(SemanticsProperties.CollectionInfo)?.rowCount == rows },
+    )
 
     /** Whether [text] is on the screen now: a list's row scrolled away, or a list covered, is not. */
     private fun onScreen(text: String): Boolean {
@@ -126,7 +130,7 @@ class MusicPanesTest {
     @Test
     fun theAlbumsKeepTheirPlaceAsTheWindowWidensAndNarrows() {
         show(MusicBrowserState(view = MusicView.Albums))
-        listShowing("Albüm 01").performScrollToNode(hasText("Albüm 45"))
+        listWith(60).performScrollToNode(hasText("Albüm 45"))
         compose.waitForIdle()
         val top = topOnScreen("Albüm", 60)
         assertFalse(onScreen("Albüm 01"))
@@ -148,7 +152,7 @@ class MusicPanesTest {
         show(state)
         compose.onNodeWithText("Albüm 03").performClick()
         compose.waitForIdle()
-        listShowing("Parça 01").performScrollToNode(hasText("Parça 40"))
+        listWith(40).performScrollToNode(hasText("Parça 40"))
         compose.waitForIdle()
         val top = topOnScreen("Parça", 40)
         assertFalse(onScreen("Parça 01"))

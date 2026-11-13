@@ -51,13 +51,13 @@ class ReselectTest {
         tab("Müzik").performClick()
         compose.waitForIdle()
         assertEquals(listOf(Destination.Music), heard)
-        // another entry switches screens and tells nobody
-        tab("Podcastler").performClick()
+        // another entry switches screens and tells nobody (the phone's bar names Podcasts short)
+        tab("Podcast").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("ekran-${Destination.Podcasts.route}").assertExists()
         assertEquals(listOf(Destination.Music), heard)
         // and that screen's own entry again tells it
-        tab("Podcastler").performClick()
+        tab("Podcast").performClick()
         compose.waitForIdle()
         assertEquals(listOf(Destination.Music, Destination.Podcasts), heard)
     }
