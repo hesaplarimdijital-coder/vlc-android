@@ -110,3 +110,6 @@ fun NagDimens.forCompactWindow(): NagDimens =
         bottomBarHeight = bottomBarHeight.coerceAtMost(64.dp),
         rowHeight = rowHeight.coerceAtMost(52.dp).coerceAtLeast(minTarget),
     )
+
+/** 1.0.8 (Desktop Kit 2.8.0): the sizes of a window short as a phone on its side: a top bar 8 dp lower (never under a target). */
+fun NagDimens.forShortWindow(): NagDimens = copy(topBarHeight = (topBarHeight - 8.dp).coerceAtLeast(minTarget))

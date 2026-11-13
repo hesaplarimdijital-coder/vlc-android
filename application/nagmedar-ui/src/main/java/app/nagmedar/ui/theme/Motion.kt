@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
+import app.nagmedar.ui.shell.HeightClass
 import app.nagmedar.ui.shell.WidthClass
 import kotlin.math.roundToInt
 
@@ -372,9 +373,12 @@ class NagMotion private constructor(val reduced: Boolean) {
             spring(dampingRatio = 1f, stiffness = 800f, visibilityThreshold = visibilityThreshold)
 
         /** The tier of a window: springs on a phone, the timed curves from tablet width up, nothing with [reduced] motion. */
-        fun tier(widthClass: WidthClass, reduced: Boolean = false): MotionTier = when {
+        fun tier(widthClass: WidthClass, reduced: Boolean = false): MotionTier = tier(widthClass, reduced, HeightClass.Expanded)
+
+        /** 1.0.8 (Desktop Kit 2.8.0): [tier], and a window short as a phone on its side ([HeightClass.Compact]) moves as a phone does. */
+        fun tier(widthClass: WidthClass, reduced: Boolean, heightClass: HeightClass): MotionTier = when {
             reduced -> MotionTier.Reduced
-            widthClass == WidthClass.Compact -> MotionTier.Gesture
+            widthClass == WidthClass.Compact || heightClass == HeightClass.Compact -> MotionTier.Gesture
             else -> MotionTier.Timed
         }
 

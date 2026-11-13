@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import app.nagmedar.ui.shell.HeightClass
+import app.nagmedar.ui.shell.LocalHeightClass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -100,11 +102,18 @@ fun NagmedarTheme(
     val target = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
     val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
     val colors = animatePalette(target, if (motion.reduced) 0 else colorChangeMillis)
-    val largeWindow = LocalConfiguration.current.screenWidthDp >= LARGE_WINDOW_DP
+    val configuration = LocalConfiguration.current
+    // 1.0.8 (Desktop Kit 2.8.0): a window short as a phone on its side keeps the phone's text, sizes and motion; from the
+    // configuration's height, not from what the on-screen keyboard leaves of it
+    val heightClass = HeightClass.fromHeight(configuration.screenHeightDp.toFloat())
+    val short = heightClass == HeightClass.Compact
+    val largeWindow = configuration.screenWidthDp >= LARGE_WINDOW_DP && !short
     val type = remember(inputMode, largeWindow, largeWindowTextStep) {
         NagType.forMode(inputMode).let { if (largeWindow) it.grow(largeWindowTextStep) else it }
     }
-    val dimens = NagDimens.forMode(inputMode).let { if (compactSizes && !largeWindow) it.forCompactWindow() else it }
+    val dimens = NagDimens.forMode(inputMode)
+        .let { if (compactSizes && !largeWindow) it.forCompactWindow() else it }
+        .let { if (short) it.forShortWindow() else it }
     // from the target palette, not from each frame of the cross-fade: Material provides its scheme through a static local
     val scheme = remember(target) { target.toMaterialScheme() }
     val selection = remember(target) { TextSelectionColors(handleColor = target.accent, backgroundColor = target.accent.copy(alpha = 0.35f)) }
@@ -122,6 +131,7 @@ fun NagmedarTheme(
         LocalNagMotion provides motion,
         LocalLargeWindow provides largeWindow,
         LocalMotionTier provides tier,
+        LocalHeightClass provides heightClass,
     ) {
         MaterialTheme(colorScheme = scheme, typography = typography) {
             CompositionLocalProvider(

@@ -153,7 +153,9 @@ fun NagmedarShell(
     val current = Destination.fromRoute(entry?.destination?.route)
     val navKind = NavKind.forWidth(widthClass)
     val motion = NagTheme.motion
-    val tier = NagMotion.tier(widthClass, motion.reduced)
+    // 1.0.8 (Desktop Kit 2.8.0): a phone on its side keeps the phone's motion and its player under the content
+    val short = LocalHeightClass.current == HeightClass.Compact
+    val tier = NagMotion.tier(widthClass, motion.reduced, LocalHeightClass.current)
     val systemGlass = rememberSystemGlassMode()
     val glassMode = if (!glass) GlassMode.Solid else LocalGlassMode.current ?: systemGlass
     // 1.0.3: the phone's bars on glass (the user's decision; solid in the product) while menus and sheets stay as [glass] says
@@ -290,7 +292,7 @@ fun NagmedarShell(
     val overlayHost = remember { ShellOverlayHost() }
     val glassSource = remember { HazeState() }
     val padding = remember(metrics, density) { shellPaddingValues(metrics, density) }
-    val floating = floatingPlayer && navKind != NavKind.BottomBar
+    val floating = floatingPlayer && navKind != NavKind.BottomBar && !short
     val floatingMargin = 12.dp
     val phone = navKind == NavKind.BottomBar && !contentOnly
     // 1.0.3: the system's navigation bar at the window's bottom, which the root leaves to the shell (read while measuring)
