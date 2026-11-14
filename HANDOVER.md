@@ -351,3 +351,20 @@ taşı" (all of 2.5.0..2.8.0 that has a counterpart; TokenField not ported, no a
 
 Left, told to the user: what only his devices show (haptics, a real mouse, DeX resizing, One UI); kit PR #17; the
 remote branches with the earlier list.
+
+## 1.0.9 (14 Nov 2026) — delivered
+The owner, 14 Nov 01:11: "Şimdi 2.9.0 yükselt" (he had tagged kit 2.9.0 on main 2a6c41a, without kit PR #17).
+`orch/LOG.md` has it in full; `orch/release-1.0.9/` has the PR's description and the device checks.
+
+- master `5ba07aa6` (PR #119). The personal APK: `app.nagmedar.debug`, 1.0.9, versionCode 14010015, target 37, not
+  debuggable, v2, baseline profile inside, arm64-v8a, 97589864 bytes, SHA-256
+  `f0c7b95c98f434c0c8bdfe789661b360e8a9bb50670f4db6423a2ab37a92aedc`.
+- Kit 2.9.0 → Nağmedar: the glass's opaque backing was there since 1.0.5; the root leaves `safeDrawing`'s bottom less
+  the IME to the shell (`shell/SystemBand.kt`); `HideBottomNavigation`'s counterpart is `PhoneWindowPage`
+  (`shell/WindowPage.kt`): full-screen lyrics, the visualiser and the lyrics editor are window pages on a phone (they
+  lay between the bars when a shortcut opened them over the mini player). Tests: `WindowEdgeTest` (software drawing,
+  API 34), `PhoneWindowPageTest`.
+- Robolectric facts met: PixelCopy draws with the hardware renderer by default under NATIVE graphics; on API 34 that
+  stops at Haze's combined noise+tint AGSL ("'color' is not a valid layout qualifier"); API 36 needs Java 21, the app's
+  tests run on 17; API 35 untried.
+- Kit PR #17: its notes moved to "Yayımlanmamış" (40eb18d); merge, number and tag are his.

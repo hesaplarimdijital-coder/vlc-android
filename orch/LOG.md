@@ -1130,3 +1130,41 @@ bug: podcasts sometimes stop by themselves (no WifiLock, no http-reconnect found
   Left for his word: kit PR #17 (merge, tag 2.9.0); remote branches story/release-1.0.8 (merged), ci/shots-pr-118,
   the evidence branches ci/emulator-*-personal-* rewritten by every walk, with the 128 in orch/branches-to-delete.txt.
   Local: $WT/release-1.0.8 and its branch removed by merge.sh. Next version: 1.0.9 = 4010009 / arm64 14010015.
+
+## 14 Nov 01:11 – (Istanbul) — 1.0.9 = Desktop Kit 2.9.0
+- 01:11 "Şimdi 2.9.0 yükselt". He had tagged kit 2.9.0 on main 2a6c41a (HideBottomNavigation #14, window edge #16),
+  without kit PR #17. Reading taken: port 2.9.0 into Nağmedar (1.0.9). Kit side effect: PR #17's notes moved out of
+  2.9.0 to "Yayımlanmamış" (40eb18d, CI 43519363064 green), its body says so; the number is his.
+- Map: glass backing = Nağmedar since 1.0.5 (786305e1, Glass.kt drawBehind under the blur); root bottom inset =
+  SystemBand.kt rememberWindowRootInsets: safe.only(Bottom).exclude(ime) (fc46c5ae); HideBottomNavigation = no shell
+  screen with its own bottom buttons, BUT the review found full-screen lyrics / visualizer / lyrics editor opened by
+  shortcut (Ctrl+Shift+L / V, phone-wide window, mini player collapsed) lie in the screen overlay between the bars ->
+  PhoneWindowPage(AnimatedVisibilityScope?) in shell/WindowPage.kt, used at the three NagmedarApp sites (1ae4b90d).
+- WindowEdgeTest (kit's): first CI 43519261081 on 62ac5161 (test alone, API 34, PixelCopy hardware, Blur pinned):
+  bottomInsetsThatDisagree red at bounds (glass 778 dp, window 780 dp) = the root bug; the other four died in
+  Robolectric's API 34 native runtime compiling Haze's combined noise+tint AGSL ("'color' is not a valid layout
+  qualifier"). @Config(sdk=[36]) (1965dfc2) -> CI 43520923610: "Android SDK 36 requires Java 21 (have Java 17)".
+  26405106: back to API 34, decorView.draw into a bitmap (translucent glass), + assertBandToTheEdge (band one colour
+  to last row; first/middle/last column after 40c83b64). Robolectric 4.17 facts: PixelCopy uses the hardware renderer
+  by default (property robolectric.pixelCopyRenderMode, default "hardware", API >= 28, NATIVE graphics); API 36 needs
+  Java 21; the app's tests run on Temurin 17. API 35 untried.
+- Review (one subagent, whole diff at 7073b7e1): see the CHANGELOG's Test section; all handled.
+- CI 43524716529 on 2985c636: debug green, 2435 tests passed, 281 screenshots same. Walk 43524771273 (personal,
+  35 + 37.0) dispatched on 2985c636 (the one on 33121b60, 43520936015, was replaced, cancelled by concurrency).
+- Walk 43524771273 on 2985c636 (personal): API 35 phone 141 steps 0/71, API 35 tablet 132 0/66, 37.0 phone 145 0/71
+  (2 system ANRs), 37.0 tablet 132 0/66. Not walked: sheet-trials, page-opens, back-button, search, notice-swipe (the
+  root's bottom inset is the same where the system's bottom insets agree, as on the emulator).
+- Final head 5ba07aa6 (notes only after 2985c636). PR #119 body: map, review, runs. release_chain.sh started ~00:01 UTC.
+- RELEASE: release_chain.sh release-1.0.9 5ba07aa6f2c1372c6b78b310e0665cd621fd7954 1.0.9 — CI 43531146857 green (2435
+  tests, 281 screenshots same), master fast-forwarded to 5ba07aa6 (PR #119 closed as merged), personal release
+  dispatched 00:21:17 UTC (run 43533617174), master push run 43533616993. apkcheck: app.nagmedar.debug, 1.0.9,
+  14010015, minSdk 34, target 37, not debuggable, v2, cert d094907b…fecbbc, baseline.prof + profm, arm64-v8a,
+  97589864 bytes, SHA-256 f0c7b95c98f434c0c8bdfe789661b360e8a9bb50670f4db6423a2ab37a92aedc (computed again locally).
+  DELIVERED 14 Nov ~03:35 Istanbul (00:35 UTC) with SendUserFile.
+  Plan document: "1.0 cihaz testi" rev 16 (1.0.9 checks at the top: heading m1gesnh1vzq.30268; Telefonda 3, Tablette
+  telefon genişliğinde 3, Değişmemesi gerekenler 2; intro .25 names 1.0.9), "1.0.3 planı" rev 40 (1.0.9 paragraph
+  m1gesnh1vzq.16560 above 1.0.8's).
+  NOT SEEN FROM HERE: the S24's last pixel row under the blur (1.0.5's fix; no test here can draw the blur); the
+  shortcut path on a real split-screen tablet with a keyboard.
+  Left for his word: kit PR #17 (merge, number, tag); remote branches story/release-1.0.9 (merged) and the evidence
+  branches with the earlier list. Next version: 1.0.10 = 4010010 / arm64 14010016 (or his choice).
