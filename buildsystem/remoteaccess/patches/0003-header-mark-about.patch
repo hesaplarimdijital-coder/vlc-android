@@ -47,9 +47,9 @@ index 5026dc0..c32ebb8 100644
                      license: "MIT"
                  },
 +                {
-+                    name: "IBM Plex Sans",
-+                    link: "https://github.com/IBM/plex",
-+                    copyright: "Copyright (c) 2017 IBM Corp. with Reserved Font Name \"Plex\"",
++                    name: "Bricolage Grotesque",
++                    link: "https://github.com/ateliertriay/bricolage",
++                    copyright: "Copyright 2022 The Bricolage Grotesque Project Authors",
 +                    license: "OFL-1.1"
 +                },
              ]

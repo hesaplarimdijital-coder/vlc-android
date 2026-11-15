@@ -84,8 +84,8 @@ class RemoteAccessBrandTest {
     @Test
     fun theColoursAreTheThemes() {
         val colours = File(build, "assets/src/scss/colors.scss").readText()
-        // NagTheme's dark accent and the light one, and the dark surface
-        listOf("#8AB0FF", "#4C618C", "#111418").forEach { assertTrue(it, colours.contains(it, ignoreCase = true)) }
+        // NagTheme's dark accent and the light one, and the dark page (1.1.0, Ebru: the blue on Gece and Su)
+        listOf("#84A9F8", "#3F60A8", "#0E1014").forEach { assertTrue(it, colours.contains(it, ignoreCase = true)) }
         assertTrue(!colours.contains("#ff8800", ignoreCase = true))
     }
 

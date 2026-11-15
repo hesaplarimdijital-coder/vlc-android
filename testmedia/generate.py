@@ -30,7 +30,8 @@ import tracker  # noqa: E402
 
 REPO = os.path.dirname(HERE)
 FONT_DIR = os.path.join(REPO, 'application', 'nagmedar-ui', 'src', 'main', 'res', 'font')
-FONT = os.path.join(FONT_DIR, 'ibm_plex_sans_semibold.ttf')
+# 1.1.0: the app's typeface is Bricolage Grotesque (IBM Plex Sans before), its 600 cut
+FONT = os.path.join(FONT_DIR, 'bricolage_grotesque_600.ttf')
 
 ALBUM = {'artist': 'Nağmedar Test Orkestrası', 'album': 'Ölçüm Kayıtları', 'date': '2026', 'genre': 'Test'}
 

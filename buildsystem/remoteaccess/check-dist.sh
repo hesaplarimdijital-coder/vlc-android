@@ -33,13 +33,13 @@ for f in logo.svg favicon.svg favicon.ico favicon-16x16.png favicon-32x32.png ap
 done
 grep -q 'Nağmedar' "$dist/favicon.svg" 2>/dev/null || fail "favicon.svg Nağmedar'ın işareti değil"
 
-n=$(ls "$dist"/fonts/ibm-plex-sans-*.woff2 2>/dev/null | wc -l)
-[ "$n" -eq 3 ] || fail "IBM Plex Sans yazı tipleri eksik ($n/3)"
+n=$(ls "$dist"/fonts/bricolage-grotesque-*.woff2 2>/dev/null | wc -l)
+[ "$n" -eq 3 ] || fail "Bricolage Grotesque yazı tipleri eksik ($n/3)"
 
 css=$(cat "$dist"/css/*.css)
-echo "$css" | grep -qi 'IBM Plex Sans' || fail "stil dosyası IBM Plex Sans'ı tanımlamıyor"
+echo "$css" | grep -qi 'Bricolage Grotesque' || fail "stil dosyası Bricolage Grotesque'i tanımlamıyor"
 echo "$css" | grep -qi '#ff8800\|#ff610a\|#ff7700' && fail "stil dosyasında VLC'nin turuncusu kalmış"
-echo "$css" | grep -qi '#8AB0FF' || fail "stil dosyasında Nağmedar'ın vurgu rengi (#8AB0FF) yok"
+echo "$css" | grep -qi '#84A9F8' || fail "stil dosyasında Nağmedar'ın vurgu rengi (#84A9F8) yok"
 
 # the patches' keys: the page asks the app for its name and language
 cat "$dist"/js/*.js | grep -q 'APP_NAME' || fail "uygulama APP_NAME anahtarını kullanmıyor: yamalar uygulanmamış"

@@ -8,7 +8,8 @@ The web app is VideoLAN's, pinned in compile-remoteaccess.sh; what makes it Nağ
   assets/public/*.png, .ico     favicon, touch icons and manifest icons from the branding SVGs
   assets/public/logo.svg        the mark, for the page header
   assets/src/assets/fonts/*.woff2
-                                IBM Plex Sans (SIL OFL 1.1), the app's typeface, as web fonts
+                                Bricolage Grotesque (SIL OFL 1.1), the app's typeface since 1.1.0
+                                (IBM Plex Sans before), its static cuts as web fonts
 
 Usage: gen_brand.py <repo_root>   (needs Pillow, fontTools with brotli, Playwright with Chromium)
 """
@@ -51,10 +52,12 @@ def tokens(root):
     palette = open(os.path.join(ui, 'Palette.kt'), encoding='utf-8').read()
     tones = open(os.path.join(ui, 'AccentTones.kt'), encoding='utf-8').read()
     blue = parse_hex(re.search(r'Blue\(Color\(0xFF([0-9A-Fa-f]{6})\)\)', palette).group(1))
-    selection = re.search(r'val Blue = fixed\(Accent\.Blue\.base, Color\(0xFF(\w{6})\), Color\(0xFF(\w{6})\), Color\(0xFF(\w{6})\)\)', tones)
-    dark_selection, _, on_dark_selection = (parse_hex(selection.group(i)) for i in (1, 2, 3))
-    deep = mix(blue, (0, 0, 0), 0.55)
-    light_selection = mix(blue, (1, 1, 1), 0.22)
+    # 1.1.0 (Ebru): the blue's tones as AccentTones keeps them, each written out
+    start = tones.index('val Blue = AccentTones(')
+    body = tones[start:tones.index('\n        )', start)]
+    blue_tones = {m.group(1): parse_hex(m.group(2)) for m in re.finditer(r'(\w+) = Color\(0xFF([0-9A-Fa-f]{6})\)', body)}
+    dark_selection, on_dark_selection = blue_tones['darkSelection'], blue_tones['onDarkSelection']
+    deep, light_selection = blue_tones['deep'], blue_tones['lightSelection']
     dark = fields(palette, 'fun dark(tones: AccentTones) = NagColors(')
     light = fields(palette, 'fun light(tones: AccentTones) = NagColors(')
     dark.update(accent=blue, accentText=blue, selection=dark_selection, onSelection=on_dark_selection)
@@ -254,10 +257,14 @@ def convert_fonts(root):
     from fontTools.ttLib import TTFont
     source = os.path.join(root, 'application/nagmedar-ui/src/main/res/font')
     out = os.path.join(HERE, 'assets/src/assets/fonts')
-    for weight in ('regular', 'medium', 'semibold'):
-        font = TTFont(os.path.join(source, 'ibm_plex_sans_%s.ttf' % weight))
+    # 1.1.0: Bricolage Grotesque's static cuts (buildsystem/branding/fonts/make_fonts.py); the old faces go
+    for name in os.listdir(out):
+        if name.endswith('.woff2'):
+            os.remove(os.path.join(out, name))
+    for weight in ('400', '500', '600'):
+        font = TTFont(os.path.join(source, 'bricolage_grotesque_%s.ttf' % weight))
         font.flavor = 'woff2'
-        font.save(os.path.join(out, 'ibm-plex-sans-%s.woff2' % weight))
+        font.save(os.path.join(out, 'bricolage-grotesque-%s.woff2' % weight))
 
 
 if __name__ == '__main__':
