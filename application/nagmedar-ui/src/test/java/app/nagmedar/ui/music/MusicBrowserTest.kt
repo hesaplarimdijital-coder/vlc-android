@@ -82,16 +82,37 @@ class MusicBrowserTest {
 
     private val library = MusicLibrary(MusicSamples.tracks, Locale.forLanguageTag("tr"))
 
-    private fun show(width: WidthClass, input: InputMode, state: MusicBrowserState = MusicBrowserState()): MusicBrowserState {
+    private fun show(width: WidthClass, input: InputMode, state: MusicBrowserState = MusicBrowserState(), shown: MusicLibrary = library): MusicBrowserState {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = input) {
                 CompositionLocalProvider(LocalWidthClass provides width) {
-                    MusicBrowser(library, state, actions, Modifier)
+                    MusicBrowser(shown, state, actions, Modifier)
                 }
             }
         }
         compose.waitForIdle()
         return state
+    }
+
+    /**
+     * 1.1.0: the genres' covers with a genre that starts with a digit (first, under "#") and tracks without one (last,
+     * under "Türü yok"), all on one screen: each heading its own key in the grid (two "#"s with one key ended the grid).
+     */
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi")
+    fun theGridTakesADigitFirstAndTheNamelessTogether() {
+        val tracks = listOf(
+            Track(1, "file:///m/1.flac", "Bir", "Ada", null, "Seksenler", "80s", 1985, 1, 1, 200_000, "/m"),
+            Track(2, "file:///m/2.flac", "İki", "Ada", null, "Caz", "Caz", 1990, 1, 1, 200_000, "/m"),
+            Track(3, "file:///m/3.flac", "Üç", "Ada", null, "Demo", null, 2000, 1, 1, 200_000, "/m"),
+        )
+        show(WidthClass.Large, InputMode.Pointer, MusicBrowserState(view = MusicView.Genres), MusicLibrary(tracks, Locale.forLanguageTag("tr")))
+        compose.onNodeWithTag("music-grid").assertExists()
+        compose.onNodeWithText("80s").assertExists()
+        compose.onNodeWithText("Türü yok").assertExists()
+        // the headings, as TalkBack hears them
+        compose.onNode(hasContentDescription("#, 1 tür")).assertExists()
+        compose.onNode(hasContentDescription("C, 1 tür")).assertExists()
+        compose.onNode(hasContentDescription("Türü yok, 1 tür")).assertExists()
     }
 
     @Test
@@ -136,7 +157,7 @@ class MusicBrowserTest {
     fun theQuickFiltersNarrowTheAlbums() {
         val state = show(WidthClass.Compact, InputMode.Touch, MusicBrowserState(view = MusicView.Albums))
         // nothing of the samples was played: every album is unheard, none heard in part
-        compose.onNodeWithText("Hiç dinlenmeyenler").performClick()
+        compose.onNodeWithText("Hiç çalınmayanlar").performClick()
         compose.waitForIdle()
         assertEquals(QuickFilter.Unheard, state.quick)
         compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Itrî'nin İzinde"))

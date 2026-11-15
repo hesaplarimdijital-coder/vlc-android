@@ -19,6 +19,7 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -192,6 +193,33 @@ class MusicPanesTest {
         compose.onNode(hasContentDescription("Listeye dön")).performClick()
         compose.waitForIdle()
         assertStillAt(top, topOnScreen("Albüm", 60))
+    }
+
+    /** The numbers of the albums whose covers are on the screen now (the grid's). */
+    private fun coversOnScreen(): List<Int> = (1..60).filter { onScreen("Albüm %02d".format(it)) }
+
+    /**
+     * 1.1.0 (Ebru): the albums' covers, the default, keep their place as the window widens (the inspector docking beside
+     * them, a row holding another number of covers) and narrows again: the grid keeps its first cover in sight, the one
+     * whose title may be scrolled off above, and starts the row the new number of covers puts it in, so the first title
+     * on the screen moves by up to a row of each layout (7 covers to a row here narrow, 4 wide); never back at the top.
+     */
+    @Test
+    fun theCoversKeepTheirPlaceAsTheWindowWidensAndNarrows() {
+        show(MusicBrowserState(view = MusicView.Albums), withInspector = true)
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Albüm 45"))
+        compose.waitForIdle()
+        val first = coversOnScreen().min()
+        assertTrue(coversOnScreen().toString(), 45 in coversOnScreen() && first > 1)
+        width = WidthClass.Large
+        compose.waitForIdle()
+        val wide = coversOnScreen()
+        assertTrue("wide: $wide, first $first", wide.isNotEmpty() && 1 !in wide && abs(wide.min() - first) <= 12)
+        assertTrue(onScreen("etiketler"))
+        width = WidthClass.Compact
+        compose.waitForIdle()
+        val narrow = coversOnScreen()
+        assertTrue("narrow again: $narrow, first $first", narrow.isNotEmpty() && 1 !in narrow && abs(narrow.min() - first) <= 12)
     }
 
     @Test

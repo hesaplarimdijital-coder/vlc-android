@@ -38,6 +38,23 @@ class PaletteContrastTest {
         assertTrue(failures.joinToString("\n"), failures.isEmpty())
     }
 
+    /**
+     * 1.1.0 (Ebru): a destructive button's words on the danger fill (4.5:1), and a notice's error sign and edge in the
+     * danger colour that reads on the inverse surface (3:1, a graphic), on every theme.
+     */
+    @Test
+    fun theDangerReadsWhereItIsDrawn() {
+        val failures = mutableListOf<String>()
+        for (mode in modes) {
+            val c = NagPalette.colors(mode, systemDark = false, accent = Accent.Blue)
+            val onFill = contrast(app.nagmedar.ui.components.onDanger(c), c.danger)
+            if (onFill < 4.5) failures += "%s: on danger %.2f:1".format(mode, onFill)
+            val sign = contrast(c.inverseDanger(), c.inverseSurface)
+            if (sign < 3.0) failures += "%s: inverse danger on the inverse surface %.2f:1".format(mode, sign)
+        }
+        assertTrue(failures.joinToString("\n"), failures.isEmpty())
+    }
+
     /** 1.0.8: a press is a step past the hover, on every theme. */
     @Test
     fun aPressShowsPastTheHover() {

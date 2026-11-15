@@ -69,6 +69,24 @@ class QuickFilterTest {
         assertEquals("E", letter("Élan", "en"))
     }
 
+    private fun group(key: String, title: String?) = MusicGroup(key, title, null, null, emptyList())
+
+    /**
+     * The headings over the groups as their order has them: a digit first under "#" at the top, those without the name
+     * under their own words at the end; a letter that comes back later is a heading of its own, and no two headings
+     * share the grid's key (two with one key would end the grid).
+     */
+    @Test
+    fun theHeadingsAreTheRunsOfTheirLetters() {
+        val groups = listOf(group("a", "10cc"), group("b", "Ada"), group("c", "Akın"), group("d", "Bora"), group("e", "Ali"), group("f", null), group("g", " "))
+        val entries = lettered(groups, { it.title }, Locale.forLanguageTag("tr"), "Bilinmeyen sanatçı")
+        val headings = entries.filterIsInstance<GridEntry.Letter>()
+        assertEquals(listOf("#", "A", "B", "A", "Bilinmeyen sanatçı"), headings.map { it.letter })
+        assertEquals(listOf(1, 2, 1, 1, 2), headings.map { it.count })
+        assertEquals(headings.size, headings.map { it.key }.toSet().size)
+        assertEquals(groups.size, entries.count { it is GridEntry.Group })
+    }
+
     @Test
     fun aNameWithoutALetterFirstGoesUnderTheHash() {
         assertEquals("#", letter("3 Doors Down", "en"))

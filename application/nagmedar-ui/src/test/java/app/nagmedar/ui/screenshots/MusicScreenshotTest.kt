@@ -140,7 +140,7 @@ class MusicScreenshotTest {
     private fun Library(library: MusicLibrary, state: MusicBrowserState, inspector: MusicInspectorContent? = null, inspectorState: InspectorState? = null) {
         val panel = inspectorState ?: rememberInspectorState()
         val compact = currentWidthClass() == WidthClass.Compact
-        val albums = remember(library) { library.groups(MusicView.Albums).size }
+        val albums = remember(library) { library.groups(MusicView.Albums).count { it.title != null } }
         val counts = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size) + " · " +
             pluralStringResource(R.plurals.nag_music_albums, albums, albums)
         val band = remember { @Composable { EbruBand(EbruInks.Default, 84.dp) } }
