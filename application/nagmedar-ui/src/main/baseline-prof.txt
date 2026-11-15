@@ -12,5 +12,9 @@ HSPLapp/nagmedar/ui/input/**->**(**)**
 # listening traces, the quick filters and the marbled band (drawn off the main thread, its tray's maps in a loop)
 HSPLapp/nagmedar/ui/music/MusicGrid**->**(**)**
 HSPLapp/nagmedar/ui/music/*MusicGridKt**->**(**)**
+HSPLapp/nagmedar/ui/music/GridEntry**->**(**)**
+HSPLapp/nagmedar/ui/music/GroupGridWords**->**(**)**
+HSPLapp/nagmedar/ui/music/MusicLayout**->**(**)**
+HSPLapp/nagmedar/ui/music/QuickFilter**->**(**)**
 HSPLapp/nagmedar/ui/music/Ebru**->**(**)**
 HSPLapp/nagmedar/ui/music/*EbruBandKt**->**(**)**

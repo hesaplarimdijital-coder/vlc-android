@@ -42,6 +42,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.input.hasPrecisePointer
+import app.nagmedar.ui.music.rememberAlbumSeed
 import app.nagmedar.ui.notify.NotificationIds
 import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.theme.InputMode
@@ -72,7 +73,7 @@ class AlarmActivity : ComponentActivity() {
         val mode = if (hasPrecisePointer(this)) InputMode.Pointer else InputMode.Touch
         setContent {
             val prefs = rememberNagmedarPreferences()
-            NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
+            NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode, albumSeed = rememberAlbumSeed(prefs.accent)) {
                 AlarmPage(
                     time = time,
                     onStop = {

@@ -148,12 +148,13 @@ fun NagmedarTheme(
 /**
  * The tones of [accent]. 1.1.0: the album's ([Accent.Album], [albumSeed]) are tuned off the main thread, against all
  * three palettes, for each new cover; the last album's stay until the new ones are ready (the palette then cross-fades
- * to them), blue before the first and while nothing with a coloured cover plays.
+ * to them), blue while nothing with a coloured cover plays. A seed there from the first frame (the last album's, kept)
+ * is tuned at once: the window opens in its ink, not blue.
  */
 @Composable
 private fun rememberAccentTones(accent: Accent, albumSeed: Color?): AccentTones {
     val systemSeed = if (accent == Accent.System) systemAccentSeed() else null
-    val album = remember { mutableStateOf<AccentTones?>(null) }
+    val album = remember { mutableStateOf(if (accent == Accent.Album) albumSeed?.let { AccentTones.fromSeed(it) } else null) }
     if (accent == Accent.Album) {
         LaunchedEffect(albumSeed) {
             album.value = if (albumSeed == null) AccentTones.Blue else withContext(Dispatchers.Default) { AccentTones.fromSeed(albumSeed) }

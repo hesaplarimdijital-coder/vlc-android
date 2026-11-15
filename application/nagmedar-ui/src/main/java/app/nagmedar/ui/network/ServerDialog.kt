@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +42,9 @@ import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.SegmentedChoice
+import app.nagmedar.ui.components.dialogEdge
+import app.nagmedar.ui.components.dialogPadding
+import app.nagmedar.ui.components.dialogShape
 import app.nagmedar.ui.theme.NagTheme
 
 /** What the add-server form finds wrong: an address's faults, or a password without its user. */
@@ -200,7 +202,8 @@ fun ServerDialog(draft: ServerDraft, onSave: () -> Unit, onCancel: () -> Unit, o
 fun ServerDialogSurface(draft: ServerDraft, onSave: () -> Unit, onCancel: () -> Unit, onRemove: () -> Unit = {}) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusCard)
+    // 1.1.0 (Ebru): a dialog's corners, edge and room; the question in Bodoni's italic
+    val shape = dialogShape()
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.92f).dp
     val errors = draft.shownErrors
     val save = {
@@ -216,13 +219,13 @@ fun ServerDialogSurface(draft: ServerDraft, onSave: () -> Unit, onCancel: () -> 
                 .fillMaxWidth()
                 .heightIn(max = maxHeight)
                 .background(colors.surfaceRaised, shape)
-                .border(1.dp, colors.borderStrong, shape)
-                .padding(dimens.gapL)
+                .border(1.dp, dialogEdge(colors), shape)
+                .padding(dialogPadding())
                 .testTag("server-dialog"),
         ) {
             Text(
                 stringResource(if (draft.editing != null) R.string.nag_net_edit_server else R.string.nag_net_add_server_title),
-                style = NagTheme.type.title,
+                style = NagTheme.type.headline,
                 color = colors.text,
                 modifier = Modifier.semantics { heading() },
             )

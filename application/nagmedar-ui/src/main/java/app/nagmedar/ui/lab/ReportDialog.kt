@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -35,6 +34,9 @@ import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.dialogEdge
+import app.nagmedar.ui.components.dialogPadding
+import app.nagmedar.ui.components.dialogShape
 import app.nagmedar.ui.theme.NagTheme
 
 /** A lab report: monospaced, selectable, with copy and share for the spike's decision note. */
@@ -43,7 +45,8 @@ fun ReportDialog(title: String, report: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusCard)
+    // 1.1.0 (Ebru): a dialog's corners, edge and room; the title in Bodoni's italic
+    val shape = dialogShape()
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.8f).dp
     NagDialog(onDismissRequest = onDismiss) {
         Column(
@@ -53,10 +56,10 @@ fun ReportDialog(title: String, report: String, onDismiss: () -> Unit) {
                 .fillMaxWidth()
                 .heightIn(max = maxHeight)
                 .background(colors.surfaceRaised, shape)
-                .border(1.dp, colors.borderStrong, shape)
-                .padding(dimens.gapL),
+                .border(1.dp, dialogEdge(colors), shape)
+                .padding(dialogPadding()),
         ) {
-            Text(title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
+            Text(title, style = NagTheme.type.headline, color = colors.text, modifier = Modifier.semantics { heading() })
             Spacer(Modifier.height(dimens.gapS))
             HorizontalRule()
             Box(

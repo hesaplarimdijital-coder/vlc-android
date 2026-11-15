@@ -1084,8 +1084,9 @@
     <string name="nag_music_layout_list">Liste görünümü</string>
     <string name="nag_music_quick_all">Tümü</string>
     <string name="nag_music_quick_unfinished">Yarım kalanlar</string>
-    <string name="nag_music_quick_unheard">Hiç dinlenmeyenler</string>
+    <string name="nag_music_quick_unheard">Hiç çalınmayanlar</string>
     <string name="nag_music_quick_new">Bu yıl eklenenler</string>
+    <string name="nag_music_trace">Çalınan parça: %1$d / %2$d</string>
     <string name="nag_music_recent_shelf">Son çalınan müzik</string>
     <string name="nag_music_recent_none_title">Henüz parça çalınmadı</string>
     <string name="nag_music_recent_none_desc">Dinlediğiniz parçalar burada görünür, en yenisi başta.</string>
@@ -1154,6 +1155,18 @@
     <plurals name="nag_music_albums">
         <item quantity="one">%d albüm</item>
         <item quantity="other">%d albüm</item>
+    </plurals>
+    <plurals name="nag_music_artists_count">
+        <item quantity="one">%d sanatçı</item>
+        <item quantity="other">%d sanatçı</item>
+    </plurals>
+    <plurals name="nag_music_genres_count">
+        <item quantity="one">%d tür</item>
+        <item quantity="other">%d tür</item>
+    </plurals>
+    <plurals name="nag_music_composers_count">
+        <item quantity="one">%d besteci</item>
+        <item quantity="other">%d besteci</item>
     </plurals>
     <string name="nag_music_lossy">Kayıplı</string>
     <string name="nag_music_rate_and_up">%1$s ve üstü</string>

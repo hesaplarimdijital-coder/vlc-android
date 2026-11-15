@@ -170,10 +170,20 @@ private fun Centered(content: @Composable () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { content() }
 }
 
-/** The lines' type: the pane's headline, larger over the whole window. */
+/**
+ * The lines' type: the pane's headline's size, larger over the whole window. 1.1.0 (Ebru): in the interface's own face,
+ * not the headlines' Bodoni italic: a song's lines read long, and the one sung is a weight bolder, which Bodoni's one cut
+ * a role cannot be.
+ */
 @Composable
-private fun lineStyle(large: Boolean): TextStyle =
-    if (large) NagTheme.type.display.copy(fontSize = NagTheme.type.size(32f), lineHeight = NagTheme.type.size(42f)) else NagTheme.type.headline
+private fun lineStyle(large: Boolean): TextStyle {
+    val type = NagTheme.type
+    return if (large) {
+        type.title.copy(fontSize = type.size(32f), lineHeight = type.size(42f), fontWeight = FontWeight.SemiBold)
+    } else {
+        type.title.copy(fontSize = type.headline.fontSize, lineHeight = type.headline.lineHeight, fontWeight = FontWeight.SemiBold)
+    }
+}
 
 @Composable
 private fun SyncedLines(lyrics: Lyrics, timeMs: () -> Long, onSeek: ((Long) -> Unit)?, large: Boolean) {

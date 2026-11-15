@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -35,6 +36,9 @@ import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.util.Random
@@ -71,8 +75,11 @@ data class EbruInks(val inks: List<Int>, val paper: Int, val seed: Long) {
  */
 internal object Ebru {
 
-    /** A band [width] × [height] pixels; transparent under its torn edge. */
-    fun band(inks: EbruInks, width: Int, height: Int): Bitmap {
+    /**
+     * A band [width] × [height] pixels; transparent under its torn edge. [check] is called between the tray's steps: it
+     * throws to give up a band no longer wanted (a coroutine's ensureActive).
+     */
+    fun band(inks: EbruInks, width: Int, height: Int, check: () -> Unit = {}): Bitmap {
         val w = width.coerceAtLeast(16).toFloat()
         val h = height.coerceAtLeast(16).toFloat()
         val random = Random(inks.seed)
@@ -86,12 +93,14 @@ internal object Ebru {
             val y = (random.nextFloat() * (1 + 2 * margin) - margin) * h
             val r = (0.05f + random.nextFloat() * 0.07f) * h
             tray.drop(x, y, r, colours[i % colours.size])
+            check()
         }
         // gelgit: the stylus back and forth across the tray, then across the other way
         var k = 0
         var x = w / 14f * 0.5f
         while (x < w + w / 14f) {
             tray.tine(x, 0f, 0f, if (k % 2 == 0) 1f else -1f, h * 0.30f, w * 0.008f)
+            check()
             x += w / 14f
             k++
         }
@@ -99,6 +108,7 @@ internal object Ebru {
         var y = h / 6f * 0.5f
         while (y < h + h / 6f) {
             tray.tine(0f, y, if (k % 2 == 0) 1f else -1f, 0f, w * 0.05f, h * 0.01f)
+            check()
             y += h / 6f
             k++
         }
@@ -106,6 +116,7 @@ internal object Ebru {
         y = h / 30f / 2f
         while (y < h + h / 30f) {
             tray.tine(0f, y, 1f, 0f, w * 0.012f, h * 0.003f)
+            check()
             y += h / 30f
         }
         tray.wave(h * 0.05f, w * 0.18f, 1.2f)
@@ -381,8 +392,8 @@ internal object Ebru {
 
     fun cached(inks: EbruInks, width: Int, height: Int): Bitmap? = made.get(key(inks, width, height))
 
-    fun make(inks: EbruInks, width: Int, height: Int): Bitmap =
-        cached(inks, width, height) ?: band(inks, width, height).also { made.put(key(inks, width, height), it) }
+    fun make(inks: EbruInks, width: Int, height: Int, check: () -> Unit = {}): Bitmap =
+        cached(inks, width, height) ?: band(inks, width, height, check).also { made.put(key(inks, width, height), it) }
 
     private fun key(inks: EbruInks, width: Int, height: Int) = "${inks.inks.joinToString(",")}|${inks.paper}|${inks.seed}|$width×$height"
 
@@ -392,13 +403,16 @@ internal object Ebru {
 
 /**
  * 1.1.0 (Ebru): the inks of [media]'s cover (its album's), read off the main thread and kept for it; [EbruInks.Default]
- * while nothing with a cover plays.
+ * while nothing with a cover plays. Made again when the cover itself changes, not when the track does: the last cover
+ * stays while the next is read, and the new track's seed with it would make a band of neither album on the way.
  */
 @Composable
 internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
     val track = remember(media?.id, media?.uri) { media?.let { CoverTrack.of(it) } }
     val cover = rememberCover(track, COVER_SAMPLE_PX)
-    val inks by produceState(EbruInks.Default, cover, track?.key) {
+    val currentTrack by rememberUpdatedState(track)
+    val inks by produceState(EbruInks.Default, cover) {
+        val track = currentTrack
         val image = cover ?: run {
             value = EbruInks.Default
             return@produceState
@@ -419,8 +433,10 @@ internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
 
 /**
  * 1.1.0 (Ebru): a band of marbled paper across the page's top, [height] high, made from [inks] off the main thread at
- * most [MAX_BAND_PX] pixels wide and stretched to the width; a new album's band fades in over the last one. Decoration
- * only: TalkBack passes over it.
+ * most [MAX_BAND_PX] pixels wide and stretched to the width; a new album's band fades in over the last one. A width
+ * that keeps changing (the sidebar folding, a divider dragged, a DeX window resized) stretches the band on screen and
+ * makes one once it has settled for [SETTLE_MS]; a band no longer wanted is given up half made. Decoration only:
+ * TalkBack passes over it.
  */
 @Composable
 fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier) {
@@ -434,7 +450,14 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier) {
         // the band on screen stays until the next one is made, then fades into it (an album that plays after another)
         val image = remember { mutableStateOf((Ebru.cached(inks, w, h) ?: if (Ebru.synchronous) Ebru.make(inks, w, h) else null)?.asImageBitmap()) }
         LaunchedEffect(inks, w, h) {
-            val ready = Ebru.cached(inks, w, h) ?: withContext(Dispatchers.Default) { Ebru.make(inks, w, h) }
+            val ready = Ebru.cached(inks, w, h) ?: run {
+                // a band already on screen waits for the width to settle (the effect starts again on every new one)
+                if (image.value != null) delay(SETTLE_MS)
+                withContext(Dispatchers.Default) {
+                    val job = coroutineContext.job
+                    Ebru.make(inks, w, h) { job.ensureActive() }
+                }
+            }
             if (image.value?.asAndroidBitmap() !== ready) image.value = ready.asImageBitmap()
         }
         val instant = NagTheme.motion.reduced
@@ -446,6 +469,9 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier) {
 
 /** The cover is read this large for its inks. */
 private const val COVER_SAMPLE_PX = 96
+
+/** How long a new width stays before a band is made for it, while another band is on screen. */
+private const val SETTLE_MS = 250L
 
 /** A band is made at most this many pixels wide: a phone's and DeX's full width, a large tablet's a little stretched. */
 private const val MAX_BAND_PX = 1600

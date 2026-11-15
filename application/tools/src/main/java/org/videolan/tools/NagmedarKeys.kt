@@ -110,6 +110,9 @@ const val NAGMEDAR_MUSIC_COLUMNS = "nagmedar_music_columns"
 /** 1.1.0 (Ebru): how the music library shows its groups: "grid" (their covers) or "list" (rows beside their tracks). */
 const val NAGMEDAR_MUSIC_LAYOUT = "nagmedar_music_layout"
 
+/** 1.1.0 (Ebru): the last playing album's cover colour (ARGB), "Çalan albüm"'s ink while a new start reads the cover. */
+const val NAGMEDAR_ALBUM_SEED = "nagmedar_album_seed"
+
 /** S-1007: the alarm, as app.nagmedar.ui.sleep.Alarm.encode writes it. */
 const val NAGMEDAR_ALARM = "nagmedar_alarm"
 

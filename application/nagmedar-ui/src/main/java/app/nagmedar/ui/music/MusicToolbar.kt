@@ -103,33 +103,37 @@ internal fun MusicToolbar(
     BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = dimens.pagePadding, vertical = dimens.gapXs).testTag("music-toolbar")) {
         val segments = maxWidth >= SEGMENTS_FROM
         val named = maxWidth >= LABELS_FROM
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        // 1.1.0: the buttons keep their room; on a narrow phone, or with large text, the way in's name is cut short first
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             if (segments) {
                 SegmentedChoice(views, state.view, state::open)
             } else {
                 MenuButton(
                     (views.firstOrNull { it.first == state.view } ?: views.first()).second,
                     { views.map { (view, label) -> MenuEntry.Item(label, { state.open(view) }, checked = view == state.view) } },
-                    modifier = Modifier.testTag("music-views"),
+                    modifier = Modifier.weight(1f, fill = false).testTag("music-views"),
                 )
             }
-            Spacer(Modifier.weight(1f))
-            if (named) {
-                NagButton(playLabel, { actions.play(tracks, 0) }, icon = NagIcons.Play, primary = true, enabled = ready)
-                Spacer(Modifier.width(dimens.gapS))
-                NagButton(shuffleLabel, { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = ready)
-                if (showColumns) {
+            Row(Modifier.padding(start = dimens.gapS), verticalAlignment = Alignment.CenterVertically) {
+                if (named) {
+                    NagButton(playLabel, { actions.play(tracks, 0) }, icon = NagIcons.Play, primary = true, enabled = ready)
                     Spacer(Modifier.width(dimens.gapS))
-                    MenuButton(columnsLabel, { columnMenu(state, labels, words) })
+                    NagButton(shuffleLabel, { actions.play(tracks.shuffled(), 0) }, icon = NagIcons.Shuffle, enabled = ready)
+                    if (showColumns) {
+                        Spacer(Modifier.width(dimens.gapS))
+                        MenuButton(columnsLabel, { columnMenu(state, labels, words) })
+                    }
+                } else {
+                    NagIconButton(NagIcons.Play, playLabel, { actions.play(tracks, 0) }, enabled = ready, tint = NagTheme.colors.accent)
+                    NagIconButton(NagIcons.Shuffle, shuffleLabel, { actions.play(tracks.shuffled(), 0) }, enabled = ready)
                 }
-            } else {
-                NagIconButton(NagIcons.Play, playLabel, { actions.play(tracks, 0) }, enabled = ready, tint = NagTheme.colors.accent)
-                NagIconButton(NagIcons.Shuffle, shuffleLabel, { actions.play(tracks.shuffled(), 0) }, enabled = ready)
+                Spacer(Modifier.width(dimens.gapS))
+                // 1.1.0 (Ebru): the groups as covers or as rows: both buttons where there is room, else one to the other
+                if (state.view.grouped) {
+                    if (named) LayoutToggle(state) else LayoutSwitch(state)
+                }
+                FilterButton(state, probing)
             }
-            Spacer(Modifier.width(dimens.gapS))
-            // 1.1.0 (Ebru): the groups as covers or as rows
-            if (state.view.grouped) LayoutToggle(state)
-            FilterButton(state, probing)
         }
     }
 }

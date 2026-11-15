@@ -69,12 +69,16 @@ import app.nagmedar.ui.components.StateIconTile
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.collectState
+import app.nagmedar.ui.components.dialogEdge
+import app.nagmedar.ui.components.dialogPadding
+import app.nagmedar.ui.components.dialogShape
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.components.toneColors
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.hasPrecisePointer
+import app.nagmedar.ui.music.rememberAlbumSeed
 import app.nagmedar.ui.network.LocalNetworkAccess
 import app.nagmedar.ui.network.LocalNetworkHost
 import app.nagmedar.ui.network.localNetworkWords
@@ -184,7 +188,7 @@ fun showCastPicker(activity: FragmentActivity) {
     view.setContent {
         val prefs = rememberNagmedarPreferences()
         val mode = if (hasPrecisePointer(activity)) InputMode.Pointer else InputMode.Touch
-        NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode) {
+        NagmedarTheme(themeMode = ThemeMode.Dark, accent = prefs.accent, inputMode = mode, albumSeed = rememberAlbumSeed(prefs.accent)) {
             // the view goes after the click that closed it
             CastPickerDialog(CastRequest()) { root.post { root.removeView(view) } }
             // Android 17: the local network permission's question, from this window
@@ -223,7 +227,9 @@ fun CastPickerSurface(
     val dimens = NagTheme.dimens
     BoxWithConstraints(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { onClose() } }) {
         val sheet = maxWidth < SHEET_BELOW
-        val shape = if (sheet) RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) else RoundedCornerShape(12.dp)
+        // 1.1.0 (Ebru): a dialog's corners (a sheet's top ones), edge and room; its title in Bodoni's italic
+        val corner = if (dimens.minTarget >= 48.dp) 24.dp else 16.dp
+        val shape = if (sheet) RoundedCornerShape(topStart = corner, topEnd = corner) else dialogShape()
         Column(
             modifier
                 .align(if (sheet) Alignment.BottomCenter else Alignment.Center)
@@ -231,11 +237,11 @@ fun CastPickerSurface(
                 .heightIn(max = maxHeight * 0.9f)
                 .shadow(24.dp, shape)
                 .background(colors.surfaceRaised, shape)
-                .border(1.dp, colors.borderStrong, shape)
+                .border(1.dp, dialogEdge(colors), shape)
                 // taps inside stay inside
                 .pointerInput(Unit) { detectTapGestures { } }
                 .then(if (sheet) Modifier.navigationBarsPadding() else Modifier)
-                .padding(dimens.gapL)
+                .padding(dialogPadding())
                 .verticalScroll(rememberScrollState())
                 .testTag("cast-picker"),
             verticalArrangement = Arrangement.spacedBy(dimens.gapS),
@@ -244,7 +250,7 @@ fun CastPickerSurface(
                 Column(Modifier.weight(1f)) {
                     Text(
                         stringResource(if (playing != null) R.string.nag_cast_title_play else R.string.nag_cast_title),
-                        style = NagTheme.type.title,
+                        style = NagTheme.type.headline,
                         color = colors.text,
                     )
                     if (playing != null) Text(playing, style = NagTheme.type.labelSmall, color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)

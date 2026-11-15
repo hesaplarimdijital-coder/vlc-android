@@ -1089,9 +1089,10 @@
     <string name="nag_music_layout_grid">Grid view</string>
     <string name="nag_music_layout_list">List view</string>
     <string name="nag_music_quick_all">All</string>
-    <string name="nag_music_quick_unfinished">Half-heard</string>
+    <string name="nag_music_quick_unfinished">Partly played</string>
     <string name="nag_music_quick_unheard">Never played</string>
     <string name="nag_music_quick_new">Added this year</string>
+    <string name="nag_music_trace">Tracks played: %1$d of %2$d</string>
     <string name="nag_music_recent_shelf">Recently played music</string>
     <string name="nag_music_recent_none_title">No track played yet</string>
     <string name="nag_music_recent_none_desc">The tracks you listen to come here, the latest first.</string>
@@ -1160,6 +1161,18 @@
     <plurals name="nag_music_albums">
         <item quantity="one">%d album</item>
         <item quantity="other">%d albums</item>
+    </plurals>
+    <plurals name="nag_music_artists_count">
+        <item quantity="one">%d artist</item>
+        <item quantity="other">%d artists</item>
+    </plurals>
+    <plurals name="nag_music_genres_count">
+        <item quantity="one">%d genre</item>
+        <item quantity="other">%d genres</item>
+    </plurals>
+    <plurals name="nag_music_composers_count">
+        <item quantity="one">%d composer</item>
+        <item quantity="other">%d composers</item>
     </plurals>
     <string name="nag_music_lossy">Lossy</string>
     <string name="nag_music_rate_and_up">%1$s and up</string>

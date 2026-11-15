@@ -124,6 +124,8 @@ import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.DetailTransition
+import app.nagmedar.ui.shell.HeightClass
+import app.nagmedar.ui.shell.LocalHeightClass
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.MUSIC_GROUPS_PANE
 import app.nagmedar.ui.shell.MovableDetails
@@ -201,10 +203,14 @@ class MusicBrowserState(
     /** A group to scroll the list to once (a player's artist or album link); null for none. */
     var reveal by mutableStateOf<String?>(null)
 
-    /** A player's link: [view] with the group [key] open, the list scrolled to it, no filter hiding its tracks. */
-    fun show(view: MusicView, key: String, clearFilter: Boolean) {
+    /**
+     * A player's link: [view] with the group [key] open, the list scrolled to it, no filter hiding its tracks
+     * ([clearFilter]) nor the group (1.1.0: [clearQuick], the quick filter).
+     */
+    fun show(view: MusicView, key: String, clearFilter: Boolean, clearQuick: Boolean = false) {
         open(view)
         if (clearFilter) filter = TechFilter()
+        if (clearQuick) quick = QuickFilter.All
         group = key
         reveal = key
     }
@@ -446,14 +452,20 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     }
     val state = rememberMusicBrowserState()
     val inspectorState = rememberInspectorState()
-    // 1.1.0 (Ebru): the counts under the masthead: tracks and albums
-    val counts = library?.let { known ->
-        val albums = remember(known) { known.tracks.mapTo(HashSet()) { CoverTrack.of(it).key }.size }
-        pluralStringResource(R.plurals.nag_tracks_count, known.tracks.size, known.tracks.size) + " · " +
-            pluralStringResource(R.plurals.nag_music_albums, albums, albums)
+    // 1.1.0 (Ebru): the counts under the masthead: tracks and albums, as the Albums view has them (tracks without an
+    // album's name are no album); the albums once they are grouped, off the main thread the first time
+    val albums by produceState(library?.madeGroups(MusicView.Albums)?.count { it.title != null }, library) {
+        val known = library ?: return@produceState
+        value = withContext(Dispatchers.Default) { known.groups(MusicView.Albums).count { it.title != null } }
     }
+    val counts = library?.let { known ->
+        val tracks = pluralStringResource(R.plurals.nag_tracks_count, known.tracks.size, known.tracks.size)
+        albums?.let { n -> tracks + " · " + pluralStringResource(R.plurals.nag_music_albums, n, n) } ?: tracks
+    }
+    // a window as short as a phone on its side keeps its height for the music: no band across it
+    val short = LocalHeightClass.current == HeightClass.Compact
     Column(Modifier.fillMaxSize()) {
-        if (!compact) EbruBand(inks, WIDE_BAND)
+        if (!compact && !short) EbruBand(inks, WIDE_BAND)
         PageHeader(
             title = stringResource(R.string.nag_nav_music),
             subtitle = counts,
@@ -849,8 +861,13 @@ fun MusicBrowser(
     val workstation = inspector != null && width >= WidthClass.Expanded
     // a tablet's window with the inspector shown has the room of a narrow one for the groups and their tracks (Desktop Kit 1.0)
     val wide = width >= WidthClass.Expanded && !(workstation && !inspectorState.collapsed && width < WidthClass.Large)
-    // a wide window always shows a group; a narrow one shows the list until one is opened
-    val open = if (!grouped) groups.firstOrNull() else groups.firstOrNull { it.key == state.group } ?: groups.firstOrNull().takeIf { wide && !grid }
+    // a wide window always shows a group; a narrow one shows the list until one is opened. 1.1.0: the open group is
+    // looked for past the quick filter, which goes by the play counts: an unplayed album played stays open
+    val open = if (!grouped) {
+        groups.firstOrNull()
+    } else {
+        state.group?.let { key -> all.firstOrNull { it.key == key } } ?: groups.firstOrNull().takeIf { wide && !grid }
+    }
     // (a phone's group closes with its transition's Back, as the grid's does)
     if (!wide && !grid && grouped && state.group != null && width != WidthClass.Compact) BackHandler { state.group = null }
     // the toolbar's Play and Shuffle take the open group's tracks as the table shows them
@@ -864,18 +881,24 @@ fun MusicBrowser(
     LaunchedEffect(link, library) {
         val asked = link ?: return@LaunchedEffect
         val filter = state.filter
+        val quickNow = state.quick
+        val counts = stats
         // the groups are sorted with the reader's collator: off the main thread for a large library
-        val (key, hidden) = withContext(Dispatchers.Default) {
+        val found = withContext(Dispatchers.Default) {
             val all = library.groups(asked.view)
-            val found = asked.keys.firstOrNull { k -> all.any { it.key == k } }
-            found to (found != null && filter.active && library.groups(asked.view, filter).none { it.key == found })
+            val key = asked.keys.firstOrNull { k -> all.any { it.key == k } } ?: return@withContext null
+            val hidden = filter.active && library.groups(asked.view, filter).none { it.key == key }
+            // 1.1.0: nor the quick filter, over the groups the tech filter leaves (all of them once it is cleared)
+            val shown = if (hidden || !filter.active) all else library.groups(asked.view, filter)
+            val unquick = quickNow != QuickFilter.All && asked.view.grouped && shown.quick(quickNow, counts, currentYear()).none { it.key == key }
+            Triple(key, hidden, unquick)
         }
         MusicLinks.taken(asked)
-        if (key == null) {
+        if (found == null) {
             Notices.show(context, R.string.nag_music_link_missing)
             return@LaunchedEffect
         }
-        state.show(asked.view, key, clearFilter = hidden)
+        state.show(asked.view, found.first, clearFilter = found.second, clearQuick = found.third)
     }
     // the open group's tracks play from it: an album's or an artist's, as the phone's player names it
     val openActions = remember(actions, state.view, open?.title) { actions.playingFrom(groupSource(state.view, open)) }
@@ -899,7 +922,6 @@ fun MusicBrowser(
             }
         }
     }
-    val res = LocalContext.current.resources
     val gridWords = remember(state.view) {
         val view = state.view
         GroupGridWords(
@@ -908,16 +930,39 @@ fun MusicBrowser(
             letters = view == MusicView.Albums || view == MusicView.Artists || view == MusicView.Genres || view == MusicView.Composers,
             // the albums are in order by their artists
             sortName = if (view == MusicView.Albums) { group -> group.artist } else { group -> group.title },
+            nameless = {
+                stringResource(
+                    when (view) {
+                        MusicView.Genres -> R.string.nag_music_unknown_genre
+                        MusicView.Composers -> R.string.nag_music_unknown_composer
+                        else -> R.string.nag_unknown_artist
+                    },
+                )
+            },
+            count = { n ->
+                pluralStringResource(
+                    when (view) {
+                        MusicView.Albums -> R.plurals.nag_music_albums
+                        MusicView.Genres -> R.plurals.nag_music_genres_count
+                        MusicView.Composers -> R.plurals.nag_music_composers_count
+                        else -> R.plurals.nag_music_artists_count
+                    },
+                    n, n,
+                )
+            },
         )
     }
     val groupGrid: @Composable (Modifier, (@Composable () -> Unit)?) -> Unit = { gridModifier, leading ->
         savedGroups.SaveableStateProvider(GROUP_GRID) {
+            val resources = LocalContext.current.resources
             GroupGrid(
                 groups, gridWords, stats, playingUri,
                 onOpen = { state.group = it.key },
-                menu = { group -> groupMenu(res, group, actions.playingFrom(groupSource(state.view, group))) },
+                menu = { group -> groupMenu(resources, group, actions.playingFrom(groupSource(state.view, group))) },
                 modifier = gridModifier,
                 leading = leading,
+                reveal = state.reveal,
+                onRevealed = { state.reveal = null },
             )
         }
     }
@@ -941,7 +986,8 @@ fun MusicBrowser(
                     description = stringResource(R.string.nag_music_recent_none_desc),
                 )
             }
-            groups.isEmpty() || (open != null && open.tracks.isEmpty()) -> Box(
+            // (an open group stays: the quick filter may have let it go as it played)
+            (groups.isEmpty() && open == null) || (open != null && open.tracks.isEmpty()) -> Box(
                 Modifier.fillMaxSize().padding(LocalShellBottomPadding.current),
                 contentAlignment = Alignment.Center,
             ) {
@@ -1141,7 +1187,6 @@ private fun GroupList(
     }
 }
 
-/** The order a phone's open group showed its tracks in, kept while it closes; plain, so keeping it never redraws anything. */
 /** What a group's [TrackPane] shows; 1.0.8: one movable pane per group ([MovableDetails]). */
 private class TrackPaneArgs(
     val group: MusicGroup,
@@ -1165,6 +1210,7 @@ private val PHONE_BAND = 84.dp
 /** 1.1.0: an album row's listening trace, under its line. */
 private val TRACE_WIDTH = 120.dp
 
+/** The order a phone's open group showed its tracks in, kept while it closes; plain, so keeping it never redraws anything. */
 private class ClosingOrder {
     private var key: String? = null
     private var tracks: List<Track>? = null

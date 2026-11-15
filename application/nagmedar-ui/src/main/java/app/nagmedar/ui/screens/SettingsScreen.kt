@@ -30,11 +30,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -77,6 +79,8 @@ import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
 import app.nagmedar.ui.music.rememberArtworkColor
 import app.nagmedar.ui.playback.rememberNowPlaying
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.InputMode
@@ -379,7 +383,11 @@ internal fun AppearanceSection(prefs: NagmedarPreferences) {
         // 1.1.0 (Ebru): the playing album's ink, as the theme tunes it
         val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
         val albumSeed = rememberArtworkColor(playing)
-        val album = remember(albumSeed) { albumSeed?.let { AccentTones.fromSeed(it).base } } ?: Accent.Album.base
+        // tuned off the main thread, as the theme's (the swatch blue until it is)
+        val albumTone by produceState<Color?>(null, albumSeed) {
+            value = albumSeed?.let { seed -> withContext(Dispatchers.Default) { AccentTones.fromSeed(seed).base } }
+        }
+        val album = albumTone ?: Accent.Album.base
         SettingRow(
             stringResource(R.string.nag_settings_accent),
             subtitle = when {

@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -65,9 +66,11 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
  * The pill is 28 dp with a pointer and 40 dp by touch (36 before 1.1.0), in a 48 dp target (S-310);
  * off, it is only its edge on the page (1.1.0, Ebru). By touch it
  * vibrates as it turns on or off ([app.nagmedar.ui.theme.NagHaptics.toggle], Desktop Kit 2.0).
+ * 1.1.0: [single], one of a row of which one is always chosen (the Music's quick filters): screen readers hear a radio
+ * button, and a tap on the chosen one leaves it chosen ([onToggle] hears true).
  */
 @Composable
-fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier, single: Boolean = false) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
@@ -86,10 +89,19 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
             .pressScale(state.pressed)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interaction)
-            .toggleable(value = selected, interactionSource = interaction, indication = null, role = Role.Checkbox) { on ->
-                haptics.toggle(on)
-                onToggle(on)
-            },
+            .then(
+                if (single) {
+                    Modifier.selectable(selected = selected, interactionSource = interaction, indication = null, role = Role.RadioButton) {
+                        haptics.toggle(true)
+                        onToggle(true)
+                    }
+                } else {
+                    Modifier.toggleable(value = selected, interactionSource = interaction, indication = null, role = Role.Checkbox) { on ->
+                        haptics.toggle(on)
+                        onToggle(on)
+                    }
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -213,7 +225,9 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
                 Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(dimens.icon))
                 Spacer(Modifier.width(6.dp))
             }
-            Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            // cut short, not the chevron, where the button is given less room than its words (a narrow toolbar)
+            Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false))
             Spacer(Modifier.width(6.dp))
             Icon(NagIcons.ChevronDown, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(14.dp))
         }

@@ -3,16 +3,22 @@ package app.nagmedar.ui.music
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.contrast
 import app.nagmedar.ui.theme.mixSrgb
@@ -20,6 +26,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.tools.NAGMEDAR_ALBUM_SEED
+import org.videolan.tools.Settings
+import org.videolan.vlc.media.PlaylistManager
 import org.videolan.vlc.util.ThumbnailsProvider
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -149,6 +158,30 @@ private fun hslColor(hue: Float, saturation: Float, light: Float): Color {
     }
     val m = light - chroma / 2
     return Color((r + m).coerceIn(0f, 1f), (g + m).coerceIn(0f, 1f), (b + m).coerceIn(0f, 1f))
+}
+
+/**
+ * 1.1.0 (Ebru): the seed of [Accent.Album] ("Çalan albüm"): the cover colour of the music that plays
+ * ([rememberArtworkColor]); null for another accent, and while nothing, or no music, plays. The last album's colour is
+ * kept in the settings and stands in while a new cover is read (at a start, after a stop): the page does not open blue
+ * and fade to the album's ink each time. Only the media is followed, not play and pause: the theme's root does not
+ * recompose for them.
+ */
+@Composable
+internal fun rememberAlbumSeed(accent: Accent): Color? {
+    if (accent != Accent.Album) return null
+    val context = LocalContext.current
+    val media by PlaylistManager.currentPlayedMedia.observeAsState()
+    val audio = media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
+    val color = rememberArtworkColor(audio)
+    val settings = remember(context) { Settings.getInstance(context.applicationContext) }
+    val last = remember(settings) { mutableStateOf(settings.getInt(NAGMEDAR_ALBUM_SEED, 0).takeIf { it != 0 }?.let { Color(it) }) }
+    LaunchedEffect(color) {
+        val known = color ?: return@LaunchedEffect
+        last.value = known
+        if (settings.getInt(NAGMEDAR_ALBUM_SEED, 0) != known.toArgb()) settings.edit().putInt(NAGMEDAR_ALBUM_SEED, known.toArgb()).apply()
+    }
+    return color ?: last.value.takeIf { audio != null }
 }
 
 /**
