@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -103,7 +104,15 @@ fun NagmedarTheme(
     val tones = rememberAccentTones(accent, albumSeed)
     val target = remember(themeMode, systemDark, tones) { NagPalette.colors(themeMode, systemDark, tones) }
     val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
-    val colors = animatePalette(target, if (motion.reduced) 0 else colorChangeMillis)
+    // 1.1.0: a new album's ink ("Çalan albüm") comes at once, a choice in the settings (the theme, the accent) cross-fades:
+    // a cross-fade for each new album would recompose every colour's reader for its frames, as a track starts and the
+    // player is dragged up. Decided with the palette it comes for, so a cross-fade under way runs to its end
+    val setting = Triple(themeMode, systemDark, accent)
+    val lastSetting = remember { SettingHolder(setting) }
+    val albumOnly = accent == Accent.Album && lastSetting.value == setting
+    val change = remember(target) { if (motion.reduced || albumOnly) 0 else colorChangeMillis }
+    SideEffect { lastSetting.value = setting }
+    val colors = animatePalette(target, change)
     val configuration = LocalConfiguration.current
     // 1.0.8 (Desktop Kit 2.8.0): a window short as a phone on its side keeps the phone's text, sizes and motion; from the
     // configuration's height, not from what the on-screen keyboard leaves of it
@@ -163,6 +172,9 @@ private fun rememberAccentTones(accent: Accent, albumSeed: Color?): AccentTones 
     }
     return remember(accent, systemSeed) { AccentTones.of(accent, systemSeed) }
 }
+
+/** The theme's last settings, kept without recomposing anything: what a new palette is compared with. */
+private class SettingHolder(var value: Triple<ThemeMode, Boolean, Accent>)
 
 /**
  * [target], cross-faded from the previous palette over [durationMillis] whenever it changes

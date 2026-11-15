@@ -35,7 +35,8 @@ import app.nagmedar.ui.covers.CoverTrack
 import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
-import kotlinx.coroutines.Dispatchers
+import java.util.concurrent.Executors
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.job
@@ -399,6 +400,18 @@ internal object Ebru {
 
     /** Robolectric's screenshots: the band is drawn at once, so the picture never catches it on its way. */
     val synchronous: Boolean = Build.FINGERPRINT == "robolectric"
+
+    /**
+     * Where bands and a cover's inks are made: a thread of their own at the lowest priority, as the waveforms' and the
+     * probes' are. A band is decoration, and its making (a few seconds of a slow device's processor) must not take the
+     * frames of what the reader does meanwhile: a new album's band comes as a track starts, under the player's drags.
+     */
+    val worker = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "nagmedar-ebru").apply {
+            isDaemon = true
+            priority = Thread.MIN_PRIORITY
+        }
+    }.asCoroutineDispatcher()
 }
 
 /**
@@ -417,7 +430,7 @@ internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
             value = EbruInks.Default
             return@produceState
         }
-        value = withContext(Dispatchers.Default) {
+        value = withContext(Ebru.worker) {
             runCatching {
                 val source = image.asAndroidBitmap()
                 val readable = if (source.config == Bitmap.Config.HARDWARE) source.copy(Bitmap.Config.ARGB_8888, false) else source
@@ -453,7 +466,7 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier) {
             val ready = Ebru.cached(inks, w, h) ?: run {
                 // a band already on screen waits for the width to settle (the effect starts again on every new one)
                 if (image.value != null) delay(SETTLE_MS)
-                withContext(Dispatchers.Default) {
+                withContext(Ebru.worker) {
                     val job = coroutineContext.job
                     Ebru.make(inks, w, h) { job.ensureActive() }
                 }
