@@ -1,0 +1,103 @@
+1129 W/ziparchive: Unable to open '/data/app/~~fXBGs1O4NgwR8Qbtr4UeDA==/app.nagmedar.debug-UnYUCk15O61qwxSU0CbYug==/base.dm': No such file or directory
+1129 W/ziparchive: Unable to open '/data/app/~~fXBGs1O4NgwR8Qbtr4UeDA==/app.nagmedar.debug-UnYUCk15O61qwxSU0CbYug==/base.dm': No such file or directory
+3608 W/dex2oat64: /apex/com.android.art/bin/dex2oat64 --zip-fd=7 --zip-location=/data/app/~~fXBGs1O4NgwR8Qbtr4UeDA==/app.nagmedar.debug-UnYUCk15O61qwxSU0CbYug==/base.apk --oat-fd=8 --oat-location=/data/app/~~fXBGs1O4NgwR8Qbtr4UeDA==/app.nagmedar.debug-UnYUCk15O61qwxSU0CbYug==/oat/x86_64/base.odex --output-vdex-fd=9 --swap-fd=10 --class-loader-context-fds=11:12 --class-loader-context=PCL[]{PCL[/system_ext/framework/androidx.window.extensions.jar]#PCL[/system_ext/framework/androidx.window.sidecar.jar]} --classpath-dir=/data/app/~~fXBGs1O4NgwR8Qbtr4UeDA==/app.nagmedar.debug-UnYUCk15O61qwxSU0CbYug== --instruction-set=x86_64 --instruction-set-features=default --instruction-set-variant=x86_64 --compiler-filter=verify --compilation-reason=install --compact-dex-level=none --max-image-block-size=524288 --resolve-startup-const-strings=true --generate-mini-debug-info --runtime-arg -Xtarget-sdk-version:37 --runtime-arg -Xhidden-api-policy:enabled --cpu-set=0,1 -j2 --runtime-arg -Xms64m --runtime-arg -Xmx512m --comments=app-version-name:1.1.0,app-version-code:14010108,art-version:341010052
+621 W/PackageConfigPersister: App-specific configuration not found for packageName: app.nagmedar.debug and userId: 10
+4430 W/.nagmedar.debug: Unexpected CPU variant for x86: x86_64.
+4430 W/.nagmedar.debug: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+4430 E/.nagmedar.debug: Not starting debugger since process cannot load the jdwp agent.
+4430 E/VLC/LibVLC/Util: WARNING: Can't find shared library
+4430 W/VLC/LibVLC/Util: WARNING: Unable to read libvlcjni.so; cannot check device ABI!
+4430 W/OpenGLRenderer: Unknown dataspace 0
+4430 W/OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name localCoord
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name localCoord
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name inPosition
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name inColor
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 2 name inCircleEdge
+4430 W/VLC: [00007a3785335430/138a] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/138e] libvlc access: cannot insert stream filter record
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+4430 W/VLC: [00007a3785337830/138f] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/1391] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785335430/1392] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785345ed0/1393] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785337830/1394] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/1395] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785335430/1396] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785345ed0/1397] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785337830/1399] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/139a] libvlc access: cannot insert stream filter record
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+4430 W/VLC: [00007a3785335430/139b] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/139d] libvlc access: cannot insert stream filter record
+621 E/NotificationService: Package enqueue rate is 5.0108285. Shedding 10|app.nagmedar.debug|43|null|1010233. package=app.nagmedar.debug
+4430 W/AndroidMedialib: type=1400 audit(0.0:65): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:66): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:67): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/VLC: [00007a37853454b0/13a5] libvlc access: cannot insert stream filter record
+4430 W/AndroidMedialib: type=1400 audit(0.0:68): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/VLC: [00007a3785349a70/13a7] libvlc access: cannot insert stream filter record
+4430 W/AndroidMedialib: type=1400 audit(0.0:69): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/VLC: [00007a37853454b0/13aa] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785349a70/13ac] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/13ae] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785349a70/13b0] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/13b2] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/13b4] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785348990/13b6] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/13b8] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785348990/13ba] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a37853454b0/13bc] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785349710/13be] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a378534dcd0/13c0] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a3785350430/13c2] libvlc access: cannot insert stream filter record
+4430 W/VLC: [00007a378534dcd0/13c4] libvlc access: cannot insert stream filter record
+4430 E/VLC: [00007a3785350430/13c6] libvlc access: cannot open file /storage/emulated/10/Android/obb/ (Permission denied)
+4430 E/VLC: [00007a37953dfc10/13c6] libvlc input: Your media can't be opened
+4430 E/VLC: [00007a37953dfc10/13c6] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/10/Android/obb/'. Check the log for details.
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/10/Android/obb/: Failed to browse network directory: Unknown error: I/O error
+4430 W/VLC: [00007a3785352a70/13c7] libvlc access: cannot insert stream filter record
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+4430 E/VLC: [00007a3785351cf0/13c9] libvlc access: cannot open file /storage/emulated/10/Android/data/ (Permission denied)
+4430 E/VLC: [00007a37953dfc10/13c9] libvlc input: Your media can't be opened
+4430 E/VLC: [00007a37953dfc10/13c9] libvlc input: VLC is unable to open the MRL 'file:///storage/emulated/10/Android/data/'. Check the log for details.
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:342 checkFolder Failed to browse file:///storage/emulated/10/Android/data/: Failed to browse network directory: Unknown error: I/O error
+4430 W/VLC: [00007a3785349710/13ca] libvlc access: cannot insert stream filter record
+4430 W/VLC/medialibrary: [T#134374840102128] ../src/discoverer/FsDiscoverer.cpp:395 checkFolder Creation of a folder failed: Request [INSERT INTO Folder(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)] aborted due to constraint violation (UNIQUE constraint failed: Folder.path, Folder.device_id). Assuming it was banned
+4430 W/AndroidMedialib: type=1400 audit(0.0:112): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:113): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:114): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:115): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 W/AndroidMedialib: type=1400 audit(0.0:116): avc:  denied  { link } for  name="cover.jpg" dev="fuse" ino=106619 scontext=u:r:untrusted_app:s0:c233,c256,c522,c768 tcontext=u:object_r:fuse:s0 tclass=file permissive=0
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 0 name position
+4430 E/VLC-std: s_glBindAttribLocation: bind attrib 1 name color
+4430 W/AccessibilityDelegate: Drawing order is not available, was AccessibilityNodeInfo requested for a child node before its parent?
+4430 W/AccessibilityDelegate: Drawing order is not available, was AccessibilityNodeInfo requested for a child node before its parent?
+4430 W/AccessibilityDelegate: Drawing order is not available, was AccessibilityNodeInfo requested for a child node before its parent?
+621 W/ForegroundServiceTypeLoggerModule: Logger should be tracking FGS types correctly for UID 1010233 in package app.nagmedar.debug
+4430 W/VLC: [00007a37e53c0e50/16a0] libvlc generic: resetting master clock: coefficient too unstable: 1.324611
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: Can't stat /dev/sr0
+4430 E/VLC-std: No such file or directory
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: Could not open /dev/sr0
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: DVDRead cannot open source: /dev/sr0
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: Version of libdvdread does not support DVD-VideoRecording
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: Can't stat /dev/sr0
+4430 E/VLC-std: No such file or directory
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: Could not open /dev/sr0
+4430 E/VLC: [00007a3785360ff0/1a4c] libvlc demux: DVDRead cannot open source: /dev/sr0
+4430 E/VLC-std: [mp3 @ 0x7a38d53308c0] Skipping 254 bytes of junk at 0.
