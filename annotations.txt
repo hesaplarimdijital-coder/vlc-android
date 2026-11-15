@@ -1,0 +1,2 @@
+::error title=Emulator check (search, step 39)::the Music holds the walk's 64 tracks, which the search is compared with the Music counts None
+::notice title=Emulator Ekran görüntüleri ve rapor::FAILED: 39 steps, 0 crash/ANR, 0 StrictMode, 1/48 checks failed, 0 system ANR/crash, 0 warnings, 10 min. Evidence: branch ci/emulator-api37.0-personal-page-opens-notice-swipe-search, report.md
