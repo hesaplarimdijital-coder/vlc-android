@@ -10,18 +10,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.components.CollapsingTop
+import app.nagmedar.ui.R
 import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.NagIconButton
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.rememberCollapsingTopState
 import app.nagmedar.ui.playback.rememberNowPlaying
 import app.nagmedar.ui.shell.HeightClass
@@ -69,6 +78,9 @@ internal fun EbruPage(
     val band = wideBandHeight(LocalConfiguration.current.screenHeightDp, short)
     // with a pointer the menu bar has its own search field
     val bandSearch = onSearch.takeIf { NagTheme.inputMode != InputMode.Pointer }
+    // folded more than halfway, what has faded under a phone's chips is neither touched nor read out (the station's
+    // button among it)
+    val faded by remember(top) { derivedStateOf { top.fraction > 0.5f } }
     // (the lists in the same place in every width: a phone turned, a DeX window resized keeps them where they were)
     Box(
         modifier
@@ -86,7 +98,11 @@ internal fun EbruPage(
                             // scrim, not under the status bar's icons
                             EbruBand(inks, statusTop + PHONE_BAND, Modifier.reportsBand(gone = { top.fraction > 0.98f }))
                             // what stays under the chips as the top folds fades beneath them
-                            Column(Modifier.graphicsLayer { alpha = 1f - top.fraction }) {
+                            Column(
+                                Modifier
+                                    .graphicsLayer { alpha = 1f - top.fraction }
+                                    .then(if (faded) Modifier.clearAndSetSemantics {}.noTouches() else Modifier),
+                            ) {
                                 Masthead(subtitle, title)
                                 header()
                                 Spacer(Modifier.height(8.dp))
@@ -94,7 +110,13 @@ internal fun EbruPage(
                         } else {
                             if (band > 0.dp) WideBand(inks, band, bandSearch)
                             WideMasthead(subtitle, null, null, large = band >= TABLET_BAND, title = title, pills = false) {
-                                Row(verticalAlignment = Alignment.CenterVertically, content = actions)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // a window too short for the band (a phone on its side): the band's search field's place
+                                    if (band == 0.dp && bandSearch != null) {
+                                        NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), bandSearch, modifier = Modifier.testTag("music-search"))
+                                    }
+                                    actions()
+                                }
                             }
                             header()
                             Spacer(Modifier.height(8.dp))
@@ -118,5 +140,12 @@ internal fun EbruPage(
                 )
             }
         }
+    }
+}
+
+/** Nothing in it takes a touch: what has faded away under the chips. */
+private fun Modifier.noTouches(): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
     }
 }

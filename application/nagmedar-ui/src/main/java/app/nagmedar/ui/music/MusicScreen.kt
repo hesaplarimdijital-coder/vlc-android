@@ -541,8 +541,16 @@ internal fun WideMusicPage(
         WideMusicTop(
             inks, band, bandSearch, wideCounts, play, shuffle,
             // the panel's button while it is hidden (its own menu hides it; Ctrl+I both); below the docking width it
-            // comes up as a sheet (1.0.8)
-            trailing = { if (inspector != null && inspectorState.hidden) InspectorToggleButton(inspectorState) },
+            // comes up as a sheet (1.0.8). 1.1.3: in a window too short for the band (a phone on its side) the band's
+            // search field's place before it
+            trailing = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (band == 0.dp && bandSearch != null) {
+                        NagIconButton(NagIcons.Search, stringResource(R.string.nag_search), bandSearch, modifier = Modifier.testTag("music-search"))
+                    }
+                    if (inspector != null && inspectorState.hidden) InspectorToggleButton(inspectorState)
+                }
+            },
             below = {
                 // a scan going on; S-1010: the converter's job under way, or what the last one came to
                 if (scan.active && listed) ScanStrip(scan, Modifier.padding(horizontal = WIDE_MARGIN, vertical = 4.dp))

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -23,17 +24,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
+import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.screenshots.ShellScreenshotTest
+import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.LocalWidthClass
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -70,6 +80,7 @@ class EbruPageTest {
 
     private var width: WidthClass? by mutableStateOf(null)
     private lateinit var list: LazyListState
+    private var stripTaps = 0
 
     private fun page(input: InputMode = InputMode.Touch) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
@@ -91,6 +102,8 @@ class EbruPageTest {
                 subtitle = "Radio Browser · topluluk rehberi",
                 section = "Favoriler",
                 onSearch = {},
+                // the station on the air under the masthead, its button a tap target
+                header = { Box(Modifier.fillMaxWidth().height(56.dp).clickable { stripTaps++ }.testTag("strip")) },
                 pinned = {
                     Row(
                         Modifier.fillMaxWidth().height(48.dp).padding(horizontal = 16.dp).testTag("tabs"),
@@ -163,5 +176,69 @@ class EbruPageTest {
         width = WidthClass.Compact
         compose.waitForIdle()
         assertEquals(first, list.firstVisibleItemIndex)
+    }
+
+    /** Folded under a phone's chips, the faded masthead and the station's strip take no touch and are not read out. */
+    @Test
+    @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun whatHasFadedUnderTheChipsTakesNoTouch() {
+        page()
+        compose.onNodeWithTag("strip").performClick()
+        assertEquals(1, stripTaps)
+        compose.onNodeWithTag("list").performTouchInput { swipeUp(startY = bottom - 20f, endY = top + 20f, durationMillis = 800) }
+        compose.waitForIdle()
+        // the strip is gone from what TalkBack reads; a tap where it lies now does nothing
+        compose.onNodeWithTag("strip").assertDoesNotExist()
+        val strip = compose.onNodeWithTag("ebru-header", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        compose.onRoot().performTouchInput { click(androidx.compose.ui.geometry.Offset(centerX, (strip.bottom.value - 30f) * density)) }
+        compose.waitForIdle()
+        assertEquals(1, stripTaps)
+    }
+
+    /** A phone on its side: no band in so short a window; its search field's place is a button beside the masthead. */
+    @Test
+    @Config(qualifiers = "tr-w891dp-h411dp-xhdpi")
+    fun aShortWindowHasTheSearchButtonInTheBandsPlace() {
+        page()
+        compose.onNodeWithTag("music-search").assertExists()
+        compose.onNodeWithText("Radyo").assertExists()
+    }
+
+    /** The page's tab chosen again takes its list to the top: the folded top comes down with it. */
+    @Test
+    @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun choosingTheTabAgainBringsTheTopDown() {
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                // (on the start tab, the one the bar has chosen; the shell's own pages reach the others by their tab)
+                TestShell(WidthClass.Compact, ownTop = AppOwnTop) { _, _ ->
+                    list = rememberLazyListState()
+                    val shown = list
+                    OnReselect { shown.scrollToItem(0) }
+                    EbruPage(title = "Radyo", subtitle = null, section = "Favoriler") {
+                        LazyColumn(Modifier.fillMaxSize().testTag("list"), state = list) {
+                            items(60) { i -> Text("İstasyon $i", Modifier.fillMaxWidth().height(56.dp)) }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val shown = compose.onNodeWithTag("ebru-header", useUnmergedTree = true).getUnclippedBoundsInRoot().top.value
+        // (from the list's middle: its end lies under the shell's bars)
+        repeat(2) { compose.onNodeWithTag("list").performTouchInput { swipeUp(startY = centerY, endY = top + 20f, durationMillis = 800) } }
+        compose.waitForIdle()
+        assertTrue(compose.onNodeWithTag("ebru-header", useUnmergedTree = true).getUnclippedBoundsInRoot().top.value < shown - 100f)
+        // the page's tab of the bottom bar, again
+        // a little way back up brings the bottom bar back (it slid away as the list went down); the top stays folded
+        compose.onNodeWithTag("list").performTouchInput { swipeDown(startY = centerY - 200f, endY = centerY + 200f, durationMillis = 800) }
+        compose.waitForIdle()
+        assertTrue(list.firstVisibleItemIndex > 0)
+        assertTrue(compose.onNodeWithTag("ebru-header", useUnmergedTree = true).getUnclippedBoundsInRoot().top.value < shown - 100f)
+        compose.onNode(hasText("Müzik") and SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected)).performClick()
+        compose.waitForIdle()
+        assertEquals(0, list.firstVisibleItemIndex)
+        assertEquals(shown, compose.onNodeWithTag("ebru-header", useUnmergedTree = true).getUnclippedBoundsInRoot().top.value, 1f)
     }
 }

@@ -52,6 +52,7 @@ class CollapsingTopTest {
     private lateinit var list: LazyListState
     private var refreshing by mutableStateOf(false)
     private var refreshes = 0
+    private var header by mutableStateOf(200)
 
     private fun page(refresh: Boolean = false) {
         compose.setContent {
@@ -59,7 +60,7 @@ class CollapsingTopTest {
                 top = rememberCollapsingTopState()
                 CollapsingTop(
                     top,
-                    header = { Box(Modifier.fillMaxWidth().height(200.dp).testTag("header")) },
+                    header = { Box(Modifier.fillMaxWidth().height(header.dp).testTag("header")) },
                     pinned = { Box(Modifier.fillMaxWidth().height(48.dp).testTag("tabs")) },
                 ) {
                     list = rememberLazyListState()
@@ -129,5 +130,35 @@ class CollapsingTopTest {
         compose.waitForIdle()
         assertEquals(0f, top.fraction, 0.001f)
         assertEquals(1, refreshes)
+    }
+
+    /** A strip coming into a folded header (the station on the air) leaves it folded: nothing jumps, nothing blank shows. */
+    @Test
+    fun aFoldedHeaderStaysFoldedAsItGrows() {
+        page()
+        compose.onNodeWithTag("list").performTouchInput { swipeUp(startY = bottom - 10f, endY = top + 10f, durationMillis = 800) }
+        compose.waitForIdle()
+        assertEquals(1f, top.fraction, 0.001f)
+        header = 272
+        compose.waitForIdle()
+        assertEquals(1f, top.fraction, 0.001f)
+        assertEquals(0f, tabsTop(), 0.5f)
+        // and shown whole, the strip with it, at the list's top
+        repeat(3) { compose.onNodeWithTag("list").performTouchInput { swipeDown(startY = top + 10f, endY = bottom - 10f, durationMillis = 800) } }
+        compose.waitForIdle()
+        assertEquals(272f, tabsTop(), 0.5f)
+    }
+
+    /** A finger on the header itself folds it (a window too short for the list to take one) and brings it down. */
+    @Test
+    fun theHeaderFoldsUnderAFingerOnItToo() {
+        page()
+        compose.onNodeWithTag("header").performTouchInput { swipeUp(startY = bottom - 5f, endY = top - 150f, durationMillis = 800) }
+        compose.waitForIdle()
+        assertEquals(1f, top.fraction, 0.001f)
+        compose.onNodeWithTag("tabs").performTouchInput { swipeDown(startY = top + 5f, endY = top + 300f, durationMillis = 800) }
+        compose.waitForIdle()
+        // (the tabs are no handle: the header has gone from under the finger)
+        assertEquals(1f, top.fraction, 0.001f)
     }
 }

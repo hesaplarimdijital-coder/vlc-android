@@ -3,6 +3,9 @@ package app.nagmedar.ui.components
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -11,6 +14,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -25,10 +29,12 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagTheme
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /**
  * 1.1.3: where a [CollapsingTop]'s header is: how far it has gone up ([offset], px; 0 while all of it shows) of how far
@@ -40,8 +46,12 @@ class CollapsingTopState {
     var offset by mutableFloatStateOf(0f)
         private set
 
-    /** How far the header may go up (px): its height less what stays of it ([CollapsingTop]'s reserve). */
-    internal var limit = 0f
+    /**
+     * How far the header may go up (px): its height less what stays of it ([CollapsingTop]'s reserve). State: what reads
+     * [fraction] (a fade, a folded header's button elsewhere) follows the header growing or shrinking too.
+     */
+    internal var limit by mutableFloatStateOf(0f)
+        private set
 
     /** With reduced motion a header let go halfway jumps to the nearer end. */
     internal var instant = false
@@ -59,6 +69,30 @@ class CollapsingTopState {
     fun expand() {
         offset = 0f
     }
+
+    /** The header shown again, sliding down (the tab chosen again: its list back at its top). */
+    internal suspend fun animateExpand() {
+        if (offset == 0f) return
+        if (instant) {
+            offset = 0f
+            return
+        }
+        animate(offset, 0f, animationSpec = tween(SETTLE_MS, easing = FastOutSlowInEasing)) { value, _ -> offset = value.coerceIn(-limit, 0f) }
+    }
+
+    /**
+     * The header measured anew, going up as far as [newLimit]: one folded away stays folded away as it grows (a strip
+     * come into it, the station on the air, shows once it comes down) or shrinks.
+     */
+    internal fun resized(newLimit: Float) {
+        if (newLimit == limit) return
+        val folded = limit > 0f && offset <= -limit + 0.5f
+        limit = newLimit
+        offset = if (folded) -newLimit else offset.coerceIn(-newLimit, 0f)
+    }
+
+    /** A finger on the header itself: it folds and comes down under it (a window too short for the lists to take one). */
+    internal fun dragBy(dy: Float): Float = moveBy(dy)
 
     private fun moveBy(dy: Float): Float {
         // a header grown shorter meanwhile: from where it is now
@@ -122,8 +156,19 @@ fun CollapsingTop(
     content: @Composable () -> Unit,
 ) {
     state.instant = NagTheme.motion.reduced || LocalMotionTier.current == MotionTier.Reduced
-    // the keyboard moving into the folded header (its search field, its buttons) brings it down
-    val focusable: @Composable () -> Unit = { Box(Modifier.onFocusChanged { if (it.hasFocus) state.expand() }) { header() } }
+    val scope = rememberCoroutineScope()
+    val drag = rememberDraggableState { delta -> state.dragBy(delta) }
+    // the keyboard moving into the folded header (its search field, its buttons) brings it down; a finger on the header
+    // folds it and brings it down as a list does
+    val focusable: @Composable () -> Unit = {
+        Box(
+            Modifier
+                .onFocusChanged { if (it.hasFocus) state.expand() }
+                .draggable(drag, Orientation.Vertical, onDragStopped = { scope.launch { state.settle() } }),
+        ) { header() }
+    }
+    // the page's tab chosen again takes its list to its top (OnReselect): the header comes down with it
+    OnReselect { state.animateExpand() }
     CompositionLocalProvider(LocalCollapsingTop provides state) {
         Layout(
             contents = listOf(focusable, pinned, content),
@@ -132,7 +177,7 @@ fun CollapsingTop(
             val loose = Constraints(maxWidth = constraints.maxWidth, maxHeight = Constraints.Infinity)
             val h = headers.map { it.measure(loose) }
             val headerHeight = h.maxOfOrNull { it.height } ?: 0
-            state.limit = (headerHeight - reserve.roundToPx()).coerceAtLeast(0).toFloat()
+            state.resized((headerHeight - reserve.roundToPx()).coerceAtLeast(0).toFloat())
             // read while measuring: the lists under it take the room it leaves
             val off = state.offset.coerceIn(-state.limit, 0f).roundToInt()
             val p = pins.map { it.measure(loose) }

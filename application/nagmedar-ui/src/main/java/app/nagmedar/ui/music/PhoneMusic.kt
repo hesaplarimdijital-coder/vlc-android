@@ -352,19 +352,22 @@ private fun BrandChip(inks: EbruInks, section: String?, named: Boolean, modifier
     // the last name stays while the chip closes over it
     var last by remember { mutableStateOf(section) }
     if (section != null) last = section
+    // the mark alone is still the brand to TalkBack ("Nağmedar"); open, the chip reads its tab's name
+    val shown = named && section != null
+    val brand = stringResource(R.string.nagmedar_shell_title)
     Row(
         modifier
             .height(CHIP)
             .clip(RoundedCornerShape(CHIP / 2))
             .background(chipColor())
             .padding(horizontal = 15.dp)
-            .semantics(mergeDescendants = true) {}
+            .semantics(mergeDescendants = true) { if (!shown) contentDescription = brand }
             .testTag("music-brand"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BandMark(inks, Modifier.size(18.dp))
         AnimatedVisibility(
-            visible = named && section != null,
+            visible = shown,
             enter = if (instant) EnterTransition.None else {
                 expandHorizontally(tween(NagMotion.MEDIUM, easing = NagMotion.Emphasized), expandFrom = Alignment.Start) +
                     fadeIn(tween(NagMotion.MEDIUM, delayMillis = NagMotion.SHORT / 2))

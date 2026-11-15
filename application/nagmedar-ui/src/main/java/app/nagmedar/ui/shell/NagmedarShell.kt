@@ -439,6 +439,10 @@ fun NagmedarShell(
                         // 1.0.8: the menu bar's menus where there is no menu bar, for a pointer as the sidebar's (S-302)
                         menus = if (navKind == NavKind.Rail && pointer) menuSpecs() else emptyList(),
                     )
+                } else {
+                    // 1.1.3: a page with its own top: no bar over it, only the status bar (the last page's bar measured
+                    // no more: a pull to refresh's disc came out a bar's height low, the screen's overlays under it)
+                    SideEffect { metrics.topPx = statusTop?.getTop(density) ?: 0 }
                 }
             },
             navigation = {
