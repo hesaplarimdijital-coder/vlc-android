@@ -16,7 +16,8 @@ medialibrary/.libs
 medialibrary/prefix
 
 # Remote access
-application/remote-access-client/remoteaccess/**
+# the web app's clone, a repository of its own ("dir/**" does not hide it), made by compile-remoteaccess.sh
+application/remote-access-client/remoteaccess/
 application/remote-access-client/assets/**
 
 # Android .so
