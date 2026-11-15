@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -159,6 +160,11 @@ fun NagmedarShell(
     glass: Boolean = false,
     /** 1.0.3: the phone's chrome on glass, the user's decision of 6 Nov (B); a debuggable build's walk compares the others. */
     chromeGlass: ChromeGlass = ChromeGlass.Product,
+    /**
+     * 1.1.1 (the design's phone page): the pages that draw their own top on a phone (the app's Müzik): no top bar over
+     * them, they lie from the window's top, under the status bar.
+     */
+    ownTop: (Destination) -> Boolean = { false },
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
@@ -311,6 +317,10 @@ fun NagmedarShell(
     val phone = navKind == NavKind.BottomBar && !contentOnly
     // 1.0.3: the system's navigation bar at the window's bottom, which the root leaves to the shell (read while measuring)
     val rootInsets = LocalWindowRootInsets.current
+    // 1.1.1 (the design's phone page): the window's top the root leaves to a phone's shell (the status bar). The top bar
+    // keeps its title below it; Müzik draws its own top there: its band under the status bar, its chips over the band
+    val statusTop = rootInsets?.top
+    val ownTop = navKind == NavKind.BottomBar && ownTop(current) && !contentOnly
     val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
     // the phone's one bottom glass, the user's decision (B): behind the mini player, the bottom bar and the band; thick, so
     // that the card's grey artist line and times keep 4.5:1 over a white cover
@@ -384,7 +394,11 @@ fun NagmedarShell(
     ) {
         ShellLayout(
             navKind = navKind,
-            modifier = modifier.fillMaxSize().background(NagTheme.colors.background),
+            modifier = modifier
+                .fillMaxSize()
+                .background(NagTheme.colors.background)
+                // 1.1.1: a window the root took for a phone's that is the rail's or the sidebar's after all keeps its top clear
+                .then(if (navKind != NavKind.BottomBar && statusTop != null) Modifier.windowInsetsPadding(statusTop) else Modifier),
             contentOnly = chromeAway,
             navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset().roundToInt() else 0 },
             topBar = {
@@ -395,13 +409,14 @@ fun NagmedarShell(
                         search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
                         caption = caption,
                     )
-                } else {
+                } else if (!ownTop) {
                     PageTopBar(
                         title = stringResource(current.label),
                         onSearch = onSearch.takeIf { current != Destination.Search },
                         caption = caption,
                         onBack = onBack.takeIf { NavRules.showsBack(current, navKind) },
                         modifier = Modifier.onSizeChanged { metrics.topPx = it.height }.underPlayer(playerOver),
+                        statusBar = statusTop.takeIf { navKind == NavKind.BottomBar },
                         // the kit's top bar (C of the user's glass decision): glass while content passes under it
                         glass = if (chromeGlass == ChromeGlass.Kit && navKind == NavKind.BottomBar) chromeMode else null,
                         scrolled = { scroll.scrolled },

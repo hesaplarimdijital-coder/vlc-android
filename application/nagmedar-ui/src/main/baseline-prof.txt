@@ -18,3 +18,14 @@ HSPLapp/nagmedar/ui/music/MusicLayout**->**(**)**
 HSPLapp/nagmedar/ui/music/QuickFilter**->**(**)**
 HSPLapp/nagmedar/ui/music/Ebru**->**(**)**
 HSPLapp/nagmedar/ui/music/*EbruBandKt**->**(**)**
+# 1.1.1 (the design's phone page): its header, chips, tabs and toolbar, the phone's rows and the letters' wave, the band's
+# place under the chips, the groups' orders
+HSPLapp/nagmedar/ui/music/*PhoneMusicKt**->**(**)**
+HSPLapp/nagmedar/ui/music/*PhoneListsKt**->**(**)**
+HSPLapp/nagmedar/ui/music/PhoneTop**->**(**)**
+HSPLapp/nagmedar/ui/music/BandPlace**->**(**)**
+HSPLapp/nagmedar/ui/music/WaveLetter**->**(**)**
+HSPLapp/nagmedar/ui/music/LetterRun**->**(**)**
+HSPLapp/nagmedar/ui/music/PhoneBand**->**(**)**
+HSPLapp/nagmedar/ui/music/GroupSort**->**(**)**
+HSPLapp/nagmedar/ui/music/GroupOrder**->**(**)**

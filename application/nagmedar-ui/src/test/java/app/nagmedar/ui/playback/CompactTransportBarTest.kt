@@ -1,5 +1,8 @@
 package app.nagmedar.ui.playback
 
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -50,10 +53,10 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * 1.0.2: the phone's bar is the tablet's transport bar laid out for a phone. Its seek bar seeks where
- * a finger lets it go, the time following the finger; a sideways swipe on the card skips while one
- * on the seek bar only seeks; it lays out on the user's 384 dp, on 412 dp and on 320 dp with the
- * largest text, shuffle and repeat joining where there is room.
+ * 1.0.2: the phone's bar, the full player growing out of it. 1.1.1 (the design's mini player): a card with the words,
+ * play in the ink's circle and next; under them the track's waveform, which seeks where a finger lets it go (TalkBack
+ * hears the times); a sideways swipe on the card skips while one on the waveform only seeks; it lays out on the user's
+ * 384 dp, on 412 dp and on 320 dp with the largest text.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -100,34 +103,37 @@ class CompactTransportBarTest {
 
     @Test
     @Config(qualifiers = "tr-w384dp-h832dp-xxhdpi")
-    fun theSeekBarSeeksWhereLetGoTheTimeFollowingTheFinger() {
+    fun theWaveformSeeksWhereLetGo() {
         phone()
-        val timeline = compose.onNodeWithTag("progress-timeline")
-        timeline.performTouchInput {
+        val wave = compose.onNodeWithTag("mini-player-seek")
+        // TalkBack hears the time played and the length: 42 % of 4:18
+        wave.assertContentDescriptionEquals("1:48 / 4:18")
+        wave.performTouchInput {
             down(Offset(width * 0.2f, height / 2f))
             moveTo(Offset(width * 0.5f, height / 2f))
             moveTo(Offset(width * 0.75f, height / 2f))
         }
         compose.waitForIdle()
-        // three quarters of 4:18 held: the time played says it, and the bubble over the finger (the seek bar's row is one
-        // node for a screen reader: its parts are looked at one by one)
-        compose.onNode(hasText("3:13") and hasTestTag("progress-bubble").not(), useUnmergedTree = true).assertExists()
-        compose.onNodeWithTag("progress-bubble", useUnmergedTree = true).assertExists()
-        timeline.performTouchInput { up() }
+        // nothing seeks while the finger is down
+        assertEquals(0, seeks.size)
+        wave.performTouchInput { up() }
         compose.waitForIdle()
         assertEquals(1, seeks.size)
         assertEquals(0.75f, seeks.single(), 0.01f)
-        // a drag along the seek bar is the seek bar's: no skip, the player not opened
+        // a drag along the waveform is the waveform's: no skip, the player not opened
         assertEquals(0, skips + backs)
         assertFalse(player.isExpanded)
+        // TalkBack's slider sets it too
+        wave.performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
+        assertEquals(0.5f, seeks.last(), 0.001f)
     }
 
     @Test
     @Config(qualifiers = "tr-w384dp-h832dp-xxhdpi")
     fun aSidewaysSwipeOnTheCardSkipsOneOnTheSeekBarDoesNot() {
         phone()
-        // across the seek bar, end to end: it seeks
-        compose.onNodeWithTag("progress-timeline").performTouchInput { swipe(centerRight - Offset(4f, 0f), centerLeft + Offset(4f, 0f), durationMillis = 400) }
+        // across the waveform, end to end: it seeks
+        compose.onNodeWithTag("mini-player-seek").performTouchInput { swipe(centerRight - Offset(4f, 0f), centerLeft + Offset(4f, 0f), durationMillis = 400) }
         compose.waitForIdle()
         assertEquals(0, skips)
         assertEquals(1, seeks.size)
@@ -186,67 +192,54 @@ class CompactTransportBarTest {
 
     private fun described(label: String): DpRect = compose.onNodeWithContentDescription(label).getBoundsInRoot()
 
-    /** Everything inside the card, the words clear of the transport, the seek bar's row under both. */
-    private fun assertLaidOut(modes: Boolean) {
+    /** Everything inside the card (84 dp, the design's), the words clear of play and next, the waveform's row under them. */
+    private fun assertLaidOut() {
         val window = compose.onRoot().getBoundsInRoot()
         val card = bounds("mini-player")
         assertTrue("the card in the window: $card", card.left >= window.left && card.right <= window.right && card.bottom <= window.bottom)
+        assertEquals("8 dp from the window's sides", 8f, (card.left - window.left).value, 0.5f)
         val title = compose.onNodeWithText("Sabaha Kadar", useUnmergedTree = true).getBoundsInRoot()
-        val previous = described("Önceki parça")
         val next = described("Sonraki parça")
         val play = described("Duraklat")
-        for ((name, b) in listOf("previous" to previous, "play" to play, "next" to next)) {
+        for ((name, b) in listOf("play" to play, "next" to next)) {
             assertTrue("$name inside the card: $b in $card", b.left >= card.left && b.right <= card.right && b.top >= card.top && b.bottom <= card.bottom)
             assertTrue("$name a finger's target: $b", b.right - b.left >= 47.5.dp && b.bottom - b.top >= 47.5.dp)
         }
-        assertTrue("the title clear of the transport: $title, $previous", title.right <= previous.left + 0.5.dp)
+        compose.onNodeWithContentDescription("Önceki parça").assertDoesNotExist()
+        assertTrue("the title clear of play: $title, $play", title.right <= play.left + 0.5.dp)
         assertTrue("the title has room: $title", title.right - title.left >= 24.dp)
         val seek = bounds("mini-player-seek")
-        assertTrue("the seek bar's row under the first: $seek, $play", seek.top >= play.bottom - 0.5.dp && seek.bottom <= card.bottom + 0.5.dp)
-        compose.onNodeWithText("1:48").assertIsDisplayed()
-        compose.onNodeWithText("−2:30").assertIsDisplayed()
-        if (modes) {
-            compose.onNodeWithContentDescription("Karıştır").assertIsDisplayed()
-            compose.onNodeWithContentDescription("Tekrarla").assertIsDisplayed()
-        } else {
-            compose.onNodeWithContentDescription("Karıştır").assertDoesNotExist()
-            compose.onNodeWithContentDescription("Tekrarla").assertDoesNotExist()
-        }
+        assertTrue("the waveform's row under the first: $seek, $play", seek.top >= play.bottom - 0.5.dp && seek.bottom <= card.bottom + 0.5.dp)
     }
 
     @Test
     @Config(qualifiers = "tr-w320dp-h640dp-xhdpi")
     fun fitsAt320() {
         bar()
-        assertLaidOut(modes = false)
+        assertLaidOut()
     }
 
     @Test
     @Config(qualifiers = "tr-w320dp-h640dp-xhdpi")
     fun fitsAt320WithTheLargestText() {
         bar(fontScale = 2f)
-        assertLaidOut(modes = false)
+        assertLaidOut()
     }
 
     @Test
     @Config(qualifiers = "tr-w384dp-h832dp-xxhdpi")
     fun fitsAt384() {
         bar()
-        assertLaidOut(modes = false)
+        assertLaidOut()
+        // the design's card: 84 dp
+        assertEquals(84f, bounds("mini-player").let { it.bottom - it.top }.value, 0.5f)
     }
 
     @Test
     @Config(qualifiers = "tr-w412dp-h915dp-xxhdpi")
     fun fitsAt412() {
         bar()
-        assertLaidOut(modes = false)
-    }
-
-    @Test
-    @Config(qualifiers = "tr-w540dp-h900dp-xhdpi")
-    fun shuffleAndRepeatJoinWhereThereIsRoom() {
-        bar()
-        assertLaidOut(modes = true)
+        assertLaidOut()
     }
 
     @Test
@@ -256,5 +249,7 @@ class CompactTransportBarTest {
         compose.onNodeWithTag("bar-live", useUnmergedTree = true).assertIsDisplayed()
         compose.onNodeWithText("Canlı yayın").assertIsDisplayed()
         compose.onNodeWithTag("progress-timeline").assertDoesNotExist()
+        // the live line in the waveform's place, as high: the card keeps its 84 dp
+        assertEquals(84f, bounds("mini-player").let { it.bottom - it.top }.value, 0.5f)
     }
 }

@@ -11,11 +11,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 
 /**
- * 1.0.3: how a phone's chrome is drawn (Desktop Kit 2.3's glass). The product draws [Bottom], the
+ * 1.0.3: how a phone's chrome is drawn (Desktop Kit 2.3's glass). The product drew [Bottom], the
  * user's decision of 6 Nov ("B olsun", from screenshots of the three on the emulator): the mini
  * player's card, the bottom bar and the band behind the system's buttons lie on the shell's one
  * glass; the top bar stays opaque and never changes colour (1.0.1's decision); menus, sheets and
- * dialogs stay solid. Tablets and DeX are as they were. Where the device draws no glass the
+ * dialogs stay solid. 1.1.1: the product draws [Solid], the approved design's phone ([Product]). Tablets and DeX are as they were. Where the device draws no glass the
  * system's fallbacks stay: battery saver and "Animasyonları kaldır" draw it in the opaque chrome
  * colour, a window without hardware acceleration as a nearly opaque tint ([app.nagmedar.ui.theme.GlassMode]).
  * [Solid] and [Kit] stay for the emulator walk's comparisons: only a debuggable build switches to
@@ -32,8 +32,12 @@ enum class ChromeGlass {
     Kit;
 
     companion object {
-        /** The product's mode, the user's decision of 6 Nov: [Bottom]. */
-        val Product: ChromeGlass = Bottom
+        /**
+         * The product's mode. 1.1.1: [Solid], as the approved design draws the phone (Main.dc.html): the mini player a
+         * raised card with its shadow floating over the page, the bottom bar the chrome's colour under its rule; the user's
+         * decision of 6 Nov ([Bottom]) stays for the walk's comparisons.
+         */
+        val Product: ChromeGlass = Solid
 
         /** The mode an intent extra names ("solid", "bottom", "kit"; or "a", "b", "c"); null for none. */
         fun parse(value: String?): ChromeGlass? = when (value?.trim()?.lowercase()) {

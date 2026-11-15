@@ -1,5 +1,8 @@
 package app.nagmedar.ui.screenshots
 
+import app.nagmedar.ui.music.MusicLayout
+import app.nagmedar.ui.library.ScanState
+import app.nagmedar.ui.music.PhoneMusicPage
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.activity.ComponentActivity
@@ -141,8 +144,20 @@ class MusicScreenshotTest {
         val panel = inspectorState ?: rememberInspectorState()
         val compact = currentWidthClass() == WidthClass.Compact
         val albums = remember(library) { library.groups(MusicView.Albums).count { it.title != null } }
+        val artists = remember(library) { library.groups(MusicView.Artists).count { it.title != null } }
         val counts = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size) + " · " +
             pluralStringResource(R.plurals.nag_music_albums, albums, albums)
+        // 1.1.1 (the design's phone page): a phone's page as the app's, from the window's top under the bars
+        if (compact) {
+            val phoneCounts = counts + " · " + pluralStringResource(R.plurals.nag_music_artists_count, artists, artists)
+            UnderShellBars(ownTop = true) {
+                PhoneMusicPage(
+                    library, ScanState.Idle, state, NoMusicActions, EbruInks.Default, phoneCounts, probing = 0, stats = MusicSamples.stats,
+                    recent = emptyList(), converting = null, onConverted = {}, onAddFolder = {}, onSearch = {},
+                )
+            }
+            return
+        }
         val band = remember { @Composable { EbruBand(EbruInks.Default, 84.dp) } }
         val page = @Composable {
             Column(Modifier.fillMaxSize()) {
@@ -270,11 +285,46 @@ class MusicScreenshotTest {
         }
     }
 
+    /** 1.1.1 (the design's phone page, Main.dc.html): Gece, the albums as covers in the order of their names. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun phoneAlbums() = capture("music-phone-dark-albums", ThemeMode.Dark, InputMode.Touch) {
+        TestShell(WidthClass.Compact, startDestination = Destination.Music, ownTop = { it == Destination.Music }) { _, _ ->
+            Library(library("tr"), MusicBrowserState(view = MusicView.Albums))
+        }
+    }
+
+    /** 1.1.1: the design's list view (Liste.dc.html): the albums as rows, their traces, "⋮". */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun phoneAlbumsList() = capture("music-phone-dark-albums-list", ThemeMode.Dark, InputMode.Touch) {
+        TestShell(WidthClass.Compact, startDestination = Destination.Music, ownTop = { it == Destination.Music }) { _, _ ->
+            Library(library("tr"), MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List))
+        }
+    }
+
+    /** 1.1.1: an album's own page on a phone: the band under the chips (the way back), its cover and name, Oynat and Karıştır. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun phoneAlbumPage() {
+        val library = library("tr")
+        capture("music-phone-dark-album", ThemeMode.Dark, InputMode.Touch) {
+            TestShell(WidthClass.Compact, startDestination = Destination.Music, ownTop = { it == Destination.Music }) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = itri(library)))
+            }
+        }
+    }
+
+    /** 1.1.1: Su, the tracks as rows with their covers under their letters. */
+    @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
+    fun phoneTracksLight() = capture("music-phone-light-tracks", ThemeMode.Light, InputMode.Touch) {
+        TestShell(WidthClass.Compact, startDestination = Destination.Music, ownTop = { it == Destination.Music }) { _, _ ->
+            Library(library("tr"), MusicBrowserState(view = MusicView.Tracks))
+        }
+    }
+
     @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
     fun phoneEnglish() {
         val library = library("en")
         capture("music-phone-light-en", ThemeMode.Light, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Music) { _, _ ->
+            TestShell(WidthClass.Compact, startDestination = Destination.Music, ownTop = { it == Destination.Music }) { _, _ ->
                 Library(library, MusicBrowserState(view = MusicView.Artists))
             }
         }

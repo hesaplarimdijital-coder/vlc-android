@@ -47,7 +47,8 @@ class SearchGroupsTest {
     @Test
     fun theArtistsThenTheAlbumsAsTheMusicViewGroupsThem() {
         assertEquals(
-            listOf("Ada Karan" to MusicView.Artists, "Deniz Aral" to MusicView.Artists, "Gece Mavisi" to MusicView.Albums, "Liman" to MusicView.Albums, "Kıyı" to MusicView.Albums),
+            // 1.1.1: the albums by their names, as the Music view has them (the design's A–Z)
+            listOf("Ada Karan" to MusicView.Artists, "Deniz Aral" to MusicView.Artists, "Gece Mavisi" to MusicView.Albums, "Kıyı" to MusicView.Albums, "Liman" to MusicView.Albums),
             groups.map { it.title to it.view },
         )
         // each opens by the library's own key

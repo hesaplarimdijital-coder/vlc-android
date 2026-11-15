@@ -118,6 +118,28 @@ data class MusicGroup(val key: String, val title: String?, val artist: String?, 
 
     /** The albums of an artist's group, or the artists of an album's. */
     val albumCount: Int get() = tracks.mapTo(HashSet()) { it.album.orEmpty() }.size
+
+    /** 1.1.1: when its newest track was added (the "Eklenme" order); 0 for none known. */
+    val addedAt: Long get() = tracks.maxOfOrNull { epochMillis(it.addedAt) } ?: 0L
+}
+
+/** 1.1.1 (the design's "A–Z" button): what a way in's groups are in order by. */
+enum class GroupOrder { Name, Artist, Year, Added }
+
+/** 1.1.1: a way in's groups' order and its direction; null where the view's own ([GroupSort.default]). */
+@Immutable
+data class GroupSort(val order: GroupOrder, val ascending: Boolean) {
+    companion object {
+        /** A way in's own order: the years newest first, every other one by name, A–Z. */
+        fun default(view: MusicView): GroupSort = if (view == MusicView.Years) GroupSort(GroupOrder.Year, false) else GroupSort(GroupOrder.Name, true)
+
+        /** The orders [view]'s button offers, its own first. */
+        fun choices(view: MusicView): List<GroupOrder> = when (view) {
+            MusicView.Albums -> listOf(GroupOrder.Name, GroupOrder.Artist, GroupOrder.Year, GroupOrder.Added)
+            MusicView.Years -> listOf(GroupOrder.Year, GroupOrder.Added)
+            else -> listOf(GroupOrder.Name, GroupOrder.Added)
+        }
+    }
 }
 
 /** S-803: the bit depth and sample rate filter; empty sets let everything through. */
@@ -137,8 +159,9 @@ data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBa
 
 /**
  * S-803: the library's groupings over one list of tracks, the medialibrary's and the picked
- * folders' alike: artists by album artist, albums by artist and name, genres, composers, years
- * (newest first) and folders, each sorted as people read them ([locale]: "Çağatay" after "Cem").
+ * folders' alike: artists by album artist, albums by name (1.1.1, the design's A–Z; by their artists
+ * before), genres, composers, years (newest first) and folders, each sorted as people read them
+ * ([locale]: "Çağatay" after "Cem"); in another [GroupSort] on asking ([orderedGroups]).
  * The Recent view's list is the playback history's, which changes as tracks play: it is not part of
  * the library (1.0: a new history does not make the library again), see [recentGroups].
  */
@@ -205,7 +228,7 @@ class MusicLibrary(val tracks: List<Track>, val locale: Locale = Locale.getDefau
                     val first = list.first()
                     MusicGroup(key, first.album?.takeIf { it.isNotBlank() }, first.filedArtist, list.mapNotNull { it.year }.maxOrNull(), sortedTracks(list, collator))
                 }
-                .sortedWith(compareBy<MusicGroup, String?>(nullsLast(collator)) { it.artist }.then(compareBy(nullsLast()) { it.year }).then(byTitle))
+                .sortedWith(byTitle.then(compareBy(nullsLast(collator)) { it.artist }).then(compareBy(nullsLast()) { it.year }))
             MusicView.Genres -> group(shown, collator, { it.genre?.takeIf(String::isNotBlank)?.let { fold(it) } }, { it.genre }).sortedWith(byTitle)
             MusicView.Composers -> group(shown, collator, { it.composer?.let { fold(it) } }, { it.composer }).sortedWith(byTitle)
             MusicView.Years -> shown.groupBy { it.year?.takeIf { y -> y > 0 } }
@@ -215,6 +238,39 @@ class MusicLibrary(val tracks: List<Track>, val locale: Locale = Locale.getDefau
             // the history is the caller's: recentGroups
             MusicView.Recent -> listOf(MusicGroup(RECENT_KEY, null, null, null, emptyList()))
         }
+    }
+
+    /** 1.1.1: the groupings in another order than their own, made so far ([orderedGroups]). */
+    private val groupOrders = HashMap<Triple<MusicView, TechFilter, GroupSort>, List<MusicGroup>>()
+
+    /**
+     * 1.1.1 (the design's "A–Z" button): the groups of [view] with [filter] in [sort]; null or the view's own order is
+     * [groups]' list. Another order is made once from it and kept. Safe from any thread.
+     */
+    fun orderedGroups(view: MusicView, filter: TechFilter = TechFilter(), sort: GroupSort?): List<MusicGroup> {
+        val base = groups(view, filter)
+        if (sort == null || sort == GroupSort.default(view)) return base
+        val key = Triple(view, filter, sort)
+        synchronized(this) { groupOrders[key] }?.let { return it }
+        val collator = collator()
+        val byTitle = byTitle(collator)
+        val (named, nameless) = base.partition { it.title != null }
+        val ordered = when (sort.order) {
+            GroupOrder.Name -> if (sort.ascending) base else named.reversed() + nameless
+            GroupOrder.Artist -> {
+                val byArtist = compareBy<MusicGroup, String?>(nullsLast(collator)) { it.artist }.then(compareBy(nullsLast()) { it.year }).then(byTitle)
+                base.sortedWith(if (sort.ascending) byArtist else compareBy<MusicGroup> { it.artist == null }.then(byArtist.reversed()))
+            }
+            GroupOrder.Year -> base.sortedWith(
+                compareBy<MusicGroup> { it.year == null }
+                    .then(if (sort.ascending) compareBy { it.year ?: 0 } else compareByDescending { it.year ?: 0 })
+                    .then(byTitle),
+            )
+            GroupOrder.Added -> base.sortedWith(
+                (if (sort.ascending) compareBy<MusicGroup> { it.addedAt } else compareByDescending { it.addedAt }).then(byTitle),
+            )
+        }
+        return synchronized(this) { groupOrders.getOrPut(key) { ordered } }
     }
 
     /** The tracks by uri, made once (by whichever thread asks first). */

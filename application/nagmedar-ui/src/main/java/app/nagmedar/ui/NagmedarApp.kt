@@ -530,6 +530,8 @@ private fun NagmedarMain(
                 glass = false,
                 // 1.0.3: the phone's bars on glass only for the user's decision's screenshots (a debuggable build's walk)
                 chromeGlass = DebugChrome.glass,
+                // 1.1.1 (the design): Müzik on a phone has no top bar, its band lies under the status bar
+                ownTop = { it == Destination.Music },
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }
@@ -613,6 +615,8 @@ private fun NagmedarMain(
                             Destination.Music -> MusicScreen(
                                 repository,
                                 onAddFolder = { sourcesFor = LibrarySection.Music },
+                                // 1.1.1: a phone's page has the search chip in place of the top bar's button
+                                onSearch = { shellNavigator.open(Destination.Search) },
                                 inspector = rememberMusicInspector(
                                     onFullScreenLyrics = { lyricsOpen = true },
                                     onFullScreenVisualizer = { visualizerOpen = true },
@@ -694,7 +698,16 @@ private fun NagmedarMain(
                         }
                     }
                     // Desktop Kit 1.0: on a phone these pages lie under the bars, their lists scrolling beneath the glass
-                    if (destination in UnderBars) UnderShellBars(listOnTop = destination in ListOnTop, content = page) else page()
+                    // 1.1.1 (the design): Müzik on a phone draws its own top, under the status bar
+                    if (destination in UnderBars) {
+                        UnderShellBars(
+                            listOnTop = destination in ListOnTop,
+                            ownTop = destination == Destination.Music && NavKind.forWidth(widthClass) == NavKind.BottomBar,
+                            content = page,
+                        )
+                    } else {
+                        page()
+                    }
                 },
             )
         }

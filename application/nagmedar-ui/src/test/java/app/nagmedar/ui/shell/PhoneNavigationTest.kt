@@ -68,11 +68,11 @@ class PhoneNavigationTest {
 
     private lateinit var navigator: ShellNavigator
 
-    private fun phone(theme: ThemeMode = ThemeMode.Light) {
+    private fun phone(theme: ThemeMode = ThemeMode.Light, chromeGlass: ChromeGlass = ChromeGlass.Product) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = InputMode.Touch) {
-                TestShell(WidthClass.Compact, screen = { destination, nav ->
+                TestShell(WidthClass.Compact, chromeGlass = chromeGlass, screen = { destination, nav ->
                     navigator = nav
                     when (destination) {
                         // a long list lying under the bars, its rows dark and light by turns
@@ -209,9 +209,10 @@ class PhoneNavigationTest {
         assertEquals(atRest, topBarPixel())
     }
 
+    /** Glass B, the user's decision of 6 Nov, which the walk still compares (1.1.1's product is the design's opaque chrome). */
     @Test
     fun theBottomChromeIsOneGlassOverTheList() {
-        phone(ThemeMode.Dark)
+        phone(ThemeMode.Dark, ChromeGlass.Bottom)
         val tracks = compose.onNodeWithTag("tracks")
         tracks.performScrollToIndex(1)
         compose.waitForIdle()

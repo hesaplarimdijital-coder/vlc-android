@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +33,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -73,6 +76,7 @@ import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.SemiBoldPlus
 import java.util.Calendar
 import kotlin.math.min
 import kotlinx.coroutines.launch
@@ -163,19 +167,31 @@ internal fun LayoutToggle(state: MusicBrowserState) {
  * played.
  */
 @Composable
-internal fun ListeningTrace(tracks: List<Track>, stats: Map<String, TrackStats>, playing: String?, modifier: Modifier = Modifier) {
+internal fun ListeningTrace(
+    tracks: List<Track>,
+    stats: Map<String, TrackStats>,
+    playing: String?,
+    modifier: Modifier = Modifier,
+    /** 1.1.1 (the design): each tick this wide, [gap] apart (a row's); null: the ticks share the whole width (a cover's). */
+    tick: Dp? = null,
+    gap: Dp = 3.dp,
+) {
     val colors = NagTheme.colors
-    val heard = colors.text
-    val unheard = colors.controlBorder
+    // 1.1.1 (the design): the playing group's played ticks in the ink, another's in the third text colour, the unplayed faint
+    val playsHere = remember(tracks, playing) { playing != null && tracks.any { it.uri == playing } }
     val accent = colors.accent
+    val heard = if (playsHere) accent else colors.textTertiary
+    val unheard = colors.text.copy(alpha = 0.14f)
     val played = remember(tracks, stats) { tracks.count { (stats[it.uri]?.plays ?: 0) > 0 } }
     val said = stringResource(R.string.nag_music_trace, played, tracks.size)
     Canvas(modifier.height(8.dp).clearAndSetSemantics { contentDescription = said }) {
         val total = tracks.size
-        val count = min(total, MAX_TICKS)
+        val gap = gap.toPx()
+        // a row's ticks as many as its width holds, a longer album's spread over them
+        val fits = tick?.let { ((size.width + gap) / (it.toPx() + gap)).toInt().coerceAtLeast(1) } ?: MAX_TICKS
+        val count = min(total, min(MAX_TICKS, fits))
         if (count == 0) return@Canvas
-        val gap = 3.dp.toPx()
-        val width = ((size.width - gap * (count - 1)) / count).coerceIn(1f, 18.dp.toPx())
+        val width = tick?.toPx() ?: ((size.width - gap * (count - 1)) / count).coerceAtLeast(1f)
         val low = 4.dp.toPx()
         val tall = size.height
         for (i in 0 until count) {
@@ -247,16 +263,25 @@ internal sealed interface GridEntry {
  * sign under "#"; those without the name at all (the order puts them last) under [nameless].
  */
 internal fun lettered(groups: List<MusicGroup>, name: (MusicGroup) -> String?, locale: java.util.Locale, nameless: String): List<GridEntry> {
-    val collator = java.text.Collator.getInstance(locale).apply { strength = java.text.Collator.PRIMARY }
-    fun letter(group: MusicGroup): String = name(group)?.takeIf { it.isNotBlank() }?.let { letterOf(it, locale, collator) } ?: nameless
     val out = ArrayList<GridEntry>(groups.size + 30)
+    letterRanges(groups, name, locale, nameless).forEach { (letter, range) ->
+        out += GridEntry.Letter(letter, range.last - range.first + 1, LETTER_KEY + groups[range.first].key)
+        for (k in range) out += GridEntry.Group(groups[k])
+    }
+    return out
+}
+
+/** 1.1.1: [items] in runs under their first letters, as [lettered] puts groups (a phone's tracks as well). */
+internal fun <T> letterRanges(items: List<T>, name: (T) -> String?, locale: java.util.Locale, nameless: String): List<Pair<String, IntRange>> {
+    val collator = java.text.Collator.getInstance(locale).apply { strength = java.text.Collator.PRIMARY }
+    fun letter(item: T): String = name(item)?.takeIf { it.isNotBlank() }?.let { letterOf(it, locale, collator) } ?: nameless
+    val out = ArrayList<Pair<String, IntRange>>(30)
     var i = 0
-    while (i < groups.size) {
-        val letter = letter(groups[i])
+    while (i < items.size) {
+        val letter = letter(items[i])
         var j = i + 1
-        while (j < groups.size && sameLetter(letter(groups[j]), letter, collator, nameless)) j++
-        out += GridEntry.Letter(letter, j - i, LETTER_KEY + groups[i].key)
-        for (k in i until j) out += GridEntry.Group(groups[k])
+        while (j < items.size && sameLetter(letter(items[j]), letter, collator, nameless)) j++
+        out += letter to (i until j)
         i = j
     }
     return out
@@ -286,7 +311,9 @@ private val MARKS = Regex("\\p{M}+")
 /**
  * 1.1.0 (Ebru): a way in's groups as their covers, two across on a phone and as many as fit on a wider window; under
  * each its name, its line and its [ListeningTrace]. A tap opens it ([onOpen]); a right click or a long press its menu.
- * [leading] (the page's band, a phone's shelf) spans the grid above them, edge to edge, scrolling with it.
+ * [leading] (the page's band, a phone's header) spans the grid above them, edge to edge, scrolling with it. 1.1.1 (the
+ * design's phone page): on a phone the covers are two across between 16 dp at the start and the room of the letters'
+ * wave at the end ([LetterWave]), under the chips at the top ([chipsRoom]: where a letter or a group scrolled to stops).
  */
 @Composable
 internal fun GroupGrid(
@@ -301,24 +328,38 @@ internal fun GroupGrid(
     /** A group to scroll to once (a player's link), [onRevealed] when it is in sight. */
     reveal: String? = null,
     onRevealed: () -> Unit = {},
+    /** 1.1.1: what a phone's chips cover at the grid's top. */
+    chipsRoom: Dp = 0.dp,
 ) {
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
     val gridState = rememberLazyGridState()
     val reduced = NagTheme.motion.reduced
+    val density = LocalDensity.current
+    val room = with(density) { chipsRoom.roundToPx() }
     OnReselect { if (reduced) gridState.scrollToItem(0) else gridState.animateScrollToItem(0) }
     val side = dimens.pagePadding
     val locale = app.nagmedar.ui.library.currentLocale()
     val nameless = words.nameless()
-    val entries = remember(groups, words.letters, locale, nameless) {
+    val entries = remember(groups, words.letters, words.sortName, locale, nameless) {
         if (words.letters) lettered(groups, words.sortName, locale, nameless) else groups.map { GridEntry.Group(it) }
     }
+    val first = if (leading != null) 1 else 0
+    // 1.1.1: the letters' wave down a phone's grid
+    val alphabet = rememberAlphabet()
+    val letters = remember(entries, alphabet, compact) {
+        if (!compact || !words.letters) emptyList() else waveLetters(
+            entries.mapIndexedNotNull { i, e -> (e as? GridEntry.Letter)?.let { LetterRun(it.letter, it.count, i + first) } },
+            alphabet,
+        )
+    }
+    val wave = letters.count { it.count > 0 } >= 2
     LaunchedEffect(reveal, entries) {
         val key = reveal ?: return@LaunchedEffect
         val index = entries.indexOfFirst { it is GridEntry.Group && it.group.key == key }
         if (index >= 0) {
-            val item = index + if (leading != null) 1 else 0
-            if (reduced) gridState.scrollToItem(item) else gridState.animateScrollToItem(item)
+            val item = index + first
+            if (reduced) gridState.scrollToItem(item, -room) else gridState.animateScrollToItem(item, -room)
             onRevealed()
         }
     }
@@ -350,38 +391,69 @@ internal fun GroupGrid(
             anchor.span = span
         }
     }
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(if (compact) 150.dp else 172.dp),
-        modifier = modifier.testTag("music-grid"),
-        state = gridState,
-        contentPadding = PaddingValues(start = side, end = side, top = 4.dp, bottom = 16.dp) + LocalShellBottomPadding.current,
-        horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 16.dp),
-        verticalArrangement = Arrangement.spacedBy(if (compact) 18.dp else 22.dp),
-    ) {
-        if (leading != null) {
-            item(key = GRID_LEADING, span = { GridItemSpan(maxLineSpan) }, contentType = GRID_LEADING) {
-                // edge to edge: past the grid's side padding
-                Box(Modifier.bleed(side)) { leading() }
-            }
-        }
-        items(
-            entries,
-            key = ::gridKey,
-            span = { entry -> if (entry is GridEntry.Letter) GridItemSpan(maxLineSpan) else GridItemSpan(1) },
-            contentType = { entry -> if (entry is GridEntry.Letter) GRID_LETTER else GRID_GROUP },
-        ) { entry ->
-            when (entry) {
-                is GridEntry.Letter -> LetterHeading(entry.letter, entry.count, words.count(entry.count))
-                is GridEntry.Group -> ContextMenuArea(entries = { menu(entry.group) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
-                    GroupCard(entry.group, words.title(entry.group), words.line(entry.group), stats, playing) { onOpen(entry.group) }
+    val start = if (compact) 16.dp else side
+    val end = if (compact) (if (wave) WAVE_ROOM else 16.dp) else side
+    val bottom = LocalShellBottomPadding.current
+    val scope = rememberCoroutineScope()
+    Box(modifier) {
+        LazyVerticalGrid(
+            columns = if (compact) GridCells.Fixed(2) else GridCells.Adaptive(172.dp),
+            modifier = Modifier.fillMaxSize().testTag("music-grid"),
+            state = gridState,
+            contentPadding = PaddingValues(start = start, end = end, top = if (compact) 0.dp else 4.dp, bottom = 16.dp) + bottom,
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 16.dp),
+            // a phone's rows keep their gaps themselves: 18 dp under the covers, 4 under a letter (the design's)
+            verticalArrangement = Arrangement.spacedBy(if (compact) 0.dp else 22.dp),
+        ) {
+            if (leading != null) {
+                item(key = GRID_LEADING, span = { GridItemSpan(maxLineSpan) }, contentType = GRID_LEADING) {
+                    // edge to edge: past the grid's side padding
+                    Box(Modifier.bleed(start, end)) { leading() }
                 }
             }
+            items(
+                entries,
+                key = ::gridKey,
+                span = { entry -> if (entry is GridEntry.Letter) GridItemSpan(maxLineSpan) else GridItemSpan(1) },
+                contentType = { entry -> if (entry is GridEntry.Letter) GRID_LETTER else GRID_GROUP },
+            ) { entry ->
+                when (entry) {
+                    is GridEntry.Letter -> LetterHeading(
+                        entry.letter, words.count(entry.count),
+                        Modifier.padding(top = if (compact) 6.dp else 6.dp, bottom = if (compact) 4.dp else 0.dp),
+                    )
+                    is GridEntry.Group -> ContextMenuArea(entries = { menu(entry.group) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
+                        GroupCard(
+                            entry.group, words.title(entry.group), words.line(entry.group), stats, playing,
+                            Modifier.padding(bottom = if (compact) 18.dp else 0.dp),
+                        ) { onOpen(entry.group) }
+                    }
+                }
+            }
+        }
+        if (wave) {
+            val waveGap = with(density) { 8.dp.roundToPx() }
+            LetterWave(
+                letters,
+                current = {
+                    val items = gridState.layoutInfo.visibleItemsInfo
+                    val under = items.firstOrNull { it.offset.y + it.size.height > room }?.index ?: gridState.firstVisibleItemIndex
+                    currentWaveLetter(letters, under)
+                },
+                onJump = { letter -> scope.launch { gridState.scrollToItem(letter.index, -room) } },
+                top = {
+                    val head = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.takeIf { it.index == 0 && leading != null }
+                    maxOf(room, (head?.let { it.offset.y + it.size.height } ?: 0) + waveGap)
+                },
+                bottom = { gridState.layoutInfo.viewportSize.height - with(density) { bottom.calculateBottomPadding().roundToPx() } - waveGap },
+                modifier = Modifier.align(Alignment.TopEnd),
+            )
         }
     }
 }
 
 /** An entry's key in the grid. */
-private fun gridKey(entry: GridEntry): Any = if (entry is GridEntry.Group) entry.group.key else (entry as GridEntry.Letter).key
+internal fun gridKey(entry: GridEntry): Any = if (entry is GridEntry.Group) entry.group.key else (entry as GridEntry.Letter).key
 
 /** What the grid shows first, all of it: the item a change of columns keeps in sight ([GroupGrid]). */
 private class GridAnchor {
@@ -401,59 +473,59 @@ private fun firstFullyShown(state: LazyGridState): Any? {
  * TalkBack, which hears what they are ([said]: "C, 5 albüm").
  */
 @Composable
-private fun LetterHeading(letter: String, count: Int, said: String) {
+internal fun LetterHeading(letter: String, said: String, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     Row(
-        Modifier.fillMaxWidth().padding(top = 6.dp).clearAndSetSemantics {
+        modifier.fillMaxWidth().heightIn(min = 40.dp).clearAndSetSemantics {
             heading()
             contentDescription = "$letter, $said"
         },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // a letter, or the nameless groups' words ("Bilinmeyen sanatçı"): the rule and the count keep their room
-        Text(letter, style = NagTheme.type.display, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        // a letter, or the nameless groups' words ("Bilinmeyen sanatçı"): the rule and the count keep their room. 1.1.1 (the
+        // design): the letter in the ink, how many there are in words ("5 albüm")
+        Text(letter, style = letterStyle(), color = colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 280.dp))
-        Box(Modifier.padding(horizontal = 12.dp).weight(1f).height(1.dp).background(colors.border))
-        Text(count.toString(), style = NagTheme.type.labelSmall, color = colors.textTertiary)
+        Box(Modifier.padding(horizontal = 12.dp).weight(1f).height(1.dp).background(colors.borderStrong))
+        Text(said, style = designText(13f, 18f), color = colors.textTertiary, maxLines = 1)
     }
 }
 
 /** One group of the grid: its cover, name, line and trace, one target. */
 @Composable
-private fun GroupCard(group: MusicGroup, title: String, line: String, stats: Map<String, TrackStats>, playing: String?, onOpen: () -> Unit) {
+private fun GroupCard(group: MusicGroup, title: String, line: String, stats: Map<String, TrackStats>, playing: String?, modifier: Modifier = Modifier, onOpen: () -> Unit) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(10.dp)
-    val playsHere = playing != null && group.tracks.any { it.uri == playing }
+    val playsHere = remember(group, playing) { playing != null && group.tracks.any { it.uri == playing } }
     Column(
-        Modifier
+        modifier
             .fillMaxWidth()
             .pressScale(state.pressed)
             .focusRing(state, shape)
             .nagClickable(interaction, onOpen),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        GroupCover(group, Modifier.fillMaxWidth().aspectRatio(1f))
-        Column(Modifier.fillMaxWidth()) {
-            Text(title, style = NagTheme.type.bodyStrong, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(line, style = NagTheme.type.labelSmall, color = if (playsHere) colors.accentText else colors.textTertiary, maxLines = 1,
-                overflow = TextOverflow.Ellipsis)
-        }
+        // 1.1.1 (the design): the playing group's cover in the ink's ring
+        GroupCover(group, Modifier.fillMaxWidth().aspectRatio(1f).coverRing(playsHere, colors.accent, 6.dp))
+        Spacer(Modifier.height(10.dp))
+        Text(title, style = designText(15f, 20f, SemiBoldPlus), color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(line, style = designText(13f, 18f), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.height(8.dp))
         ListeningTrace(group.tracks, stats, playing, Modifier.fillMaxWidth())
     }
 }
 
-/** [by] wider on both sides than the room it is given: an item that reaches past its list's padding. */
-private fun Modifier.bleed(by: Dp): Modifier = layout { measurable, constraints ->
-    val extra = (by * 2).roundToPx()
+/** [start] and [end] wider than the room it is given: an item that reaches past its list's padding, edge to edge. */
+internal fun Modifier.bleed(start: Dp, end: Dp = start): Modifier = layout { measurable, constraints ->
+    val extra = (start + end).roundToPx()
     val placeable = measurable.measure(
         constraints.copy(
             minWidth = (constraints.minWidth + extra).coerceAtLeast(0),
             maxWidth = if (constraints.hasBoundedWidth) constraints.maxWidth + extra else constraints.maxWidth,
         ),
     )
-    layout(constraints.constrainWidth(placeable.width - extra), placeable.height) { placeable.place(-by.roundToPx(), 0) }
+    layout(constraints.constrainWidth(placeable.width - extra), placeable.height) { placeable.placeRelative(-start.roundToPx(), 0) }
 }
 
 /** A group's ticks at most: a longer album's are spread over it. */
@@ -463,7 +535,7 @@ private const val MAX_TICKS = 24
 private const val GRID_LEADING = "\u0000grid-leading"
 
 /** Before a letter's first group's key: a letter's key in the grid. */
-private const val LETTER_KEY = "\u0000letter-"
+internal const val LETTER_KEY = "\u0000letter-"
 
 /** The grid's kinds of items, for the lazy grid's reuse. */
 private const val GRID_LETTER = "letter"

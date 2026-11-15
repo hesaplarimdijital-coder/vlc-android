@@ -2,6 +2,44 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.1 (15 Kasım 2026)
+
+Telefonun Müzik sayfası tasarımın aynısı (15 Kasım, telefonun ekran görüntüsüyle: “Olmamış”). 1.1.0 tasarımın renklerini, yazısını ve bileşenlerini almıştı, ama telefondaki sayfa tuvaldekine (Müzikler · telefon, ızgara ve liste) benzemiyordu: üst çubuk şeridin üstündeydi, yollar bir menüdeydi, parçalar tabloydu, küçük oynatıcı eskisiydi, 1.1.0'ın “sonraki bir sürümde” dediği parçalar da yoktu. Bu sürüm sayfayı tuvaldeki ölçülerle yeniden kurar. Tablet ve DeX'in sayfası sırada.
+
+### Telefonda Müzik
+- Üst çubuk yok: ebru şeridi pencerenin en üstünden, durum çubuğunun altından başlar (durum çubuğunun altında 136 dp: 28 dp'lik bir durum çubuğuyla tasarımın 164'ü) ve listeyle kayar. Üstünde yerinden kıpırdamayan üç çip: Nağmedar (şeridin bir parçası, mürekkep renginde bir halkada; Bodoni'nin italiği), Ara ve Seçenekler (⋮). Liste çiplerin altından geçmeye başlayınca arkalarına ve durum çubuğuna sayfanın rengi gelir. Şerit durum çubuğunun altındayken durum çubuğunun simgeleri koyudur (kâğıt açık renk), sonra temanınki; oynatıcı ya da bir sayfa üstündeyken onlarınki.
+- Başlık “Müzikler” (Bodoni'nin italiği, 52 sp), altında parça, albüm ve sanatçı sayısı (“974 parça · 88 albüm · 61 sanatçı”).
+- Yollar sekme şeridi: Parçalar, Sanatçılar, Albümler, Türler, Besteciler, Yıllar, Klasörler ve en sonda Son çalınanlar. Seçili olan yazının renginde, altında mürekkep çizgisi; şerit yana kayar, sonu sayfanın rengine solar, seçilen sekme hep görünür. 1.0'ın “Son çalınan müzik” rafı kalktı: son çalınanlar şeridin son sekmesi.
+- Araç çubuğu: mürekkep renginde “Karıştır” (görünümdeki bütün parçaları karışık çalar; Albümler'de bütün albümlerinkini), sıralama düğmesi (“A–Z”; menüsünde sıralar ve iki yönü; ekran okuyucu “Sırala: ada göre, A'dan Z'ye” diye okur), ızgara ve liste düğmeleri.
+- Hızlı filtreler (Tümü, Yarım kalanlar, Hiç çalınmayanlar, Bu yıl eklenenler), Filtrele ve Klasör ekle Seçenekler'de. Bir filtre açıkken Seçenekler'de bir nokta, araç çubuğunun altında “Filtre: Yarım kalanlar, 24 bit” ve “Filtreleri temizle”.
+- Harfler mürekkep renginde, Bodoni'nin italiğiyle; yanlarındaki sayı sözle (“5 albüm”). Albümler adlarına göre dizilir (A–Z, tasarımınki; 1.1.0'da sanatçılarına göre); sıralama düğmesinden sanatçıya, yıla ya da eklenme tarihine göre de, her biri iki yönde. Sanatçılar, türler, besteciler ve klasörler ada ya da eklenme tarihine göre, yıllar yıla göre. Android Auto'nun albümleri ve aramanın albümleri de adlarına göre.
+- Izgara iki sütun, sağında harf dalgasına yer; çalan albümün kapağı mürekkep renginde bir halkada. Kapağın altında adı, “sanatçı · yıl” ve dinleme izi: çalan albümün çalınmış parçaları mürekkep renginde, başka albümlerinki yazının üçüncü renginde, çalınmamışlar silik.
+- Liste görünümü tasarımın satırları: 64 dp, 52 dp kapak (çalanınki halkalı, adı mürekkep renginde), “sanatçı · yıl · 12 parça”, dinleme izi ve ⋮. Sanatçının ve bestecinin satırı baş harfiyle (Bodoni, vurgunun açık tonunda bir daire), türün, yılın ve klasörün satırı işaretiyle başlar.
+- Parçalar görünümü artık tablo değil, satırlar: parçanın kapağı (çalanınki halkalı), adı, “sanatçı · albüm”, ⋮; sıralandığı adın harflerinin altında. Dokunmak çalar; uzun basış menüsünü açar, “Seç” ile seçim başlar ve seçimin çubuğu çiplerin altına gelir.
+- **Harf dalgası** (“Harfe atla”): listenin sonunda alfabenin harfleri (Türkçenin 29 harfi; İngilizcede 26), her harfin çizgisi altındakiler kadar uzun, listenin başındaki harfinki mürekkep renginde. Parmakla dokunup kaydırınca liste o harfe gider (çiplerin altında durur), parmağın yanında harf görünür, her harfte bir titreşim. Ekran okuyucu harfler üzerinde bir kaydırıcı olarak duyar.
+- Bir albümün kendi sayfası: kısa bir şerit, çiplerde geri, kapak (menüsüyle değişir), ad Bodoni'yle, satırı, Oynat ve Karıştır, dönüştürme; parçalar numaralarıyla, satırlarında sanatçı ve süre.
+- Yeni bir kurulumda Müzik Albümler'le açılır (tasarımdaki gibi); başka bir yol seçildiyse o.
+
+### Telefonun küçük oynatıcısı
+- Tasarımın kartı: 84 dp, 20 dp köşeli, gölgeli, kenar çizgisi yok; pencerenin kenarlarından 8 dp içeride sayfanın üstünde durur. Kapak, ad, “sanatçı · albüm”, mürekkep renginde bir dairede oynat/duraklat, sonraki. Altında parçanın biçimi altmış çubukla ilerleme olarak: çalınan kısmı mürekkep renginde; parmakla kaydırınca ya da dokununca konum değişir (bırakıldığında), ekran okuyucu bir kaydırıcı ve zamanlar (“1:48 / 4:15”) olarak duyar. Önceki, karıştır, tekrar ve kalan zaman tam oynatıcıda; kartı yana kaydırmak eskisi gibi önceki ya da sonraki parçaya geçer. Bir videonun satırı biçimini söyler, canlı yayının “Canlı yayın”ı çubukların yerinde.
+- Telefonun çubukları opak (tasarımınki): alt çubuk çubukların renginde, üstünde çizgi; kart sayfanın üstünde yüzer, çevresinden sayfa görünür. 6 Kasım'ın cam kararı (B) yürüyüşün karşılaştırmaları için durur.
+- Alt çubukta seçili sekmenin hapı 60 × 32 dp, etiketler 650 ve 500 kalınlıkta.
+
+### Kabuk
+- Telefonda kabuk pencerenin üstünü de alır. Üst çubuk durum çubuğunun altından başlar, görünüşü aynı kalır; pencere boyunca açılan sayfalar (Sıradaki, sözler, görselleştirici, tam oynatıcı) ve alt sayfalar durum çubuğunun altında kalır, tam oynatıcının zemini durum çubuğunun arkasına da uzanır. Tablette ve DeX'te bir şey değişmedi.
+
+### Tasarımda olup bu sürümde olmayanlar
+- Tablet ve DeX'in Müzik sayfası (kenar çubuğunda marka ve “Bir yıldır açmadıkların”, şeridin üstünde arama alanı, beş sütunluk ızgara, sağda kapağın arkasında plakla “Şimdi çalıyor” paneli). Sıradaki sürümde.
+
+### Test
+- Yeni testler: `MusicBrowserTest`'te telefon sayfasının sekmelerden albümü açıp çipteki geriyle dönüşü ve harf dalgasının ekran okuyucunun kaydırıcısıyla bir harfe gidişi; `CompactTransportBarTest`'te kartın dalga biçiminin bırakıldığı yere atlaması, ekran okuyucunun zamanları ve kaydırıcısı, kartın 84 dp'si ve canlı yayında da aynı yüksekliği.
+- Değişen testler: albümlerin sırası (Android Auto'nun ağacı, aramanın grupları) adlarına göre; telefonun küçük oynatıcısının testleri tasarımın kartına göre (önceki düğmesi yok, zamanlar yerine dalga biçimi); camı (B) deneyen testler (pencerenin kenarı, sistem şeridi, Podcast sayfası, telefonun gezinmesi) B'yi açıkça seçer, ürün artık opak; bölmelerin testlerinde telefonun listesi bir satır fazladır (albümlerin harfi ya da albüm sayfasının başlığı), geri de sayfanın çipindedir.
+- Emülatör yürüyüşü: Müzik artık Albümler'le açıldığından yürüyüş parçalarını Parçalar'da arar (sekmesi ya da menüsü); telefonda Müzik'in üst çubuğu yerine tasarımın çiplerini, başlığını ve sekmelerini denetler, üst çubuğun rengini “Daha fazla” sayfasında okur; soğuk açılışta rafın yerine sayfanın başlığının satırların üstünde olduğuna bakar.
+
+### Sürüm
+- `versionCode` 4010101; kişisel arm64 APK'sı 14010107 (1.1.0'ın 14010106'sının üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+- Baseline Profile: telefon sayfasının yeni parçaları (başlık, çipler, sekmeler, satırlar, harf dalgası, sıralar) önceden derlenir.
+
 ## 1.1.0 (15 Kasım 2026)
 
 Ebru: Nağmedar'ın yeni tasarım dili (14 Kasım: “Peki tüm bunları kullanarak nağmedarın tasarımını değiştirsen…”, 15 Kasım: “Çok güzel olmuş nağmedarı böyle yapalım”, “Tüm temayı ilk önce canvasa ekle. Tüm uyarı mesajları, en küçük komponent dahil bu yeni tasarım diline uygun tasarla. Daha sonra kodunu yap ve yeni nağmedar sürümü olarak gönder. Kite yükleme şimdilik”). Önce tasarım tuvaline çizildi: Müzik sayfası telefonda, tablette ve DeX'te (ızgara ve liste), üç tema sayfası (renkler; yazı, ölçü ve hareket; simgeler ve ebru), beş bileşen sayfası (kontroller, menüler ve pencereler, listeler ve tablolar, kabuk, oynatıcı) ve dört uyarı sayfası (kısa haberler ve uyarılar, durumlar, pencereler, uygulamanın bütün mesajlarının kataloğu), hepsi uygulamanın kendi Türkçe metinleriyle. Bu sürüm onu koda geçirir. Desktop Kit'e bir şey eklenmedi (“Kite yükleme şimdilik”).

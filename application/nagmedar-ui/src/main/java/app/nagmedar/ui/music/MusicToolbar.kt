@@ -207,7 +207,7 @@ private fun FilterButton(state: MusicBrowserState, probing: Int) {
  * Escape, Back and a click outside close it; Tab walks the chips.
  */
 @Composable
-private fun FilterPanel(state: MusicBrowserState, probing: Int, onDismiss: () -> Unit) {
+internal fun FilterPanel(state: MusicBrowserState, probing: Int, onDismiss: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))

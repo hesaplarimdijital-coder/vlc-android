@@ -1,5 +1,10 @@
 package app.nagmedar.ui.music
 
+import app.nagmedar.ui.library.ScanStrip
+import app.nagmedar.ui.shell.LocalWindowRootInsets
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.runtime.CompositionLocalProvider
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
@@ -184,6 +189,9 @@ class MusicBrowserState(
     /** 1.1.0 (Ebru): the quick filter over the groups; not kept. */
     var quick by mutableStateOf(quick)
 
+    /** 1.1.1 (the design's "A–Z" button): the groups' order; null for the way in's own ([GroupSort.default]). */
+    var groupSort by mutableStateOf<GroupSort?>(null)
+
     fun changeLayout(next: MusicLayout) {
         if (next == layout) return
         layout = next
@@ -220,6 +228,7 @@ class MusicBrowserState(
         view = next
         group = null
         sort = null
+        groupSort = null
         columnsOf?.invoke(next)?.let { columns = it }
         keep(view, columns)
     }
@@ -257,6 +266,7 @@ class MusicBrowserState(
                     it.filter.depths.joinToString(",") { d -> d.name }, it.filter.rates.joinToString(",") { r -> r.name },
                     it.sort?.let { s -> "${s.column.name}:${s.ascending}" }.orEmpty(),
                     it.layout.name, it.quick.name,
+                    it.groupSort?.let { g -> "${g.order.name}:${g.ascending}" }.orEmpty(),
                 )
             },
             restore = { saved ->
@@ -274,7 +284,11 @@ class MusicBrowserState(
                     layout = MusicLayout.entries.firstOrNull { it.name == saved.getOrNull(6) } ?: MusicLayout.Grid,
                     quick = QuickFilter.entries.firstOrNull { it.name == saved.getOrNull(7) } ?: QuickFilter.All,
                     keepLayout = keepLayout,
-                )
+                ).also { state ->
+                    state.groupSort = saved.getOrNull(8)?.takeIf { it.isNotEmpty() }?.let { g ->
+                        GroupOrder.entries.firstOrNull { it.name == g.substringBefore(':') }?.let { GroupSort(it, g.substringAfter(':') == "true") }
+                    }
+                }
             },
         )
     }
@@ -298,7 +312,8 @@ fun rememberMusicBrowserState(): MusicBrowserState {
         { layout -> settings.edit().putString(NAGMEDAR_MUSIC_LAYOUT, layout.name.lowercase()).apply() }
     }
     return rememberSaveable(saver = MusicBrowserState.saver(keep, columnsOf, keepLayout)) {
-        val view = MusicView.entries.firstOrNull { it.name.lowercase() == settings.getString(NAGMEDAR_MUSIC_VIEW, null) } ?: MusicView.Tracks
+        // 1.1.1 (the design): the albums until another way in was chosen
+        val view = MusicView.entries.firstOrNull { it.name.lowercase() == settings.getString(NAGMEDAR_MUSIC_VIEW, null) } ?: MusicView.Albums
         // 1.1.0 (Ebru): the covers unless the rows were chosen
         val layout = if (settings.getString(NAGMEDAR_MUSIC_LAYOUT, null) == MusicLayout.List.name.lowercase()) MusicLayout.List else MusicLayout.Grid
         MusicBrowserState(view = view, columns = columnsOf(view), keep = keep, columnsOf = columnsOf, layout = layout, keepLayout = keepLayout)
@@ -372,10 +387,11 @@ internal fun groupSource(view: MusicView, group: MusicGroup?): PlaySource? {
 
 /**
  * S-803: the music library, from the medialibrary (or the picked folders) and the engine's probe. Desktop Kit 1.0: on
- * tablet and DeX windows [inspector]'s tabs stand on the right of the table, shown and hidden from the header.
+ * tablet and DeX windows [inspector]'s tabs stand on the right of the table, shown and hidden from the header. 1.1.1
+ * (the design's phone page): on a phone the page is the design's ([PhoneMusicPage]), [onSearch] its search chip.
  */
 @Composable
-fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector: MusicInspectorContent? = null) {
+fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector: MusicInspectorContent? = null, onSearch: (() -> Unit)? = null) {
     val context = LocalContext.current
     val scan = rememberScanState()
     val read = rememberMusicRead(repository)
@@ -406,20 +422,8 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     // a wide window
     val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
     val inks = rememberEbruInks(playing)
-    val bandInks = rememberUpdatedState(inks)
-    val shelf: (@Composable () -> Unit)? = if (compact) remember {
-        @Composable {
-            Column {
-                EbruBand(bandInks.value, PHONE_BAND)
-                RecentShelf(recent.value.orEmpty())
-            }
-        }
-    } else null
-    // 1.0.3: whether the shelf has tracks now, for the list: one that comes after the rows is shown, not left above them
-    // (1.1.0: the band is always there)
-    val shelfPresent: (() -> Boolean)? = if (compact) remember { { true } } else null
-    // a wide window's Recent view; the same empty list on a phone, so that a new history recomposes nothing there
-    val recentKeys = if (compact) emptyList() else recent.value.orEmpty().let { list -> remember(list) { list.mapNotNull { it.uri?.toString() } } }
+    // 1.1.1 (the design's phone page): the recently played are the phone's last tab too
+    val recentKeys = recent.value.orEmpty().let { list -> remember(list) { list.mapNotNull { it.uri?.toString() } } }
     val tech by TrackTechIndex.tech.collectAsState()
     val probing by TrackTechIndex.remaining.collectAsState()
     val locale = context.resources.locale()
@@ -453,14 +457,32 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     val state = rememberMusicBrowserState()
     val inspectorState = rememberInspectorState()
     // 1.1.0 (Ebru): the counts under the masthead: tracks and albums, as the Albums view has them (tracks without an
-    // album's name are no album); the albums once they are grouped, off the main thread the first time
-    val albums by produceState(library?.madeGroups(MusicView.Albums)?.count { it.title != null }, library) {
+    // album's name are no album); the albums once they are grouped, off the main thread the first time. 1.1.1 (the
+    // design): the artists too
+    val groupCounts by produceState(
+        library?.let { known -> known.madeGroups(MusicView.Albums)?.let { a -> known.madeGroups(MusicView.Artists)?.let { r -> named(a) to named(r) } } },
+        library,
+    ) {
         val known = library ?: return@produceState
-        value = withContext(Dispatchers.Default) { known.groups(MusicView.Albums).count { it.title != null } }
+        value = withContext(Dispatchers.Default) { named(known.groups(MusicView.Albums)) to named(known.groups(MusicView.Artists)) }
     }
     val counts = library?.let { known ->
         val tracks = pluralStringResource(R.plurals.nag_tracks_count, known.tracks.size, known.tracks.size)
-        albums?.let { n -> tracks + " · " + pluralStringResource(R.plurals.nag_music_albums, n, n) } ?: tracks
+        groupCounts?.let { (albums, artists) ->
+            listOf(
+                tracks,
+                pluralStringResource(R.plurals.nag_music_albums, albums, albums),
+                pluralStringResource(R.plurals.nag_music_artists_count, artists, artists),
+            ).joinToString(" · ")
+        } ?: tracks
+    }
+    if (compact) {
+        PhoneMusicPage(library, scan, state, actions, inks, counts, probing, stats, recentKeys, converting, onConverted = { converting = null }, onAddFolder, onSearch)
+        adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
+        rating?.let { tracks ->
+            RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+        }
+        return
     }
     // a window as short as a phone on its side keeps its height for the music: no band across it
     val short = LocalHeightClass.current == HeightClass.Compact
@@ -483,7 +505,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
         MusicContent(library, scan, onAddFolder) { known ->
             MusicBrowser(
                 known, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
-                stats = stats, recent = recentKeys, shelf = shelf, shelfPresent = shelfPresent,
+                stats = stats, recent = recentKeys,
             )
         }
     }
@@ -491,6 +513,116 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     rating?.let { tracks ->
         RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
     }
+}
+
+/** How many of [groups] have a name (tracks without an album's name are no album). */
+private fun named(groups: List<MusicGroup>): Int = groups.count { it.title != null }
+
+/**
+ * 1.1.1 (the design's phone page, Main.dc.html): the Music page of a phone. Its list starts at the window's top: the
+ * header ([PhoneMusicHeader]: the band under the status bar, the masthead with [counts], the tabs, the toolbar) is its
+ * first item; the chips stay over it ([PhoneMusicChips]: the brand, or the way back from a group's page; the search;
+ * the options with the quick filters, the filter and the folders). Until there is a list, the band and the masthead
+ * over the loading or empty state.
+ */
+@Composable
+internal fun PhoneMusicPage(
+    library: MusicLibrary?,
+    scan: ScanState,
+    state: MusicBrowserState,
+    actions: MusicActions,
+    inks: EbruInks,
+    counts: String?,
+    probing: Int,
+    stats: Map<String, TrackStats>,
+    recent: List<String>,
+    converting: List<Track>?,
+    onConverted: () -> Unit,
+    onAddFolder: () -> Unit,
+    onSearch: (() -> Unit)?,
+) {
+    val phoneTop = remember { PhoneTop() }
+    val density = LocalDensity.current
+    val statusTop = with(density) { (LocalWindowRootInsets.current?.top?.getTop(this) ?: 0).toDp() }
+    val chipsRoom = statusTop + PHONE_CHIPS_ROOM
+    val res = LocalContext.current.resources
+    var filterOpen by remember { mutableStateOf(false) }
+    val filtered = filteredWords(state)
+    val clearFilters = remember(state) {
+        {
+            state.filter = TechFilter()
+            state.quick = QuickFilter.All
+        }
+    }
+    // the header reads what changes through these, so that the lists that hold it are not made again for them
+    val latestInks = rememberUpdatedState(inks)
+    val latestCounts = rememberUpdatedState(counts)
+    val latestFiltered = rememberUpdatedState(filtered)
+    val latestConverting = rememberUpdatedState(converting)
+    val latestConverted = rememberUpdatedState(onConverted)
+    val header: @Composable (shuffle: (() -> Unit)?) -> Unit = remember(state, statusTop, scan) {
+        { shuffle ->
+            PhoneMusicHeader(
+                latestInks.value, statusTop, latestCounts.value, state, shuffle, latestFiltered.value, clearFilters,
+            ) {
+                // a scan going on, the converter's job: under the toolbar
+                if (scan.active) ScanStrip(scan)
+                ConvertHost(
+                    latestConverting.value,
+                    onConverted = { latestConverted.value() },
+                    modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
+                )
+            }
+        }
+    }
+    val options: () -> List<MenuEntry> = {
+        buildList {
+            // 1.1.0's quick filters over the groups, as radio items
+            if (state.view.grouped) {
+                QuickFilter.entries.forEach { quick -> add(MenuEntry.Item(res.getString(quick.label), { state.quick = quick }, checked = state.quick == quick)) }
+                add(MenuEntry.Separator)
+            }
+            add(MenuEntry.Item(res.getString(R.string.nag_music_filter), { filterOpen = true }, icon = NagIcons.Filter, checked = state.filter.active.takeIf { it }))
+            add(MenuEntry.Item(res.getString(R.string.nag_state_add_folder), onAddFolder, icon = NagIcons.FolderAdd))
+        }
+    }
+    val open = state.view.grouped && state.group != null
+    Box(Modifier.fillMaxSize().onGloballyPositioned { phoneTop.pageTop = it.positionInWindow().y }.testTag("music-page")) {
+        CompositionLocalProvider(LocalPhoneTop provides phoneTop, LocalPhoneBand provides remember(inks, statusTop) { PhoneBand(inks, statusTop) }) {
+            if (library == null || library.tracks.isEmpty()) {
+                Column(Modifier.fillMaxSize()) {
+                    PhoneMusicTopOnly(inks, statusTop, counts)
+                    Box(Modifier.weight(1f)) { MusicContent(library, scan, onAddFolder) {} }
+                }
+            } else {
+                MusicBrowser(
+                    library, state, actions, Modifier.fillMaxSize(), probing = probing, stats = stats, recent = recent,
+                    phoneHeader = header, chipsRoom = chipsRoom,
+                )
+            }
+            PhoneMusicChips(
+                statusTop = statusTop,
+                inks = inks,
+                onBack = if (open) ({ state.group = null }) else null,
+                onSearch = onSearch,
+                options = options,
+                marked = filtered != null,
+                optionsAnchor = { if (filterOpen) FilterPanel(state, probing, onDismiss = { filterOpen = false }) },
+            )
+        }
+    }
+}
+
+/** What holds a phone's list now: the quick filter and the format's filters, in words; null for nothing. */
+@Composable
+private fun filteredWords(state: MusicBrowserState): String? {
+    val locale = LocalContext.current.resources.locale()
+    val parts = buildList {
+        if (state.view.grouped && state.quick != QuickFilter.All) add(stringResource(state.quick.label))
+        state.filter.depths.forEach { add(depthLabel(it)) }
+        state.filter.rates.forEach { add(rateLabel(it, locale)) }
+    }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
 }
 
 /**
@@ -510,33 +642,6 @@ internal fun MusicContent(library: MusicLibrary?, scan: ScanState, onAddFolder: 
         onAddFolder = onAddFolder,
     ) {
         if (library != null) browser(library)
-    }
-}
-
-/**
- * 1.0: the tracks played last, newest first, as the Home page's shelf had them: a tap plays them from there; a long
- * press opens their menu as a sheet, as every phone menu is. Nothing while nothing was played.
- */
-@Composable
-private fun RecentShelf(tracks: List<MediaWrapper>) {
-    if (tracks.isEmpty()) return
-    val context = LocalContext.current
-    val dimens = NagTheme.dimens
-    Column(Modifier.fillMaxWidth().testTag("recent-shelf")) {
-        ShelfTitle(stringResource(R.string.nag_music_recent_shelf))
-        LazyRow(contentPadding = PaddingValues(horizontal = dimens.pagePadding), horizontalArrangement = Arrangement.spacedBy(dimens.gapM)) {
-            itemsIndexed(tracks, key = { _, m -> m.id }) { index, media ->
-                val play: () -> Unit = { PlaybackActions.playList(context, tracks, index) }
-                ContextMenuArea(
-                    entries = { mediaMenu(context, media, play) },
-                    accessibilityLabel = stringResource(R.string.nag_more_actions),
-                    asSheet = true,
-                    sheetTitle = media.title,
-                ) {
-                    TrackCard(media, Modifier.width(150.dp), onClick = play)
-                }
-            }
-        }
     }
 }
 
@@ -594,9 +699,8 @@ private const val MUSIC_KEEP_WHILE_WORKING_MS = 30_000L
 
 /** S-1006: an album's cover in its header; a click (a right click, a long press) opens its menu. */
 @Composable
-private fun AlbumCover(group: MusicGroup, modifier: Modifier = Modifier) {
+internal fun AlbumCover(group: MusicGroup, modifier: Modifier = Modifier, side: Dp = 48.dp) {
     val track = remember(group.key) { group.tracks.firstOrNull()?.let(CoverTrack::of) }
-    val side = 48.dp
     val px = with(LocalDensity.current) { side.roundToPx() }
     CoverMenuButton(rememberCover(track, px), side, stringResource(R.string.nag_cover_menu), rememberCoverMenu(track), modifier)
 }
@@ -826,13 +930,20 @@ fun MusicBrowser(
     recent: List<String> = emptyList(),
     shelf: (@Composable () -> Unit)? = null,
     shelfPresent: (() -> Boolean)? = null,
+    /**
+     * 1.1.1 (the design's phone page): a phone's header (the band, the masthead, the tabs, the toolbar), the first item of
+     * every list and grid, scrolling away with it; the toolbar then is none of the browser's. [chipsRoom]: what the
+     * page's chips cover at the lists' top.
+     */
+    phoneHeader: (@Composable (shuffle: (() -> Unit)?) -> Unit)? = null,
+    chipsRoom: Dp = 0.dp,
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
     val all = if (state.view == MusicView.Recent) {
         remember(library, recent, state.filter) { library.recentGroups(recent, state.filter) }
     } else {
-        rememberGroups(library, state.view, state.filter)
+        rememberOrderedGroups(library, state.view, state.filter, state.groupSort, rememberGroups(library, state.view, state.filter))
     }
     // 1.1.0 (Ebru): the quick filter over a way in's groups
     val quick = state.quick.takeIf { state.view.grouped } ?: QuickFilter.All
@@ -840,23 +951,31 @@ fun MusicBrowser(
     // 1.1.0: the covers of the groups, where they are groups
     val grid = state.view.grouped && state.layout == MusicLayout.Grid
     val playingUri = rememberNowPlaying().media?.uri?.toString()
-    // the phone's only: over the groups, or over the whole library's tracks
-    val phoneShelf = shelf.takeIf { width == WidthClass.Compact }
+    // the phone's only: over the groups, or over the whole library's tracks. 1.1.1: the design's header in its place, its
+    // Karıştır the shown groups' tracks (the whole library's in the Tracks view)
+    val phone = width == WidthClass.Compact && phoneHeader != null
+    val shuffleFrom = rememberUpdatedState(groups)
+    val shuffleAll: () -> Unit = remember(actions) { { actions.play(shuffleFrom.value.flatMap { it.tracks }.shuffled(), 0) } }
+    val canShuffle = groups.any { it.tracks.isNotEmpty() }
+    val latestShuffle = rememberUpdatedState(shuffleAll.takeIf { canShuffle })
+    val header: (@Composable () -> Unit)? = phoneHeader?.let { h -> remember(h) { @Composable { h(latestShuffle.value) } } }
+    val phoneShelf = if (width != WidthClass.Compact) null else header ?: shelf
     // 1.1.0 (Ebru): the quick filters over a way in's groups, the first thing of their list or grid (after a phone's
-    // shelf), so the tracks beside them never move for them; in the narrow pane beside the tracks on one line
-    val quickOverGrid: @Composable () -> Unit = remember(phoneShelf, state) {
+    // shelf), so the tracks beside them never move for them; in the narrow pane beside the tracks on one line. 1.1.1: on
+    // a phone with the design's header they are in its options' chip
+    val quickOverGrid: @Composable () -> Unit = remember(phoneShelf, state, phone) {
         @Composable {
             Column {
                 phoneShelf?.invoke()
-                QuickFilterRow(state)
+                if (!phone) QuickFilterRow(state)
             }
         }
     }
     val quickInPane: @Composable () -> Unit = remember(state) { @Composable { QuickFilterRow(state, wrap = false) } }
     val grouped = state.view.grouped
-    // the recently played are the shelf on a phone, not a view
-    LaunchedEffect(width, state.view) {
-        if (width == WidthClass.Compact && state.view == MusicView.Recent) state.open(MusicView.Tracks)
+    // the recently played are the shelf on a phone, not a view (1.1.1: with the design's header, its last tab)
+    LaunchedEffect(width, state.view, phone) {
+        if (width == WidthClass.Compact && !phone && state.view == MusicView.Recent) state.open(MusicView.Tracks)
     }
     val workstation = inspector != null && width >= WidthClass.Expanded
     // a tablet's window with the inspector shown has the room of a narrow one for the groups and their tracks (Desktop Kit 1.0)
@@ -915,21 +1034,18 @@ fun MusicBrowser(
     val savedGroups = rememberSaveableStateHolder()
     val currentStats by rememberUpdatedState(stats)
     val currentPlaying by rememberUpdatedState(playingUri)
-    val groupList = remember(state) {
-        movableContentOf { openKey: String?, listModifier: Modifier, rowPadding: Dp, leading: (@Composable () -> Unit)? ->
-            savedGroups.SaveableStateProvider(GROUP_LIST) {
-                GroupList(currentGroups, state, currentActions, openKey, listModifier, rowPadding, leading, currentStats, currentPlaying)
-            }
-        }
-    }
-    val gridWords = remember(state.view) {
+    // 1.1.1: the groups go under their letters while they are in order by a name (the design's A–Z)
+    val order = state.groupSort ?: GroupSort.default(state.view)
+    val named = order.order == GroupOrder.Name || order.order == GroupOrder.Artist
+    val gridWords = remember(state.view, order) {
         val view = state.view
         GroupGridWords(
             title = { groupTitle(it, view) },
-            line = { groupLine(it, view) },
-            letters = view == MusicView.Albums || view == MusicView.Artists || view == MusicView.Genres || view == MusicView.Composers,
-            // the albums are in order by their artists
-            sortName = if (view == MusicView.Albums) { group -> group.artist } else { group -> group.title },
+            // 1.1.1 (the design): an album's cover has its artist and year under its name, a row its tracks too
+            line = { if (view == MusicView.Albums) listOfNotNull(it.artist, it.year?.toString()).joinToString(" · ") else groupLine(it, view) },
+            letters = named && (view == MusicView.Albums || view == MusicView.Artists || view == MusicView.Genres || view == MusicView.Composers),
+            // the albums are in order by their names (1.1.1; by their artists before), or by their artists when asked
+            sortName = if (view == MusicView.Albums && order.order == GroupOrder.Artist) { group -> group.artist } else { group -> group.title },
             nameless = {
                 stringResource(
                     when (view) {
@@ -952,6 +1068,14 @@ fun MusicBrowser(
             },
         )
     }
+    val currentWords by rememberUpdatedState(gridWords)
+    val groupList = remember(state) {
+        movableContentOf { openKey: String?, listModifier: Modifier, rowPadding: Dp, leading: (@Composable () -> Unit)? ->
+            savedGroups.SaveableStateProvider(GROUP_LIST) {
+                GroupList(currentGroups, state, currentActions, openKey, listModifier, rowPadding, leading, currentStats, currentPlaying, currentWords, chipsRoom)
+            }
+        }
+    }
     val groupGrid: @Composable (Modifier, (@Composable () -> Unit)?) -> Unit = { gridModifier, leading ->
         savedGroups.SaveableStateProvider(GROUP_GRID) {
             val resources = LocalContext.current.resources
@@ -963,11 +1087,12 @@ fun MusicBrowser(
                 leading = leading,
                 reveal = state.reveal,
                 onRevealed = { state.reveal = null },
+                chipsRoom = chipsRoom,
             )
         }
     }
     val trackPanes = rememberMovableDetails<String, TrackPaneArgs>(open?.key) { args ->
-        TrackPane(args.group, args.tracks, state, args.actions, args.showBack, stats, selection, args.leading, args.leadingPresent)
+        TrackPane(args.group, args.tracks, state, args.actions, args.showBack, stats, selection, args.leading, args.leadingPresent, chipsRoom, playingUri)
     }
     // the groups' width beside their tracks, dragged and kept
     val groupsSplit = rememberSplitState(260.dp, MUSIC_GROUPS_PANE)
@@ -975,10 +1100,7 @@ fun MusicBrowser(
     val panes: @Composable () -> Unit = {
         when {
             // nothing played yet (no filter hiding what was)
-            state.view == MusicView.Recent && open?.tracks.isNullOrEmpty() && !state.filter.active -> Box(
-                Modifier.fillMaxSize().padding(LocalShellBottomPadding.current),
-                contentAlignment = Alignment.Center,
-            ) {
+            state.view == MusicView.Recent && open?.tracks.isNullOrEmpty() && !state.filter.active -> UnderPhoneHeader(header.takeIf { phone }) {
                 StatePanel(
                     tone = StateTone.Neutral,
                     icon = NagIcons.Play,
@@ -987,10 +1109,7 @@ fun MusicBrowser(
                 )
             }
             // (an open group stays: the quick filter may have let it go as it played)
-            (groups.isEmpty() && open == null) || (open != null && open.tracks.isEmpty()) -> Box(
-                Modifier.fillMaxSize().padding(LocalShellBottomPadding.current),
-                contentAlignment = Alignment.Center,
-            ) {
+            (groups.isEmpty() && open == null) || (open != null && open.tracks.isEmpty()) -> UnderPhoneHeader(header.takeIf { phone }) {
                 NoResultsState(
                     title = stringResource(R.string.nag_music_no_match),
                     // the files still being read may yet fit
@@ -1069,7 +1188,8 @@ fun MusicBrowser(
     }
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
-        MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact && !(grid && open == null), probing = probing)
+        // 1.1.1: a phone's toolbar is in its header
+        if (!phone) MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact && !(grid && open == null), probing = probing)
         if (inspector == null) {
             panes()
         } else {
@@ -1115,7 +1235,7 @@ internal fun viewLabel(view: MusicView): Int = when (view) {
 
 /** A group's name, or what stands for it when the tag is missing. */
 @Composable
-private fun groupTitle(group: MusicGroup, view: MusicView): String = group.title ?: stringResource(
+internal fun groupTitle(group: MusicGroup, view: MusicView): String = group.title ?: stringResource(
     when (view) {
         MusicView.Artists -> R.string.nag_unknown_artist
         MusicView.Albums -> R.string.nag_music_unknown_album
@@ -1128,7 +1248,7 @@ private fun groupTitle(group: MusicGroup, view: MusicView): String = group.title
 
 /** "Ada Karan · 1977 · 9 parça", "4 albüm · 38 parça", "12 parça · 52:10". */
 @Composable
-private fun groupLine(group: MusicGroup, view: MusicView): String {
+internal fun groupLine(group: MusicGroup, view: MusicView): String {
     val tracks = pluralStringResource(R.plurals.nag_tracks_count, group.tracks.size, group.tracks.size)
     val parts = when (view) {
         MusicView.Albums -> listOfNotNull(group.artist, group.year?.toString(), tracks)
@@ -1151,11 +1271,19 @@ private fun GroupList(
     leading: (@Composable () -> Unit)? = null,
     stats: Map<String, TrackStats> = emptyMap(),
     playing: String? = null,
+    words: GroupGridWords? = null,
+    chipsRoom: Dp = 0.dp,
 ) {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
     val reduced = NagTheme.motion.reduced
     val compact = currentWidthClass() == WidthClass.Compact
+    // 1.1.1 (the design's phone page): a phone's rows under their letters, the wave down their end; the same list's state,
+    // so the groups keep their place as the window crosses the width
+    if (compact && words != null) {
+        PhoneGroupList(groups, state, actions, listState, modifier, leading, stats, playing, words, chipsRoom)
+        return
+    }
     // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the groups go to their top
     OnReselect { if (reduced) listState.scrollToItem(0) else listState.animateScrollToItem(0) }
     // 1.0.3: on a phone the first groups arrive in turn, again for another way in, not when a group's tracks close
@@ -1203,9 +1331,8 @@ private const val GROUP_LIST = "groups"
 /** 1.1.0: the grid's, as [GROUP_LIST]. */
 private const val GROUP_GRID = "group-grid"
 
-/** 1.1.0 (Ebru): the band's height across a wide window's page, and atop a phone's list. */
+/** 1.1.0 (Ebru): the band's height across a wide window's page (1.1.1: a phone's is the design's, [PHONE_BAND]). */
 private val WIDE_BAND = 104.dp
-private val PHONE_BAND = 84.dp
 
 /** 1.1.0: an album row's listening trace, under its line. */
 private val TRACE_WIDTH = 120.dp
@@ -1227,13 +1354,13 @@ private class ClosingOrder {
 }
 
 /** The key of a group list's first item that is not a group (the phone's shelf); no group's key holds a NUL. */
-private const val LEADING_ITEM = "\u0000leading"
+internal const val LEADING_ITEM = "\u0000leading"
 
 /**
  * An album's, an artist's or a folder's menu (right click, long press): play, queue, convert; its
  * tracks' files shared together, the first one shown in its folder.
  */
-private fun groupMenu(res: android.content.res.Resources, group: MusicGroup, actions: MusicActions): List<MenuEntry> =
+internal fun groupMenu(res: android.content.res.Resources, group: MusicGroup, actions: MusicActions): List<MenuEntry> =
     tracksMenu(res, group.tracks, actions)
 
 /**
@@ -1335,6 +1462,9 @@ private fun TrackPane(
     leading: (@Composable () -> Unit)? = null,
     /** 1.0.3: whether [leading] has something to show now ([DenseTable]'s). */
     leadingPresent: (() -> Boolean)? = null,
+    /** 1.1.1: what a phone's chips cover at the list's top. */
+    chipsRoom: Dp = 0.dp,
+    playing: String? = null,
 ) {
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
@@ -1355,6 +1485,14 @@ private fun TrackPane(
     val appear = rememberListAppear(state.view, group.key)
     // 1.0.3 (Desktop Kit 2.2): Back clears a selection being made: any by touch or in "Seç", several with a mouse
     ClearSelectionOnBack(selection, touchLayout = !pointer)
+    // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the tracks go to their top
+    val tableState = rememberLazyListState()
+    // 1.1.1 (the design's phone page): a phone's rows (a group's own page, or the library's tracks under the header); the
+    // same list's state as the table's, so the rows keep their place as the window crosses the width
+    if (compact) {
+        PhoneTrackList(group, shown, state, actions, stats, selection, tableState, leading, chipsRoom, playing, page = state.view.grouped, appear = appear)
+        return
+    }
     Column(Modifier.fillMaxSize()) {
         // a group's name and line; the way back on a phone; an album's cover; the group's conversion
         if (state.view.grouped) {
@@ -1396,8 +1534,6 @@ private fun TrackPane(
         }
         HorizontalRule()
         val columnsLabel = stringResource(R.string.nag_music_columns)
-        // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the tracks go to their top
-        val tableState = rememberLazyListState()
         val reducedMotion = NagTheme.motion.reduced
         OnReselect { if (reducedMotion) tableState.scrollToItem(0) else tableState.animateScrollToItem(0) }
         DenseTable(
@@ -1455,7 +1591,7 @@ private fun TrackPane(
 }
 
 /** The table's sort: the whole library by artist when nothing else is asked; a group plays in album order. */
-private fun effectiveSort(state: MusicBrowserState): MusicSort? =
+internal fun effectiveSort(state: MusicBrowserState): MusicSort? =
     state.sort ?: if (state.view == MusicView.Tracks) MusicSort(MusicColumn.Artist, true) else null
 
 /** S-808: the columns whose order the statistics decide; sorted by one, the order follows the ratings and counts. */

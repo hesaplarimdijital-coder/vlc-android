@@ -226,7 +226,7 @@ fun rememberExpandablePlayerState(initialValue: PlayerValue = PlayerValue.Collap
  * card and grows into the page ([ExpandablePlayer]).
  */
 @Immutable
-class PlayerCard(val horizontal: Dp, val vertical: Dp, val corner: Dp)
+class PlayerCard(val horizontal: Dp, val vertical: Dp, val corner: Dp, val rule: Boolean = true)
 
 /**
  * The phone's player (Desktop Kit 1.0's ExpandablePlayer): the mini player strip in the shell's
@@ -583,7 +583,7 @@ private fun PlayerSheet(
                     drawRect(PlayerSurface.fill(p, cardColor, pageColor))
                     // the card's rule, gone with the strip's controls
                     val fading = (1f - p / MINI_FADE).coerceIn(0f, 1f)
-                    if (card != null && fading > 0f) {
+                    if (card != null && card.rule && fading > 0f) {
                         val bounds = PlayerSurface.bounds(p, state.collapsedTop, miniHeight.toFloat(), size.width, size.height, insetX, insetY)
                         val radius = PlayerSurface.radius(p, cardRadius, travel) + backCorner * backProgress.value * p
                         drawRoundRect(

@@ -1,5 +1,6 @@
 package app.nagmedar.ui.podcast
 
+import app.nagmedar.ui.shell.ChromeGlass
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,7 +85,8 @@ class PodcastPageOpensTest {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
-                TestShell(WidthClass.Compact, startDestination = Destination.Podcasts) { _, _ -> PodcastsContent(model, actions) }
+                // glass B, whose one surface the bars' slide is read from (the product's opaque chrome slides the same way)
+                TestShell(WidthClass.Compact, startDestination = Destination.Podcasts, chromeGlass = ChromeGlass.Bottom) { _, _ -> PodcastsContent(model, actions) }
             }
         }
         compose.waitForIdle()

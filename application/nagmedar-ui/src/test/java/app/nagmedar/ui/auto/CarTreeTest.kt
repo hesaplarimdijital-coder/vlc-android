@@ -92,8 +92,8 @@ class CarTreeTest {
     fun albumsAreTilesThatOpenOnTheirTracks() {
         val data = FakeCarData(tracks = gulumse + tarkan)
         val albums = children(data, CarIds.ALBUMS)
-        // as the Albums view sorts them: by artist, then by year
-        assertEquals(listOf("Gülümse", "Aacayipsin", "Ölürüm Sana", "Karma"), titles(albums))
+        // as the Albums view sorts them: by name (1.1.1, the design's A–Z; by artist, then by year before)
+        assertEquals(listOf("Aacayipsin", "Gülümse", "Karma", "Ölürüm Sana"), titles(albums))
         val gulumseAlbum = albums.first { it.title == "Gülümse" }
         assertEquals("Sezen Aksu", gulumseAlbum.subtitle)
         assertEquals("cover:file:///music/1.flac", gulumseAlbum.iconUri)

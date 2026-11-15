@@ -77,7 +77,8 @@ class ShellPaddingTest {
         // the top bar's height on top; the mini player's card (with its margins) and the bottom bar below
         val miniTop = compose.onNodeWithTag("mini-player").getBoundsInRoot().top
         assertTrue("top padding ${values.calculateTopPadding()}", values.calculateTopPadding() >= 48.dp)
-        near(root.bottom - miniTop + 6.dp, values.calculateBottomPadding(), "bottom padding")
+        // the card's margin under the strip's top: 4 dp (1.1.1, the design's card; 6 before)
+        near(root.bottom - miniTop + 4.dp, values.calculateBottomPadding(), "bottom padding")
         assertEquals(0.dp, values.calculateLeftPadding(LayoutDirection.Ltr))
     }
 

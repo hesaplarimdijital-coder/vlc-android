@@ -163,18 +163,20 @@ val LocalShellTopPadding = staticCompositionLocalOf<PaddingValues> { PaddingValu
  * beneath the bottom bar and the player strip and their last rows rest clear of them. A screen
  * that is one list from the top ([listOnTop]: Settings, Search, More) gets the top through
  * [LocalShellTopPadding] too and scrolls beneath the top bar. On tablet and DeX the
- * padding is zero and nothing changes.
+ * padding is zero and nothing changes. 1.1.1 (the design's phone page): a page with its own top
+ * ([ownTop]: Müzik on a phone, which has no top bar) gets no top at all: it lies from the window's
+ * top, under the status bar.
  */
 @Composable
-fun UnderShellBars(listOnTop: Boolean = false, content: @Composable () -> Unit) {
+fun UnderShellBars(listOnTop: Boolean = false, ownTop: Boolean = false, content: @Composable () -> Unit) {
     val padding = rememberShellContentPadding()
     val top = remember(padding) { padding.topOnly() }
     val bottom = remember(padding) { padding.bottomOnly() }
     val none = remember { PaddingValues(0.dp) }
-    Box(Modifier.fillMaxSize().then(if (listOnTop) Modifier else Modifier.padding(top)), propagateMinConstraints = true) {
+    Box(Modifier.fillMaxSize().then(if (listOnTop || ownTop) Modifier else Modifier.padding(top)), propagateMinConstraints = true) {
         CompositionLocalProvider(
             LocalShellBottomPadding provides bottom,
-            LocalShellTopPadding provides if (listOnTop) top else none,
+            LocalShellTopPadding provides if (listOnTop && !ownTop) top else none,
             content = content,
         )
     }

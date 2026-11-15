@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -446,8 +447,10 @@ fun QueuePage(
                 // a row's handle and its sideways swipe keep their drags; the list and the rest of the page pull it
                 .sheetDrag(drag)
                 .testTag("queue-page")
-                // 1.0.3: the page's colour behind the system's buttons, its rows above them
+                // 1.0.3: the page's colour behind the system's buttons, its rows above them; 1.1.1: and behind a phone's
+                // status bar, which the shell reaches under, its title below it
                 .background(NagTheme.colors.background)
+                .statusBarsPadding()
                 .navigationBarsPadding(),
         )
         DetailBackHandler(enabled = open, state = back, onBack = onClose)

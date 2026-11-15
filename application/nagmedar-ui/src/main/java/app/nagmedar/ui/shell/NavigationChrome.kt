@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
@@ -108,6 +110,7 @@ import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.SemiBoldPlus
 import app.nagmedar.ui.theme.glass
 
 /** Item counts and badges shown next to sidebar entries ("4 812", "4 yeni"). */
@@ -255,7 +258,8 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        NavIndicator(selected, state, pill, Modifier.width(56.dp).height(30.dp)) {
+        // 1.1.1 (the design): the pill 60 by 32
+        NavIndicator(selected, state, pill, Modifier.width(60.dp).height(32.dp)) {
             Icon(
                 // the phone's last tab is "⋯", the page of the other pages
                 if (destination == Destination.More) NagIcons.MoreHorizontal else destination.icon,
@@ -270,8 +274,8 @@ private fun RowScope.BottomBarItem(destination: Destination, selected: Boolean, 
         Text(
             text = shortLabel,
             modifier = Modifier.badgeSemantics(shortLabel, badge),
-            // the selected tab's label a shade heavier (Desktop Kit 0.2.0)
-            style = if (selected) NagTheme.type.caption.copy(fontWeight = FontWeight.Medium) else NagTheme.type.caption,
+            // the selected tab's label a shade heavier (Desktop Kit 0.2.0); 1.1.1 (the design): 650 and 500
+            style = NagTheme.type.caption.copy(fontWeight = if (selected) SemiBoldPlus else FontWeight.Medium),
             color = animateStateColor(if (selected) colors.text else colors.textSecondary, "navLabel"),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -665,6 +669,8 @@ fun PageTopBar(
     scrolled: () -> Boolean = { false },
     /** 1.0.8 (Desktop Kit 2.8.0): the menu bar's menus where there is no menu bar (the rail), behind a "≡". */
     menus: List<MenuSpec> = emptyList(),
+    /** 1.1.1: a phone's status bar over the bar, which its surface reaches under ([app.nagmedar.ui.shell.WindowRootInsets.top]). */
+    statusBar: WindowInsets? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -675,6 +681,7 @@ fun PageTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (statusBar != null) Modifier.windowInsetsPadding(statusBar) else Modifier)
                 .heightIn(min = maxOf(dimens.topBarHeight, caption?.height ?: 0.dp))
                 .captionPadding(caption)
                 .padding(start = dimens.gapXs, end = dimens.gapS),

@@ -1,5 +1,6 @@
 package app.nagmedar.ui.playback
 
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,17 +126,16 @@ class PlayerBarsTest {
         bar(NavKind.BottomBar, InputMode.Touch)
         compose.onNodeWithText("Sabaha Kadar").performClick()
         compose.onNodeWithContentDescription("Duraklat").performClick()
-        compose.onNodeWithContentDescription("Önceki parça").performClick()
         compose.onNodeWithContentDescription("Sonraki parça").performClick()
-        assertEquals(listOf("open", "playPause", "previous", "next"), actions.calls)
-        // the second line: artist and format
-        compose.onNodeWithText("Ada Karan · Gece Mavisi · FLAC 24/96").assertExists()
-        // 42 % of 4:18 played: the time played and the time left either side of the seek bar
-        compose.onNodeWithText("1:48").assertExists()
-        compose.onNodeWithText("−2:30").assertExists()
-        compose.onNode(seekBar).performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
+        assertEquals(listOf("open", "playPause", "next"), actions.calls)
+        // 1.1.1 (the design's card): the second line is the artist and the album; play and next alone, the rest the
+        // full player's (and the card's sideways swipe's)
+        compose.onNodeWithText("Ada Karan · Gece Mavisi").assertExists()
+        compose.onNodeWithContentDescription("Önceki parça").assertDoesNotExist()
+        // 42 % of 4:18 played: the waveform says the time played and the length, and seeks
+        compose.onNodeWithTag("mini-player-seek").assertContentDescriptionEquals("1:48 / 4:18")
+        compose.onNodeWithTag("mini-player-seek").performSemanticsAction(SemanticsActions.SetProgress) { it(0.5f) }
         assertEquals(listOf(0.5f), actions.seeks)
-        // an upright phone has no room for shuffle and repeat; stop is the full player's
         compose.onNodeWithContentDescription("Karıştır").assertDoesNotExist()
         compose.onNodeWithContentDescription("Durdur").assertDoesNotExist()
     }

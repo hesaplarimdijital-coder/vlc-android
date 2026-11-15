@@ -20,7 +20,7 @@ class ChromeGlassTest {
 
     @After
     fun backToTheProduct() {
-        DebugChrome.follow(ApplicationProvider.getApplicationContext(), Intent().putExtra(EXTRA_CHROME_GLASS, "bottom"))
+        DebugChrome.follow(ApplicationProvider.getApplicationContext(), Intent().putExtra(EXTRA_CHROME_GLASS, "solid"))
     }
 
     @Test
@@ -35,9 +35,10 @@ class ChromeGlassTest {
         assertNull(ChromeGlass.parse("glass"))
     }
 
+    /** 1.1.1: the approved design's phone: opaque bars, the mini player a card with its shadow (glass B before). */
     @Test
-    fun theProductIsTheBottomGlass() {
-        assertEquals(ChromeGlass.Bottom, ChromeGlass.Product)
+    fun theProductIsTheDesignsSolidChrome() {
+        assertEquals(ChromeGlass.Solid, ChromeGlass.Product)
         assertEquals(ChromeGlass.Product, DebugChrome.glass)
     }
 
@@ -68,7 +69,7 @@ class ChromeGlassTest {
         val flags = context.applicationInfo.flags
         context.applicationInfo.flags = flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE.inv()
         try {
-            DebugChrome.follow(context, Intent().putExtra(EXTRA_CHROME_GLASS, "solid"))
+            DebugChrome.follow(context, Intent().putExtra(EXTRA_CHROME_GLASS, "bottom"))
             assertEquals(ChromeGlass.Product, DebugChrome.glass)
             DebugChrome.follow(context, Intent().putExtra(EXTRA_CHROME_GLASS, "kit"))
             assertEquals(ChromeGlass.Product, DebugChrome.glass)

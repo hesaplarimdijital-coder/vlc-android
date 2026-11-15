@@ -1086,6 +1086,30 @@
     <string name="nag_music_quick_unfinished">Yarım kalanlar</string>
     <string name="nag_music_quick_unheard">Hiç çalınmayanlar</string>
     <string name="nag_music_quick_new">Bu yıl eklenenler</string>
+    <!-- 1.1.1 (the design's phone page): the masthead, the options chip, the order button and its menu, the letters' wave -->
+    <string name="nag_music_masthead">Müzikler</string>
+    <string name="nag_music_options">Seçenekler</string>
+    <string name="nag_sort_az">A–Z</string>
+    <string name="nag_sort_za">Z–A</string>
+    <!-- "Sırala: ada göre, A'dan Z'ye" -->
+    <string name="nag_sort_described">Sırala: %1$s, %2$s</string>
+    <string name="nag_sort_name">Ada göre</string>
+    <string name="nag_sort_artist">Sanatçıya göre</string>
+    <string name="nag_sort_album">Albüme göre</string>
+    <string name="nag_sort_year">Yıla göre</string>
+    <string name="nag_sort_added">Eklenme tarihine göre</string>
+    <string name="nag_sort_duration">Süreye göre</string>
+    <string name="nag_sort_dir_az">A\'dan Z\'ye</string>
+    <string name="nag_sort_dir_za">Z\'den A\'ya</string>
+    <string name="nag_sort_dir_new">Yeniden eskiye</string>
+    <string name="nag_sort_dir_old">Eskiden yeniye</string>
+    <string name="nag_sort_dir_short">Kısadan uzuna</string>
+    <string name="nag_sort_dir_long">Uzundan kısaya</string>
+    <!-- the letters of the interface language's alphabet, in its order: the letters' wave down a phone's list -->
+    <string name="nag_music_alphabet">ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ</string>
+    <string name="nag_music_jump">Harfe atla</string>
+    <!-- what filters the list now: "Filtre: Yarım kalanlar, 24 bit" -->
+    <string name="nag_music_filtered">Filtre: %1$s</string>
     <string name="nag_music_trace">Çalınan parça: %1$d / %2$d</string>
     <string name="nag_music_recent_shelf">Son çalınan müzik</string>
     <string name="nag_music_recent_none_title">Henüz parça çalınmadı</string>

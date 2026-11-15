@@ -22,14 +22,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -279,6 +284,8 @@ fun MoreButton(
     modifier: Modifier = Modifier,
     title: String? = null,
     contentDescription: String = moreActionsLabel(title),
+    /** 1.1.1 (the design's rows): "⋮" where the row's end stands upright. */
+    icon: ImageVector = NagIcons.MoreHorizontal,
 ) {
     var open by remember { mutableStateOf(false) }
     var height by remember { mutableIntStateOf(0) }
@@ -286,7 +293,7 @@ fun MoreButton(
     var byKeys by remember { mutableStateOf(false) }
     Box(modifier.onSizeChanged { height = it.height }) {
         NagIconButton(
-            NagIcons.MoreHorizontal,
+            icon,
             contentDescription,
             {
                 byKeys = inputModes.inputMode == ComposeInputMode.Keyboard
@@ -788,6 +795,8 @@ private fun SheetSurface(
         Column(
             modifier
                 .align(Alignment.BottomCenter)
+                // 1.1.1: a phone's shell reaches under the status bar; a tall sheet stops below it
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                 .widthIn(max = 640.dp)
                 .fillMaxWidth()
                 .graphicsLayer {

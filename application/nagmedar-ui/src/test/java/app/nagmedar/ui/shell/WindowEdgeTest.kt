@@ -92,7 +92,8 @@ class WindowEdgeTest {
             view = LocalView.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
                 WindowRoot(shell = true, belowCaption = false, modifier = Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(WidthClass.Compact, startDestination = start, screen = { _, _ ->
+                    // glass B, which the walk still compares (1.1.1's product is the design's opaque chrome: SystemBandTest)
+                    TestShell(WidthClass.Compact, startDestination = start, chromeGlass = ChromeGlass.Bottom, screen = { _, _ ->
                         val padding = rememberShellContentPadding()
                         LazyColumn(Modifier.fillMaxSize().testTag("list"), rememberLazyListState(10), padding) {
                             items(120) { Box(Modifier.fillMaxWidth().height(56.dp).background(PAGE)) }

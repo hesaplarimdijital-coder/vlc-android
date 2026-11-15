@@ -86,6 +86,8 @@ fun TestShell(
     chromeGlass: ChromeGlass = ChromeGlass.Product,
     /** 1.0.8: a count or a dot on the navigation's icons. */
     iconBadges: NavIconBadges = emptyMap(),
+    /** 1.1.1: the pages that draw their own top on a phone, as the app's Müzik (none for the sample pages). */
+    ownTop: (Destination) -> Boolean = { false },
     screen: @Composable (Destination, ShellNavigator) -> Unit = { destination, navigator -> SampleScreen(destination, navigator, moreActions) },
 ) {
     val res = LocalContext.current.resources
@@ -124,6 +126,7 @@ fun TestShell(
         floatingPlayer = floatingPlayer,
         glass = glass,
         chromeGlass = chromeGlass,
+        ownTop = ownTop,
     )
 }
 

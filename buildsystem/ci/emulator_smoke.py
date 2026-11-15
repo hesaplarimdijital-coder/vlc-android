@@ -196,6 +196,7 @@ class Node:
         self.rid = a.get("resource-id", "")
         self.clickable = a.get("clickable") == "true"
         self.scrollable = a.get("scrollable") == "true"
+        self.selected = a.get("selected") == "true"
         m = BOUNDS_RE.match(a.get("bounds", ""))
         self.b = tuple(int(g) for g in m.groups()) if m else (0, 0, 0, 0)
 
@@ -1137,12 +1138,47 @@ class Smoke:
             self.key(4)
             nodes = self.nodes(self.settle(0.8))
 
-    def open_music(self):
+    def open_music(self, tracks=True):
         s = self.strings[self.lang]
         self.back_to_tabs()
         if not self.open_label(s["nag_nav_music"], via_more=False):
             self.warnings.append("[%s] Music not found in the UI" % self.cur_pass)
-        return self.step("Music")
+        nodes = self.step("Music")
+        return self.music_tracks(nodes) if tracks else nodes
+
+    def music_tracks(self, nodes):
+        """1.1.1: the Music page opens on the albums (the design's): the walk's tracks are in its Tracks view ("Parçalar"),
+        a tab on a phone and a wide window, an entry of the way-in menu on a narrower one."""
+        s = self.strings[self.lang]
+        label = s["nag_music_view_tracks"]
+        tab = [n for n in self.app_nodes(nodes) if n.text.strip() == label]
+        if tab and tab[0].selected:
+            return nodes
+        if tab:
+            return self.step("Music: %s" % label, lambda: self.tap(tab[0]), wait=1.2)
+        views = self.by_id(nodes, "music-views")
+        if views:
+            self.tap(views[0])
+            time.sleep(0.8)
+            item = [n for n in self.app_nodes(self.nodes(self.settle(0.6))) if n.text.strip() == label]
+            if item:
+                return self.step("Music: %s" % label, lambda: self.tap(item[0]), wait=1.2)
+            self.key(4)
+        self.warnings.append("[%s] the Music's Tracks view (%s) not found" % (self.cur_pass, label))
+        return self.nodes(self.settle(0.6))
+
+    def music_design_check(self, nodes):
+        """1.1.1 (the design's phone page): no top bar over Müzik: its band from the window's top, under the status bar,
+        the chips over it (the brand's, the search's, the options'), the masthead and the ways in as tabs under it."""
+        s = self.strings[self.lang]
+        w, h = self.screen_size(nodes)
+        chips = [self.by_id(nodes, t) for t in ("music-search", "music-options")]
+        header = self.by_id(nodes, "music-header")
+        tabs = self.by_id(nodes, "music-views")
+        titled = bool(self.page_title(nodes, s["nag_nav_music"]))
+        self.check("the phone's Music page is the design's: its chips at the top, no top bar, the header with its tabs",
+                   all(c and c[0].center[1] < h * 0.12 for c in chips) and not titled and bool(header) and bool(tabs),
+                   "chips %s, top bar title %s, header %s, tabs %s" % ([bool(c) for c in chips], titled, bool(header), bool(tabs)))
 
     def page_title(self, nodes, label):
         """The top bar's title [label]: text that is not a control, in the top tenth of the screen."""
@@ -1157,9 +1193,10 @@ class Smoke:
     def phone_pages(self):
         """1.0.1: ⋯ opens the "More" page; Settings is a page of its own; Back returns to "More"; the top bar keeps its colour."""
         s = self.strings[self.lang]
-        nodes = self.open_music()
+        nodes = self.open_music(tracks=False)
         self.check_bottom_bar(nodes)
-        self.top_bar_colour_check(nodes)
+        # 1.1.1: Müzik has no top bar on a phone (the design's band and chips); the top bar's colour is read on More
+        self.music_design_check(nodes)
         nodes = self.open_music()
         w, h = self.screen_size(nodes)
         more = [n for n in self.app_nodes(nodes) if n.text.strip() == s["nag_nav_more"] and n.center[1] > h * 0.85]
@@ -1170,6 +1207,8 @@ class Smoke:
         seen = {t.split("\n")[0].strip() for t in self.texts(nodes)}
         self.check("⋯ opens the More page", all(x in seen for x in rows) and bool(self.page_title(nodes, s["nag_nav_more"]))
                    and self.has_bottom_bar(nodes), "seen: %s" % ", ".join(x for x in rows if x in seen))
+        self.top_bar_colour_check(nodes, s["nag_nav_more"])
+        nodes = self.nodes(self.settle(0.6))
         settings = self.find(nodes, s["nag_nav_settings"])
         if not self.check("Settings on the More page", settings is not None):
             return
@@ -1201,10 +1240,10 @@ class Smoke:
         k = im.width / float(width)
         return im.getpixel((min(int(x * k), im.width - 1), min(int(y * k), im.height - 1)))
 
-    def top_bar_colour_check(self, nodes):
+    def top_bar_colour_check(self, nodes, label=None):
         """The top bar's colour (beside the title) at rest, while a finger drags the list and after it: one colour."""
         s = self.strings[self.lang]
-        titles = self.page_title(nodes, s["nag_nav_music"])
+        titles = self.page_title(nodes, label or s["nag_nav_music"])
         w, h = self.screen_size(nodes)
         if Image is None or not titles:
             self.warnings.append("[%s] top bar colour not read (%s)" % (self.cur_pass, "no Pillow" if Image is None else "no title"))
@@ -1223,7 +1262,7 @@ class Smoke:
                 f.write(data)
             mid = self.pixel(rel, x, y, w)
         time.sleep(1.5)
-        self.step("Music scrolled (top bar)")
+        self.step("Scrolled (top bar)")
         after = self.pixel(self.steps[-1]["shot"], x, y, w)
         self.check("the top bar keeps its colour while the list scrolls", rest is not None and rest == after and (mid is None or mid == rest),
                    "at rest %s, while dragged %s, after %s" % (rest, mid, after))
@@ -2544,14 +2583,13 @@ class Smoke:
             # a cold start with the glass on: its first frames, read as soon as the window has drawn
             rel = self.cold_start()
             nodes = self.step("Glass B: a cold start", wait=1.0)
-            # 1.0.3: the tracks played last are kept with the list: the phone's shelf is over the rows from the start
-            # (the history, read after the kept list was drawn, used to leave it out of sight above the column titles)
-            shelf = self.by_id(nodes, "recent-shelf")
-            rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track")
-                    and not any(self.inside(n, x.b) for x in shelf)]
-            self.check("a cold start shows the shelf of the tracks played last over the Music's rows",
-                       bool(shelf) and bool(rows) and shelf[0].b[3] <= min(n.b[1] for n in rows),
-                       "shelf %s, first row %s" % (shelf[0].b if shelf else None, min((n.b[1] for n in rows), default=None)))
+            # 1.1.1 (the design): the page's header (the band, the masthead, the tabs) is over the rows from the start (1.0.3's
+            # shelf of the tracks played last is no more: the recently played are the last tab)
+            header = self.by_id(nodes, "music-header")
+            rows = [n for n in self.app_nodes(nodes) if n.text.startswith("Profile track")]
+            self.check("a cold start shows the page's header over the Music's rows",
+                       bool(header) and bool(rows) and header[0].b[3] <= min(n.b[1] for n in rows),
+                       "header %s, first row %s" % (header[0].b if header else None, min((n.b[1] for n in rows), default=None)))
             bar = self.glass_boxes(nodes)["bar"]
             first = self.region(rel, bar, w) if bar and rel else None
             cold = self.glass_read(nodes, "cold start")

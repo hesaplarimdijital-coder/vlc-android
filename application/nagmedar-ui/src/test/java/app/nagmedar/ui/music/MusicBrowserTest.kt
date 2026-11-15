@@ -1,5 +1,8 @@
 package app.nagmedar.ui.music
 
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import app.nagmedar.ui.library.ScanState
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
@@ -117,25 +120,54 @@ class MusicBrowserTest {
         compose.onNode(hasContentDescription("Türü yok, 1 tür")).assertExists()
     }
 
+    /** 1.1.1 (the design's phone page): the page as the app has it on a phone, its chips over its list. */
+    private fun showPhone(state: MusicBrowserState = MusicBrowserState()): MusicBrowserState {
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
+                CompositionLocalProvider(LocalWidthClass provides WidthClass.Compact) {
+                    PhoneMusicPage(
+                        library, ScanState.Idle, state, actions, EbruInks.Default, counts = "11 parça", probing = 0, stats = emptyMap(),
+                        recent = emptyList(), converting = null, onConverted = {}, onAddFolder = {}, onSearch = {},
+                    )
+                }
+            }
+        }
+        compose.waitForIdle()
+        return state
+    }
+
     @Test
     fun aPhoneOpensAnAlbumAndComesBack() {
-        val state = show(WidthClass.Compact, InputMode.Touch)
-        // a phone chooses the way in from a menu
-        compose.onNodeWithTag("music-views").performClick()
-        compose.waitForIdle()
+        val state = showPhone()
+        // 1.1.1: a phone's ways in are the header's tabs
         compose.onNodeWithText("Albümler").performClick()
         compose.waitForIdle()
         assertEquals(MusicView.Albums, state.view)
-        // the albums (1.1.0: their covers, under their artists' letters), then one album's tracks
-        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Itrî'nin İzinde"))
+        // the albums (their covers, under the letters of their names), then one album's own page
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Itrî'nin İzinde"))
         compose.onNodeWithText("Itrî'nin İzinde").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Neva Kâr").assertExists()
+        compose.onNodeWithTag("music-group-header").assertExists()
+        // the way back is the chips' first
         compose.onNode(hasContentDescription("Listeye dön")).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Neva Kâr").assertDoesNotExist()
-        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Gece Yolcusu"))
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Gece Yolcusu"))
         compose.onNodeWithText("Gece Yolcusu").assertExists()
+    }
+
+    /** 1.1.1 (the design): the tracks under the letters of their artists, the wave down their end takes the list to one. */
+    @Test
+    fun aPhonesLettersWaveJumpsToALetter() {
+        val state = showPhone(MusicBrowserState(view = MusicView.Tracks))
+        val wave = compose.onNodeWithTag("music-wave")
+        wave.assertExists()
+        // TalkBack's slider over the letters: the last of the alphabet's letters that has tracks
+        wave.performSemanticsAction(SemanticsActions.SetProgress) { it(28f) }
+        compose.waitForIdle()
+        assertEquals(MusicView.Tracks, state.view)
+        compose.onNode(hasContentDescription("K, 3 parça")).assertIsDisplayed()
     }
 
     @Test

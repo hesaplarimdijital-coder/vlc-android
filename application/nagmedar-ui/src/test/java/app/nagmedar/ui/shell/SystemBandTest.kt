@@ -130,7 +130,8 @@ class SystemBandTest {
     @Test
     @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun phoneBarReachesBehindTheButtons() {
-        app()
+        // glass B, the user's decision of 6 Nov that the walk still compares (the product is the design's opaque chrome)
+        app(chromeGlass = ChromeGlass.Bottom)
         systemBars(status = 24.dp, navigation = 48.dp)
         val root = compose.onRoot().getBoundsInRoot()
         // the tabs stay above the buttons, the bar resting right on them
@@ -148,7 +149,7 @@ class SystemBandTest {
     @Test
     @Config(qualifiers = "tr-w411dp-h891dp-hdpi")
     fun theOpaqueChromeReachesBehindTheButtonsToo() {
-        // A, the 1.0.1–1.0.2 bars the walk still compares: the opaque chrome colour, behind the buttons as on the bar
+        // A, the 1.0.1–1.0.2 bars and 1.1.1's product (the design's): the opaque chrome colour, behind the buttons as on the bar
         app(chromeGlass = ChromeGlass.Solid)
         systemBars(status = 24.dp, navigation = 48.dp)
         val bitmap = window()
@@ -172,7 +173,7 @@ class SystemBandTest {
         near(root.bottom, screen.bottom, "screen bottom")
         // its padding reaches from the mini player's card (with its margin) to the window's bottom
         val miniTop = compose.onNodeWithTag("mini-player").getBoundsInRoot().top
-        near(root.bottom - miniTop + 6.dp, padding!!.calculateBottomPadding(), "bottom padding")
+        near(root.bottom - miniTop + 4.dp, padding!!.calculateBottomPadding(), "bottom padding")
     }
 
     @Test
@@ -182,7 +183,7 @@ class SystemBandTest {
         systemBars(status = 24.dp, navigation = 48.dp)
         val screen = compose.onNodeWithTag("screen").getBoundsInRoot()
         val miniTop = compose.onNodeWithTag("mini-player").getBoundsInRoot().top
-        near(miniTop - 6.dp, screen.bottom, "screen bottom")
+        near(miniTop - 4.dp, screen.bottom, "screen bottom")
     }
 
     @Test
@@ -197,7 +198,7 @@ class SystemBandTest {
         val keyboardTop: Dp = root.bottom - with(compose.density) { keyboardPx.toDp() }
         // the mini player sits right on the keyboard: no band for the buttons it covers
         val mini = compose.onNodeWithTag("mini-player").getBoundsInRoot()
-        assertTrue("mini player ends at ${mini.bottom}, keyboard at $keyboardTop", abs((keyboardTop - mini.bottom - 6.dp).value) < 1.5f)
+        assertTrue("mini player ends at ${mini.bottom}, keyboard at $keyboardTop", abs((keyboardTop - mini.bottom - 4.dp).value) < 1.5f)
     }
 
     @Test

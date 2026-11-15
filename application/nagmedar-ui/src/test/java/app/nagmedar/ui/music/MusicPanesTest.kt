@@ -123,10 +123,18 @@ class MusicPanesTest {
     /** 1.1.0: the albums' list holds the quick filters over the 60 albums. */
     private val ALBUM_ROWS = 61
 
-    /** The scrolling list of [rows] rows (the albums are 61 with the quick filters, an album's tracks 40). */
+    /**
+     * The scrolling list of [rows] rows (the albums are 61 with the quick filters, an album's tracks 40); 1.1.1: a phone's
+     * has one more, the albums' letter (the design's) or the album's own header over its tracks.
+     */
     private fun listWith(rows: Int) = compose.onNode(
-        hasScrollToNodeAction() and SemanticsMatcher("$rows rows") { it.config.getOrNull(SemanticsProperties.CollectionInfo)?.rowCount == rows },
+        hasScrollToNodeAction() and SemanticsMatcher("$rows rows") { it.config.getOrNull(SemanticsProperties.CollectionInfo)?.rowCount in rows..rows + 1 },
     )
+
+    private fun back() {
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        compose.waitForIdle()
+    }
 
     /** Whether [text] is on the screen now: a list's row scrolled away, or a list covered, is not. */
     private fun onScreen(text: String): Boolean {
@@ -190,8 +198,8 @@ class MusicPanesTest {
         width = WidthClass.Compact
         compose.waitForIdle()
         assertStillAt(tracksTop, topOnScreen("Parça", 40))
-        compose.onNode(hasContentDescription("Listeye dön")).performClick()
-        compose.waitForIdle()
+        // 1.1.1: a phone's way back is the page's chip (not part of the browser) and Back
+        back()
         assertStillAt(top, topOnScreen("Albüm", 60))
     }
 
@@ -237,7 +245,8 @@ class MusicPanesTest {
         width = WidthClass.Compact
         compose.waitForIdle()
         assertEquals(library.groups(MusicView.Albums).first { it.title == "Albüm 03" }.key, state.group)
-        compose.onNode(hasContentDescription("Listeye dön")).assertIsDisplayed()
+        // alone: its tracks, the albums under them out of sight (1.1.1: a phone's way back is the page's chip, and Back)
+        compose.onNodeWithTag("music-tracks").assertIsDisplayed()
         assertStillAt(top, topOnScreen("Parça", 40))
         // the medium width shows it alone as well, still where it was
         width = WidthClass.Medium

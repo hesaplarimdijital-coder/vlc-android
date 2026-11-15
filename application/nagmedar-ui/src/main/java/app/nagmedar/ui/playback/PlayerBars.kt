@@ -1,5 +1,24 @@
 package app.nagmedar.ui.playback
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
+import app.nagmedar.ui.components.pressScale
+import app.nagmedar.ui.library.formatDuration
+import app.nagmedar.ui.shell.LocalOnBottomGlass
+import app.nagmedar.ui.theme.SemiBoldPlus
+import kotlin.math.min
+import kotlin.math.sin
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.LruCache
@@ -627,7 +646,7 @@ private fun SeekRow(
  * transport bar's line, without the format), the library's music has its artist and album as links to their tracks.
  */
 @Composable
-private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat: Boolean, actions: PlayerBarActions? = null) {
+private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat: Boolean, actions: PlayerBarActions? = null, phone: Boolean = false) {
     val chapter = if (info.chapters.isEmpty()) null else chapterNameAt(info.chapters, info.lengthMs, progress())
     if (actions != null && info.linked && chapter == null && !withFormat) {
         val colors = NagTheme.colors
@@ -647,10 +666,11 @@ private fun SubtitleLine(info: PlayerBarInfo, progress: () -> Float, withFormat:
         }
         return
     }
+    val type = NagTheme.type
     Text(
         listOfNotNull(info.subtitle, chapter ?: info.format.takeIf { withFormat }).joinToString(" · "),
-        style = NagTheme.type.labelSmall,
-        color = NagTheme.colors.textTertiary,
+        style = if (phone) type.body.copy(fontSize = type.size(13f), lineHeight = type.size(18f)) else type.labelSmall,
+        color = if (phone) NagTheme.colors.textSecondary else NagTheme.colors.textTertiary,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.testTag("bar-subtitle"),
@@ -709,13 +729,12 @@ fun TransportBar(
 }
 
 /**
- * 1.0.2: the phone's bar is the tablet's [TransportBar] laid out for a phone ("the same bar"): the
- * same floating card, the artwork and the words that open the player (on a phone the full player
- * grows from the bar), the transport, and under them the tablet's seek bar in the artwork's colour
- * between the time played and the time left, which a finger drags to seek with the time following
- * it; a station on the air is shown live instead ([BarTimeline]). Shuffle and repeat join the
- * transport where the window leaves the words room for them ([showsModes]); while casting the
- * second line names the device, as the tablet's does.
+ * 1.0.2: the phone's bar, the full player growing out of it. 1.1.1 (the design's mini player, Main.dc.html and the
+ * components' "Küçük oynatıcı"): a raised card with a shadow, 84 dp, floating 8 dp from the window's sides over the
+ * page: the artwork and the words that open the player, play in the ink's circle and next; under them the track's
+ * waveform as its progress, in the ink as far as it has played, which a finger drags or taps to seek (TalkBack: a
+ * slider, with the times). A station on the air shows that it is live instead ([LiveLine]); while casting the second
+ * line names the device.
  */
 @Composable
 fun CompactTransportBar(
@@ -725,60 +744,159 @@ fun CompactTransportBar(
     artwork: @Composable (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dimens = NagTheme.dimens
+    val colors = NagTheme.colors
     // 1.0.3: the copy of the bar in the phone player's sheet lies on the sheet, which is its card and grows into the page;
     // it is told apart from the bar itself (composed with the full player, it is in the tree while the bar rests)
     val inSheet = inPlayerSheetStrip
-    val card = if (inSheet) Modifier.clip(RoundedCornerShape(floatingPlayerCorner)) else Modifier.floatingPlayerCard()
-    BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = COMPACT_MARGIN_Y)) {
-        val button = TransportSize.Compact.button.coerceAtLeast(dimens.minTarget)
-        val modes = showsModes(maxWidth, button, dimens.gapM)
+    val shape = RoundedCornerShape(PHONE_CARD_CORNER)
+    val card = if (inSheet) Modifier.clip(shape) else Modifier.phonePlayerCard(shape)
+    Box(modifier.fillMaxWidth().padding(horizontal = COMPACT_MARGIN, vertical = COMPACT_MARGIN_Y)) {
         Column(Modifier.fillMaxWidth().then(card).testTag(if (inSheet) "mini-player-sheet" else "mini-player")) {
             Row(
-                Modifier.fillMaxWidth().padding(start = COMPACT_INSET - 4.dp, end = 4.dp, top = 4.dp),
+                Modifier.fillMaxWidth().padding(start = 6.dp, end = 8.dp, top = 6.dp).heightIn(min = 56.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                NowPlayingWords(info, progress, actions, artwork, COMPACT_ARTWORK, Modifier.weight(1f), withFormat = true, links = false)
-                TransportControls(
-                    info.playing, info.shuffling, info.repeating, actions,
-                    size = TransportSize.Compact,
-                    repeatOne = info.repeatOne,
-                    horizontalArrangement = Arrangement.spacedBy(0.dp),
-                    modes = modes,
-                )
+                // a video's line says what it is ("Şimdi çalıyor · 4K DV"); music's the artist and the album (the design's)
+                NowPlayingWords(info, progress, actions, artwork, COMPACT_ARTWORK, Modifier.weight(1f), withFormat = info.isVideo, links = false, phone = true)
+                Spacer(Modifier.width(6.dp))
+                PlayCircle(info.playing, actions::togglePlayPause)
+                NagIconButton(NagIcons.Next, stringResource(R.string.nag_next), actions::next, size = 48.dp, iconSize = 22.dp, tint = colors.text, shortcut = ShortcutId.Next)
             }
-            // its own node: the times with the seek bar, apart from the card that opens the player; a finger's height
-            BarTimeline(
-                info, progress, actions,
-                Modifier.fillMaxWidth().padding(horizontal = COMPACT_INSET).semantics(mergeDescendants = true) {}.testTag("mini-player-seek"),
-                height = dimens.minTarget.coerceAtLeast(SeekRowHeight),
-            )
+            // its own node: the times with the waveform that seeks, apart from the card that opens the player
+            BarWave(info, progress, actions, Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("mini-player-seek"))
         }
     }
 }
 
+/** 1.1.1: the phone's card: the raised surface, a soft shadow under it (no edge: the design's). */
+@Composable
+private fun Modifier.phonePlayerCard(shape: Shape): Modifier {
+    val colors = NagTheme.colors
+    return this
+        .shadow(if (colors.isDark) 18.dp else 12.dp, shape, ambientColor = Color.Black, spotColor = Color.Black)
+        .clip(shape)
+        .then(if (LocalOnBottomGlass.current) Modifier else Modifier.background(colors.surfaceRaised))
+}
+
+/** The play button of the phone's card: the ink's circle, the glyph in its own colour on it. */
+@Composable
+private fun PlayCircle(playing: Boolean, onClick: () -> Unit) {
+    val colors = NagTheme.colors
+    val interaction = remember { MutableInteractionSource() }
+    val state = interaction.collectState()
+    val label = stringResource(if (playing) R.string.nag_pause else R.string.nag_play)
+    val accent = animatedAccent(colors.accent, "playCircle")
+    Box(
+        Modifier
+            .size(48.dp)
+            .pressScale(state.pressed, 0.92f)
+            .shadow(6.dp, CircleShape, ambientColor = Color.Black, spotColor = Color.Black)
+            .focusRing(state, CircleShape)
+            .drawBehind { drawCircle(accent.value) }
+            .nagClickable(interaction, onClick, onClickLabel = label)
+            .testTag("mini-player-play"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(if (playing) NagIcons.Pause else NagIcons.Play, contentDescription = label, tint = colors.onAccent, modifier = Modifier.size(22.dp))
+    }
+}
+
 /**
- * Whether a phone's bar whose card is [width] wide has room for shuffle and repeat beside previous, play and next ([button] each):
- * only if the artwork and the words keep [WORDS_MIN] after them; on a phone held upright they do not (1.0.2).
+ * The phone's card's progress (1.1.1, the design's): sixty bars of the track's shape (its title's, the same each time it
+ * plays), in the ink as far as it has played, the rest faint; a finger along it seeks, a tap seeks there. TalkBack hears a
+ * slider with the time played and the length; a station on the air shows that it is live ([LiveLine]).
  */
-internal fun showsModes(width: Dp, button: Dp, gap: Dp): Boolean =
-    width - COMPACT_INSET - 4.dp - 8.dp - COMPACT_ARTWORK - gap - button * 5 >= WORDS_MIN
+@Composable
+private fun BarWave(info: PlayerBarInfo, progress: () -> Float, actions: PlayerBarActions, modifier: Modifier) {
+    if (info.live) {
+        LiveLine(modifier.padding(bottom = 6.dp), WAVE_ROW - 6.dp)
+        return
+    }
+    val colors = NagTheme.colors
+    val accent = animatedAccent(colors.accent, "barWave")
+    val off = colors.text.copy(alpha = 0.14f)
+    val bars = remember(info.title) { waveShape(info.title) }
+    var dragged by remember { mutableStateOf<Float?>(null) }
+    val length = info.lengthMs
+    // the times for TalkBack (and the walk's reading of the bar), once a second
+    val seconds by remember(length) {
+        derivedStateOf { if (length > 0) (progress() * length / 1000f).toLong() else playbackPositionMs() / 1000 }
+    }
+    val said = if (length > 0) "${formatDuration(seconds * 1000)} / ${formatDuration(length)}" else formatDuration(seconds * 1000)
+    val seek: (Float) -> Unit = { f -> actions.seekTo(f.coerceIn(0f, 1f)) }
+    Box(
+        modifier
+            .height(WAVE_ROW)
+            .semantics(mergeDescendants = true) {
+                contentDescription = said
+                progressBarRangeInfo = ProgressBarRangeInfo(if (length > 0) (seconds * 1000f / length).coerceIn(0f, 1f) else 0f, 0f..1f)
+                setProgress { target ->
+                    seek(target)
+                    true
+                }
+            }
+            .pointerInput(length) {
+                detectTapGestures { offset -> if (length > 0) seek(offset.x / size.width) }
+            }
+            .pointerInput(length) {
+                detectHorizontalDragGestures(
+                    onDragStart = { offset -> if (length > 0) dragged = (offset.x / size.width).coerceIn(0f, 1f) },
+                    onDragEnd = {
+                        dragged?.let(seek)
+                        dragged = null
+                    },
+                    onDragCancel = { dragged = null },
+                ) { change, _ ->
+                    change.consume()
+                    if (length > 0) dragged = (change.position.x / size.width).coerceIn(0f, 1f)
+                }
+            }
+            .drawBehind {
+                val played = dragged ?: progress()
+                val gap = 2.dp.toPx()
+                val n = bars.size
+                val w = ((size.width - gap * (n - 1)) / n).coerceAtLeast(1f)
+                // the bars' middle 6 dp under the words' row (their tallest 12 dp), 8 dp over the card's foot
+                val mid = 8.dp.toPx()
+                val radius = CornerRadius(1.dp.toPx())
+                for (i in 0 until n) {
+                    val h = (2f + bars[i] * 10f).dp.toPx()
+                    val x = i * (w + gap)
+                    val on = n > 1 && i.toFloat() / (n - 1) <= played
+                    drawRoundRect(if (on) accent.value else off, Offset(x, mid - h / 2f), Size(w, h), radius)
+                }
+            },
+    )
+}
+
+/** The sixty bars' heights (0.14 … 1) of the track named [title]: a soft envelope over three waves, as the design's. */
+internal fun waveShape(title: String, count: Int = 60): FloatArray {
+    val seed = (title.hashCode() and 0xffff) / 6553.6f
+    return FloatArray(count) { i ->
+        val x = i / (count - 1f)
+        val v = 0.52f + 0.26f * sin(i * 0.83f + seed) + 0.16f * sin(i * 2.17f + seed * 2.3f) + 0.07f * sin(i * 4.9f + seed * 0.7f)
+        val envelope = min(1f, x * 5f + 0.3f) * min(1f, (1f - x) * 4f + 0.3f)
+        (v * envelope).coerceIn(0.14f, 1f)
+    }
+}
 
 /**
  * 1.0.3: the phone's bar's card as the player's sheet starts from it ([ExpandablePlayer]): its margins in the strip and
- * its corners ([floatingPlayerCard]'s).
+ * its corners. 1.1.1: no edge drawn round it (the design's card has a shadow instead).
  */
 @Composable
-internal fun compactPlayerCard(): PlayerCard = PlayerCard(COMPACT_MARGIN, COMPACT_MARGIN_Y, floatingPlayerCorner)
+internal fun compactPlayerCard(): PlayerCard = PlayerCard(COMPACT_MARGIN, COMPACT_MARGIN_Y, PHONE_CARD_CORNER, rule = false)
 
-/** The phone's bar: its margin to the window's edges (above and below the card: [COMPACT_MARGIN_Y]), the room inside its card, the artwork. */
+/** The phone's bar: its margin to the window's sides and above and below the card, the artwork's side. */
 private val COMPACT_MARGIN = 8.dp
-private val COMPACT_MARGIN_Y = 6.dp
-private val COMPACT_INSET = 12.dp
-private val COMPACT_ARTWORK = 40.dp
+private val COMPACT_MARGIN_Y = 4.dp
+private val COMPACT_ARTWORK = 48.dp
 
-/** The least the words of a phone's bar keep when shuffle and repeat join the transport. */
-private val WORDS_MIN = 160.dp
+/** 1.1.1 (the design): the phone's card's corners. */
+internal val PHONE_CARD_CORNER = 20.dp
+
+/** The waveform's row under the words: the ink's bars, 12 dp at the tallest, 2 dp under its top; the card's foot under them. */
+private val WAVE_ROW = 22.dp
 
 /**
  * The artwork with the title and the second line (the artist, or the device cast to), which open the player: the
@@ -795,6 +913,8 @@ private fun NowPlayingWords(
     modifier: Modifier,
     withFormat: Boolean,
     links: Boolean,
+    /** 1.1.1: the phone's card's words, the design's sizes (15 on 20, the line 13 on 18 in the second text colour). */
+    phone: Boolean = false,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
@@ -810,11 +930,12 @@ private fun NowPlayingWords(
     ) {
         // 1.0.3: on a phone the artwork and the title fly into the full player as it opens, and back
         Box(Modifier.playerSharedElement(PlayerShared.Artwork, RoundedCornerShape(BAR_ARTWORK_CORNER))) { artwork(artSize) }
-        Spacer(Modifier.width(dimens.gapM))
+        Spacer(Modifier.width(if (phone) 10.dp else dimens.gapM))
         Column(Modifier.weight(1f)) {
+            val type = NagTheme.type
             Text(
                 info.title,
-                style = NagTheme.type.bodyStrong,
+                style = if (phone) type.bodyStrong.copy(fontWeight = SemiBoldPlus, fontSize = type.size(15f), lineHeight = type.size(20f)) else type.bodyStrong,
                 color = colors.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -823,7 +944,7 @@ private fun NowPlayingWords(
             if (info.casting != null) {
                 CastingLine(info.casting)
             } else {
-                SubtitleLine(info, progress, withFormat = withFormat, actions = actions.takeIf { links })
+                SubtitleLine(info, progress, withFormat = withFormat, actions = actions.takeIf { links }, phone = phone)
             }
         }
     }

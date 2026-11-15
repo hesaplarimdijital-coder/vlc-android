@@ -1092,6 +1092,30 @@
     <string name="nag_music_quick_unfinished">Partly played</string>
     <string name="nag_music_quick_unheard">Never played</string>
     <string name="nag_music_quick_new">Added this year</string>
+    <!-- 1.1.1 (the design's phone page): the masthead, the options chip, the order button and its menu, the letters' wave -->
+    <string name="nag_music_masthead">Music</string>
+    <string name="nag_music_options">Options</string>
+    <string name="nag_sort_az">A–Z</string>
+    <string name="nag_sort_za">Z–A</string>
+    <!-- "Sort: by name, A to Z" -->
+    <string name="nag_sort_described">Sort: %1$s, %2$s</string>
+    <string name="nag_sort_name">By name</string>
+    <string name="nag_sort_artist">By artist</string>
+    <string name="nag_sort_album">By album</string>
+    <string name="nag_sort_year">By year</string>
+    <string name="nag_sort_added">By date added</string>
+    <string name="nag_sort_duration">By length</string>
+    <string name="nag_sort_dir_az">A to Z</string>
+    <string name="nag_sort_dir_za">Z to A</string>
+    <string name="nag_sort_dir_new">Newest first</string>
+    <string name="nag_sort_dir_old">Oldest first</string>
+    <string name="nag_sort_dir_short">Shortest first</string>
+    <string name="nag_sort_dir_long">Longest first</string>
+    <!-- the letters of the interface language's alphabet, in its order: the letters' wave down a phone's list -->
+    <string name="nag_music_alphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <string name="nag_music_jump">Jump to a letter</string>
+    <!-- what filters the list now: "Filter: Partly played, 24 bit" -->
+    <string name="nag_music_filtered">Filter: %1$s</string>
     <string name="nag_music_trace">Tracks played: %1$d of %2$d</string>
     <string name="nag_music_recent_shelf">Recently played music</string>
     <string name="nag_music_recent_none_title">No track played yet</string>

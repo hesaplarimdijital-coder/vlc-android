@@ -17,6 +17,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
@@ -41,6 +42,12 @@ class WindowRootInsets internal constructor(
      * less the keyboard over it, left to the shell; zero when the root pads it.
      */
     val navigationBottom: WindowInsets,
+    /**
+     * 1.1.1 (the design's phone page): what lies over the window's top (the status bar, a cutout) when the root leaves
+     * it to the shell, a phone's: its pages draw under it (Müzik's band), its top bar and pages keep their controls
+     * below it; zero when the root pads it.
+     */
+    val top: WindowInsets = NoInsets,
 )
 
 /**
@@ -50,7 +57,7 @@ class WindowRootInsets internal constructor(
  * (Desktop Kit 2.1's first launch: a bar-high gap under the shell until the window was laid out again).
  */
 @Composable
-fun rememberWindowRootInsets(belowCaption: Boolean, shellDrawsNavigation: Boolean): WindowRootInsets {
+fun rememberWindowRootInsets(belowCaption: Boolean, shellDrawsNavigation: Boolean, shellDrawsTop: Boolean = false): WindowRootInsets {
     val safe = WindowInsets.safeDrawing
     val captionBar = WindowInsets.captionBar
     val base = if (belowCaption) safe.exclude(captionBar) else safe
@@ -58,10 +65,13 @@ fun rememberWindowRootInsets(belowCaption: Boolean, shellDrawsNavigation: Boolea
     // The navigation bar alone left the root a strip of its own background under the shell's chrome wherever a device
     // reports a cutout or another system bar there taller than the navigation bar; the band now covers the tallest
     val navigationBottom = safe.only(WindowInsetsSides.Bottom).exclude(WindowInsets.ime)
-    return remember(base, navigationBottom, shellDrawsNavigation) {
+    // 1.1.1: a phone's shell takes the window's top as well
+    val leavesTop = shellDrawsNavigation && shellDrawsTop
+    return remember(base, navigationBottom, shellDrawsNavigation, leavesTop) {
         WindowRootInsets(
-            padding = if (shellDrawsNavigation) RootPadding(base, navigationBottom) else base,
+            padding = if (shellDrawsNavigation) RootPadding(base, navigationBottom, leavesTop) else base,
             navigationBottom = if (shellDrawsNavigation) navigationBottom else NoInsets,
+            top = if (leavesTop) base.only(WindowInsetsSides.Top) else NoInsets,
         )
     }
 }
@@ -72,28 +82,33 @@ val LocalWindowRootInsets = staticCompositionLocalOf<WindowRootInsets?> { null }
 /**
  * The app's window root (1.0.3): pads the window's insets ([rememberWindowRootInsets]) around
  * [content]; with [shell] the navigation bar at the window's bottom is left to the shell inside
- * ([LocalWindowRootInsets]), without it (the first run) it is padded as well.
+ * ([LocalWindowRootInsets]), without it (the first run) it is padded as well. 1.1.1 (the design's phone
+ * page): a phone's shell (a window of the bottom bar's width) takes the window's top too, so that Müzik's band
+ * lies under the status bar ([WindowRootInsets.top]); the shell keeps its bars and pages below it.
  */
 @Composable
 fun WindowRoot(shell: Boolean, belowCaption: Boolean, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val insets = rememberWindowRootInsets(belowCaption = belowCaption, shellDrawsNavigation = shell)
+    val width = LocalConfiguration.current.screenWidthDp
+    val phone = shell && width > 0 && NavKind.forWidth(WidthClass.fromWidth(width.toFloat())) == NavKind.BottomBar
+    val insets = rememberWindowRootInsets(belowCaption = belowCaption, shellDrawsNavigation = shell, shellDrawsTop = phone)
     Box(modifier.windowInsetsPadding(insets.padding)) {
         if (shell) CompositionLocalProvider(LocalWindowRootInsets provides insets, content = content) else content()
     }
 }
 
-/** [safe] without the [navigationBottom] the shell draws behind. */
-private class RootPadding(private val safe: WindowInsets, private val navigationBottom: WindowInsets) : WindowInsets {
+/** [safe] without the [navigationBottom] the shell draws behind; without its top as well when the shell takes it ([leavesTop]). */
+private class RootPadding(private val safe: WindowInsets, private val navigationBottom: WindowInsets, private val leavesTop: Boolean = false) : WindowInsets {
     override fun getLeft(density: Density, layoutDirection: LayoutDirection) = safe.getLeft(density, layoutDirection)
-    override fun getTop(density: Density) = safe.getTop(density)
+    override fun getTop(density: Density) = if (leavesTop) 0 else safe.getTop(density)
     override fun getRight(density: Density, layoutDirection: LayoutDirection) = safe.getRight(density, layoutDirection)
     override fun getBottom(density: Density) = (safe.getBottom(density) - navigationBottom.getBottom(density)).coerceAtLeast(0)
 
-    override fun equals(other: Any?) = other is RootPadding && other.safe == safe && other.navigationBottom == navigationBottom
+    override fun equals(other: Any?) =
+        other is RootPadding && other.safe == safe && other.navigationBottom == navigationBottom && other.leavesTop == leavesTop
 
-    override fun hashCode() = 31 * safe.hashCode() + navigationBottom.hashCode()
+    override fun hashCode() = (31 * safe.hashCode() + navigationBottom.hashCode()) * 31 + leavesTop.hashCode()
 
-    override fun toString() = "RootPadding($safe - $navigationBottom)"
+    override fun toString() = "RootPadding($safe - $navigationBottom${if (leavesTop) " - top" else ""})"
 }
 
 private val NoInsets = WindowInsets(0, 0, 0, 0)
