@@ -260,8 +260,8 @@ class MusicPanesTest {
         val store = Store()
         show(MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List), store)
         val divider = compose.onNodeWithContentDescription("Listenin genişliği")
-        // where the music view always had it
-        assertTrue(abs(divider.fetchSemanticsNode().boundsInRoot.left - 260f) < 1f)
+        // 1.1.2 (the design's tablet page): the page's margin, the albums' rows and their letters' wave
+        assertTrue(abs(divider.fetchSemanticsNode().boundsInRoot.left - 328f) < 1f)
         divider.performSemanticsAction(SemanticsActions.SetProgress) { it(340f) }
         compose.waitForIdle()
         assertEquals(340f, store.saved[MUSIC_GROUPS_PANE])

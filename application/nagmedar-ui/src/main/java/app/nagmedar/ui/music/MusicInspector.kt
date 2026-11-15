@@ -48,10 +48,15 @@ import app.nagmedar.ui.audio.decibels
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.audio.latency.LatencyCenter
 import app.nagmedar.ui.audio.rememberSignalPath
+import app.nagmedar.ui.cast.Casting
+import app.nagmedar.ui.cast.rememberCastingEnabled
+import app.nagmedar.ui.rememberNagmedarPreferences
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.InspectorPane
 import app.nagmedar.ui.components.InspectorState
 import app.nagmedar.ui.components.InspectorTab
+import app.nagmedar.ui.components.MenuEntry
+import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.RatingStars
 import app.nagmedar.ui.components.UndoBarState
 import app.nagmedar.ui.covers.CoverMenuButton
@@ -101,20 +106,27 @@ class MusicInspectorContent(
     val lyrics: @Composable (InspectorSubject) -> Unit,
     /** "Sıra": the play queue. */
     val queue: @Composable () -> Unit,
+    /** 1.1.2 (the design's tablet page): more in the panel's "⋯" after its views (the visualiser, casting). */
+    val menu: @Composable () -> List<MenuEntry> = { emptyList() },
 )
 
-/** The inspector of the music view: its four tabs over [content], about [subject]; the page header's button hides it. */
+/**
+ * The inspector of the music view: its four views over [content], about [subject]. 1.1.2 (the design's tablet page):
+ * the panel of what plays ("Şimdi çalıyor"; a selected track's tags under "Seçili parça"), the others behind its "⋯"
+ * with [MusicInspectorContent.menu]'s and the panel's hiding.
+ */
 @Composable
 internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorContent, subject: InspectorSubject) {
+    val playing = rememberPlayingUri()
     val tabs = listOf(
-        InspectorTab(InspectorTabs.TAGS, stringResource(R.string.nag_inspector_tags)),
+        InspectorTab(InspectorTabs.TAGS, stringResource(if (subject.notPlaying(playing)) R.string.nag_inspector_selected else R.string.nag_now_playing)),
         InspectorTab(InspectorTabs.SIGNAL, stringResource(R.string.nag_sp_title)),
         InspectorTab(InspectorTabs.LYRICS, stringResource(R.string.nag_lyrics_title)),
         InspectorTab(InspectorTabs.QUEUE, stringResource(R.string.nag_inspector_queue)),
     )
     // the last lines rest clear of a floating player bar
     val bottom = LocalShellBottomPadding.current
-    InspectorPane(tabs, state.selectedTab, { state.selectedTab = it }) { tab ->
+    InspectorPane(tabs, state.selectedTab, { state.selectedTab = it }, onCollapse = state::toggle, menu = content.menu) { tab ->
         Box(Modifier.fillMaxSize().padding(bottom)) {
             when (tab.id) {
                 InspectorTabs.TAGS -> content.tags(subject)
@@ -283,8 +295,28 @@ fun rememberMusicInspector(onFullScreenLyrics: () -> Unit, onFullScreenVisualize
             signal = { subject -> SignalTab(subject) },
             lyrics = { subject -> LyricsTab(subject) { lyrics() } },
             queue = { QueueTab(undo) },
+            menu = { panelMenu { visualizer() } },
         )
     }
+}
+
+/**
+ * 1.1.2: the panel's "⋯" after its views: the visualiser in the panel (S-611, on and off as in Settings › Visualiser) and
+ * over the window, the device picker while VLC's casting setting is on (S-1302).
+ */
+@Composable
+private fun panelMenu(onFullScreenVisualizer: () -> Unit): List<MenuEntry> {
+    val prefs = rememberNagmedarPreferences()
+    val shown = prefs.visualizer.music
+    val canCast = rememberCastingEnabled()
+    val visualizer = stringResource(R.string.nag_vis_title)
+    val fullScreen = stringResource(R.string.nag_sc_visualizer)
+    val cast = stringResource(R.string.nag_sc_cast)
+    return listOfNotNull(
+        MenuEntry.Item(visualizer, { prefs.updateVisualizer(prefs.visualizer.copy(music = !shown)) }, icon = NagIcons.Visualizer, checked = shown),
+        MenuEntry.Item(fullScreen, onFullScreenVisualizer, icon = NagIcons.Fullscreen),
+        if (canCast) MenuEntry.Item(cast, { Casting.openPicker() }, icon = NagIcons.Cast) else null,
+    )
 }
 
 /** The uri of the music that plays; null when nothing does (or a stream, a video). */
@@ -307,7 +339,8 @@ private fun TagsTab(subject: InspectorSubject, onFullScreenVisualizer: () -> Uni
     LaunchedEffect(Unit) { TrackStatsIndex.follow(context) }
     val track = subject.track
     if (track == null || !subject.notPlaying(playing)) {
-        MusicNowPlaying(onFullScreenVisualizer = onFullScreenVisualizer, withQueue = false, withLyrics = false, below = { PlayingTags(stats) })
+        // 1.1.2 (the design's tablet page): what plays as the design's panel, its tags under it
+        MusicNowPlaying(onFullScreenVisualizer = onFullScreenVisualizer, withQueue = false, withLyrics = false, below = { PlayingTags(stats) }, designed = true)
         return
     }
     // 1.0.3: the file's ReplayGain tags, read now if the probe has not come to it yet

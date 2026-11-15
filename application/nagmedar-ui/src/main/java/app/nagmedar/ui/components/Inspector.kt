@@ -55,10 +55,16 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -69,6 +75,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.ShortcutId
+import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.library.currentLocale
 import app.nagmedar.ui.input.TabNavigation
 import app.nagmedar.ui.shell.LocalPaneWidths
 import app.nagmedar.ui.shell.WORKSTATION_PANE
@@ -278,8 +286,17 @@ fun InspectorPane(
     modifier: Modifier = Modifier,
     onCollapse: (() -> Unit)? = null,
     background: Color = NagTheme.colors.surface,
+    /**
+     * 1.1.2 (Nağmedar's design, its tablet page): the tabs behind the header's "⋯" (Seçenekler), the chosen one's name over
+     * the pane in capitals; the menu lists them, then these entries, then the pane's hiding ([onCollapse]).
+     */
+    menu: (@Composable () -> List<MenuEntry>)? = null,
     content: @Composable (InspectorTab) -> Unit,
 ) {
+    if (menu != null) {
+        MenuInspectorPane(tabs, selected, onSelect, modifier, onCollapse, background, menu(), content)
+        return
+    }
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_inspector)
     val index = selected.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
@@ -360,6 +377,69 @@ fun InspectorPane(
             }
         }
         HorizontalRule()
+        val tab = tabs.getOrNull(index)
+        if (tab != null) {
+            val spec = if (NagTheme.motion.reduced) snap<Float>() else tween<Float>(NagMotion.CROSSFADE)
+            Crossfade(targetState = tab, animationSpec = spec, label = "inspectorTab", modifier = Modifier.fillMaxSize()) { shownTab ->
+                Box(Modifier.fillMaxSize()) { content(shownTab) }
+            }
+        }
+    }
+}
+
+/** [InspectorPane] with its tabs in the header's menu (1.1.2, the design's): the chosen one's name, "⋯", the content. */
+@Composable
+private fun MenuInspectorPane(
+    tabs: List<InspectorTab>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier,
+    onCollapse: (() -> Unit)?,
+    background: Color,
+    extra: List<MenuEntry>,
+    content: @Composable (InspectorTab) -> Unit,
+) {
+    val colors = NagTheme.colors
+    val label = stringResource(R.string.nag_inspector)
+    val hide = stringResource(R.string.nag_inspector_hide)
+    val locale = currentLocale()
+    val index = selected.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
+    var open by remember { mutableStateOf(false) }
+    var anchor by remember { mutableIntStateOf(0) }
+    val keys = ShortcutRegistry.chordLabel(ShortcutId.ToggleInspector, LocalContext.current.resources)
+    val entries = buildList {
+        tabs.forEachIndexed { i, tab -> add(MenuEntry.Item(tab.label, { onSelect(i) }, checked = i == index)) }
+        if (extra.isNotEmpty()) {
+            add(MenuEntry.Separator)
+            addAll(extra)
+        }
+        if (onCollapse != null) {
+            add(MenuEntry.Separator)
+            add(MenuEntry.Item(hide, onCollapse, shortcut = keys))
+        }
+    }
+    Column(modifier.fillMaxSize().background(background).semantics { paneTitle = label }.testTag("inspector")) {
+        Row(
+            Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 20.dp).height(48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val title = tabs.getOrNull(index)?.label.orEmpty()
+            Text(
+                remember(title, locale) { title.uppercase(locale) },
+                style = NagTheme.type.overline,
+                color = colors.textTertiary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).clearAndSetSemantics {
+                    heading()
+                    text = AnnotatedString(title)
+                },
+            )
+            Box(Modifier.onSizeChanged { anchor = it.height }) {
+                NagIconButton(NagIcons.MoreHorizontal, stringResource(R.string.nag_music_options), { open = true }, Modifier.testTag("inspector-menu"), selected = open)
+                MenuPopup(visible = open, onDismiss = { open = false }, entries = if (open) entries else emptyList(), offset = IntOffset(0, anchor))
+            }
+        }
         val tab = tabs.getOrNull(index)
         if (tab != null) {
             val spec = if (NagTheme.motion.reduced) snap<Float>() else tween<Float>(NagMotion.CROSSFADE)

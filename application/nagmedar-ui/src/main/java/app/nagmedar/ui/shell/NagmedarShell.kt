@@ -162,9 +162,16 @@ fun NagmedarShell(
     chromeGlass: ChromeGlass = ChromeGlass.Product,
     /**
      * 1.1.1 (the design's phone page): the pages that draw their own top on a phone (the app's Müzik): no top bar over
-     * them, they lie from the window's top, under the status bar.
+     * them, they lie from the window's top, under the status bar. 1.1.2: on a rail's window by touch too (its page has the
+     * search over its band).
      */
     ownTop: (Destination) -> Boolean = { false },
+    /**
+     * 1.1.2 (the design's tablet page): a tablet's sidebar by touch, with no menu bar over the window: its brand at the
+     * top (told whether the sidebar is collapsed) and what stands under its entries (the albums not opened for a year).
+     */
+    sidebarBrand: (@Composable (collapsed: Boolean) -> Unit)? = null,
+    sidebarExtra: (@Composable () -> Unit)? = null,
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val current = Destination.fromRoute(entry?.destination?.route)
@@ -178,6 +185,8 @@ fun NagmedarShell(
     // 1.0.3: the phone's bars on glass (the user's decision; solid in the product) while menus and sheets stay as [glass] says
     val chromeMode = if (chromeGlass == ChromeGlass.Solid) GlassMode.Solid else LocalGlassMode.current ?: systemGlass
     val pointer = NagTheme.inputMode == InputMode.Pointer
+    // 1.1.2 (the design's tablet page): the menu bar over a pointer's window and a desktop window's caption; none by touch
+    val menuBar = pointer || caption != null
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val sidebarWidth = rememberPaneWidth(SIDEBAR_PANE, NagTheme.dimens.sidebarWidth)
     // the graph builder below must not capture changing values, or NavHost would rebuild the graph
@@ -309,6 +318,8 @@ fun NagmedarShell(
     val overlayHost = remember { ShellOverlayHost() }
     // 1.0.8 (Desktop Kit 2.8.0): the screen's main action (ShellPrimaryAction), where the layout keeps it
     val primaryHost = remember { PrimaryActionHost() }
+    // 1.1.2: a page that shows the transport itself (Müzik's panel): the floating player stands aside
+    val playerAside = remember { ShellPlayerAside() }
     val primary = primaryHost.current
     val glassSource = remember { HazeState() }
     val padding = remember(metrics, density) { shellPaddingValues(metrics, density) }
@@ -320,7 +331,8 @@ fun NagmedarShell(
     // 1.1.1 (the design's phone page): the window's top the root leaves to a phone's shell (the status bar). The top bar
     // keeps its title below it; Müzik draws its own top there: its band under the status bar, its chips over the band
     val statusTop = rootInsets?.top
-    val ownTop = navKind == NavKind.BottomBar && ownTop(current) && !contentOnly
+    // 1.1.2 (the design's tablet page): by touch the rail's window too, whose page has the search over its band
+    val ownTop = (navKind == NavKind.BottomBar || (navKind == NavKind.Rail && !pointer)) && ownTop(current) && !contentOnly
     val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
     // the phone's one bottom glass, the user's decision (B): behind the mini player, the bottom bar and the band; thick, so
     // that the card's grey artist line and times keep 4.5:1 over a white cover
@@ -390,6 +402,7 @@ fun NagmedarShell(
         LocalGlassMode provides glassMode,
         LocalGlassSource provides glassSource,
         LocalShellOverlayHost provides overlayHost,
+        LocalShellPlayerAside provides playerAside,
         LocalShellContentPadding provides padding,
     ) {
         ShellLayout(
@@ -403,12 +416,15 @@ fun NagmedarShell(
             navigationOffset = { if (navKind == NavKind.BottomBar) bottomOffset().roundToInt() else 0 },
             topBar = {
                 if (navKind == NavKind.Sidebar) {
-                    // the menus are a pointer's and a keyboard's (S-302); by touch the bar keeps the search
-                    MenuBarChrome(
-                        menus = if (pointer) menus else ({}),
-                        search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
-                        caption = caption,
-                    )
+                    // the menus are a pointer's and a keyboard's (S-302); 1.1.2 (the design's tablet page): by touch no bar
+                    // over the window, the sidebar has the brand and the search (a desktop window's caption keeps it)
+                    if (menuBar) {
+                        MenuBarChrome(
+                            menus = if (pointer) menus else ({}),
+                            search = { SearchField(onClick = onSearch, shortcut = "Ctrl+K", modifier = Modifier.widthIn(min = 220.dp, max = 380.dp)) },
+                            caption = caption,
+                        )
+                    }
                 } else if (!ownTop) {
                     PageTopBar(
                         title = stringResource(current.label),
@@ -462,6 +478,10 @@ fun NagmedarShell(
                         badges = badges,
                         width = sidebarWidth,
                         iconBadges = iconBadges,
+                        // 1.1.2 (the design's tablet page): without the menu bar, the brand at its top and "Ara" at its foot
+                        brand = if (menuBar) null else sidebarBrand ?: { collapsed -> SidebarBrand(collapsed) },
+                        onSearch = onSearch.takeIf { !menuBar },
+                        extra = sidebarExtra.takeIf { !menuBar },
                         // 1.0.8: the screen's main action at the sidebar's top, the icon alone while collapsed
                         action = primary?.let { action ->
                             { collapsed ->
@@ -476,19 +496,23 @@ fun NagmedarShell(
                 }
             },
             player = {
+                // 1.1.2: none while the page shows the transport itself
+                val aside = floating && playerAside.aside
                 Box(
                     Modifier
                         .onSizeChanged { metrics.playerPx = it.height }
                         .underPlayer(playerOver)
                         .then(if (barsHidden && navKind == NavKind.BottomBar) Modifier.clearAndSetSemantics {} else Modifier)
                         // a solid card with its border, whatever passes beneath (1.0.1)
-                        .then(if (floating) Modifier.floatingPlayerCard() else Modifier),
+                        .then(if (floating && !aside) Modifier.floatingPlayerCard() else Modifier),
                 ) {
-                    CompositionLocalProvider(
-                        LocalFloatingPlayer provides floating,
-                        LocalOnBottomGlass provides onBottomGlass,
-                        LocalBottomGlassSurface provides bottomGlass,
-                    ) { player(navKind) }
+                    if (!aside) {
+                        CompositionLocalProvider(
+                            LocalFloatingPlayer provides floating,
+                            LocalOnBottomGlass provides onBottomGlass,
+                            LocalBottomGlassSurface provides bottomGlass,
+                        ) { player(navKind) }
+                    }
                 }
             },
             content = {

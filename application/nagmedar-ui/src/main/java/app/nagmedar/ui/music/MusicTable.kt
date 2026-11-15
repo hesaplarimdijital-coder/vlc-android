@@ -1,12 +1,33 @@
 package app.nagmedar.ui.music
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.formatName
@@ -52,6 +73,12 @@ enum class MusicColumn(val key: String, @StringRes val label: Int, val width: Co
     companion object {
         /** What a new table shows. */
         val DEFAULT = listOf(Title, Artist, Album, Year, Format, Duration, Rating)
+
+        /** 1.1.2 (the design's tablet page): what an album's tracks show until other columns are chosen: No, Ad, Süre, Çalınma, Biçim. */
+        val ALBUM_DEFAULT = listOf(Number, Title, Duration, Plays, Format)
+
+        /** The columns of [view] until the user chose some. */
+        fun defaultFor(view: MusicView): List<MusicColumn> = if (view == MusicView.Albums) ALBUM_DEFAULT else DEFAULT
 
         /**
          * The columns kept in the settings, in the order kept (Desktop Kit 1.0: the user moves them), Title among
@@ -124,6 +151,13 @@ fun rememberMusicColumns(
     columns: List<MusicColumn>,
     stats: Map<String, TrackStats> = emptyMap(),
     onRate: ((Track, Int) -> Unit)? = null,
+    /**
+     * 1.1.2 (the design's tablet page): an album's tracks as the design has them: the playing one's bars in place of its
+     * number ([playing]), a bar as long as its plays beside their count (in the ink while the album plays), the format
+     * in a small frame.
+     */
+    designed: Boolean = false,
+    playing: String? = null,
 ): List<TableColumn<Track>> {
     val resources = LocalContext.current.resources
     val locale = resources.locale()
@@ -131,7 +165,7 @@ fun rememberMusicColumns(
     val titles = columns.map { stringResource(it.label) }
     val latestRate by rememberUpdatedState(onRate)
     val rates = onRate != null
-    return remember(columns, locale, unknownArtist, titles, stats, rates) {
+    return remember(columns, locale, unknownArtist, titles, stats, rates, designed, playing) {
         val dates = DateFormat.getDateInstance(DateFormat.SHORT, locale)
         columns.mapIndexed { i, column ->
             val stars: (@Composable (Track, Boolean) -> Unit)? = if (column != MusicColumn.Rating) null else { track, selected ->
@@ -142,7 +176,13 @@ fun rememberMusicColumns(
                     filledTint = if (selected) NagTheme.colors.onSelection else NagTheme.colors.accent,
                 )
             }
-            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd, mono = column.mono, content = stars, id = column.key) { track ->
+            val drawn: (@Composable (Track, Boolean) -> Unit)? = stars ?: if (!designed) null else when (column) {
+                MusicColumn.Number -> { track, selected -> DesignedNumber(track, track.uri == playing, selected) }
+                MusicColumn.Plays -> { track, selected -> DesignedPlays(stats[track.statsKey]?.plays ?: 0, playing != null, selected) }
+                MusicColumn.Format -> { track, selected -> track.tech?.let { DesignedFormat(formatLabel(it), selected) } }
+                else -> null
+            }
+            TableColumn<Track>(titles[i], column.width, alignEnd = column.alignEnd && !(designed && column == MusicColumn.Plays), mono = column.mono, content = drawn, id = column.key) { track ->
                 when (column) {
                     MusicColumn.Title -> track.title
                     MusicColumn.Artist -> track.artist?.takeIf { it.isNotBlank() } ?: unknownArtist
@@ -227,4 +267,59 @@ fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale, stats: Map
         }
     })
     return ordered
+}
+
+/** 1.1.2 (the design): a track's number, or the bars of the one that plays, in the ink. */
+@Composable
+private fun DesignedNumber(track: Track, now: Boolean, selected: Boolean) {
+    val colors = NagTheme.colors
+    if (now) {
+        Canvas(Modifier.size(14.dp).semantics { contentDescription = "" }) {
+            val w = size.width * 2.6f / 16f
+            val r = CornerRadius(size.width / 16f)
+            listOf(2f to 6f, 6.7f to 2f, 11.4f to 8f).forEach { (x, top) ->
+                drawRoundRect(colors.accent, Offset(size.width * x / 16f, size.height * top / 16f), Size(w, size.height * (14f - top) / 16f), r)
+            }
+        }
+        return
+    }
+    val number = when {
+        track.trackNumber <= 0 -> ""
+        track.discNumber > 1 -> "${track.discNumber}-${track.trackNumber}"
+        else -> "${track.trackNumber}"
+    }
+    Text(number, style = designText(13f, 18f).copy(fontFeatureSettings = "tnum"), color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1)
+}
+
+/** 1.1.2 (the design): a bar as long as the track's plays (the ink's while its album plays), then how many; "—" for none. */
+@Composable
+private fun DesignedPlays(plays: Int, inPlayingAlbum: Boolean, selected: Boolean) {
+    val colors = NagTheme.colors
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (plays > 0) {
+            Box(Modifier.width((4 + plays.coerceAtMost(10) * 4).dp).height(4.dp).background(if (inPlayingAlbum) colors.accent else colors.textTertiary, RoundedCornerShape(2.dp)))
+        }
+        Text(if (plays > 0) plays.toString() else "—", style = designText(12f, 16f).copy(fontFeatureSettings = "tnum"), color = if (selected) colors.onSelection else colors.textTertiary, maxLines = 1)
+    }
+}
+
+/** 1.1.2 (the design): the format in a small frame ("FLAC 24/96"). */
+@Composable
+private fun DesignedFormat(text: String, selected: Boolean) {
+    val colors = NagTheme.colors
+    Box(
+        Modifier
+            .height(22.dp)
+            .border(1.dp, if (selected) colors.onSelection.copy(alpha = 0.4f) else colors.borderStrong, RoundedCornerShape(6.dp))
+            .padding(horizontal = 7.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text,
+            style = designText(11.5f, 20f, FontWeight.SemiBold).copy(fontFeatureSettings = "tnum"),
+            color = if (selected) colors.onSelection else colors.textSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

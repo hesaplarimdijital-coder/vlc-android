@@ -343,13 +343,16 @@ class MusicBrowserTest {
         row("Neva Kâr").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("etiketler Neva Kâr 1").assertExists()
-        // a tab clicked, the next one with the arrow key
-        compose.onNodeWithTag("inspector-tab-lyrics").performClick()
+        // 1.1.2 (the design's tablet page): the panel's views in its "⋯"; the header names the one shown
+        compose.onNodeWithTag("inspector-menu").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Sözler").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("sözler").assertExists()
-        compose.runOnIdle { inputModes.requestInputMode(ComposeInputMode.Keyboard) }
-        compose.onNodeWithTag("inspector-tab-lyrics").requestFocus()
-        compose.onNodeWithTag("inspector-tab-lyrics").performKeyInput { pressKey(Key.DirectionRight) }
+        compose.onNode(hasText("Sözler") and !hasClickAction()).assertExists()
+        compose.onNodeWithTag("inspector-menu").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Sıra").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("sıra").assertExists()
         // Ctrl+I hides it, and it is kept so

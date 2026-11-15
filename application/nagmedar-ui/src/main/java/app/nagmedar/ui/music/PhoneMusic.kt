@@ -84,6 +84,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -425,31 +427,40 @@ internal val PHONE_VIEWS = listOf(
     MusicView.Recent,
 )
 
-/** The ways in as a strip of tabs over a rule, the chosen one in the text's colour over the ink's line; it scrolls sideways. */
+/**
+ * The ways in as a strip of tabs over a rule, the chosen one in the text's colour over the ink's line; it scrolls
+ * sideways, the page's colour over the tabs past its end while there are some. A phone's runs from the window's edges
+ * ([start] 4 dp: the first tab's words line up with the page's); 1.1.2: the tablet's inside the page's margins, its
+ * first tab's words on the margin and the rule from there ([ruleStart]).
+ */
 @Composable
-private fun ViewTabs(state: MusicBrowserState) {
+internal fun ViewTabs(state: MusicBrowserState, modifier: Modifier = Modifier, start: Dp = 4.dp, fade: Boolean = true, ruleStart: Dp = 0.dp) {
     val colors = NagTheme.colors
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val rule = colors.border
     val page = colors.background
+    val scroll = rememberScrollState()
     Box(
-        Modifier
+        modifier
             .fillMaxWidth()
             .height(48.dp)
-            .drawBehind { drawRect(rule, Offset(0f, size.height - 1.dp.toPx()), Size(size.width, 1.dp.toPx())) },
+            .drawBehind {
+                val inset = ruleStart.toPx()
+                drawRect(rule, Offset(if (rtl) 0f else inset, size.height - 1.dp.toPx()), Size(size.width - inset, 1.dp.toPx()))
+            },
     ) {
         Row(
             Modifier
                 .height(47.dp)
-                .horizontalScroll(rememberScrollState())
-                .padding(start = 4.dp, end = 44.dp)
+                .horizontalScroll(scroll)
+                .padding(start = start, end = if (fade) 44.dp else 0.dp)
                 .selectableGroup()
                 .testTag("music-views"),
         ) {
             PHONE_VIEWS.forEach { view -> ViewTab(stringResource(viewLabel(view)), view == state.view) { state.open(view) } }
         }
         // more tabs past the end: the page's colour comes over them
-        Box(
+        if (fade && scroll.value < scroll.maxValue) Box(
             Modifier
                 .align(Alignment.TopEnd)
                 .width(64.dp)
@@ -584,38 +595,41 @@ internal fun PlayPill(onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     }
 }
 
-/** What an order is to the button: its short label, its words for TalkBack, the menu's entries. */
-private class SortWords(val label: String, val said: String)
+/** What an order is to the button: its short label ("A–Z"), its name ("Ada göre"), its words for TalkBack. */
+private class SortWords(val label: String, val said: String, val name: String)
 
-/** The order's button: "A–Z" and a chevron; its menu has the orders and their two directions. */
+/**
+ * The order's button: "A–Z" and a chevron (a tablet's says the order's name: "Ada göre", [named]); its menu has the
+ * orders and their two directions.
+ */
 @Composable
-private fun SortButton(state: MusicBrowserState) {
+internal fun SortButton(state: MusicBrowserState, named: Boolean = false, height: Dp = 48.dp) {
     val colors = NagTheme.colors
     var open by remember { mutableStateOf(false) }
-    var height by remember { mutableIntStateOf(0) }
+    var anchor by remember { mutableIntStateOf(0) }
     val interaction = remember { MutableInteractionSource() }
     val st = interaction.collectState()
     val shape = RoundedCornerShape(24.dp)
     val words = sortWords(state)
     val entries = sortEntries(state)
-    Box(Modifier.onSizeChanged { height = it.height }) {
+    Box(Modifier.onSizeChanged { anchor = it.height }) {
         Row(
             Modifier
-                .height(48.dp)
+                .height(height)
                 .focusRing(st, shape)
                 .clip(shape)
                 .background(stateBackground(st, open))
                 .nagClickable(interaction, { open = true }, onClickLabel = words.said)
                 .semantics { contentDescription = words.said }
-                .padding(start = 10.dp, end = 6.dp)
+                .padding(start = if (named) 14.dp else 10.dp, end = if (named) 10.dp else 6.dp)
                 .testTag("music-sort"),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (named) 4.dp else 2.dp),
         ) {
-            Text(words.label, style = designText(14f, 20f, FontWeight.SemiBold), color = if (open) colors.onSelection else colors.textSecondary, maxLines = 1)
+            Text(if (named) words.name else words.label, style = designText(14f, 20f, FontWeight.SemiBold), color = if (open) colors.onSelection else colors.textSecondary, maxLines = 1)
             Icon(NagIcons.ChevronDown, contentDescription = null, tint = if (open) colors.onSelection else colors.textSecondary, modifier = Modifier.size(18.dp))
         }
-        MenuPopup(visible = open, onDismiss = { open = false }, entries = if (open) entries else emptyList(), offset = IntOffset(0, height))
+        MenuPopup(visible = open, onDismiss = { open = false }, entries = if (open) entries else emptyList(), offset = IntOffset(0, anchor))
     }
 }
 
@@ -683,6 +697,7 @@ private fun sortWords(state: MusicBrowserState): SortWords {
         return SortWords(
             sortLabel(kind, sort.ascending, short),
             stringResource(R.string.nag_sort_described, orderName(sort.order).lowercase(currentLocaleOf()), if (sort.ascending) up.lowercase(currentLocaleOf()) else down.lowercase(currentLocaleOf())),
+            orderName(sort.order),
         )
     }
     val sort = effectiveSort(state) ?: MusicSort(MusicColumn.Title, true)
@@ -691,6 +706,7 @@ private fun sortWords(state: MusicBrowserState): SortWords {
     return SortWords(
         sortLabel(kind, sort.ascending, stringResource(sort.column.label)),
         stringResource(R.string.nag_sort_described, orderName(sort.column).lowercase(currentLocaleOf()), if (sort.ascending) up.lowercase(currentLocaleOf()) else down.lowercase(currentLocaleOf())),
+        orderName(sort.column),
     )
 }
 
@@ -727,31 +743,33 @@ private fun sortEntries(state: MusicBrowserState): List<MenuEntry> {
     )
 }
 
-/** The covers or the rows: two round buttons on the surface, the chosen one raised. */
+/** The covers or the rows: two round buttons on the surface, the chosen one raised ([button]: a phone's 48 dp, a tablet's 44). */
 @Composable
-private fun LayoutSegment(state: MusicBrowserState) {
+internal fun LayoutSegment(state: MusicBrowserState, button: Dp = 48.dp, inset: Dp = 0.dp) {
     val colors = NagTheme.colors
     val grid = state.layout == MusicLayout.Grid
     Row(
         Modifier
             .clip(RoundedCornerShape(24.dp))
             .background(colors.surface)
+            .padding(inset)
             .selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(inset),
     ) {
-        SegmentButton(NagIcons.Grid, stringResource(R.string.nag_music_layout_grid), grid, "music-layout-grid") { state.changeLayout(MusicLayout.Grid) }
-        SegmentButton(NagIcons.ListView, stringResource(R.string.nag_music_layout_list), !grid, "music-layout-list") { state.changeLayout(MusicLayout.List) }
+        SegmentButton(NagIcons.Grid, stringResource(R.string.nag_music_layout_grid), grid, "music-layout-grid", button) { state.changeLayout(MusicLayout.Grid) }
+        SegmentButton(NagIcons.ListView, stringResource(R.string.nag_music_layout_list), !grid, "music-layout-list", button) { state.changeLayout(MusicLayout.List) }
     }
 }
 
 @Composable
-private fun SegmentButton(icon: ImageVector, label: String, selected: Boolean, tag: String, onClick: () -> Unit) {
+private fun SegmentButton(icon: ImageVector, label: String, selected: Boolean, tag: String, side: Dp, onClick: () -> Unit) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val haptics = rememberNagHaptics()
     Box(
         Modifier
-            .size(48.dp)
+            .size(side)
             .focusRing(state, CircleShape)
             .clip(CircleShape)
             .background(if (selected) colors.surfaceRaised else Color.Transparent)
@@ -842,6 +860,13 @@ internal fun LetterWave(
     top: () -> Int,
     bottom: () -> Int,
     modifier: Modifier = Modifier,
+    /**
+     * 1.1.2 (the design's tablet page): [WaveStyle.Named] beside a tablet's covers, each letter written before its dash,
+     * those in sight ([range]: the letters of the list's first and last items in sight) in the text's colour over a soft
+     * band, their dashes in the ink; [WaveStyle.Thin] beside a tablet's rows, the dashes alone, thinner.
+     */
+    style: WaveStyle = WaveStyle.Phone,
+    range: (() -> IntRange)? = null,
 ) {
     if (letters.count { it.count > 0 } < 2) return
     val colors = NagTheme.colors
@@ -850,6 +875,7 @@ internal fun LetterWave(
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val most = remember(letters) { letters.maxOf { it.count }.coerceAtLeast(1) }
     val currentLetter by remember(letters) { derivedStateOf { current() } }
+    val inSight by remember(letters, range) { derivedStateOf { range?.invoke() } }
     var touched by remember { mutableStateOf<WaveLetter?>(null) }
     var fingerY by remember { mutableFloatStateOf(0f) }
     val latestJump by rememberUpdatedState(onJump)
@@ -858,7 +884,18 @@ internal fun LetterWave(
     val none = tickOff()
     val label = stringResource(R.string.nag_music_jump)
     val n = letters.size
-    val widthPx = with(density) { WAVE_WIDTH.roundToPx() }
+    val waveWidth = if (style == WaveStyle.Thin) 44.dp else WAVE_WIDTH
+    val widthPx = with(density) { waveWidth.roundToPx() }
+    // the named wave's letters, measured once: bold in sight, regular out of it
+    val measurer = rememberTextMeasurer()
+    val letterSize = NagTheme.type.size(12f)
+    val named = remember(letters, measurer, letterSize, style) {
+        if (style != WaveStyle.Named) emptyList() else letters.map { l ->
+            val plain = TextStyle(fontSize = letterSize, lineHeight = letterSize, fontWeight = FontWeight.Medium)
+            measurer.measure(l.letter, plain) to measurer.measure(l.letter, plain.copy(fontWeight = FontWeight.Bold))
+        }
+    }
+    val text = colors.text
     /** The letter with items nearest to slot [slot]. */
     fun nearest(slot: Int): WaveLetter? {
         for (d in 0 until n) {
@@ -912,16 +949,63 @@ internal fun LetterWave(
             }
             .drawBehind {
                 val slot = size.height / n
-                val bar = 4.dp.toPx()
                 val shown = touched?.let { letters.indexOf(it) } ?: currentLetter
-                letters.forEachIndexed { i, l ->
-                    val w = if (l.count > 0) (6f + l.count.toFloat() / most * 22f).dp.toPx() else 4.dp.toPx()
-                    val colour = when {
-                        i == shown -> ink
-                        l.count > 0 -> some
-                        else -> none
+                val sight = inSight?.takeIf { it.first >= 0 && it.last >= it.first }
+                when (style) {
+                    WaveStyle.Phone -> {
+                        val bar = 4.dp.toPx()
+                        letters.forEachIndexed { i, l ->
+                            val w = if (l.count > 0) (6f + l.count.toFloat() / most * 22f).dp.toPx() else 4.dp.toPx()
+                            val colour = when {
+                                i == shown -> ink
+                                l.count > 0 -> some
+                                else -> none
+                            }
+                            drawRoundRect(colour, Offset((size.width - w) / 2f, slot * i + (slot - bar) / 2f), Size(w, bar), CornerRadius(bar / 2f))
+                        }
                     }
-                    drawRoundRect(colour, Offset((size.width - w) / 2f, slot * i + (slot - bar) / 2f), Size(w, bar), CornerRadius(bar / 2f))
+                    WaveStyle.Named -> {
+                        // the letters in sight on a soft band, the design's 6 % of the text's colour
+                        if (sight != null) {
+                            drawRoundRect(text.copy(alpha = 0.06f), Offset(0f, slot * sight.first), Size(size.width, slot * (sight.last - sight.first + 1)), CornerRadius(10.dp.toPx()))
+                        }
+                        val bar = 4.dp.toPx()
+                        val letterBox = 12.dp.toPx()
+                        val start = 6.dp.toPx()
+                        letters.forEachIndexed { i, l ->
+                            val lit = (sight?.contains(i) ?: false) || i == shown
+                            val (plain, bold) = named[i]
+                            val layout = if (lit) bold else plain
+                            val letterColour = when {
+                                lit -> text
+                                l.count > 0 -> some
+                                else -> text.copy(alpha = 0.28f)
+                            }
+                            val lx = if (rtl) size.width - start - letterBox + (letterBox - layout.size.width) / 2f else start + (letterBox - layout.size.width) / 2f
+                            drawText(layout, color = letterColour, topLeft = Offset(lx, slot * i + (slot - layout.size.height) / 2f))
+                            val w = if (l.count > 0) (4f + l.count.toFloat() / most * 20f).dp.toPx() else 3.dp.toPx()
+                            val barColour = when {
+                                lit -> ink
+                                l.count > 0 -> text.copy(alpha = 0.34f)
+                                else -> text.copy(alpha = 0.12f)
+                            }
+                            val bx = start + letterBox + 6.dp.toPx()
+                            drawRoundRect(barColour, Offset(if (rtl) size.width - bx - w else bx, slot * i + (slot - bar) / 2f), Size(w, bar), CornerRadius(bar / 2f))
+                        }
+                    }
+                    WaveStyle.Thin -> {
+                        val bar = 3.dp.toPx()
+                        letters.forEachIndexed { i, l ->
+                            val lit = (sight?.contains(i) ?: false) || i == shown
+                            val w = if (l.count > 0) (3f + l.count.toFloat() / most * 15f).dp.toPx() else 2.dp.toPx()
+                            val colour = when {
+                                lit -> ink
+                                l.count > 0 -> text.copy(alpha = 0.34f)
+                                else -> text.copy(alpha = 0.12f)
+                            }
+                            drawRoundRect(colour, Offset((size.width - w) / 2f, slot * i + (slot - bar) / 2f), Size(w, bar), CornerRadius(2.dp.toPx()))
+                        }
+                    }
                 }
             }
             .testTag("music-wave"),
@@ -933,7 +1017,7 @@ internal fun LetterWave(
             Box(
                 Modifier
                     .offset {
-                        val x = if (rtl) WAVE_WIDTH.roundToPx() + 8.dp.roundToPx() else -(bubble + 8.dp).roundToPx()
+                        val x = if (rtl) waveWidth.roundToPx() + 8.dp.roundToPx() else -(bubble + 8.dp).roundToPx()
                         IntOffset(x, (fingerY - bubble.toPx() / 2f).roundToInt())
                     }
                     .size(bubble)
@@ -947,6 +1031,9 @@ internal fun LetterWave(
         }
     }
 }
+
+/** 1.1.2: how a [LetterWave] is drawn: a phone's, a tablet's beside its covers (with the letters), beside its rows. */
+internal enum class WaveStyle { Phone, Named, Thin }
 
 /** The interface language's alphabet, its letters in its order (a string of the language's resources). */
 @Composable

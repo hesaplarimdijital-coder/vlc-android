@@ -107,6 +107,8 @@ object NagIcons {
     val Posters: ImageVector by lazy { icon("Posters", stroke("M2.5,3H6.5A1,1 0 0 1 7.5,4V12A1,1 0 0 1 6.5,13H2.5A1,1 0 0 1 1.5,12V4A1,1 0 0 1 2.5,3Z"), stroke("M9.5,3H13.5A1,1 0 0 1 14.5,4V12A1,1 0 0 1 13.5,13H9.5A1,1 0 0 1 8.5,12V4A1,1 0 0 1 9.5,3Z")) }
     /** 1.0.8: a check box's third state (some of the rows). */
     val Minus: ImageVector by lazy { icon("Minus", stroke("M4 8h8")) }
+    /** 1.1.2 (the design's tablet page): the track table's columns ("Sütunlar"). */
+    val Columns: ImageVector by lazy { icon("Columns", stroke("M4,3H12A1.5,1.5 0 0 1 13.5,4.5V11.5A1.5,1.5 0 0 1 12,13H4A1.5,1.5 0 0 1 2.5,11.5V4.5A1.5,1.5 0 0 1 4,3Z"), stroke("M6.3 3v10M9.7 3v10")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -121,7 +123,7 @@ object NagIcons {
         SuccessCircle, Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal,
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
         Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
-        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters, Minus,
+        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters, Minus, Columns,
     )
 }
 

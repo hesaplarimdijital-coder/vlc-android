@@ -29,3 +29,13 @@ HSPLapp/nagmedar/ui/music/LetterRun**->**(**)**
 HSPLapp/nagmedar/ui/music/PhoneBand**->**(**)**
 HSPLapp/nagmedar/ui/music/GroupSort**->**(**)**
 HSPLapp/nagmedar/ui/music/GroupOrder**->**(**)**
+# 1.1.2 (the design's tablet page): its top, tabs, toolbar and rows, the panel of what plays, the sidebar's forgotten
+# albums, the floating player set aside
+HSPLapp/nagmedar/ui/music/*WideMusicKt**->**(**)**
+HSPLapp/nagmedar/ui/music/*WideListsKt**->**(**)**
+HSPLapp/nagmedar/ui/music/*PanelPlayingKt**->**(**)**
+HSPLapp/nagmedar/ui/music/*ForgottenShelfKt**->**(**)**
+HSPLapp/nagmedar/ui/music/PanelTransport**->**(**)**
+HSPLapp/nagmedar/ui/music/WaveStyle**->**(**)**
+HSPLapp/nagmedar/ui/shell/ShellPlayerAside**->**(**)**
+HSPLapp/nagmedar/ui/shell/*PlayerAsideKt**->**(**)**

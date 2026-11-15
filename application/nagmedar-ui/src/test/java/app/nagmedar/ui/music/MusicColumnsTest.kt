@@ -48,8 +48,9 @@ class MusicColumnsTest {
         assertEquals(state.columns, kept[MusicView.Tracks])
         state.open(MusicView.Albums)
         assertEquals(listOf(Number, Title, Duration), state.columns)
+        // 1.1.2 (the design's tablet page): an album's own columns are No, Ad, Süre, Çalınma, Biçim
         state.resetColumns()
-        assertEquals(MusicColumn.DEFAULT, state.columns)
-        assertEquals(MusicColumn.DEFAULT, kept[MusicView.Albums])
+        assertEquals(MusicColumn.ALBUM_DEFAULT, state.columns)
+        assertEquals(MusicColumn.ALBUM_DEFAULT, kept[MusicView.Albums])
     }
 }

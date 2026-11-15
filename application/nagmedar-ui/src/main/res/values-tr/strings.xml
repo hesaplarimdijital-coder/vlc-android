@@ -1110,6 +1110,28 @@
     <string name="nag_music_jump">Harfe atla</string>
     <!-- what filters the list now: "Filtre: Yarım kalanlar, 24 bit" -->
     <string name="nag_music_filtered">Filtre: %1$s</string>
+    <!-- 1.1.2 (tasarımın tablet sayfası) -->
+    <string name="nag_music_search">Müzikte ara</string>
+    <string name="nag_music_search_hint">Albüm, sanatçı ya da parça</string>
+    <string name="nag_music_played_of">%1$d/%2$d parça çalındı</string>
+    <plurals name="nag_music_length_days">
+        <item quantity="one">%d gün</item>
+        <item quantity="other">%d gün</item>
+    </plurals>
+    <plurals name="nag_music_length_hours">
+        <item quantity="one">%d saat</item>
+        <item quantity="other">%d saat</item>
+    </plurals>
+    <plurals name="nag_music_length_minutes">
+        <item quantity="one">%d dakika</item>
+        <item quantity="other">%d dakika</item>
+    </plurals>
+    <string name="nag_music_forgotten">Bir yıldır açmadıkların</string>
+    <string name="nag_music_queue_shuffled">Karışık sıra</string>
+    <string name="nag_music_keys_play">çal ya da duraklat</string>
+    <string name="nag_music_keys_jump">10 saniye</string>
+    <string name="nag_list_two">%1$s ve %2$s</string>
+    <string name="nag_list_three">%1$s, %2$s ve %3$s</string>
     <string name="nag_music_trace">Çalınan parça: %1$d / %2$d</string>
     <string name="nag_music_recent_shelf">Son çalınan müzik</string>
     <string name="nag_music_recent_none_title">Henüz parça çalınmadı</string>

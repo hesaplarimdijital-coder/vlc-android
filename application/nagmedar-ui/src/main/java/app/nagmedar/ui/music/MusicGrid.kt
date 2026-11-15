@@ -175,6 +175,9 @@ internal fun ListeningTrace(
     /** 1.1.1 (the design): each tick this wide, [gap] apart (a row's); null: the ticks share the whole width (a cover's). */
     tick: Dp? = null,
     gap: Dp = 3.dp,
+    /** 1.1.2 (the design's tablet page): the trace's height, the one that plays as tall; the others [low] (at most as tall). */
+    height: Dp = 8.dp,
+    low: Dp = 4.dp,
 ) {
     val colors = NagTheme.colors
     // 1.1.1 (the design): the playing group's played ticks in the ink, another's in the third text colour, the unplayed faint
@@ -184,7 +187,7 @@ internal fun ListeningTrace(
     val unheard = colors.text.copy(alpha = 0.14f)
     val played = remember(tracks, stats) { tracks.count { (stats[it.uri]?.plays ?: 0) > 0 } }
     val said = stringResource(R.string.nag_music_trace, played, tracks.size)
-    Canvas(modifier.height(8.dp).clearAndSetSemantics { contentDescription = said }) {
+    Canvas(modifier.height(height).clearAndSetSemantics { contentDescription = said }) {
         val total = tracks.size
         val gap = gap.toPx()
         // a row's ticks as many as its width holds, a longer album's spread over them
@@ -192,8 +195,8 @@ internal fun ListeningTrace(
         val count = min(total, min(MAX_TICKS, fits))
         if (count == 0) return@Canvas
         val width = tick?.toPx() ?: ((size.width - gap * (count - 1)) / count).coerceAtLeast(1f)
-        val low = 4.dp.toPx()
         val tall = size.height
+        val low = low.toPx().coerceAtMost(tall)
         for (i in 0 until count) {
             // the tracks this tick stands for: one each up to MAX_TICKS, else a run of them; the one that plays is never
             // left out, and a run counts as played once half of it was
@@ -330,6 +333,8 @@ internal fun GroupGrid(
     onRevealed: () -> Unit = {},
     /** 1.1.1: what a phone's chips cover at the grid's top. */
     chipsRoom: Dp = 0.dp,
+    /** 1.1.2 (the design's tablet page): a group played from its cover's button, which a pointer resting on it brings. */
+    onPlay: ((MusicGroup) -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val compact = currentWidthClass() == WidthClass.Compact
@@ -345,10 +350,10 @@ internal fun GroupGrid(
         if (words.letters) lettered(groups, words.sortName, locale, nameless) else groups.map { GridEntry.Group(it) }
     }
     val first = if (leading != null) 1 else 0
-    // 1.1.1: the letters' wave down a phone's grid
+    // 1.1.1: the letters' wave down a phone's grid; 1.1.2: a tablet's too, its letters written
     val alphabet = rememberAlphabet()
     val letters = remember(entries, alphabet, compact) {
-        if (!compact || !words.letters) emptyList() else waveLetters(
+        if (!words.letters) emptyList() else waveLetters(
             entries.mapIndexedNotNull { i, e -> (e as? GridEntry.Letter)?.let { LetterRun(it.letter, it.count, i + first) } },
             alphabet,
         )
@@ -391,19 +396,21 @@ internal fun GroupGrid(
             anchor.span = span
         }
     }
-    val start = if (compact) 16.dp else side
-    val end = if (compact) (if (wave) WAVE_ROOM else 16.dp) else side
+    // 1.1.2 (the design's tablet page): a tablet's covers between the page's margin and the wave's room, five across
+    val start = if (compact) 16.dp else WIDE_MARGIN
+    val end = if (compact) (if (wave) WAVE_ROOM else 16.dp) else if (wave) WIDE_WAVE_ROOM else WIDE_MARGIN
     val bottom = LocalShellBottomPadding.current
     val scope = rememberCoroutineScope()
     Box(modifier) {
         LazyVerticalGrid(
-            columns = if (compact) GridCells.Fixed(2) else GridCells.Adaptive(172.dp),
+            columns = if (compact) GridCells.Fixed(2) else GridCells.Adaptive(128.dp),
             modifier = Modifier.fillMaxSize().testTag("music-grid"),
             state = gridState,
-            contentPadding = PaddingValues(start = start, end = end, top = if (compact) 0.dp else 4.dp, bottom = 16.dp) + bottom,
+            contentPadding = PaddingValues(start = start, end = end, top = 0.dp, bottom = 16.dp) + bottom,
             horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 16.dp),
-            // a phone's rows keep their gaps themselves: 18 dp under the covers, 4 under a letter (the design's)
-            verticalArrangement = Arrangement.spacedBy(if (compact) 0.dp else 22.dp),
+            // the rows keep their gaps themselves: a phone's 18 dp under the covers, 4 under a letter; a tablet's 16 between
+            // the covers' rows, 18 before a letter (the design's)
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             if (leading != null) {
                 item(key = GRID_LEADING, span = { GridItemSpan(maxLineSpan) }, contentType = GRID_LEADING) {
@@ -420,12 +427,15 @@ internal fun GroupGrid(
                 when (entry) {
                     is GridEntry.Letter -> LetterHeading(
                         entry.letter, words.count(entry.count),
-                        Modifier.padding(top = if (compact) 6.dp else 6.dp, bottom = if (compact) 4.dp else 0.dp),
+                        Modifier.padding(top = if (compact) 6.dp else 2.dp, bottom = 4.dp),
+                        line = if (compact) 40f else 36f,
                     )
                     is GridEntry.Group -> ContextMenuArea(entries = { menu(entry.group) }, accessibilityLabel = stringResource(R.string.nag_more_actions)) {
                         GroupCard(
                             entry.group, words.title(entry.group), words.line(entry.group), stats, playing,
-                            Modifier.padding(bottom = if (compact) 18.dp else 0.dp),
+                            Modifier.padding(bottom = if (compact) 18.dp else 16.dp),
+                            wide = !compact,
+                            onPlay = onPlay?.let { play -> { play(entry.group) } },
                         ) { onOpen(entry.group) }
                     }
                 }
@@ -443,10 +453,19 @@ internal fun GroupGrid(
                 onJump = { letter -> scope.launch { gridState.scrollToItem(letter.index, -room) } },
                 top = {
                     val head = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.takeIf { it.index == 0 && leading != null }
-                    maxOf(room, (head?.let { it.offset.y + it.size.height } ?: 0) + waveGap)
+                    maxOf(room, (head?.let { it.offset.y + it.size.height } ?: 0) + if (compact) waveGap else 0)
                 },
                 bottom = { gridState.layoutInfo.viewportSize.height - with(density) { bottom.calculateBottomPadding().roundToPx() } - waveGap },
-                modifier = Modifier.align(Alignment.TopEnd),
+                modifier = Modifier.align(Alignment.TopEnd).padding(end = if (compact) 0.dp else WIDE_MARGIN),
+                style = if (compact) WaveStyle.Phone else WaveStyle.Named,
+                // a tablet's letters in sight: from the first row's to the last's
+                range = if (compact) null else ({
+                    val info = gridState.layoutInfo
+                    val items = info.visibleItemsInfo
+                    val first = items.firstOrNull { it.offset.y + it.size.height > room }?.index ?: gridState.firstVisibleItemIndex
+                    val last = items.lastOrNull { it.offset.y < info.viewportEndOffset - info.afterContentPadding }?.index ?: first
+                    currentWaveLetter(letters, first)..currentWaveLetter(letters, last)
+                }),
             )
         }
     }
@@ -473,10 +492,10 @@ private fun firstFullyShown(state: LazyGridState): Any? {
  * TalkBack, which hears what they are ([said]: "C, 5 albüm").
  */
 @Composable
-internal fun LetterHeading(letter: String, said: String, modifier: Modifier = Modifier) {
+internal fun LetterHeading(letter: String, said: String, modifier: Modifier = Modifier, line: Float = 40f) {
     val colors = NagTheme.colors
     Row(
-        modifier.fillMaxWidth().heightIn(min = 40.dp).clearAndSetSemantics {
+        modifier.fillMaxWidth().heightIn(min = line.dp).clearAndSetSemantics {
             heading()
             contentDescription = "$letter, $said"
         },
@@ -484,21 +503,37 @@ internal fun LetterHeading(letter: String, said: String, modifier: Modifier = Mo
     ) {
         // a letter, or the nameless groups' words ("Bilinmeyen sanatçı"): the rule and the count keep their room. 1.1.1 (the
         // design): the letter in the ink, how many there are in words ("5 albüm")
-        Text(letter, style = letterStyle(), color = colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        Text(letter, style = letterStyle().copy(lineHeight = NagTheme.type.size(line)), color = colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 280.dp))
         Box(Modifier.padding(horizontal = 12.dp).weight(1f).height(1.dp).background(colors.borderStrong))
         Text(said, style = designText(13f, 18f), color = colors.textTertiary, maxLines = 1)
     }
 }
 
-/** One group of the grid: its cover, name, line and trace, one target. */
+/**
+ * One group of the grid: its cover, name, line and trace, one target. 1.1.2 (the design's tablet page): a tablet's
+ * ([wide]) name a size smaller; a pointer resting on it (or the keyboard's focus) brings the ink's play button on its
+ * cover, which plays it ([onPlay]).
+ */
 @Composable
-private fun GroupCard(group: MusicGroup, title: String, line: String, stats: Map<String, TrackStats>, playing: String?, modifier: Modifier = Modifier, onOpen: () -> Unit) {
+private fun GroupCard(
+    group: MusicGroup,
+    title: String,
+    line: String,
+    stats: Map<String, TrackStats>,
+    playing: String?,
+    modifier: Modifier = Modifier,
+    wide: Boolean = false,
+    onPlay: (() -> Unit)? = null,
+    onOpen: () -> Unit,
+) {
     val colors = NagTheme.colors
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val shape = RoundedCornerShape(10.dp)
     val playsHere = remember(group, playing) { playing != null && group.tracks.any { it.uri == playing } }
+    val glyph = remember { MutableInteractionSource() }
+    val glyphState = glyph.collectState()
     Column(
         modifier
             .fillMaxWidth()
@@ -507,9 +542,14 @@ private fun GroupCard(group: MusicGroup, title: String, line: String, stats: Map
             .nagClickable(interaction, onOpen),
     ) {
         // 1.1.1 (the design): the playing group's cover in the ink's ring
-        GroupCover(group, Modifier.fillMaxWidth().aspectRatio(1f).coverRing(playsHere, colors.accent, 6.dp))
+        Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
+            GroupCover(group, Modifier.fillMaxSize().coverRing(playsHere, colors.accent, 6.dp))
+            if (onPlay != null && (state.hovered || state.focused || glyphState.hovered || glyphState.focused)) {
+                InkPlayButton(stringResource(R.string.nag_play) + ": " + title, onPlay, Modifier.align(Alignment.BottomEnd).padding(8.dp), side = 44.dp, interaction = glyph)
+            }
+        }
         Spacer(Modifier.height(10.dp))
-        Text(title, style = designText(15f, 20f, SemiBoldPlus), color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(title, style = if (wide) designText(14f, 19f, SemiBoldPlus) else designText(15f, 20f, SemiBoldPlus), color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(line, style = designText(13f, 18f), color = colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Spacer(Modifier.height(8.dp))
         ListeningTrace(group.tracks, stats, playing, Modifier.fillMaxWidth())

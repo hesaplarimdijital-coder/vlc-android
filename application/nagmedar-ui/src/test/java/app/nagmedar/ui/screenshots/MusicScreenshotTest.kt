@@ -1,8 +1,11 @@
 package app.nagmedar.ui.screenshots
 
+import app.nagmedar.ui.shell.NavIconBadge
 import app.nagmedar.ui.music.MusicLayout
 import app.nagmedar.ui.library.ScanState
 import app.nagmedar.ui.music.PhoneMusicPage
+import app.nagmedar.ui.music.WideMusicPage
+import app.nagmedar.ui.music.PanelTransport
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.activity.ComponentActivity
@@ -141,7 +144,7 @@ class MusicScreenshotTest {
      */
     @Composable
     private fun Library(library: MusicLibrary, state: MusicBrowserState, inspector: MusicInspectorContent? = null, inspectorState: InspectorState? = null) {
-        val panel = inspectorState ?: rememberInspectorState()
+        val panel = inspectorState ?: rememberInspectorState(defaultWidth = 376.dp)
         val compact = currentWidthClass() == WidthClass.Compact
         val albums = remember(library) { library.groups(MusicView.Albums).count { it.title != null } }
         val artists = remember(library) { library.groups(MusicView.Artists).count { it.title != null } }
@@ -158,18 +161,13 @@ class MusicScreenshotTest {
             }
             return
         }
-        val band = remember { @Composable { EbruBand(EbruInks.Default, 84.dp) } }
+        // 1.1.2 (the design's tablet page): a wide window's page as the app's
+        val wideCounts = counts + " · " + pluralStringResource(R.plurals.nag_music_artists_count, artists, artists)
         val page = @Composable {
-            Column(Modifier.fillMaxSize()) {
-                if (!compact) EbruBand(EbruInks.Default, 104.dp)
-                PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = counts, masthead = true) {
-                    if (inspector != null && currentWidthClass() >= WidthClass.Expanded) InspectorToggleButton(panel)
-                }
-                MusicBrowser(
-                    library, state, NoMusicActions, inspector = inspector, inspectorState = panel, stats = MusicSamples.stats,
-                    shelf = band.takeIf { compact }, shelfPresent = if (compact) ({ true }) else null,
-                )
-            }
+            WideMusicPage(
+                library, ScanState.Idle, state, NoMusicActions, EbruInks.Default, wideCounts, probing = 0, stats = MusicSamples.stats,
+                recent = emptyList(), converting = null, onConverted = {}, onAddFolder = {}, onSearch = {}, inspector = inspector, inspectorState = panel,
+            )
         }
         if (inspector != null) UnderShellBars(content = page) else page()
     }
@@ -207,16 +205,19 @@ class MusicScreenshotTest {
         tags = { subject ->
             val track = subject.track
             if (track == null || track.uri == neva.uri) {
+                // 1.1.2 (the design's tablet page): the panel as the app's
                 NowPlayingPanel(
                     info = playing,
                     progress = { 0.38f },
                     waveform = MusicSamples.waveform,
-                    upNext = emptyList(),
+                    upNext = upNext,
                     onSeek = {},
                     onPlayUpNext = {},
                     artwork = { size -> Artwork(null, size, corner = 8.dp, video = false) },
                     onRate = {},
                     below = { TrackTags(neva, MusicSamples.stats, Modifier.padding(top = 12.dp), replayGain = MusicSamples.gains[neva.uri]) },
+                    transport = PanelTransport(shuffling = true, repeating = false, repeatOne = false, {}, {}, {}, {}, {}),
+                    upNextFrom = 1,
                 )
             } else {
                 TrackInspector(
@@ -244,6 +245,9 @@ class MusicScreenshotTest {
         },
         queue = { QueuePanel(queue.entries, queue.current, queue, onClose = null, modifier = Modifier.fillMaxSize(), background = NagTheme.colors.surface) },
     )
+
+    /** 1.1.2: the design's "new" count on the podcasts' entry. */
+    private val designBadges = mapOf(Destination.Podcasts to NavIconBadge(3, "3 yeni bölüm"))
 
     private fun itri(library: MusicLibrary) = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
 
@@ -281,6 +285,32 @@ class MusicScreenshotTest {
         capture("music-lyrics-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
             TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true) { _, _ ->
                 Library(library, MusicBrowserState(view = MusicView.Albums, group = album), inspector, remember { InspectorState(384f, initialTab = 2) })
+            }
+        }
+    }
+
+    /**
+     * 1.1.1 (the design's tablet page, Tablet.dc.html): the Tab S11 Ultra on its side by touch: the sidebar with the
+     * brand, the band with the search field, the masthead with Oynat and Karıştır, the tabs and the quick filters, the
+     * covers five across with the letters' wave, the panel of what plays on the right.
+     */
+    @Test @Config(qualifiers = "tr-w1480dp-h924dp-mdpi")
+    fun tabletAlbums() {
+        val library = library("tr")
+        capture("music-tablet-dark-albums", ThemeMode.Dark, InputMode.Touch) {
+            TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true, iconBadges = designBadges) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums), inspector)
+            }
+        }
+    }
+
+    /** 1.1.1: the design's tablet list (TabletListe.dc.html): the albums beside one album's tracks. */
+    @Test @Config(qualifiers = "tr-w1480dp-h924dp-mdpi")
+    fun tabletAlbumsList() {
+        val library = library("tr")
+        capture("music-tablet-dark-albums-list", ThemeMode.Dark, InputMode.Touch) {
+            TestShell(WidthClass.Large, startDestination = Destination.Music, floatingPlayer = true, iconBadges = designBadges) { _, _ ->
+                Library(library, MusicBrowserState(view = MusicView.Albums, group = itri(library), layout = MusicLayout.List), inspector)
             }
         }
     }

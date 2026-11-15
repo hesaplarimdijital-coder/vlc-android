@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -96,6 +97,11 @@ import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.shell.SidebarBrand
+import app.nagmedar.ui.music.rememberForgottenAlbums
+import app.nagmedar.ui.music.rememberEbruInks
+import app.nagmedar.ui.music.ForgottenShelf
+import app.nagmedar.ui.music.BandMark
 import app.nagmedar.ui.music.MusicLink
 import app.nagmedar.ui.music.MusicLinks
 import app.nagmedar.ui.music.rememberAlbumSeed
@@ -418,6 +424,8 @@ private fun NagmedarMain(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
         val nowPlaying = rememberNowPlaying()
+        // 1.1.2: the sidebar's brand in the inks of the music that plays (the bozkır's while nothing does)
+        val brandInks = rememberEbruInks(nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO })
         val openNowPlaying: (NavKind) -> Unit = { navKind ->
             val page = PlaybackActions.nowPlayingDestination()
             if (page == Destination.Music) {
@@ -532,6 +540,10 @@ private fun NagmedarMain(
                 chromeGlass = DebugChrome.glass,
                 // 1.1.1 (the design): Müzik on a phone has no top bar, its band lies under the status bar
                 ownTop = { it == Destination.Music },
+                // 1.1.2 (the design's tablet page): a tablet's sidebar by touch: the brand in the inks of what plays, the albums
+                // not opened for a year under the entries
+                sidebarBrand = { collapsed -> SidebarBrand(collapsed) { BandMark(brandInks, Modifier.size(22.dp), ring = 2.dp) } },
+                sidebarExtra = { ForgottenShelf(rememberForgottenAlbums(repository)) },
                 overlay = {
                     if (sleepTimerOpen) SleepTimerDialog { sleepTimerOpen = false }
                     sourcesFor?.let { section -> SectionSourcesDialog(section, prefs) { sourcesFor = null } }

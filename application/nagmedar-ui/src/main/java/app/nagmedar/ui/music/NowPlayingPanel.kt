@@ -66,6 +66,7 @@ import app.nagmedar.ui.playback.ChapterStrip
 import app.nagmedar.ui.playback.PlaybackActions
 import app.nagmedar.ui.playback.ProgressTimeline
 import app.nagmedar.ui.playback.QueueEntry
+import app.nagmedar.ui.playback.ServicePlayerBarActions
 import app.nagmedar.ui.playback.playbackPositionMs
 import app.nagmedar.ui.playback.playbackRate
 import app.nagmedar.ui.playback.rememberPlayingLength
@@ -82,7 +83,9 @@ import app.nagmedar.ui.stats.statsKey
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.visual.PlayingVisualizer
 import kotlin.math.min
+import android.support.v4.media.session.PlaybackStateCompat
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.vlc.media.PlaylistManager
 
 /** What the now playing panel shows (S-1001): from the playback service, or made up in tests. */
 @Immutable
@@ -141,10 +144,41 @@ fun NowPlayingPanel(
     onOpenAlbum: (() -> Unit)? = null,
     /** Desktop Kit 1.0: more under what plays, in the same scroll (the inspector's tags of the track). */
     below: (@Composable () -> Unit)? = null,
+    /**
+     * 1.1.2 (the design's tablet page): the panel as the design draws it ([DesignedPlaying]) under the pane's own header:
+     * the record, the bars, [transport], the next tracks ([upNext] numbered from [upNextFrom]), the record's label in
+     * [inks]; the visualiser, the format and the stars under them, then [below].
+     */
+    transport: PanelTransport? = null,
+    upNextFrom: Int = 0,
+    inks: EbruInks = EbruInks.Default,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val links = Links(onOpenArtist, onOpenAlbum)
+    if (transport != null) {
+        Column(modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
+            if (info != null && casting != null) CastingStrip(casting, onStopCasting)
+            if (info == null) {
+                Text(stringResource(R.string.nag_music_nothing_playing), style = NagTheme.type.body, color = colors.textSecondary, modifier = Modifier.padding(top = 16.dp))
+                return@Column
+            }
+            DesignedPlaying(
+                info, progress, waveform, upNext, upNextFrom, transport, onSeek, onPlayUpNext, artwork, inks, links,
+                below = {
+                    Column(Modifier.padding(top = 26.dp), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
+                        // S-611: what plays, drawn, while it is on (the panel's menu)
+                        if (visualizerShown) visualizer?.invoke(Modifier.fillMaxWidth().height(VISUALIZER_HEIGHT))
+                        if (info.format != null) Text(info.format, style = NagTheme.type.mono, color = colors.textTertiary, maxLines = 2)
+                        info.rating?.let { stars -> RatingStars(stars, onRate, starSize = 16.dp, target = 22.dp, focusable = onRate != null, modifier = Modifier.testTag("now-playing-rating")) }
+                        ChapterStrip(info.chapters, info.lengthMs, progress, onStepChapter, onSeekToMs)
+                        below?.invoke()
+                    }
+                },
+            )
+        }
+        return
+    }
     Column(modifier.fillMaxSize().padding(dimens.gapL), verticalArrangement = Arrangement.spacedBy(dimens.gapS)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.nag_now_playing), style = NagTheme.type.labelSmall, color = colors.textTertiary, modifier = Modifier.weight(1f))
@@ -324,6 +358,8 @@ fun MusicNowPlaying(
     withQueue: Boolean = true,
     withLyrics: Boolean = true,
     below: (@Composable () -> Unit)? = null,
+    /** 1.1.2: the panel as the design draws it, with its transport and the next four tracks ([DesignedPlaying]). */
+    designed: Boolean = false,
 ) {
     val context = LocalContext.current
     val prefs = rememberNagmedarPreferences()
@@ -337,7 +373,23 @@ fun MusicNowPlaying(
     val waveform = rememberWaveform(media?.uri?.toString())
     val queue = rememberPlayQueue()
     val path = rememberSignalPath()
-    val upNext = if (withQueue && queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
+    val upNext = if ((withQueue || designed) && queue.current >= 0) queue.entries.drop(queue.current + 1) else emptyList()
+    // 1.1.2: the design's transport, on the playback service
+    val shuffling by PlaylistManager.shuffling.collectAsState()
+    val repeating by PlaylistManager.repeating.collectAsState()
+    val context2 = LocalContext.current
+    val barActions = remember(context2) { ServicePlayerBarActions(context2) }
+    val transport = if (!designed) null else PanelTransport(
+        shuffling = shuffling,
+        repeating = repeating != PlaybackStateCompat.REPEAT_MODE_NONE,
+        repeatOne = repeating == PlaybackStateCompat.REPEAT_MODE_ONE,
+        onTogglePlay = barActions::togglePlayPause,
+        onPrevious = barActions::previous,
+        onNext = barActions::next,
+        onShuffle = barActions::shuffle,
+        onRepeat = barActions::cycleRepeat,
+    )
+    val inks = rememberEbruInks(media)
     // S-1004: the lyrics in place of the artwork and the queue, until turned off
     var lyricsShown by rememberSaveable { mutableStateOf(false) }
     val coverMenu = rememberCoverMenu(remember(media) { media?.let(CoverTrack::of) })
@@ -389,6 +441,9 @@ fun MusicNowPlaying(
         onOpenArtist = artistLink?.let { link -> { MusicLinks.open(link) } },
         onOpenAlbum = albumLink?.let { link -> { MusicLinks.open(link) } },
         below = below,
+        transport = transport,
+        upNextFrom = queue.current + 1,
+        inks = inks,
     )
 }
 

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -51,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -135,6 +137,7 @@ import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.MUSIC_GROUPS_PANE
 import app.nagmedar.ui.shell.MovableDetails
 import app.nagmedar.ui.shell.OnReselect
+import app.nagmedar.ui.shell.PlayerAside
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -169,7 +172,7 @@ import org.videolan.vlc.media.MediaUtils
 @Stable
 class MusicBrowserState(
     view: MusicView = MusicView.Tracks,
-    columns: List<MusicColumn> = MusicColumn.DEFAULT,
+    columns: List<MusicColumn> = MusicColumn.defaultFor(view),
     group: String? = null,
     filter: TechFilter = TechFilter(),
     sort: MusicSort? = null,
@@ -247,9 +250,9 @@ class MusicBrowserState(
         keep(view, columns)
     }
 
-    /** The table's own columns again. */
+    /** The table's own columns again (1.1.2: an album's own, the design's). */
     fun resetColumns() {
-        columns = MusicColumn.DEFAULT
+        columns = MusicColumn.defaultFor(view)
         if (sort?.column !in columns) sort = null
         keep(view, columns)
     }
@@ -305,8 +308,12 @@ fun rememberMusicBrowserState(): MusicBrowserState {
         }
     }
     // a way in whose columns were never chosen takes those kept before there was one set per way in
+    // 1.1.2 (the design's tablet page): an album's own are No, Ad, Süre, Çalınma, Biçim
     val columnsOf: (MusicView) -> List<MusicColumn> = remember(settings) {
-        { view -> MusicColumn.parse(settings.getString(columnsKey(view), null) ?: settings.getString(NAGMEDAR_MUSIC_COLUMNS, null)) }
+        { view ->
+            (settings.getString(columnsKey(view), null) ?: settings.getString(NAGMEDAR_MUSIC_COLUMNS, null))?.let { MusicColumn.parse(it) }
+                ?: MusicColumn.defaultFor(view)
+        }
     }
     val keepLayout: (MusicLayout) -> Unit = remember(settings) {
         { layout -> settings.edit().putString(NAGMEDAR_MUSIC_LAYOUT, layout.name.lowercase()).apply() }
@@ -455,7 +462,8 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
         )
     }
     val state = rememberMusicBrowserState()
-    val inspectorState = rememberInspectorState()
+    // 1.1.2 (the design's tablet page): the panel 376 dp wide until it is dragged
+    val inspectorState = rememberInspectorState(defaultWidth = MUSIC_PANEL_WIDTH)
     // 1.1.0 (Ebru): the counts under the masthead: tracks and albums, as the Albums view has them (tracks without an
     // album's name are no album); the albums once they are grouped, off the main thread the first time. 1.1.1 (the
     // design): the artists too
@@ -484,34 +492,71 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
         }
         return
     }
-    // a window as short as a phone on its side keeps its height for the music: no band across it
-    val short = LocalHeightClass.current == HeightClass.Compact
-    Column(Modifier.fillMaxSize()) {
-        if (!compact && !short) EbruBand(inks, WIDE_BAND)
-        PageHeader(
-            title = stringResource(R.string.nag_nav_music),
-            subtitle = counts,
-            masthead = true,
-        ) {
-            // 1.0.8 (Desktop Kit 2.8.0): below the docking width the inspector comes up as a sheet
-            if (inspector != null) InspectorToggleButton(inspectorState)
-        }
-        // S-1010: the converter's job under way, or what the last one came to
-        ConvertHost(
-            converting,
-            onConverted = { converting = null },
-            modifier = Modifier.padding(horizontal = NagTheme.dimens.pagePadding, vertical = NagTheme.dimens.gapXs),
-        )
-        MusicContent(library, scan, onAddFolder) { known ->
-            MusicBrowser(
-                known, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
-                stats = stats, recent = recentKeys,
-            )
-        }
-    }
+    // 1.1.2 (the design's tablet page): the page as the design draws it on a tablet's and a DeX window
+    WideMusicPage(
+        library, scan, state, actions, inks, counts, probing, stats, recentKeys, converting, onConverted = { converting = null },
+        onAddFolder, onSearch, inspector, inspectorState,
+    )
     adding?.let { tracks -> AddToPlaylistHost(tracks, scope) { adding = null } }
     rating?.let { tracks ->
         RatingDialog(tracks, stats, onRate = { stars -> actions.rate(tracks, stars) }, onDismiss = { rating = null })
+    }
+}
+
+/**
+ * 1.1.2 (the design's tablet page, Tablet.dc.html): the Music page of a tablet's or a DeX window. The band across its
+ * top, the design's tall one on a tablet's window (none on a window as short as a phone on its side), the search field
+ * over it ([onSearch]; with a pointer the menu bar has its own); the masthead with [counts] and how long the library
+ * plays, Oynat and Karıştır; the tabs, the toolbar and the covers or the rows under it, [inspector]'s panel beside it all.
+ * Until there is a list, the band and the masthead over the loading or empty state.
+ */
+@Composable
+internal fun WideMusicPage(
+    library: MusicLibrary?,
+    scan: ScanState,
+    state: MusicBrowserState,
+    actions: MusicActions,
+    inks: EbruInks,
+    counts: String?,
+    probing: Int,
+    stats: Map<String, TrackStats>,
+    recent: List<String>,
+    converting: List<Track>?,
+    onConverted: () -> Unit,
+    onAddFolder: () -> Unit,
+    onSearch: (() -> Unit)?,
+    inspector: MusicInspectorContent?,
+    inspectorState: InspectorState,
+) {
+    val short = LocalHeightClass.current == HeightClass.Compact
+    val band = wideBandHeight(LocalConfiguration.current.screenHeightDp, short)
+    val bandSearch = onSearch.takeIf { NagTheme.inputMode != InputMode.Pointer }
+    val length = library?.let { known -> remember(known) { known.tracks.sumOf { it.durationMs.coerceAtLeast(0) } } }
+    val wideCounts = listOfNotNull(counts, length?.let { libraryLength(it) }).joinToString(" · ").ifEmpty { null }
+    val listed = library?.tracks?.isNotEmpty() == true
+    val header: @Composable (play: (() -> Unit)?, shuffle: (() -> Unit)?) -> Unit = { play, shuffle ->
+        WideMusicTop(
+            inks, band, bandSearch, wideCounts, play, shuffle,
+            // the panel's button while it is hidden (its own menu hides it; Ctrl+I both); below the docking width it
+            // comes up as a sheet (1.0.8)
+            trailing = { if (inspector != null && inspectorState.hidden) InspectorToggleButton(inspectorState) },
+            below = {
+                // a scan going on; S-1010: the converter's job under way, or what the last one came to
+                if (scan.active && listed) ScanStrip(scan, Modifier.padding(horizontal = WIDE_MARGIN, vertical = 4.dp))
+                ConvertHost(converting, onConverted = onConverted, modifier = Modifier.padding(horizontal = WIDE_MARGIN, vertical = NagTheme.dimens.gapXs))
+            },
+        )
+    }
+    if (library == null || !listed) {
+        Column(Modifier.fillMaxSize().testTag("music-page")) {
+            header(null, null)
+            Box(Modifier.weight(1f)) { MusicContent(library, scan, onAddFolder) {} }
+        }
+    } else {
+        MusicBrowser(
+            library, state, actions, Modifier.fillMaxSize(), probing = probing, inspector = inspector, inspectorState = inspectorState,
+            stats = stats, recent = recent, wideHeader = header,
+        )
     }
 }
 
@@ -924,7 +969,7 @@ fun MusicBrowser(
     modifier: Modifier = Modifier,
     probing: Int = 0,
     inspector: MusicInspectorContent? = null,
-    inspectorState: InspectorState = rememberInspectorState(),
+    inspectorState: InspectorState = rememberInspectorState(defaultWidth = MUSIC_PANEL_WIDTH),
     /** S-808: the ratings and counts, by track uri. */
     stats: Map<String, TrackStats> = emptyMap(),
     recent: List<String> = emptyList(),
@@ -937,6 +982,11 @@ fun MusicBrowser(
      */
     phoneHeader: (@Composable (shuffle: (() -> Unit)?) -> Unit)? = null,
     chipsRoom: Dp = 0.dp,
+    /**
+     * 1.1.2 (the design's tablet page): a wide window's top (the band, the masthead with Oynat and Karıştır: the shown
+     * tracks) over the tabs and the toolbar, beside the panel.
+     */
+    wideHeader: (@Composable (play: (() -> Unit)?, shuffle: (() -> Unit)?) -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
@@ -960,10 +1010,12 @@ fun MusicBrowser(
     val latestShuffle = rememberUpdatedState(shuffleAll.takeIf { canShuffle })
     val header: (@Composable () -> Unit)? = phoneHeader?.let { h -> remember(h) { @Composable { h(latestShuffle.value) } } }
     val phoneShelf = if (width != WidthClass.Compact) null else header ?: shelf
+    // 1.1.2 (the design's tablet page): a wide window's tabs and toolbar over the groups, the quick filters in it
+    val wideTop = width != WidthClass.Compact
     // 1.1.0 (Ebru): the quick filters over a way in's groups, the first thing of their list or grid (after a phone's
     // shelf), so the tracks beside them never move for them; in the narrow pane beside the tracks on one line. 1.1.1: on
     // a phone with the design's header they are in its options' chip
-    val quickOverGrid: @Composable () -> Unit = remember(phoneShelf, state, phone) {
+    val quickOverGrid: (@Composable () -> Unit)? = if (wideTop) null else remember(phoneShelf, state, phone) {
         @Composable {
             Column {
                 phoneShelf?.invoke()
@@ -971,7 +1023,7 @@ fun MusicBrowser(
             }
         }
     }
-    val quickInPane: @Composable () -> Unit = remember(state) { @Composable { QuickFilterRow(state, wrap = false) } }
+    val quickInPane: (@Composable () -> Unit)? = if (wideTop) null else remember(state) { @Composable { QuickFilterRow(state, wrap = false) } }
     val grouped = state.view.grouped
     // the recently played are the shelf on a phone, not a view (1.1.1: with the design's header, its last tab)
     LaunchedEffect(width, state.view, phone) {
@@ -1088,6 +1140,8 @@ fun MusicBrowser(
                 reveal = state.reveal,
                 onRevealed = { state.reveal = null },
                 chipsRoom = chipsRoom,
+                // 1.1.2 (the design's tablet page): a cover's play button
+                onPlay = if (width == WidthClass.Compact) null else ({ group -> actions.playingFrom(groupSource(state.view, group)).play(group.tracks, 0) }),
             )
         }
     }
@@ -1095,7 +1149,8 @@ fun MusicBrowser(
         TrackPane(args.group, args.tracks, state, args.actions, args.showBack, stats, selection, args.leading, args.leadingPresent, chipsRoom, playingUri)
     }
     // the groups' width beside their tracks, dragged and kept
-    val groupsSplit = rememberSplitState(260.dp, MUSIC_GROUPS_PANE)
+    // 1.1.2 (the design): the margin, the rows and their letters' wave
+    val groupsSplit = rememberSplitState(if (wideTop) 328.dp else 260.dp, MUSIC_GROUPS_PANE)
     val instant = LocalMotionTier.current == MotionTier.Reduced || NagTheme.motion.reduced
     val panes: @Composable () -> Unit = {
         when {
@@ -1135,7 +1190,8 @@ fun MusicBrowser(
             // the groups and the open group's tracks side by side, the divider between them dragged and kept (1.0.8)
             wide && grouped -> HorizontalSplitPane(
                 state = groupsSplit,
-                start = { groupList(open?.key, Modifier.fillMaxSize(), 0.dp, quickInPane) },
+                // 1.1.2 (the design): the groups from the page's margin
+                start = { groupList(open?.key, Modifier.fillMaxSize().padding(start = if (wideTop) WIDE_MARGIN else 0.dp), 0.dp, quickInPane) },
                 end = {
                     // 1.0.8 (Desktop Kit 2.8.0): another group chosen, its tracks come once the last ones have gone
                     AnimatedContent(
@@ -1186,20 +1242,49 @@ fun MusicBrowser(
             else -> groupList(null, Modifier.fillMaxSize(), dimens.pagePadding - 12.dp, if (grouped) quickOverGrid else phoneShelf)
         }
     }
+    // 1.1.2 (the design's tablet page): the masthead's Oynat and Karıştır: the shown groups' tracks in their order (the
+    // table's, for the library's tracks)
+    val playFrom = rememberUpdatedState(if (grouped) null else shown)
+    val playShown: () -> Unit = remember(actions) { { actions.play(playFrom.value ?: shuffleFrom.value.flatMap { it.tracks }, 0) } }
+    val shuffleShown: () -> Unit = remember(actions) { { actions.play((playFrom.value ?: shuffleFrom.value.flatMap { it.tracks }).shuffled(), 0) } }
+    val covers = grid && open == null
+    val main: @Composable () -> Unit = {
+        Column(Modifier.fillMaxSize()) {
+            if (wideTop) {
+                wideHeader?.invoke(playShown.takeIf { canShuffle }, shuffleShown.takeIf { canShuffle })
+                WideTabs(state)
+                WideToolbar(
+                    state, probing,
+                    // the order of the covers; the table's columns where there is a table (its titles sort it)
+                    orderShown = covers || (!grouped && state.view != MusicView.Recent),
+                    columnsShown = !covers,
+                )
+                Spacer(Modifier.height(16.dp))
+            } else if (!phone) {
+                // 1.1.1: a phone's toolbar is in its header
+                MusicToolbar(state, openActions, shown, showColumns = false, probing = probing)
+            }
+            Box(Modifier.weight(1f).fillMaxWidth()) { panes() }
+        }
+    }
     // "music": what the scroll benchmark (S-803) looks for
     Column(modifier.fillMaxSize().testTag("music")) {
-        // 1.1.1: a phone's toolbar is in its header
-        if (!phone) MusicToolbar(state, openActions, shown, showColumns = width != WidthClass.Compact && !(grid && open == null), probing = probing)
         if (inspector == null) {
-            panes()
+            main()
         } else {
             // the selected track (the last clicked of several), else what plays
             val chosen = selection.keys
             val key = selection.anchor?.takeIf { it in chosen } ?: chosen.firstOrNull()
             val subject = InspectorSubject(key?.let { k -> shown.firstOrNull { it.uri == k } }, chosen.size)
+            // 1.1.2 (the design's tablet page): the panel beside the page shows the transport of what plays: the shell's
+            // floating player stands aside meanwhile
+            PlayerAside(
+                inspectorState.docked && !inspectorState.collapsed && inspectorState.selectedTab == 0 &&
+                    (subject.track == null || subject.track.uri == playingUri),
+            )
             WorkstationLayout(
                 state = inspectorState,
-                main = panes,
+                main = main,
                 inspector = { MusicInspectorPane(inspectorState, inspector, subject) },
                 // the table keeps the room for its title beside the fixed columns (and the groups beside it): the inspector gives way
                 minMain = if (wide) 760.dp else 560.dp,
@@ -1284,6 +1369,11 @@ private fun GroupList(
         PhoneGroupList(groups, state, actions, listState, modifier, leading, stats, playing, words, chipsRoom)
         return
     }
+    // 1.1.2 (the design's tablet page): a wide window's rows beside the open group's tracks
+    if (words != null && leading == null) {
+        WideGroupList(groups, state, actions, listState, openKey, modifier, stats, playing, words)
+        return
+    }
     // 1.0.8 (Desktop Kit 2.8.0): Müzik's entry tapped again: the groups go to their top
     OnReselect { if (reduced) listState.scrollToItem(0) else listState.animateScrollToItem(0) }
     // 1.0.3: on a phone the first groups arrive in turn, again for another way in, not when a group's tracks close
@@ -1331,8 +1421,6 @@ private const val GROUP_LIST = "groups"
 /** 1.1.0: the grid's, as [GROUP_LIST]. */
 private const val GROUP_GRID = "group-grid"
 
-/** 1.1.0 (Ebru): the band's height across a wide window's page (1.1.1: a phone's is the design's, [PHONE_BAND]). */
-private val WIDE_BAND = 104.dp
 
 /** 1.1.0: an album row's listening trace, under its line. */
 private val TRACE_WIDTH = 120.dp
@@ -1471,7 +1559,11 @@ private fun TrackPane(
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val sort = effectiveSort(state)
     val columns = if (compact) listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Duration) else state.columns
-    val tableColumns = rememberMusicColumns(columns, stats, onRate = if (actions.askRating != null) ({ track, stars -> actions.rate(listOf(track), stars) }) else null)
+    val tableColumns = rememberMusicColumns(
+        columns, stats, onRate = if (actions.askRating != null) ({ track, stars -> actions.rate(listOf(track), stars) }) else null,
+        // 1.1.2 (the design's tablet page): an album's tracks as the design draws them
+        designed = !compact, playing = playing?.takeIf { uri -> shown.any { it.uri == uri } },
+    )
     val labels = MusicColumn.entries.associateWith { stringResource(it.label) }
     val words = rememberColumnMenuWords()
     val res = LocalContext.current.resources
@@ -1493,25 +1585,25 @@ private fun TrackPane(
         PhoneTrackList(group, shown, state, actions, stats, selection, tableState, leading, chipsRoom, playing, page = state.view.grouped, appear = appear)
         return
     }
-    Column(Modifier.fillMaxSize()) {
-        // a group's name and line; the way back on a phone; an album's cover; the group's conversion
+    // 1.1.2 (the design's tablet page): beside the groups the pane runs from 16 dp after their divider to the page's
+    // margin; over the covers, between the margins
+    Column(Modifier.fillMaxSize().padding(start = if (showBack) WIDE_MARGIN - 8.dp else 16.dp, end = WIDE_MARGIN)) {
+        // a group's name, line and trace, the way back over the covers, its play button and its conversion; S-1006: an
+        // album's cover changed from the header's menu (a right click, a long press)
         if (state.view.grouped) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = dimens.pagePadding - 4.dp, vertical = dimens.gapXs),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (showBack) NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), { state.group = null })
-                // S-1006: an album's cover, its menu to change it
-                if (state.view == MusicView.Albums) AlbumCover(group, Modifier.padding(start = 4.dp, end = 4.dp))
-                Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
-                    Text(groupTitle(group, state.view), style = NagTheme.type.title, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(groupLine(group, state.view), style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                // S-1010: an album's, an artist's, a folder's tracks converted
-                actions.convert?.let { convert ->
-                    NagIconButton(NagIcons.Convert, stringResource(R.string.nag_convert), { convert(shown) }, modifier = Modifier.testTag("music-convert"))
+            val coverMenu = rememberCoverMenu(remember(group.key) { group.tracks.firstOrNull()?.takeIf { state.view == MusicView.Albums }?.let(CoverTrack::of) })
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                if (showBack) NagIconButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), { state.group = null }, Modifier.testTag("music-back"))
+                ContextMenuArea(entries = coverMenu, modifier = Modifier.weight(1f), accessibilityLabel = stringResource(R.string.nag_cover_menu)) {
+                    WideGroupHeader(
+                        group, state.view, stats, playing,
+                        onPlay = if (shown.isEmpty()) null else ({ actions.play(shown, 0) }),
+                    ) {
+                        // S-1010: an album's, an artist's, a folder's tracks converted
+                        actions.convert?.let { convert ->
+                            NagIconButton(NagIcons.Convert, stringResource(R.string.nag_convert), { convert(shown) }, modifier = Modifier.testTag("music-convert"))
+                        }
+                    }
                 }
             }
         }
@@ -1532,7 +1624,8 @@ private fun TrackPane(
                 actions.share?.let { share -> NagButton(stringResource(R.string.nag_media_share), { share(chosen) }) }
             }
         }
-        HorizontalRule()
+        // 1.1.2 (the design): the column titles' rule under the header, none over it
+        if (!state.view.grouped) HorizontalRule()
         val columnsLabel = stringResource(R.string.nag_music_columns)
         val reducedMotion = NagTheme.motion.reduced
         OnReselect { if (reducedMotion) tableState.scrollToItem(0) else tableState.animateScrollToItem(0) }
@@ -1586,6 +1679,8 @@ private fun TrackPane(
             leading = leading,
             leadingPresent = leadingPresent,
             rowAppear = appear,
+            // 1.1.2 (the design): the track that plays in bold
+            rowEmphasis = playing?.let { uri -> { track: Track -> track.uri == uri } },
         )
     }
 }

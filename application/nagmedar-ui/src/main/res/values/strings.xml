@@ -1116,6 +1116,28 @@
     <string name="nag_music_jump">Jump to a letter</string>
     <!-- what filters the list now: "Filter: Partly played, 24 bit" -->
     <string name="nag_music_filtered">Filter: %1$s</string>
+    <!-- 1.1.2 (the design's tablet page) -->
+    <string name="nag_music_search">Search music</string>
+    <string name="nag_music_search_hint">Album, artist or track</string>
+    <string name="nag_music_played_of">%1$d of %2$d tracks played</string>
+    <plurals name="nag_music_length_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="nag_music_length_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="nag_music_length_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <string name="nag_music_forgotten">Not opened for a year</string>
+    <string name="nag_music_queue_shuffled">Shuffled</string>
+    <string name="nag_music_keys_play">play or pause</string>
+    <string name="nag_music_keys_jump">10 seconds</string>
+    <string name="nag_list_two">%1$s and %2$s</string>
+    <string name="nag_list_three">%1$s, %2$s and %3$s</string>
     <string name="nag_music_trace">Tracks played: %1$d of %2$d</string>
     <string name="nag_music_recent_shelf">Recently played music</string>
     <string name="nag_music_recent_none_title">No track played yet</string>

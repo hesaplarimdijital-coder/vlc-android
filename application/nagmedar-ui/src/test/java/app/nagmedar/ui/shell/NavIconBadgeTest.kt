@@ -68,12 +68,18 @@ class NavIconBadgeTest {
         compose.onNodeWithText("4").assertExists()
     }
 
-    /** The open sidebar keeps its text beside the entries; a collapsed one shows the marks on the icons. */
+    /**
+     * 1.1.2 (the design's tablet page): by touch the open sidebar has the count of what is new on a pill after the name
+     * (no mark on the icons; a dot alone says nothing there), TalkBack hearing it; a collapsed one shows the marks on the
+     * icons.
+     */
     @Test
     @Config(qualifiers = "tr-w1400dp-h900dp-mdpi")
-    fun anOpenSidebarKeepsItsText() {
+    fun anOpenSidebarHasTheCountOnAPill() {
         shell(WidthClass.Large)
-        compose.onAllNodesWithTag("nav-badge", useUnmergedTree = true).assertCountEquals(0)
+        compose.onAllNodesWithTag("nav-badge", useUnmergedTree = true).assertCountEquals(1)
+        compose.onNodeWithText("4", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("Podcastler, 4 yeni bölüm").assertExists()
     }
 
     @Test

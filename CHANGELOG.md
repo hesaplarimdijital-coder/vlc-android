@@ -2,6 +2,37 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.2 (15 Kasım 2026)
+
+Tablet ve DeX'in Müzik sayfası tasarımın aynısı: 1.1.1'in “sıradaki sürümde” dediği. Sayfa tuvaldeki “Müzikler · tablet ve DeX” (ızgara ve liste) ölçüleriyle yeniden kuruldu; tuvalin çerçevesi Galaxy Tab S11 Ultra'nın penceresiyle aynı boyutta (1480 × 924 dp).
+
+### Tablette ve DeX'te Müzik
+- Ebru şeridi 168 dp (pencere 800 dp'den alçaksa 1.1.0'ın 104'ü, telefon yan dururken hiç), üstünde “Albüm, sanatçı ya da parça” alanı: dokununca arama sayfası açılır. Fareyle (DeX, klavye kapağının dokunmatik yüzeyi) menü çubuğunun arama alanı onun yerine durur.
+- Başlık “Müzikler” (Bodoni'nin italiği, 60 sp), altında parça, albüm ve sanatçı sayısıyla kütüphanenin süresi (“974 parça · 88 albüm · 61 sanatçı · 2 gün 20 saat”); yanında çerçeveli Oynat ve mürekkep renginde Karıştır: görünümdeki bütün parçalar sırayla ya da karışık. Panel gizliyken yanlarında paneli gösteren düğme.
+- Yollar telefondaki gibi sekme şeridi, sayfanın kenarından 32 dp içeride. Altında hızlı filtreler 44 dp'lik çipler (seçili olan seçimin renginde); sağda ızgarada “Ada göre” (sıralar ve iki yönü), listede “Sütunlar”, Filtrele, ızgara ve liste düğmeleri. 1.1.0'ın segmentli yol seçicisi, araç çubuğundaki Oynat ve Karıştır ile grupların üstündeki filtre çipleri kalktı.
+- Izgara sayfanın kenarından 32 dp içeride, pencereye göre beş sütun (tasarımınki), harf başlıkları 36 dp. Kapağın üstüne fare gelince (ya da klavyeyle odaklanınca) mürekkep renginde bir oynat düğmesi çıkar: albümü çalar; kapağa dokunmak eskisi gibi albümü açar.
+- Harf dalgası tablette de: kapakların yanında harfler yazılı, ekrandaki harfler açık bir bandın üstünde, çizgileri mürekkep renginde; dokunup kaydırınca liste o harfe gider.
+- Liste görünümü: albümler 56 dp'lik satırlar (40 dp kapak, ad, “sanatçı · yıl · 12 parça”, ince dinleme izi), açık albüm yükseltilmiş renkte, harfler 22 sp; yanlarında ince harf dalgası, sonra bölme çizgisi. Açık albümün başlığı Bodoni'yle, satırında süresi (“· 46 dk”), altında dinleme izi ve “7/13 parça çalındı”, sağında mürekkep renginde oynat düğmesi; kapak başlığın menüsünden değişir (sağ tık, uzun basış).
+- Bir albümün tablosu yeni kurulumda tasarımın sütunlarıyla: No, Ad, Süre, Çalınma, Biçim (sütunlar seçilmişse seçilenler kalır; “Sıfırla” albümlerde bunlara döner). Çalan parçanın numarası yerine çubuklar ve parça kalın; çalınma sayısının yanında o kadar uzun bir çubuk (albüm çalıyorsa mürekkep renginde), biçim küçük bir çerçevede.
+
+### Şimdi çalıyor paneli
+- Sağdaki ayrıntı paneli tasarımın “Şimdi çalıyor”u, 376 dp: kapağın arkasından kayan bir plak (etiketi çalan albümün ebrusu, çalarken döner; hareketler azaltılmışsa durur), parçanın adı Bodoni'yle, sanatçı ve albüm (bağlantılar), altmış çubukla dalga biçimi (çalınan kısmı mürekkep renginde; dokunmak ve kaydırmak konumu değiştirir, ekran okuyucu zamanlarıyla bir kaydırıcı olarak duyar), zamanlar, karıştır, önceki, mürekkep renginde oynat/duraklat, sonraki, tekrarla (açıkken mürekkep renginde, altında nokta; tek parçayı tekrarlarken “1”), Sıradaki'nin ilk dördü ve “Karışık sıra”. Altında biçim, yıldızlar, bölümler ve etiketler; klavye takılıyken en altta “Boşluk çal ya da duraklat · Alt+← Alt+→ 10 saniye”.
+- Sekmeler başlığın ⋯'sine (Seçenekler) taşındı: Şimdi çalıyor, Sinyal yolu, Sözler, Sıra; ayrıca Görselleştirici, Tam ekran görselleştirici, Yayınla… (VLC'nin yayın ayarı açıkken) ve Ayrıntı panelini gizle (Ctrl+I). Başlıkta seçili görünümün adı büyük harflerle; tabloda başka bir parça seçiliyken “Seçili parça” ve onun etiketleri.
+- Panel çalanı gösterirken Müzik'te alttaki yüzen oynatıcı çubuğu çekilir: panelin kendi oynatıcısı var. Panel gizlenince, başka bir görünüme geçince ya da başka bir sayfada çubuk yerinde.
+
+### Kenar çubuğu ve kabuk
+- Dokunmatik tablette pencerenin üstünde menü çubuğu yok: marka (çalan albümün ebrusu mürekkep renginde bir halkada, “Nağmedar” Bodoni'nin italiğiyle) kenar çubuğunun başında, “Ara” (Ctrl+K) sonunda, Ayarlar'ın üstünde. Fareyle ve masaüstü penceresinde menü çubuğu yerinde.
+- Kenar çubuğu tasarımın: 248 dp (1.1.0'da 280), 48 dp'lik 12 dp köşeli satırlar, simge ve ad aynı renkte (seçili olan seçimin renginde ve 650 kalınlıkta), bölüm başlıkları büyük harflerle; dokunmatik tablette yeni bölüm sayısı mürekkep renginde bir hapın içinde (“3”), parça sayısı yazılmaz.
+- **Bir yıldır açmadıkların**: kenar çubuğunda, en az bir yıl önce çalınıp o günden beri çalınmamış albümlerden en çok çalınan üçü, yamuk duran kapaklarla ve adlarıyla; dokunmak albümü çalar. Böyle albüm yoksa görünmez.
+
+### Test
+- Değişen testler: `MusicBrowserTest`'te ayrıntı panelinin görünümleri sekmelerden değil başlığın ⋯'sinden seçilir; ekran görüntüleri uygulamanın tablet sayfasıyla (`WideMusicPage`) çekilir, paneli tasarımın paneliyle; yeni ikonu (Sütunlar) simgelerin listesinde.
+- Ekran görüntüleri: tabletin Müzik'i ızgara ve liste görünümünde (`music-tablet-dark-albums`, `music-tablet-dark-albums-list`), tasarımın tuvaliyle aynı boyutta. Dokunmatik tablet ve DeX ekranlarının referansları yenilendi: kenar çubuğu daraldı, dokunmatik tablette menü çubuğu yok.
+
+### Sürüm
+- `versionCode` 4010102; kişisel arm64 APK'sı 14010108 (1.1.1'in 14010107'sinin üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+- Baseline Profile: tablet sayfasının yeni parçaları (üst kısım, sekmeler, araç çubuğu, satırlar, panel, kenar çubuğunun albümleri) önceden derlenir.
+
 ## 1.1.1 (15 Kasım 2026)
 
 Telefonun Müzik sayfası tasarımın aynısı (15 Kasım, telefonun ekran görüntüsüyle: “Olmamış”). 1.1.0 tasarımın renklerini, yazısını ve bileşenlerini almıştı, ama telefondaki sayfa tuvaldekine (Müzikler · telefon, ızgara ve liste) benzemiyordu: üst çubuk şeridin üstündeydi, yollar bir menüdeydi, parçalar tabloydu, küçük oynatıcı eskisiydi, 1.1.0'ın “sonraki bir sürümde” dediği parçalar da yoktu. Bu sürüm sayfayı tuvaldeki ölçülerle yeniden kurar. Tablet ve DeX'in sayfası sırada.

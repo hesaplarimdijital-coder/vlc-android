@@ -116,13 +116,13 @@ internal fun UnderPhoneHeader(header: (@Composable () -> Unit)?, content: @Compo
 }
 
 /** A lettered list's items: a letter's heading, or the item. */
-private sealed interface Lettered<out T> {
+internal sealed interface Lettered<out T> {
     class Letter(val letter: String, val count: Int, val key: String) : Lettered<Nothing>
     class Item<T>(val item: T, val index: Int) : Lettered<T>
 }
 
 /** [items] under their letters' headings ([letterRanges]) when [name] gives them one; else as they are. */
-private fun <T> letteredItems(items: List<T>, name: ((T) -> String?)?, key: (T) -> String, locale: Locale, nameless: String): List<Lettered<T>> {
+internal fun <T> letteredItems(items: List<T>, name: ((T) -> String?)?, key: (T) -> String, locale: Locale, nameless: String): List<Lettered<T>> {
     if (name == null) return items.mapIndexed { i, t -> Lettered.Item(t, i) }
     val out = ArrayList<Lettered<T>>(items.size + 30)
     letterRanges(items, name, locale, nameless).forEach { (letter, range) ->
@@ -133,7 +133,7 @@ private fun <T> letteredItems(items: List<T>, name: ((T) -> String?)?, key: (T) 
 }
 
 /** The wave's letters of [entries], [first] the list's index of their first one. */
-private fun <T> runsOf(entries: List<Lettered<T>>, first: Int): List<LetterRun> =
+internal fun <T> runsOf(entries: List<Lettered<T>>, first: Int): List<LetterRun> =
     entries.mapIndexedNotNull { i, e -> (e as? Lettered.Letter)?.let { LetterRun(it.letter, it.count, i + first) } }
 
 /** The wave over a lettered lazy list: its letters, the one at the top under the chips, a jump, its room. */

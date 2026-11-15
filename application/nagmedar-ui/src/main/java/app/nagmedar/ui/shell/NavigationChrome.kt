@@ -74,6 +74,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,6 +107,7 @@ import app.nagmedar.ui.components.pressScale
 import app.nagmedar.ui.components.stateBackground
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.keyHint
+import app.nagmedar.ui.theme.BodoniHeadline
 import app.nagmedar.ui.theme.GlassMode
 import app.nagmedar.ui.theme.NagGlass
 import app.nagmedar.ui.theme.LocalMotionTier
@@ -186,6 +189,23 @@ private fun BoxScope.IconBadge(badge: NavIconBadge?, iconSize: Dp, ring: Color) 
                 .border(1.5.dp, ring, CircleShape)
                 .background(colors.accent, CircleShape)
                 .testTag("nav-badge"),
+        )
+    }
+}
+
+/** 1.1.2 (the design's tablet page): the sidebar's brand without the menu bar: the mark and "Nağmedar" in Bodoni's italic. */
+@Composable
+fun SidebarBrand(collapsed: Boolean, mark: @Composable () -> Unit = { BrandMark(Modifier.size(22.dp)) }) {
+    mark()
+    if (!collapsed) {
+        Spacer(Modifier.width(11.dp))
+        Text(
+            stringResource(R.string.nagmedar_shell_title),
+            style = TextStyle(fontFamily = BodoniHeadline, fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold, fontSize = NagTheme.type.size(25f), lineHeight = NagTheme.type.size(28f)),
+            color = NagTheme.colors.text,
+            maxLines = 1,
+            overflow = TextOverflow.Clip,
+            modifier = Modifier.semantics { heading() },
         )
     }
 }
@@ -434,6 +454,14 @@ fun Sidebar(
     iconBadges: NavIconBadges = emptyMap(),
     /** 1.0.8 (Desktop Kit 2.8.0): the screen's main action at the top ([ShellPrimaryAction]), told whether the sidebar is collapsed. */
     action: (@Composable (collapsed: Boolean) -> Unit)? = null,
+    /**
+     * 1.1.2 (the design's tablet page): where no menu bar is over the window (a tablet by touch), the brand at the top
+     * (told whether the sidebar is collapsed), "Ara" at the foot ([onSearch]) and [extra] under the entries (the albums
+     * not opened for a year); the "new" counts on pills.
+     */
+    brand: (@Composable (collapsed: Boolean) -> Unit)? = null,
+    onSearch: (() -> Unit)? = null,
+    extra: (@Composable () -> Unit)? = null,
 ) {
     val dimens = NagTheme.dimens
     val motion = NagTheme.motion
@@ -463,6 +491,9 @@ fun Sidebar(
             open = open,
             iconBadges = iconBadges,
             action = action,
+            brand = brand,
+            onSearch = onSearch,
+            extra = extra,
         )
         if (width != null && !collapsed) {
             // over the sidebar's padding and its edge, so the content does not move
@@ -494,12 +525,17 @@ private fun SidebarColumn(
     open: Float,
     iconBadges: NavIconBadges = emptyMap(),
     action: (@Composable (collapsed: Boolean) -> Unit)? = null,
+    brand: (@Composable (collapsed: Boolean) -> Unit)? = null,
+    onSearch: (() -> Unit)? = null,
+    extra: (@Composable () -> Unit)? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_sidebar)
-    // the entries' inset from the sidebar's edges, narrower while collapsed
-    val inset = lerp(6.dp, dimens.gapS, open)
+    // the entries' inset from the sidebar's edges, narrower while collapsed; 1.1.2 (the design): 12 dp
+    val inset = lerp(6.dp, 12.dp, open)
+    // 1.1.2 (the design's tablet page): with the brand at its top the entries carry the "new" counts as pills
+    val designed = brand != null
     Row(Modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
@@ -509,6 +545,12 @@ private fun SidebarColumn(
                 .background(colors.chrome)
                 .semantics { paneTitle = label },
         ) {
+            if (brand != null) {
+                Row(
+                    Modifier.fillMaxWidth().height(72.dp).padding(start = inset + lerp(14.dp, 10.dp, open), end = inset),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { brand(collapsed || open < 0.5f) }
+            }
             // 1.0.8: the screen's main action above the entries, the icon alone while collapsed
             if (action != null) {
                 Box(Modifier.padding(start = inset, end = inset, top = dimens.gapS)) { action(collapsed) }
@@ -517,34 +559,57 @@ private fun SidebarColumn(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = inset, vertical = dimens.gapS)
+                    .padding(horizontal = inset)
+                    .padding(bottom = dimens.gapS, top = if (designed) 0.dp else dimens.gapS)
                     .selectableGroup(),
             ) {
+                var first = true
                 NavSection.entries.filter { it != NavSection.Footer }.forEach { section ->
                     val items = Destination.sidebar.filter { it.section == section }
                     if (items.isEmpty()) return@forEach
                     val title = section.title
                     if (!collapsed && title != null) {
+                        // 1.1.2 (the design): 12 on 16 in capitals, 10 dp over the first, 18 over the others
                         SectionCaption(
                             stringResource(title),
-                            Modifier.padding(start = 10.dp, top = dimens.gapM, bottom = 4.dp).alpha(labelAlpha(open)),
+                            Modifier.padding(start = 12.dp, top = if (first) 10.dp else 18.dp, bottom = 6.dp).alpha(labelAlpha(open)),
                         )
                     } else {
                         Spacer(Modifier.height(dimens.gapS))
                     }
+                    first = false
                     items.forEach { destination ->
-                        SidebarItem(destination, destination == selected, collapsed, badges[destination], open, iconBadges[destination]) { onSelect(destination) }
+                        SidebarItem(
+                            destination, destination == selected, collapsed, badges[destination].takeIf { !designed }, open, iconBadges[destination],
+                            pill = designed,
+                        ) { onSelect(destination) }
                     }
                 }
+                if (extra != null && !collapsed && open > 0.5f) {
+                    Box(Modifier.padding(top = 22.dp).alpha(labelAlpha(open))) { extra() }
+                }
             }
-            HorizontalRule()
+            if (!designed) HorizontalRule()
+            // 1.1.2 (the design's tablet page): "Ara" at the foot where no menu bar has the search field
+            if (onSearch != null) {
+                Box(Modifier.padding(horizontal = if (collapsed) 6.dp else inset)) {
+                    SidebarRow(
+                        NagIcons.Search, stringResource(R.string.nag_nav_search), selected = false, collapsed = collapsed, open = open,
+                        role = Role.Button, trailing = keyHint("Ctrl+K")?.let { keys -> { KeyCap(keys) } }, onClick = onSearch,
+                        modifier = Modifier.testTag("sidebar-search"),
+                    )
+                }
+            }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = if (collapsed) 6.dp else dimens.gapS, vertical = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = if (collapsed) 6.dp else if (designed) inset else dimens.gapS)
+                    .padding(top = if (designed) 0.dp else 6.dp, bottom = if (designed) 20.dp else 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (!collapsed) {
                     Box(Modifier.weight(1f)) {
-                        SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = false, badge = badges[Destination.Settings], open = open) {
+                        SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = false, badge = badges[Destination.Settings].takeIf { !designed }, open = open, pill = designed) {
                             onSelect(Destination.Settings)
                         }
                     }
@@ -558,7 +623,7 @@ private fun SidebarColumn(
             }
             if (collapsed) {
                 Box(Modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp)) {
-                    SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = true, badge = badges[Destination.Settings], open = open) {
+                    SidebarItem(Destination.Settings, selected == Destination.Settings, collapsed = true, badge = badges[Destination.Settings].takeIf { !designed }, open = open, pill = designed) {
                         onSelect(Destination.Settings)
                     }
                 }
@@ -570,7 +635,8 @@ private fun SidebarColumn(
 
 /**
  * [open] runs from 0 (collapsed) to 1 (expanded) while the sidebar moves: a collapsed item's icon
- * keeps its place and goes smoothly to where an expanded item has it.
+ * keeps its place and goes smoothly to where an expanded item has it. 1.1.2 (the design's tablet page, [pill]): the
+ * count of what is new on an ink pill after the name ("3"), TalkBack hearing its words.
  */
 @Composable
 private fun SidebarItem(
@@ -580,65 +646,116 @@ private fun SidebarItem(
     badge: String?,
     open: Float,
     iconBadge: NavIconBadge? = null,
+    pill: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val label = stringResource(destination.label)
+    // 1.0.8: the icon's mark only while the sidebar is collapsed: open, the entry's text badge says it; 1.1.2: or its pill
+    val shownIconBadge = if (collapsed) iconBadge else null
+    val pillBadge = if (pill && !collapsed) iconBadge?.takeIf { it.count > 0 } else null
+    val pillWords = pillBadge?.let { badgeDescription(it) }
+    SidebarRow(
+        destination.icon, label, selected, collapsed, open,
+        role = Role.Tab,
+        badgeText = badge,
+        iconBadge = shownIconBadge,
+        trailing = pillBadge?.let { b -> { NavPill(if (b.count > 99) "99+" else b.count.toString()) } },
+        said = pillWords?.let { "$label, $it" },
+        onClick = onClick,
+    )
+}
+
+/** 1.1.2 (the design): a count on the ink's pill, 22 dp high. */
+@Composable
+private fun NavPill(text: String) {
+    val colors = NagTheme.colors
+    Box(
+        Modifier
+            .heightIn(min = 22.dp)
+            .defaultMinSize(minWidth = 22.dp)
+            .background(colors.accent, RoundedCornerShape(11.dp))
+            .padding(horizontal = 7.dp)
+            .testTag("nav-badge"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = NagTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold), color = colors.onAccent, maxLines = 1)
+    }
+}
+
+/**
+ * A row of the sidebar (1.1.2, the design's): [icon] and [label] on a rounded row, the chosen one on the selection's
+ * colour; [badgeText] or [trailing] after the name; [iconBadge] on the icon while collapsed, where a resting pointer or
+ * the keyboard's focus brings the name.
+ */
+@Composable
+private fun SidebarRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    selected: Boolean,
+    collapsed: Boolean,
+    open: Float,
+    role: Role,
+    modifier: Modifier = Modifier,
+    badgeText: String? = null,
+    iconBadge: NavIconBadge? = null,
+    trailing: (@Composable () -> Unit)? = null,
+    said: String? = null,
     onClick: () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
+    val touch = dimens.minTarget >= 48.dp
     val shape = RoundedCornerShape(dimens.radiusControl)
-    val label = stringResource(destination.label)
     // a collapsed item centres its icon; the same start padding keeps it still while the sidebar opens
     val collapsedStart = ((dimens.sidebarCollapsedWidth - 12.dp - dimens.icon) / 2).coerceAtLeast(0.dp)
     val showLabel = !collapsed && open > 0.5f
-    // 1.0.8: the icon's mark only while the sidebar is collapsed: open, the entry's text badge says it
-    val shownIconBadge = if (collapsed) iconBadge else null
-    val iconBadgeText = shownIconBadge?.let { badgeDescription(it) }
+    val iconBadgeText = iconBadge?.let { badgeDescription(it) }
+    // 1.1.2 (the design): the icon and the name in one colour, the chosen one's on the selection; 15 on 20 by touch
+    val tint = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "sidebarIcon")
+    val base = if (touch) NagTheme.type.body.copy(fontSize = NagTheme.type.size(15f), lineHeight = NagTheme.type.size(20f)) else NagTheme.type.body
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = dimens.navItemHeight.coerceAtLeast(dimens.minTarget))
-            .padding(vertical = 1.dp)
             .focusRing(state, shape)
             .background(stateBackground(state, selected), shape)
             .semantics {
                 this.selected = selected
                 if (collapsed) contentDescription = if (iconBadgeText != null) "$label, $iconBadgeText" else label
+                else if (said != null) contentDescription = said
             }
-            .nagClickable(interaction, onClick, role = Role.Tab)
-            .padding(start = lerp(collapsedStart, 10.dp, open), end = if (showLabel) 10.dp else 0.dp),
+            .nagClickable(interaction, onClick, role = role)
+            .padding(start = lerp(collapsedStart, 12.dp, open), end = if (showLabel) 12.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(
-                destination.icon,
-                contentDescription = null,
-                tint = animateStateColor(if (selected) colors.accentText else colors.textSecondary, "sidebarIcon"),
-                modifier = Modifier.size(dimens.icon),
-            )
-            IconBadge(shownIconBadge, dimens.icon, ring = colors.chrome)
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(dimens.icon))
+            IconBadge(iconBadge, dimens.icon, ring = colors.chrome)
         }
         if (showLabel) {
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(12.dp))
             Row(Modifier.weight(1f).alpha(labelAlpha(open)), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = label,
-                    style = if (selected) NagTheme.type.bodyStrong else NagTheme.type.body,
-                    color = animateStateColor(if (selected) colors.onSelection else colors.text, "sidebarLabel"),
+                    style = base.copy(fontWeight = if (selected) SemiBoldPlus else FontWeight.Medium),
+                    color = animateStateColor(if (selected) colors.onSelection else colors.textSecondary, "sidebarLabel"),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-                if (badge != null) {
-                    Text(badge, style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (badgeText != null) {
+                    Text(badgeText, style = NagTheme.type.caption, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
+                trailing?.invoke()
             }
         }
         if (collapsed) {
             // only the icon shows: a resting mouse brings the name (S-404); 1.0.8 (Desktop Kit 2.8.0): so does the
             // keyboard's focus, and the name stands beside the entry
-            HoverTooltip(state.hovered && !state.pressed, label, badge, focused = state.focused && !state.pressed, placement = TooltipPlacement.End)
+            HoverTooltip(state.hovered && !state.pressed, label, badgeText, focused = state.focused && !state.pressed, placement = TooltipPlacement.End)
         }
     }
 }

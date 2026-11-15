@@ -79,7 +79,7 @@ data class NagDimens(
             topBarHeight = 56.dp,
             bottomBarHeight = 72.dp,
             railWidth = 88.dp,
-            sidebarWidth = 280.dp,
+            sidebarWidth = 248.dp,
             sidebarCollapsedWidth = 72.dp,
             miniPlayerHeight = 72.dp,
             radiusSmall = 6.dp,

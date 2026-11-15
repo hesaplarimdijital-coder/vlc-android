@@ -1,5 +1,8 @@
 package app.nagmedar.ui
 
+import app.nagmedar.ui.shell.SidebarBrand
+import app.nagmedar.ui.music.EbruInks
+import app.nagmedar.ui.music.BandMark
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -127,6 +130,8 @@ fun TestShell(
         glass = glass,
         chromeGlass = chromeGlass,
         ownTop = ownTop,
+        // 1.1.2 (the design's tablet page): the sidebar's brand by touch as the app's, in the bozkır's inks
+        sidebarBrand = { collapsed -> SidebarBrand(collapsed) { BandMark(EbruInks.Default, Modifier.size(22.dp), ring = 2.dp) } },
     )
 }
 
