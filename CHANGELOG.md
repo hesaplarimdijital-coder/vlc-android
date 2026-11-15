@@ -2,6 +2,56 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.0 (15 Kasım 2026)
+
+Ebru: Nağmedar'ın yeni tasarım dili (14 Kasım: “Peki tüm bunları kullanarak nağmedarın tasarımını değiştirsen…”, 15 Kasım: “Çok güzel olmuş nağmedarı böyle yapalım”, “Tüm temayı ilk önce canvasa ekle. Tüm uyarı mesajları, en küçük komponent dahil bu yeni tasarım diline uygun tasarla. Daha sonra kodunu yap ve yeni nağmedar sürümü olarak gönder. Kite yükleme şimdilik”). Önce tasarım tuvaline çizildi: Müzik sayfası telefonda, tablette ve DeX'te (ızgara ve liste), üç tema sayfası (renkler; yazı, ölçü ve hareket; simgeler ve ebru), beş bileşen sayfası (kontroller, menüler ve pencereler, listeler ve tablolar, kabuk, oynatıcı) ve dört uyarı sayfası (kısa haberler ve uyarılar, durumlar, pencereler, uygulamanın bütün mesajlarının kataloğu), hepsi uygulamanın kendi Türkçe metinleriyle. Bu sürüm onu koda geçirir. Desktop Kit'e bir şey eklenmedi (“Kite yükleme şimdilik”).
+
+### Renkler
+- Üç zemin yeni. Gece (koyu): gece mavisine çalan bir is, `#0E1014` sayfa, `#121519` çubuklar, `#15181E` paneller, `#1D2129` pencereler. Su (açık): suya çalan kırık bir beyaz, sayfa `#EEF0EC` panellerin bir ton altında, pencereler beyaz. Kara (OLED siyah): siyahın üstünde zor ayrılan paneller. Ayarlar › Görünüm'ün dört seçeneği aynı kaldı (Sistem, Açık, Koyu, OLED siyah). Her metin her yüzeyde, üzerine gelinmiş hâliyle de en az 4,5:1 (PaletteContrastTest).
+- Dört sabit vurgu (Mavi, Kehribar, Yeşil, Mercan) yeni zeminlere göre yeniden ayarlandı: her tonu, duvar kâğıdı renginin ayarlandığı yolla (`AccentTones.fromSeed`) 1.0'daki renk tohum olarak bulundu ve kodda sabit duruyor.
+- Yeni vurgu: **Çalan albüm**. Sayfanın mürekkebi çalan müziğin kapağından gelir; kapağın baskın rengi duvar kâğıdınınki gibi her karşıtlık kuralı geçene kadar açılıp koyulaşır (ana iş parçacığının dışında) ve palet yeni renge 150 ms'de geçer. Bir şey çalmıyorken ya da kapak renksizken mavidir. Vurgu rengini hiç seçmediyseniz bu sürümle Çalan albüm olur; seçtiyseniz o kalır. Ayarlar › Görünüm'deki örneği çalan albümün rengini gösterir, seçili değilken üstünde bir nota durur; Ctrl+K paletinde de var.
+- Cam: Gece'nin ince ve kalın camı, Su'nun kalın camı ve Gece'nin bulanıksız camı biraz daha yoğun (0,72 → 0,74; 0,88 → 0,93; 0,90 → 0,92; 0,96 → 0,98), yeni zeminlerin yazıları en kötü içeriğin üstünde de okunsun diye (GlassTest).
+
+### Yazı
+- Başlıklar Bodoni Moda'nın italiği: sayfa başlığı (“masthead”, 52 sp; tablette 60), görüntü satırları (çalan parça, harfler, 30 sp), başlıklar (pencerelerin sorusu, üst çubuk, 22 sp). Arayüzün geri kalanı Bricolage Grotesque; zaman kodları, biçimler ve tuşlar IBM Plex Mono'da kaldı. IBM Plex Sans çıktı.
+- Yazı tipleri uygulamanın içinde (SIL OFL 1.1; Hakkında › Lisanslar'da). Değişken yazı tiplerinden fontTools'la çıkarılmış sabit kesimler: Bricolage 14 punto optik boyutta beş kalınlık (400, 500, 600, 650, 700), Bodoni her rolün okunduğu optik boyutta (48, 28, 20) birer kalınlık; çizici değişken yazı tipi desteklemese de aynı görünür.
+- Bölüm başlıkları küçük büyük harflerle ve aralıklı (“KÜTÜPHANE”, Türkçenin büyük harfleriyle: “İNDİRMELER”); ekran okuyucu yazıldığı gibi okur.
+- Tek seferlik kod (uzaktan erişim) mono yazıyla: rakamlar birbirine benzemesin.
+
+### Simgeler
+- Çizgiler 1,6'dan 1,45'e inceldi: uygulamanın simgeleri, bildirimin ve Android Auto'nun düğmeleri, başlatıcı kısayolları (`gen_icons.py`'nin tek bir sabiti). Üreticiye kendi elle eklenmiş “Minus” simgesi de alındı.
+
+### Bileşenler
+- Düğmeler, çipler, menü düğmeleri ve seçimler (Ayarlar'daki sekmeli seçimler) hap biçiminde. Düz düğmenin kendi dolgusu yok, yalnız kenarı; dolu düğmenin yazısı bir kalınlık ağır. Simge düğmeleri ve satırların oynat düğmesi yuvarlak.
+- Silen bir sorunun düğmesi tehlike renginde dolu (ekolayzeri silmek, indirilen dosyayı silmek, oynatma geçmişini temizlemek, medya kütüphanesini sıfırlamak, uygulama verisini silmek).
+- Anahtar dokunarak 52 × 32 dp (işaretçiyle 40 × 24): kapalıyken bir alanın kenarı ve küçük bir top, açıkken vurgu renginde büyük bir top. Onay kutusu 22 dp (işaretçiyle 18), kenarı bir alanınki. Filtre çipleri dokunarak 40 dp.
+- Metin alanının adı bir kalınlık ağır, alanın 6 dp üstünde; hatası bir uyarı işaretiyle başlar.
+- Pencereler 24 dp köşeli (işaretçiyle 16), içleri 24 dp boşluklu (20); başlığı sorunun kendisi, Bodoni'nin italiğiyle. libVLC'nin soruları (sertifika, oturum açma, ilerleme) aynı kartta, işaretleri 48 dp.
+- Kısa haberler yumuşak bir kartta: bir söz mürekkep noktasıyla başlar; hata, ters yüzeyde okunan tehlike renginde bir uyarı işareti ve kenar alır; ilerleme çizgisi kartın dibinde. Başarısızlıklar artık hata olarak söyleniyor, ekran okuyucu hemen okur: yedeğin yazılamaması ve okunamaması, çalma listesinin ve kısayol dosyasının içe aktarılamaması, kısayolların dışa aktarılamaması, akışın listeye eklenememesi, podcast akışlarının okunamaması.
+- Geri al çubuğu geri dönen bir saatle başlar. Uyarı şeridinin tonu solda bir mürekkep çizgisi.
+- Durum panelinin işareti suya düşmüş bir mürekkep damlası (dolu bir öz, dışa doğru solan iki halka); sayfada başlığı Bodoni'yle. Rozetler hap; ilerleme çizgisi 4 dp; yer tutucuların köşesi kapaklarınki.
+- Ayarlar'daki varsayılan uyku zamanlayıcısının penceresi sözlüğün adıyla: “Uyku zamanlayıcısı” (“Uyku zamanlayıcı” değil).
+
+### Müzik
+- Sayfanın başında ebru şeridi: mermerli bir kâğıt, çalan albümün kapağının renkleriyle. Cihazda, ana iş parçacığının dışında çizilir (Lu ve Jaffer'in matematiksel mermerlemesi: tepsiye damlayan mürekkepler, gidip gelen bir kalem, ince bir tarak ve ağır bir dalga); kenarı elle yapılmış kâğıt gibi yırtık, altından sayfa görünür. Aynı albüm hep aynı şeridi verir; yeni albümün şeridi eskisinin üstüne 300 ms'de gelir (azaltılmış harekette hemen). Bir şey çalmıyorken bozkırın kırmızıları, okru, toprağı ve yeşili. Telefonda listenin ilk satırıdır ve onunla kayar; tablette ve DeX'te sayfanın üstünde durur. Ekran okuyucu üstünden geçer.
+- Kenar çubuklu pencerede (geniş tablet, DeX) başlık büyük Bodoni italikle (“Müzik”), yanında parça ve albüm sayısı (“974 parça · 88 albüm”); telefonda ve rayda sayılar başlığın yerinde.
+- **Izgara görünümü** (yeni, varsayılan): albümler, sanatçılar, türler, besteciler, yıllar ve klasörler kapaklarıyla; telefonda iki sütun, geniş pencerede sığdığı kadar. Albümler, sanatçılar, türler ve besteciler ilk harflerinin altında (Bodoni'yle büyük bir harf ve sayısı; albümler sanatçılarına göre dizili olduğundan sanatçının harfi; arayüzün dilinin alfabesiyle: Türkçede Ç, C'den ayrı, İngilizcede C'nin altında). Her kapağın altında adı, satırı ve **dinleme izi**: her parça için bir çizgi, çalınanlar koyu, hiç çalınmayanlar soluk, çalan vurgu renginde ve uzun (en çok 24 çizgi; uzun bir albümünkiler albüme yayılır). Bir kapağa dokunmak grubu açar, Geri döner (telefonda olduğu gibi her pencerede); sağ tık ya da uzun basış menüsünü açar.
+- **Liste görünümü** eskisi gibi grupları parçaların yanında gösterir; albüm ve sanatçı satırları kapakla başlar, albüm satırı dinleme iziyle biter.
+- Izgara ve liste araç çubuğundaki iki düğmeyle seçilir, seçim saklanır (`nagmedar_music_layout`).
+- **Hızlı filtreler** grupların üstünde, onlarla birlikte kayar: Tümü, Yarım kalanlar (parçalarından bazıları çalınmış), Hiç dinlenmeyenler, Bu yıl eklenenler. Hiçbir grup kalmazsa “Filtreleri temizle” onu da temizler.
+
+### Tasarımda olup bu sürümde olmayanlar
+- Harf dalgası (kenardaki alfabe), “Bir yıldır açmadıkların” rafı, tablet panelinde kapağın arkasındaki plak, yolların sekme şeridi olarak gösterilmesi (araç çubuğu eskisi gibi seçimli düğmeyle ya da menüyle), telefonda üst çubuğun şeridin üstünde durması (şerit üst çubuğun altındadır). Sonraki bir sürümde.
+
+### Sürüm
+- `versionCode` 4010100; kişisel arm64 APK'sı 14010106 (1.0.9'un 14010015'inin üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+- Baseline Profile: Müzik'in yeni parçaları (ızgara, dinleme izi, hızlı filtreler, şerit) kabuğun 1.0.8'deki geniş kuralları gibi önceden derlenir (`nagmedar-ui/src/main/baseline-prof.txt`); üreticinin yürüyüşü yenilenmedi.
+
+### Test
+- Arayüz testlerinin hepsi yerelde de koşuldu ve geçti. Yeni testler: `QuickFilterTest` (hızlı filtrelerin her birinin bıraktığı gruplar, eklenme tarihinin saniye ya da milisaniye oluşu; ızgaranın harfleri: Türkçede Ç, Ş, Ö, İ ve I kendi harfleri, İngilizcede işaretsiz harflerinin altında, harfle başlamayan ad “#”in altında), `MusicBrowserTest`'te ızgara ile liste arasında geçiş ve hızlı filtreler, `MediaFileMenuTest`'te albüm kapağının menüsü (Paylaş…, Dosyada göster), `AccentTonesTest`'te Çalan albüm vurgusu.
+- Değişen testler: grupları satır satır okuyan testler (bölmelerin genişliği ve yeri, masaüstünde türlerin sütunları, albümün menüsü) liste görünümünde koşar, çünkü varsayılan artık ızgara; aynı menü ızgarada da ayrıca denenir. `SheetDragTest`'in yavaş çekişi sayfanın yüksekliğinin yarısı yerine 0,6'sı kadar: satırdan başlayan yavaş bir çekişte sayfa parmaktan geride kalır (burada üçte bir kadar), yarım çekiş kapanma noktasının bir dp yakınında bitiyordu ve yeni yazıyla 1,3 dp kısalan sayfa onun hemen altında kaldı. Kapanma kuralı değişmedi.
+- Ekran görüntüleri: 281 referansın hepsi yeni tasarımla yeniden çekildi, ikisi yeni (`ebru-band-phone-dark`, `ebru-band-dex-light`: şerit cihazda çizildiği gibi). Müzik sayfasının görüntüleri, uygulamadaki sayfa gibi, şeridi ve başlığın yanındaki sayıları da gösterir (bir şey çalmadığından bozkırın mürekkepleriyle).
+
 ## 1.0.9 (14 Kasım 2026)
 
 Desktop Kit 2.9.0'ın getirdikleri (14 Kasım: “Şimdi 2.9.0 yükselt”). Kitin 2.8.0'dan 2.9.0'a üç değişikliği var: biri Nağmedar'da 1.0.5'ten beri vardı, ikisi bu sürümde geldi.
