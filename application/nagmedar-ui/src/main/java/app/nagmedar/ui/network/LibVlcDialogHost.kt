@@ -15,10 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -32,15 +32,18 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import app.nagmedar.ui.components.NagDialog
 import androidx.lifecycle.compose.LifecycleStartEffect
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
+import app.nagmedar.ui.components.NagDialog
 import app.nagmedar.ui.components.NagIcons
 import app.nagmedar.ui.components.NagProgressBar
 import app.nagmedar.ui.components.StateIconTile
 import app.nagmedar.ui.components.StateTone
+import app.nagmedar.ui.components.dialogEdge
+import app.nagmedar.ui.components.dialogPadding
+import app.nagmedar.ui.components.dialogShape
 import app.nagmedar.ui.theme.NagTheme
 
 /** The requests the app's windows show, in the order they came; main thread. */
@@ -89,20 +92,21 @@ fun LibVlcDialogHost() {
 fun PromptSurface(prompt: LibVlcPrompt, onDone: () -> Unit) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusCard)
+    // 1.1.0 (Ebru): the dialogs' card
+    val shape = dialogShape()
     val surface = Modifier
         .padding(dimens.gapM)
         .widthIn(max = 480.dp)
         .fillMaxWidth()
         .background(colors.surfaceRaised, shape)
-        .border(1.dp, colors.borderStrong, shape)
+        .border(1.dp, dialogEdge(colors), shape)
     when (prompt.kind) {
         PromptKind.Login -> LoginPrompt(prompt, surface, onDone)
         PromptKind.Question -> PromptPanel(prompt, surface, focusFirst = true) { action ->
             if (action == null) prompt.dismiss() else prompt.action(action)
             onDone()
         }
-        PromptKind.Progress -> Column(surface.padding(dimens.gapL).testTag("libvlc-progress"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        PromptKind.Progress -> Column(surface.padding(dialogPadding()).testTag("libvlc-progress"), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PromptWords(prompt)
             NagProgressBar(if (prompt.indeterminate) null else prompt.position.coerceIn(0f, 1f), label = prompt.title)
             prompt.cancelText?.let { cancel ->
@@ -130,8 +134,8 @@ fun PromptPanel(prompt: LibVlcPrompt, modifier: Modifier = Modifier, focusFirst:
     val res = LocalContext.current.resources
     val cancel = remember { FocusRequester() }
     if (focusFirst) LaunchedEffect(prompt) { runCatching { cancel.requestFocus() } }
-    Column(modifier.widthIn(max = 480.dp).padding(dimens.gapL), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        StateIconTile(if (prompt.warning) NagIcons.Warning else NagIcons.Shield, if (prompt.warning) StateTone.Warning else StateTone.Info)
+    Column(modifier.widthIn(max = 480.dp).padding(dialogPadding()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        StateIconTile(if (prompt.warning) NagIcons.Warning else NagIcons.Shield, if (prompt.warning) StateTone.Warning else StateTone.Info, size = 48.dp)
         PromptWords(prompt)
         FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             NagButton(
@@ -151,7 +155,7 @@ private fun PromptWords(prompt: LibVlcPrompt) {
     val res = LocalContext.current.resources
     Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (prompt.title.isNotEmpty()) {
-            Text(LibVlcWords.localized(res, prompt.title), style = NagTheme.type.title, color = colors.text, modifier = Modifier.semantics { heading() })
+            Text(LibVlcWords.localized(res, prompt.title), style = NagTheme.type.headline, color = colors.text, modifier = Modifier.semantics { heading() })
         }
         if (prompt.text.isNotEmpty()) Text(LibVlcWords.localized(res, prompt.text), style = NagTheme.type.body, color = colors.textSecondary)
     }
@@ -170,8 +174,8 @@ private fun LoginPrompt(prompt: LibVlcPrompt, modifier: Modifier, onDone: () -> 
         prompt.login(user, password, keep && prompt.asksStore)
         onDone()
     }
-    Column(modifier.padding(dimens.gapL).testTag("libvlc-login"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        StateIconTile(NagIcons.Lock, StateTone.Info)
+    Column(modifier.padding(dialogPadding()).testTag("libvlc-login"), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        StateIconTile(NagIcons.Lock, StateTone.Info, size = 48.dp)
         PromptWords(prompt)
         CredentialFields(user, { user = it }, password, { password = it }, show, { show = it }, onDone = submit)
         if (prompt.asksStore) NagCheckbox(keep, { keep = it }, stringResource(R.string.nag_net_remember))

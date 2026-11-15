@@ -75,6 +75,9 @@ import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.sleep.AlarmSection
 import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.AccentTones
+import app.nagmedar.ui.music.rememberArtworkColor
+import app.nagmedar.ui.playback.rememberNowPlaying
+import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import app.nagmedar.ui.theme.DensityPreference
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -373,12 +376,21 @@ internal fun AppearanceSection(prefs: NagmedarPreferences) {
         }
         val seed = systemAccentSeed()
         val wallpaper = remember(seed) { seed?.let { AccentTones.fromSeed(it).base } }
+        // 1.1.0 (Ebru): the playing album's ink, as the theme tunes it
+        val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
+        val albumSeed = rememberArtworkColor(playing)
+        val album = remember(albumSeed) { albumSeed?.let { AccentTones.fromSeed(it).base } } ?: Accent.Album.base
         SettingRow(
             stringResource(R.string.nag_settings_accent),
-            subtitle = if (wallpaper != null) stringResource(R.string.nag_accent_system_hint) else null,
+            subtitle = when {
+                prefs.accent == Accent.Album -> stringResource(R.string.nag_accent_album_hint)
+                wallpaper != null -> stringResource(R.string.nag_accent_system_hint)
+                else -> null
+            },
         ) {
             SwatchChoice(
                 options = buildList {
+                    add(Triple(Accent.Album, album, stringResource(R.string.nag_accent_album)))
                     if (wallpaper != null) add(Triple(Accent.System, wallpaper, stringResource(R.string.nag_accent_system)))
                     add(Triple(Accent.Blue, Accent.Blue.base, stringResource(R.string.nag_accent_blue)))
                     add(Triple(Accent.Amber, Accent.Amber.base, stringResource(R.string.nag_accent_amber)))
@@ -388,6 +400,7 @@ internal fun AppearanceSection(prefs: NagmedarPreferences) {
                 // without a wallpaper colour the system accent is blue
                 selected = if (wallpaper == null && prefs.accent == Accent.System) Accent.Blue else prefs.accent,
                 onSelect = prefs::updateAccent,
+                marks = mapOf(Accent.Album to NagIcons.Music),
             )
         }
     }

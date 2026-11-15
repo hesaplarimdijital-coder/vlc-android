@@ -18,20 +18,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.input.hardwareKeyboard
 import app.nagmedar.ui.input.hasHardwareKeyboard
 import app.nagmedar.ui.shell.KeyCap
+import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagTheme
 
 /**
@@ -99,11 +105,14 @@ fun DialogDismissButton(modifier: Modifier = Modifier) {
 /**
  * The card of the player's small dialogs: a title with Esc, then what it asks; [cardWidth] wide where the window has
  * room. Esc is shown with a keyboard at hand; without one (a phone, a tablet by touch) a × closes the dialog instead.
+ *
+ * 1.1.0 (Ebru): the title is the question itself in Bodoni's italic ([dialogShape], [dialogPadding]); the card a
+ * rounder sheet of the raised surface.
  */
 @Composable
 internal fun DialogCard(title: String, modifier: Modifier = Modifier, cardWidth: Dp = 380.dp, content: @Composable ColumnScope.() -> Unit) {
     val colors = NagTheme.colors
-    val shape = RoundedCornerShape(12.dp)
+    val shape = dialogShape()
     BoxWithConstraints(contentAlignment = Alignment.Center) {
         val width = if (maxWidth < cardWidth + 40.dp) maxWidth - 32.dp else cardWidth
         Column(
@@ -111,20 +120,33 @@ internal fun DialogCard(title: String, modifier: Modifier = Modifier, cardWidth:
                 .width(width)
                 .shadow(24.dp, shape)
                 .background(colors.surfaceRaised, shape)
-                .border(1.dp, colors.borderStrong, shape)
+                .border(1.dp, dialogEdge(colors), shape)
                 // taps inside stay inside
                 .pointerInput(Unit) { detectTapGestures { } }
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(dialogPadding()),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = NagTheme.type.title, color = colors.text, modifier = Modifier.weight(1f))
+                Text(title, style = NagTheme.type.headline, color = colors.text, modifier = Modifier.weight(1f).semantics { heading() })
                 DialogDismissButton()
             }
             content()
         }
     }
 }
+
+/** 1.1.0 (Ebru): a dialog's corners: 24 dp by touch, 16 with a pointer. */
+@Composable
+@ReadOnlyComposable
+fun dialogShape(): Shape = RoundedCornerShape(if (NagTheme.dimens.minTarget >= 48.dp) 24.dp else 16.dp)
+
+/** 1.1.0: the room inside a dialog's edge: 24 dp by touch, 20 with a pointer. */
+@Composable
+@ReadOnlyComposable
+fun dialogPadding(): Dp = if (NagTheme.dimens.minTarget >= 48.dp) 24.dp else 20.dp
+
+/** 1.1.0: a dialog's edge: the strong border on the dark themes, the plain one on the light one (its shadow carries it there). */
+fun dialogEdge(colors: NagColors): Color = if (colors.isDark) colors.borderStrong else colors.border
 
 /** The key's name, as keyboards write it. */
 private const val ESCAPE = "Esc"

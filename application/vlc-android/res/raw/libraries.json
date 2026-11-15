@@ -11,6 +11,11 @@
       "license"  : "mit"
     },
     {
+      "title"    : "Bodoni Moda",
+      "copyright": "Copyright © 2020 The Bodoni Moda Project Authors (https://github.com/indestructible-type/Bodoni)",
+      "license"  : "ofl"
+    },
+    {
       "title"    : "Bootstrap",
       "copyright": "Copyright © 2011-2023 The Bootstrap Authors",
       "license"  : "mit"
@@ -19,6 +24,11 @@
       "title"    : "Bouncy Castle",
       "copyright": "Copyright © 2000-2023 The Legion of the Bouncy Castle Inc.",
       "license"  : "mit"
+    },
+    {
+      "title"    : "Bricolage Grotesque",
+      "copyright": "Copyright © 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)",
+      "license"  : "ofl"
     },
     {
       "title"    : "FFmpeg",

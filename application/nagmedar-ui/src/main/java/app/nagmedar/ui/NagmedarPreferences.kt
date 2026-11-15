@@ -36,7 +36,8 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
 
     var themeMode by mutableStateOf(prefs.enumValue(KEY_THEME, ThemeMode.System))
         private set
-    var accent by mutableStateOf(prefs.enumValue(KEY_ACCENT, Accent.Blue))
+    // 1.1.0 (Ebru): the playing album's ink unless another was chosen
+    var accent by mutableStateOf(prefs.enumValue(KEY_ACCENT, Accent.Album))
         private set
     var density by mutableStateOf(prefs.enumValue(KEY_DENSITY, DensityPreference.Auto))
         private set
@@ -109,7 +110,7 @@ class NagmedarPreferences(private val prefs: SharedPreferences) : PaneWidths {
     /** Reads [key] again; null (the preferences were cleared) reads them all. */
     internal fun reload(key: String?) {
         if (key == null || key == KEY_THEME) themeMode = prefs.enumValue(KEY_THEME, ThemeMode.System)
-        if (key == null || key == KEY_ACCENT) accent = prefs.enumValue(KEY_ACCENT, Accent.Blue)
+        if (key == null || key == KEY_ACCENT) accent = prefs.enumValue(KEY_ACCENT, Accent.Album)
         if (key == null || key == KEY_DENSITY) density = prefs.enumValue(KEY_DENSITY, DensityPreference.Auto)
         if (key == null || key == KEY_SIDEBAR_COLLAPSED) sidebarCollapsed = prefs.getBoolean(KEY_SIDEBAR_COLLAPSED, false)
         if (key == null || key == KEY_TOOLTIP_DELAY) tooltipDelay = prefs.enumValue(KEY_TOOLTIP_DELAY, TooltipDelay.Normal)

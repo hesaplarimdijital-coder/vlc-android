@@ -150,7 +150,7 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
         scope.launch {
             val imported = store.import(uri, state.playlists.orEmpty().map { it.name })
             if (imported == null) {
-                Notices.show(context, res.getString(R.string.nag_pl_import_failed), long = true)
+                Notices.show(context, res.getString(R.string.nag_pl_import_failed), long = true, error = true)
                 return@launch
             }
             state.reload(prefer = imported.id)

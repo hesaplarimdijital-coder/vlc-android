@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -28,16 +29,23 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
+import app.nagmedar.ui.library.currentLocale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
+import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.SemiBoldPlus
 
 /**
- * Square icon button with hover, press and focus states. Its size never drops below the touch or
- * pointer target. A mouse resting on it shows its name and, for a [shortcut], the keys (S-404).
+ * Round icon button with hover, press and focus states (1.1.0, Ebru: a circle, as a drop; square
+ * before). Its size never drops below the touch or pointer target. A mouse resting on it shows its
+ * name and, for a [shortcut], the keys (S-404).
  */
 @Composable
 fun NagIconButton(
@@ -54,7 +62,7 @@ fun NagIconButton(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
-    val shape = RoundedCornerShape(NagTheme.dimens.radiusControl)
+    val shape = CircleShape
     val keys = shortcut?.let { ShortcutRegistry.chordLabel(it, LocalContext.current.resources) }
     Box(
         modifier = modifier
@@ -77,8 +85,8 @@ fun NagIconButton(
 }
 
 /**
- * The play button of a row (podcast episodes, recordings): an accent-filled rounded box with the
- * play glyph on it, always drawn so, with or without hover, so it is found at a glance in a list
+ * The play button of a row (podcast episodes, recordings): an accent-filled circle (1.1.0; a
+ * rounded box before) with the play glyph on it, always drawn so, with or without hover, so it is found at a glance in a list
  * whose tap opens the item. The hit area is 48 dp by touch and 36 dp with a pointer; the box in
  * it is 6 dp smaller.
  */
@@ -93,7 +101,7 @@ fun NagPlayButton(
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusControl)
+    val shape = CircleShape
     val hit = dimens.minTarget.coerceAtLeast(36.dp)
     // with a mouse the hover and the press show at once (Desktop Kit 0.2.1)
     val fill by animateInteractionColor(
@@ -124,6 +132,9 @@ fun NagPlayButton(
 /**
  * Text button. [primary] fills it with the accent colour, or with [fill] and [onFill] when a
  * state asks for its own (the success state's green button).
+ *
+ * 1.1.0 (Ebru): a pill, half its height round; the plain one has no fill of its own, only its edge,
+ * so the page's paper shows through; a filled one's label is a weight heavier.
  */
 @Composable
 fun NagButton(
@@ -140,15 +151,20 @@ fun NagButton(
      * the library): its text, icon and edge in the danger colour, its hover and press in that colour too; never filled.
      */
     danger: Boolean = false,
+    /**
+     * 1.1.0 (Ebru): the answer of a question that takes something away for good (“… silinsin mi?” › Sil): filled with
+     * the danger colour, as the primary answer is with the accent.
+     */
+    destructive: Boolean = false,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val shape = RoundedCornerShape(dimens.radiusControl)
-    @Suppress("NAME_SHADOWING") val primary = primary && !danger
-    val primaryFill = fill ?: colors.accent
-    val primaryContent = onFill ?: colors.onAccent
+    val shape = RoundedCornerShape(50)
+    @Suppress("NAME_SHADOWING") val primary = (primary || destructive) && !danger
+    val primaryFill = if (destructive) colors.danger else fill ?: colors.accent
+    val primaryContent = if (destructive) onDanger(colors) else onFill ?: colors.onAccent
     // with a mouse the hover and the press show at once (Desktop Kit 0.2.1)
     val background by animateInteractionColor(
         when {
@@ -164,7 +180,7 @@ fun NagButton(
             primary -> primaryFill
             state.pressed -> colors.pressed
             state.hovered -> colors.hover
-            else -> colors.surfaceRaised
+            else -> colors.surfaceRaised.copy(alpha = 0f)
         },
     )
     val content = when {
@@ -173,6 +189,8 @@ fun NagButton(
         primary -> primaryContent
         else -> colors.text
     }
+    // a pill's sides: room for the round ends
+    val pad = if (dimens.minTarget >= 48.dp) 18.dp else 12.dp
     Row(
         modifier = modifier
             // by touch a 48 dp target either way (S-310)
@@ -188,31 +206,39 @@ fun NagButton(
                 },
             )
             .nagClickable(interaction, onClick, enabled = enabled, role = Role.Button)
-            .padding(horizontal = dimens.gapM),
+            .padding(start = if (icon != null) pad - 4.dp else pad, end = pad),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(dimens.icon))
+            Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size((dimens.icon - 4.dp).coerceAtLeast(15.dp)))
             Spacer(Modifier.width(dimens.gapS))
         }
-        Text(text, style = NagTheme.type.label, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        val label = NagTheme.type.label
+        Text(text, style = if (primary && enabled) label.copy(fontWeight = SemiBoldPlus) else label, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
+
+/** 1.1.0: the label on the danger colour as a fill: near black on the dark themes' light coral, white on the light one's deep red. */
+fun onDanger(colors: NagColors): Color = if (colors.isDark) Color(0xFF1A0A08) else Color.White
 
 /** How faded a control is that cannot be used now. */
 private const val DISABLED_ALPHA = 0.45f
 
-/** Small uppercase-free section caption used in the sidebar and settings. */
+/**
+ * A section's caption in the sidebar and the settings. 1.1.0 (Ebru): the overline: small capitals in the reader's
+ * locale ("KÜTÜPHANE", "İNDİRMELER"), a little air between them; read out, and found by tests, as it is written.
+ */
 @Composable
 fun SectionCaption(text: String, modifier: Modifier = Modifier) {
+    val locale = currentLocale()
     Text(
-        text = text,
-        style = NagTheme.type.labelSmall,
+        text = remember(text, locale) { text.uppercase(locale) },
+        style = NagTheme.type.overline,
         color = NagTheme.colors.textTertiary,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier,
+        modifier = modifier.clearAndSetSemantics { this.text = AnnotatedString(text) },
     )
 }
 

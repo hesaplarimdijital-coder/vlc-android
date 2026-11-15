@@ -249,7 +249,7 @@ private fun RemoveDialog(episode: PodcastEpisode, onConfirm: () -> Unit, onDismi
                             onConfirm()
                             onDismiss()
                         },
-                        primary = true,
+                        destructive = true,
                     )
                 }
             }

@@ -107,6 +107,9 @@ const val NAGMEDAR_MUSIC_VIEW = "nagmedar_music_view"
 /** S-1001: the music table's columns, in order, comma-separated (app.nagmedar.ui.music.MusicColumn's keys). */
 const val NAGMEDAR_MUSIC_COLUMNS = "nagmedar_music_columns"
 
+/** 1.1.0 (Ebru): how the music library shows its groups: "grid" (their covers) or "list" (rows beside their tracks). */
+const val NAGMEDAR_MUSIC_LAYOUT = "nagmedar_music_layout"
+
 /** S-1007: the alarm, as app.nagmedar.ui.sleep.Alarm.encode writes it. */
 const val NAGMEDAR_ALARM = "nagmedar_alarm"
 

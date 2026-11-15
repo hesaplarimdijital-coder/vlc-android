@@ -424,6 +424,8 @@
     <string name="nag_accent_coral">Coral</string>
     <string name="nag_accent_system">Wallpaper colour</string>
     <string name="nag_accent_system_hint">Taken from your wallpaper; made lighter or darker where needed so text stays readable.</string>
+    <string name="nag_accent_album">Playing album</string>
+    <string name="nag_accent_album_hint">Taken from the cover of the album that plays; made lighter or darker where needed so text stays readable. Blue while nothing plays.</string>
     <string name="nag_settings_input">Input</string>
     <string name="nag_settings_density">Interface density</string>
     <string name="nag_density_auto">Automatic (follows mouse or touch)</string>
@@ -1084,6 +1086,12 @@
     <string name="nag_music_view_folders">Folders</string>
     <!-- 1.0: the tracks played last: a view of Music on a wide window, the shelf above it on a phone -->
     <string name="nag_music_view_recent">Recently played</string>
+    <string name="nag_music_layout_grid">Grid view</string>
+    <string name="nag_music_layout_list">List view</string>
+    <string name="nag_music_quick_all">All</string>
+    <string name="nag_music_quick_unfinished">Half-heard</string>
+    <string name="nag_music_quick_unheard">Never played</string>
+    <string name="nag_music_quick_new">Added this year</string>
     <string name="nag_music_recent_shelf">Recently played music</string>
     <string name="nag_music_recent_none_title">No track played yet</string>
     <string name="nag_music_recent_none_desc">The tracks you listen to come here, the latest first.</string>

@@ -111,12 +111,16 @@ object NagGlass {
                 GlassThickness.Regular, GlassThickness.Thick -> 28.dp
             },
             noise = 0.04f,
-            translucent = tinted.copy(alpha = if (oled) 0.97f else 0.96f),
+            // 1.1.0 (Ebru): a little denser on Gece, so its tertiary text keeps 4.5:1 over white without blur
+            translucent = tinted.copy(alpha = if (oled) 0.97f else if (colors.isDark) 0.98f else 0.96f),
             solid = base,
         )
     }
 
-    /** Opacity of the tint over the blur, per palette. */
+    /**
+     * Opacity of the tint over the blur, per palette. 1.1.0 (Ebru): Gece's thin and thick glass and Su's thick a little
+     * denser, so the new grounds' texts keep their contrast over the worst content (GlassTest).
+     */
     fun tintAlpha(dark: Boolean, oled: Boolean, thickness: GlassThickness): Float = when {
         oled -> when (thickness) {
             GlassThickness.UltraThin -> 0.62f
@@ -126,15 +130,15 @@ object NagGlass {
         }
         dark -> when (thickness) {
             GlassThickness.UltraThin -> 0.55f
-            GlassThickness.Thin -> 0.72f
+            GlassThickness.Thin -> 0.74f
             GlassThickness.Regular -> 0.82f
-            GlassThickness.Thick -> 0.88f
+            GlassThickness.Thick -> 0.93f
         }
         else -> when (thickness) {
             GlassThickness.UltraThin -> 0.50f
             GlassThickness.Thin -> 0.68f
             GlassThickness.Regular -> 0.80f
-            GlassThickness.Thick -> 0.90f
+            GlassThickness.Thick -> 0.92f
         }
     }
 

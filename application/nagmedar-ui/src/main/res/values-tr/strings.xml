@@ -424,6 +424,8 @@
     <string name="nag_accent_coral">Mercan</string>
     <string name="nag_accent_system">Duvar kâğıdı rengi</string>
     <string name="nag_accent_system_hint">Duvar kâğıdınızdan alınır; yazılar okunaklı kalsın diye gerektiğinde açılır ya da koyulaşır.</string>
+    <string name="nag_accent_album">Çalan albüm</string>
+    <string name="nag_accent_album_hint">Çalan albümün kapağından alınır; yazılar okunaklı kalsın diye gerektiğinde açılır ya da koyulaşır. Bir şey çalmıyorken mavidir.</string>
     <string name="nag_settings_input">Giriş</string>
     <string name="nag_settings_density">Arayüz yoğunluğu</string>
     <string name="nag_density_auto">Otomatik (fare ya da dokunmaya göre)</string>
@@ -1078,6 +1080,12 @@
     <string name="nag_music_view_folders">Klasörler</string>
     <!-- 1.0: the tracks played last: a view of Music on a wide window, the shelf above it on a phone -->
     <string name="nag_music_view_recent">Son çalınanlar</string>
+    <string name="nag_music_layout_grid">Izgara görünümü</string>
+    <string name="nag_music_layout_list">Liste görünümü</string>
+    <string name="nag_music_quick_all">Tümü</string>
+    <string name="nag_music_quick_unfinished">Yarım kalanlar</string>
+    <string name="nag_music_quick_unheard">Hiç dinlenmeyenler</string>
+    <string name="nag_music_quick_new">Bu yıl eklenenler</string>
     <string name="nag_music_recent_shelf">Son çalınan müzik</string>
     <string name="nag_music_recent_none_title">Henüz parça çalınmadı</string>
     <string name="nag_music_recent_none_desc">Dinlediğiniz parçalar burada görünür, en yenisi başta.</string>

@@ -475,7 +475,7 @@ private fun StreamToPlaylist(stream: SavedStream, history: StreamHistory, scope:
     fun add(name: String, into: suspend (Long) -> Boolean) {
         scope.launch {
             val id = stream.id.takeIf { it > 0 } ?: history.idOf(stream.address, stream.name)
-            if (id > 0 && into(id)) added(name) else Notices.show(context, R.string.nag_streams_playlist_failed, long = true)
+            if (id > 0 && into(id)) added(name) else Notices.show(context, R.string.nag_streams_playlist_failed, long = true, error = true)
         }
     }
     AddToPlaylistDialog(

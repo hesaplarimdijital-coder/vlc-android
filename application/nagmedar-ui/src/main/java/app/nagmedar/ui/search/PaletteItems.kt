@@ -78,6 +78,7 @@ fun settingItems(res: Resources, prefs: NagmedarPreferences, wallpaperAccent: Bo
         ThemeMode.Oled to R.string.nag_theme_oled,
     ).map { (mode, label) -> item("theme.${mode.name}", R.string.nag_settings_theme, label) { prefs.updateThemeMode(mode) } }
     val accents = listOfNotNull(
+        Accent.Album to R.string.nag_accent_album,
         (Accent.System to R.string.nag_accent_system).takeIf { wallpaperAccent },
         Accent.Blue to R.string.nag_accent_blue,
         Accent.Amber to R.string.nag_accent_amber,

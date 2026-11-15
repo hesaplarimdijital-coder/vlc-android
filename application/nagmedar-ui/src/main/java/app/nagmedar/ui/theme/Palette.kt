@@ -6,18 +6,27 @@ import androidx.compose.ui.graphics.Color
 /** Appearance chosen in Settings → Appearance. */
 enum class ThemeMode { System, Light, Dark, Oled }
 
-/** Accent colours offered by the design; blue is the brand colour. */
+/**
+ * Accent colours offered by the design; blue is the brand colour. 1.1.0 (Ebru): the four inks are tuned for the Gece,
+ * Su and Kara grounds (each tone found as [AccentTones.fromSeed] finds it, from the 1.0 colours as seeds).
+ */
 enum class Accent(val base: Color) {
-    Blue(Color(0xFF8AB0FF)),
-    Amber(Color(0xFFF2B84B)),
-    Green(Color(0xFF59D49A)),
-    Coral(Color(0xFFFF7A6E)),
+    Blue(Color(0xFF84A9F8)),
+    Amber(Color(0xFFD8A02C)),
+    Green(Color(0xFF48C58C)),
+    Coral(Color(0xFFFF7F73)),
 
     /**
      * S-204: the wallpaper's colour (Android 12+), turned into tones that keep every contrast
      * ([AccentTones.fromSeed]); blue where the system has no such colour. [base] is that blue.
      */
-    System(Color(0xFF8AB0FF)),
+    System(Color(0xFF84A9F8)),
+
+    /**
+     * 1.1.0 (Ebru): the ink of the album that plays, from its cover's colour ([app.nagmedar.ui.music.rememberArtworkColor])
+     * tuned as the wallpaper's is ([AccentTones.fromSeed]); blue while nothing with a coloured cover plays.
+     */
+    Album(Color(0xFF84A9F8)),
 }
 
 /**
@@ -77,9 +86,12 @@ data class NagColors(
 
 object NagPalette {
 
-    /** [systemSeed]: the wallpaper colour behind [Accent.System]. */
-    fun colors(mode: ThemeMode, systemDark: Boolean, accent: Accent, systemSeed: Color? = null): NagColors {
-        val tones = AccentTones.of(accent, systemSeed)
+    /** [systemSeed]: the wallpaper colour behind [Accent.System], the playing album's cover colour behind [Accent.Album]. */
+    fun colors(mode: ThemeMode, systemDark: Boolean, accent: Accent, systemSeed: Color? = null): NagColors =
+        colors(mode, systemDark, AccentTones.of(accent, systemSeed))
+
+    /** The palette of [mode] with [tones] as its accent. */
+    fun colors(mode: ThemeMode, systemDark: Boolean, tones: AccentTones): NagColors {
         return when (mode) {
             ThemeMode.Light -> light(tones)
             ThemeMode.Dark -> dark(tones)
@@ -94,86 +106,101 @@ object NagPalette {
 
     fun light(accent: Accent) = light(AccentTones.of(accent))
 
+    /**
+     * 1.1.0 (Ebru): Gece, a night-blue soot under the inks; the chrome a step above the page, the panels and the raised
+     * surfaces further up, each text at 4.5:1 on all of them under the pointer too.
+     */
     fun dark(tones: AccentTones) = NagColors(
         isDark = true,
-        background = Color(0xFF111418),
-        chrome = Color(0xFF0C0F12),
-        surface = Color(0xFF171B20),
-        surfaceRaised = Color(0xFF1F252C),
-        hover = Color(0xFF262C34),
-        // 1.0.8 (Desktop Kit 2.8.0): a step past hover, so a press shows under the pointer (1.16:1 to hover; 1.06:1 before)
-        pressed = Color(0xFF30363F),
-        border = Color(0xFF20262D),
-        borderStrong = Color(0xFF2A3038),
-        text = Color(0xFFE6E9ED),
-        textSecondary = Color(0xFFC3CAD3),
-        textTertiary = Color(0xFF959FAB),
+        background = Color(0xFF0E1014),
+        chrome = Color(0xFF121519),
+        surface = Color(0xFF15181E),
+        surfaceRaised = Color(0xFF1D2129),
+        hover = Color(0xFF23272F),
+        // 1.0.8 (Desktop Kit 2.8.0): a step past hover, so a press shows under the pointer
+        pressed = Color(0xFF2D323B),
+        border = Color(0xFF1F232A),
+        borderStrong = Color(0xFF2B3038),
+        text = Color(0xFFEEF0F2),
+        textSecondary = Color(0xFFB0B6C0),
+        textTertiary = Color(0xFF8E96A2),
         accent = tones.base,
-        onAccent = Color(0xFF0E1420),
+        onAccent = Color(0xFF14110C),
         accentText = tones.base,
         selection = tones.darkSelection,
         onSelection = tones.onDarkSelection,
         focusRing = tones.base,
-        success = Color(0xFF59D49A),
+        success = Color(0xFF6CD39C),
         warning = Color(0xFFF2B84B),
-        danger = Color(0xFFFF7A6E),
-        brandBlue = Color(0xFF8AB0FF),
-        brandCoral = Color(0xFFFF7A6E),
+        danger = Color(0xFFFF7D6E),
+        brandBlue = Color(0xFF7FA8F0),
+        brandCoral = Color(0xFFF27C62),
         scrim = Color(0x99000000),
-        inverseSurface = Color(0xFFE6E9ED),
+        inverseSurface = Color(0xFFEEF0F2),
         onInverseSurface = Color(0xFF14181C),
         inverseAccent = tones.darkInverse,
-        controlBorder = Color(0xFF6A7480),
+        controlBorder = Color(0xFF6E7683),
     )
 
+    /** 1.1.0 (Ebru): Kara, the inks on black; the panels barely lifted from it. */
     fun oled(tones: AccentTones) = dark(tones).copy(
         background = Color(0xFF000000),
         chrome = Color(0xFF000000),
-        surface = Color(0xFF0A0C0F),
-        surfaceRaised = Color(0xFF161A1F),
-        hover = Color(0xFF1C2127),
-        pressed = Color(0xFF2A3038),
-        border = Color(0xFF1A1F25),
-        borderStrong = Color(0xFF262C34),
+        surface = Color(0xFF0A0B0D),
+        surfaceRaised = Color(0xFF15171B),
+        hover = Color(0xFF1B1E23),
+        pressed = Color(0xFF262A30),
+        border = Color(0xFF16181C),
+        borderStrong = Color(0xFF22252B),
         selection = tones.oledSelection,
         scrim = Color(0xB3000000),
     )
 
+    /**
+     * 1.1.0 (Ebru): Su, a broken white leaning to water, the page a shade under the panels as marbling paper is under
+     * its ink; the raised surfaces white.
+     */
     fun light(tones: AccentTones) = NagColors(
         isDark = false,
-        background = Color(0xFFFAFBFC),
-        chrome = Color(0xFFFFFFFF),
-        surface = Color(0xFFFFFFFF),
+        background = Color(0xFFEEF0EC),
+        chrome = Color(0xFFF4F5F2),
+        surface = Color(0xFFF7F8F5),
         surfaceRaised = Color(0xFFFFFFFF),
-        // 1.0.8 (Desktop Kit 2.8.0): hover shows on the page (1.14:1 to it; 1.10:1 before), a press a step further
-        hover = Color(0xFFE9EDF2),
-        pressed = Color(0xFFDADEE4),
-        border = Color(0xFFE2E5EA),
-        borderStrong = Color(0xFFD6DAE0),
-        text = Color(0xFF12161B),
-        textSecondary = Color(0xFF4A5360),
-        textTertiary = Color(0xFF58626D),
+        // 1.0.8 (Desktop Kit 2.8.0): hover shows on the page, a press a step further
+        hover = Color(0xFFE2E5DF),
+        pressed = Color(0xFFD5D9D2),
+        border = Color(0xFFDADED7),
+        borderStrong = Color(0xFFCBD0C8),
+        text = Color(0xFF151C19),
+        textSecondary = Color(0xFF46514C),
+        textTertiary = Color(0xFF58625D),
         accent = tones.deep,
         onAccent = Color(0xFFFFFFFF),
         accentText = tones.deep,
         selection = tones.lightSelection,
-        onSelection = Color(0xFF0E1420),
+        onSelection = Color(0xFF101613),
         focusRing = tones.deep,
-        success = Color(0xFF187A4F),
-        warning = Color(0xFF8A5A12),
-        danger = Color(0xFFB4382B),
-        brandBlue = Color(0xFF4E78D8),
-        brandCoral = Color(0xFFE0574B),
-        scrim = Color(0x6612161B),
-        inverseSurface = Color(0xFF1F252C),
-        onInverseSurface = Color(0xFFE6E9ED),
+        success = Color(0xFF146F47),
+        warning = Color(0xFF875811),
+        danger = Color(0xFFB1372A),
+        brandBlue = Color(0xFF3F68C4),
+        brandCoral = Color(0xFFC24A33),
+        scrim = Color(0x66151C19),
+        inverseSurface = Color(0xFF1D2421),
+        onInverseSurface = Color(0xFFEEF0EC),
         inverseAccent = tones.base,
-        controlBorder = Color(0xFF7E8794),
+        controlBorder = Color(0xFF78827C),
     )
 
     /** 1.0.8 (Desktop Kit 2.8.0): the check on a colour swatch (the accent chooser): the swatches are all light enough for it. */
     val onSwatch: Color = Color(0xFF0E1420)
 }
+
+/**
+ * 1.1.0 (Ebru): the danger colour that reads on [NagColors.inverseSurface] (a notice's warning sign and edge): the
+ * light palette's deep red on the dark themes' light card, the dark palette's coral on the light theme's dark one.
+ */
+fun NagColors.inverseDanger(): Color = if (isDark) Color(0xFFB1372A) else Color(0xFFFF7D6E)
 
 /** CSS `color-mix(in srgb, a fraction, b)`: mixes in gamma-encoded sRGB like the mockups. */
 fun mixSrgb(a: Color, b: Color, fraction: Float): Color = Color(

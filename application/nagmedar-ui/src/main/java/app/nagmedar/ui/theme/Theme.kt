@@ -91,6 +91,8 @@ fun NagmedarTheme(
     themeMode: ThemeMode = ThemeMode.System,
     accent: Accent = Accent.Blue,
     inputMode: InputMode = InputMode.Pointer,
+    /** 1.1.0: the playing album's cover colour, the seed of [Accent.Album]; null keeps it blue. */
+    albumSeed: Color? = null,
     reduceMotion: Boolean? = null,
     largeWindowTextStep: Float = LARGE_WINDOW_TEXT_STEP,
     compactSizes: Boolean = true,
@@ -98,8 +100,8 @@ fun NagmedarTheme(
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
-    val seed = if (accent == Accent.System) systemAccentSeed() else null
-    val target = remember(themeMode, systemDark, accent, seed) { NagPalette.colors(themeMode, systemDark, accent, seed) }
+    val tones = rememberAccentTones(accent, albumSeed)
+    val target = remember(themeMode, systemDark, tones) { NagPalette.colors(themeMode, systemDark, tones) }
     val motion = NagMotion.of(reduceMotion ?: rememberSystemReducedMotion())
     val colors = animatePalette(target, if (motion.reduced) 0 else colorChangeMillis)
     val configuration = LocalConfiguration.current
@@ -141,6 +143,24 @@ fun NagmedarTheme(
             )
         }
     }
+}
+
+/**
+ * The tones of [accent]. 1.1.0: the album's ([Accent.Album], [albumSeed]) are tuned off the main thread, against all
+ * three palettes, for each new cover; the last album's stay until the new ones are ready (the palette then cross-fades
+ * to them), blue before the first and while nothing with a coloured cover plays.
+ */
+@Composable
+private fun rememberAccentTones(accent: Accent, albumSeed: Color?): AccentTones {
+    val systemSeed = if (accent == Accent.System) systemAccentSeed() else null
+    val album = remember { mutableStateOf<AccentTones?>(null) }
+    if (accent == Accent.Album) {
+        LaunchedEffect(albumSeed) {
+            album.value = if (albumSeed == null) AccentTones.Blue else withContext(Dispatchers.Default) { AccentTones.fromSeed(albumSeed) }
+        }
+        return album.value ?: AccentTones.Blue
+    }
+    return remember(accent, systemSeed) { AccentTones.of(accent, systemSeed) }
 }
 
 /**

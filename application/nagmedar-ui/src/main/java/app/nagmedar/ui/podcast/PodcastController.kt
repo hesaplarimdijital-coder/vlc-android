@@ -656,11 +656,13 @@ class PodcastController(
                         report.news > 0 -> res.getQuantityString(R.plurals.nag_pod_refresh_news, report.news, report.news)
                         else -> res.getString(R.string.nag_pod_refresh_none)
                     },
+                    // 1.1.0 (Ebru): a failure as an error
+                    error = report.allFailed,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Notices.show(context, R.string.nag_pod_refresh_failed)
+                Notices.show(context, R.string.nag_pod_refresh_failed, error = true)
             } finally {
                 refreshingAll = services.refreshing.value
             }
@@ -673,11 +675,11 @@ class PodcastController(
         refreshingShow = feedId
         scope.launch {
             try {
-                if (repository.refresh(feedId) is RefreshResult.Failed) Notices.show(context, R.string.nag_pod_refresh_show_failed)
+                if (repository.refresh(feedId) is RefreshResult.Failed) Notices.show(context, R.string.nag_pod_refresh_show_failed, error = true)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Notices.show(context, R.string.nag_pod_refresh_show_failed)
+                Notices.show(context, R.string.nag_pod_refresh_show_failed, error = true)
             } finally {
                 refreshingShow = null
             }

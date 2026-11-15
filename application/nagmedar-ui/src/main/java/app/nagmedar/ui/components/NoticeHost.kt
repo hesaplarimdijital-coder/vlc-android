@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.SemiBoldPlus
+import app.nagmedar.ui.theme.inverseDanger
 import app.nagmedar.ui.theme.mixSrgb
 import kotlinx.coroutines.delay
 import org.videolan.tools.Notices
@@ -89,29 +92,38 @@ private fun NoticeBar(notice: Notices.Notice) {
             if (remaining <= 0) Notices.dismiss(notice.id)
         }
     }
-    val shape = RoundedCornerShape(9.dp)
+    // 1.1.0 (Ebru): a softer card; a plain word starts with a drop of the accent's ink, an error with its warning sign in
+    // the danger colour that reads on this surface and an edge of it; a progress draws its line along the card's foot
+    val shape = RoundedCornerShape(16.dp)
+    val danger = colors.inverseDanger()
     Column(
         Modifier
             // a progress stays while its work goes on: it is not swiped away
             .then(if (notice.progress) Modifier else Modifier.swipeToDismiss(notice.id) { Notices.dismiss(notice.id) })
-            .shadow(10.dp, shape)
+            .shadow(12.dp, shape)
             .background(colors.inverseSurface, shape)
-            .then(if (notice.error) Modifier.border(1.dp, colors.danger, shape) else Modifier)
+            .then(if (notice.error) Modifier.border(1.5.dp, danger, shape) else Modifier)
             .hoverable(interaction)
             .onFocusChanged { focused = it.hasFocus }
-            .heightIn(min = 42.dp)
+            .heightIn(min = 48.dp)
             .semantics { liveRegion = if (notice.error) LiveRegionMode.Assertive else LiveRegionMode.Polite }
-            .padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+            .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = if (notice.progress) 4.dp else 6.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        Row(Modifier.heightIn(min = 34.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (notice.error) {
-                Icon(NagIcons.Warning, contentDescription = null, tint = colors.onInverseSurface, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(8.dp))
+        Row(Modifier.heightIn(min = 36.dp), verticalAlignment = Alignment.CenterVertically) {
+            when {
+                notice.error -> {
+                    Icon(NagIcons.Warning, contentDescription = null, tint = danger, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(10.dp))
+                }
+                !notice.progress -> {
+                    Box(Modifier.size(8.dp).background(colors.inverseAccent, CircleShape))
+                    Spacer(Modifier.width(12.dp))
+                }
             }
             Text(
                 notice.text,
-                style = NagTheme.type.body,
+                style = NagTheme.type.body.copy(fontWeight = FontWeight.Medium),
                 color = colors.onInverseSurface,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
@@ -128,7 +140,10 @@ private fun NoticeBar(notice: Notices.Notice) {
             }
         }
         if (notice.progress) {
-            NagProgressBar(null, notice.text, Modifier.padding(end = 8.dp, bottom = 6.dp).width(240.dp), color = colors.inverseAccent)
+            NagProgressBar(
+                null, notice.text, Modifier.padding(end = 10.dp, bottom = 6.dp).width(240.dp), color = colors.inverseAccent,
+                track = mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.18f), thickness = 3.dp,
+            )
         }
     }
 }
@@ -138,7 +153,8 @@ private fun NoticeButton(label: String, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
-    val shape = RoundedCornerShape(6.dp)
+    // 1.1.0 (Ebru): a pill, as every button
+    val shape = RoundedCornerShape(50)
     val background = when {
         state.pressed -> mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.16f)
         state.hovered -> mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.08f)
@@ -150,10 +166,10 @@ private fun NoticeButton(label: String, onClick: () -> Unit) {
             .then(if (state.focused) Modifier.border(2.dp, colors.inverseAccent, shape) else Modifier)
             .background(background, shape)
             .nagClickable(interaction, onClick, role = Role.Button)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = NagTheme.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, style = NagTheme.type.label.copy(fontWeight = SemiBoldPlus), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

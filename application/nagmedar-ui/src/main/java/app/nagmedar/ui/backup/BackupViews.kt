@@ -78,7 +78,8 @@ internal fun BackupSection(
             val written = runCatching { app.write(app.make(), uri) }.getOrDefault(false)
             working = false
             if (written) last = app.lastBackup() ?: last
-            Notices.show(context, if (written) R.string.nag_backup_done else R.string.nag_backup_failed)
+            // 1.1.0 (Ebru): a failure as an error: its warning sign, read out at once
+            Notices.show(context, if (written) R.string.nag_backup_done else R.string.nag_backup_failed, error = !written)
         }
     }
     val restoreFrom = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
@@ -87,9 +88,9 @@ internal fun BackupSection(
             try {
                 restore = RestoreState.Choosing(app.read(uri))
             } catch (e: BackupException) {
-                Notices.show(context, readFailure(e.reason), long = true)
+                Notices.show(context, readFailure(e.reason), long = true, error = true)
             } catch (e: IOException) {
-                Notices.show(context, R.string.nag_backup_unreadable, long = true)
+                Notices.show(context, R.string.nag_backup_unreadable, long = true, error = true)
             }
         }
     }

@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
 
-// Generated from the mockup icons (16 x 16 grid, 1.6 stroke, round caps) by
+// Generated from the mockup icons (16 x 16 grid, 1.45 stroke, round caps) by
 // buildsystem/branding/gen_icons.py; edit the generator, not this file.
 object NagIcons {
     val Home: ImageVector by lazy { icon("Home", stroke("M3 7.5 8 3l5 4.5V13H9.5V9.5h-3V13H3z")) }
@@ -34,8 +34,6 @@ object NagIcons {
     val ChevronLeft: ImageVector by lazy { icon("ChevronLeft", stroke("m10 4-4 4 4 4"), mirrored = true) }
     val ChevronRight: ImageVector by lazy { icon("ChevronRight", stroke("m6 4 4 4-4 4"), mirrored = true) }
     val Check: ImageVector by lazy { icon("Check", stroke("m3.5 8.5 3 3 6-7")) }
-    /** 1.0.8: a check box's third state (some of the rows). */
-    val Minus: ImageVector by lazy { icon("Minus", stroke("M4 8h8")) }
     val Play: ImageVector by lazy { icon("Play", fill("M5 3.2v9.6L13 8z")) }
     val Resume: ImageVector by lazy { icon("Resume", stroke("M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8")) }
     val Forward: ImageVector by lazy { icon("Forward", stroke("M13 8a5 5 0 1 1-1.6-3.7M13 2.5v2.8h-2.8")) }
@@ -107,6 +105,8 @@ object NagIcons {
     val ChapterPrevious: ImageVector by lazy { icon("ChapterPrevious", stroke("M8 4 4 8l4 4M12.5 4l-4 4 4 4")) }
     val ChapterNext: ImageVector by lazy { icon("ChapterNext", stroke("M3.5 4l4 4-4 4M8 4l4 4-4 4")) }
     val Posters: ImageVector by lazy { icon("Posters", stroke("M2.5,3H6.5A1,1 0 0 1 7.5,4V12A1,1 0 0 1 6.5,13H2.5A1,1 0 0 1 1.5,12V4A1,1 0 0 1 2.5,3Z"), stroke("M9.5,3H13.5A1,1 0 0 1 14.5,4V12A1,1 0 0 1 13.5,13H9.5A1,1 0 0 1 8.5,12V4A1,1 0 0 1 9.5,3Z")) }
+    /** 1.0.8: a check box's third state (some of the rows). */
+    val Minus: ImageVector by lazy { icon("Minus", stroke("M4 8h8")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -121,8 +121,7 @@ object NagIcons {
         SuccessCircle, Warning, DriveRemoved, DiskFull, NetworkOff, SearchOff, Lock, FlipHorizontal,
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
         Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
-        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters,
-        Minus,
+        Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters, Minus,
     )
 }
 
@@ -150,7 +149,7 @@ private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false
                         pathData = addPathNodes(part.d),
                         fill = null,
                         stroke = SolidColor(Color.Black),
-                        strokeLineWidth = 1.6f,
+                        strokeLineWidth = 1.45f,
                         strokeLineCap = StrokeCap.Round,
                         strokeLineJoin = StrokeJoin.Round,
                     )

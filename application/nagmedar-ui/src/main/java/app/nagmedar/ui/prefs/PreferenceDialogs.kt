@@ -90,7 +90,7 @@ fun PreferenceDialogHost(controller: AllSettingsController) {
         is PrefDialog.Text -> TextDialog(dialog.item.title, values.text(dialog.item), dialog.item.multiLine, onSave = { controller.type(dialog.item, it) }, onDismiss = close)
         is PrefDialog.Number -> NumberDialog(dialog.item.title, values.number(dialog.item), dialog.item.min, dialog.item.max, onSave = { controller.setNumber(dialog.item, it) }, onDismiss = close)
         is PrefDialog.Colour -> ColourDialog(dialog.item.title, values.number(dialog.item), onSave = { controller.setColour(dialog.item, it) }, onDismiss = close)
-        is PrefDialog.Confirm -> ConfirmDialog(dialog.title, dialog.message, dialog.button, onConfirm = dialog.onConfirm, onDismiss = close)
+        is PrefDialog.Confirm -> ConfirmDialog(dialog.title, dialog.message, dialog.button, onConfirm = dialog.onConfirm, onDismiss = close, destructive = dialog.destructive)
         PrefDialog.Restart -> ConfirmDialog(
             stringResource(R.string.restart_vlc),
             stringResource(R.string.restart_message),
@@ -303,9 +303,20 @@ private fun parseHex(text: String): Int? {
     return digits.toIntOrNull(16)?.let { it or OPAQUE }
 }
 
-/** A question before a change: [button] makes it, [dismiss] (Cancel) leaves it. */
+/**
+ * A question before a change: [button] makes it, [dismiss] (Cancel) leaves it. 1.1.0 (Ebru): a [destructive] change
+ * (one that deletes) has its button in the danger colour.
+ */
 @Composable
-internal fun ConfirmDialog(title: String, message: String, button: String, onConfirm: () -> Unit, onDismiss: () -> Unit, dismiss: String? = null) {
+internal fun ConfirmDialog(
+    title: String,
+    message: String,
+    button: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    dismiss: String? = null,
+    destructive: Boolean = false,
+) {
     NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
             DialogCard(title, cardWidth = 460.dp) {
@@ -320,7 +331,7 @@ internal fun ConfirmDialog(title: String, message: String, button: String, onCon
                     NagButton(button, {
                         onDismiss()
                         onConfirm()
-                    }, primary = true)
+                    }, primary = true, destructive = destructive)
                 }
             }
         }
@@ -347,7 +358,8 @@ internal fun SleepDefaultDialog(minutes: Int?, wait: Boolean, reset: Boolean, on
     val typed = text.trim().toIntOrNull()?.takeIf { it in 1..MAX_SLEEP_MINUTES }
     NagDialog(onDismissRequest = onDismiss) {
         DialogFrame(onDismiss) {
-            DialogCard(stringResource(R.string.sleep_title), cardWidth = 420.dp) {
+            // 1.1.0: the glossary's name, as the player's own window has it ("Uyku zamanlayıcısı")
+            DialogCard(stringResource(R.string.nag_sleep_title), cardWidth = 420.dp) {
                 NagTextField(text, { text = it.filter(Char::isDigit).take(4) }, stringResource(R.string.nag_prefs_sleep_minutes), placeholder = stringResource(R.string.disabled))
                 NagCheckbox(waits, { waits = it }, stringResource(R.string.wait_before_sleep), Modifier.fillMaxWidth())
                 NagCheckbox(resets, { resets = it }, stringResource(R.string.reset_on_interaction), Modifier.fillMaxWidth())

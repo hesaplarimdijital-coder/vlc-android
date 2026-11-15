@@ -62,7 +62,8 @@ import androidx.compose.ui.input.InputMode as ComposeInputMode
 /**
  * A filter that is on or off (S-801): "4K", "Dolby Vision", "İzlenmedi". On, it takes the
  * selection colour and a check mark slides in (Desktop Kit 0.2.0); screen readers hear a checkbox.
- * The pill is 28 dp with a pointer and 36 dp by touch, in a 48 dp target (S-310). By touch it
+ * The pill is 28 dp with a pointer and 40 dp by touch (36 before 1.1.0), in a 48 dp target (S-310);
+ * off, it is only its edge on the page (1.1.0, Ebru). By touch it
  * vibrates as it turns on or off ([app.nagmedar.ui.theme.NagHaptics.toggle], Desktop Kit 2.0).
  */
 @Composable
@@ -93,11 +94,11 @@ fun FilterChip(label: String, selected: Boolean, onToggle: (Boolean) -> Unit, mo
     ) {
         Row(
             modifier = Modifier
-                .height(if (touch) 36.dp else 28.dp)
+                .height(if (touch) 40.dp else 28.dp)
                 .focusRing(state, shape)
-                .background(stateBackground(state, selected, rest = colors.surface), shape)
+                .background(stateBackground(state, selected, rest = colors.surface.copy(alpha = 0f)), shape)
                 .border(1.dp, border, shape)
-                .padding(start = if (touch) 12.dp else 10.dp, end = if (touch) 14.dp else 10.dp),
+                .padding(start = if (touch) 14.dp else 10.dp, end = if (touch) 14.dp else 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -186,7 +187,8 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
     val inputModes = LocalInputModeManager.current
     // opened from the keyboard, the menu's first item takes the focus (S-1403)
     var byKeys by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(dimens.radiusControl)
+    // 1.1.0 (Ebru): a pill, as the buttons
+    val shape = RoundedCornerShape(50)
     Box(modifier) {
         Row(
             modifier = Modifier
@@ -204,7 +206,7 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
                     },
                     role = Role.DropdownList,
                 )
-                .padding(horizontal = 10.dp),
+                .padding(start = if (icon != null) 10.dp else 14.dp, end = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (icon != null) {

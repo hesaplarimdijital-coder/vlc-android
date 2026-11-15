@@ -155,7 +155,7 @@ fun ShortcutEditor(
         val written = runCatching {
             context.contentResolver.openOutputStream(uri)?.use { it.write(ShortcutFile.export(table).toByteArray()) } != null
         }.getOrDefault(false)
-        Notices.show(context, if (written) R.string.nag_sc_exported else R.string.nag_sc_export_failed)
+        Notices.show(context, if (written) R.string.nag_sc_exported else R.string.nag_sc_export_failed, error = !written)
     }
     val importFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -164,7 +164,7 @@ fun ShortcutEditor(
             ShortcutFile.import(text)
         }.getOrNull()
         if (imported == null) {
-            Notices.show(context, R.string.nag_sc_import_failed, long = true)
+            Notices.show(context, R.string.nag_sc_import_failed, long = true, error = true)
         } else {
             val message = res.getQuantityString(R.plurals.nag_sc_imported, imported.applied, imported.applied) +
                 if (imported.skipped.isEmpty()) "" else " · " + res.getQuantityString(R.plurals.nag_sc_import_skipped, imported.skipped.size, imported.skipped.size)

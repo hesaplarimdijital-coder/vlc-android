@@ -62,6 +62,8 @@ fun PageHeader(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    /** 1.1.0 (Ebru): the title as the page's masthead, large in Bodoni's italic (the Music page, under its band). */
+    masthead: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val dimens = NagTheme.dimens
@@ -80,8 +82,8 @@ fun PageHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showTitle) {
-            Text(title, style = NagTheme.type.display, color = NagTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.semantics { heading() })
+            Text(title, style = if (masthead) NagTheme.type.masthead else NagTheme.type.display, color = NagTheme.colors.text, maxLines = 1,
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
             if (subtitle != null) Spacer(Modifier.width(dimens.gapS))
         }
         // the actions keep their room; a long subtitle is cut short instead

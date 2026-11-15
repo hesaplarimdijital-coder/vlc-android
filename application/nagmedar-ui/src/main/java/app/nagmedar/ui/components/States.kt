@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
@@ -65,6 +66,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
@@ -84,7 +86,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import app.nagmedar.ui.input.keyHint
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalMotionTier
@@ -92,11 +93,12 @@ import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagColors
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
+import app.nagmedar.ui.theme.SemiBoldPlus
 import app.nagmedar.ui.theme.mixSrgb
+import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlin.math.abs
 
 /*
  * S-308 state components: empty, permission, loading, no results, error, warning, success and
@@ -149,19 +151,19 @@ fun toneColors(tone: StateTone): ToneColors = NagTheme.colors.tone(tone)
 @Immutable
 data class StateAction(val label: String, val onClick: () -> Unit)
 
-/** Small coloured label: "BOŞ", "4 sorun", "4 yeni". */
+/** Small coloured label: "BOŞ", "4 sorun", "4 yeni". 1.1.0 (Ebru): a pill of the tone's colour. */
 @Composable
 fun ToneBadge(text: String, tone: StateTone, modifier: Modifier = Modifier) {
     val c = toneColors(tone)
     Text(
         text = text,
-        style = NagTheme.type.caption.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.04.em),
+        style = NagTheme.type.caption.copy(fontWeight = SemiBoldPlus),
         color = c.content,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
-            .background(c.container, RoundedCornerShape(5.dp))
-            .padding(horizontal = 7.dp, vertical = 1.dp),
+            .background(c.container, RoundedCornerShape(50))
+            .padding(horizontal = 9.dp, vertical = 3.dp),
     )
 }
 
@@ -169,25 +171,43 @@ fun ToneBadge(text: String, tone: StateTone, modifier: Modifier = Modifier) {
 @Composable
 fun StatusLine(text: String, tone: StateTone, modifier: Modifier = Modifier) {
     val c = toneColors(tone)
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Icon(if (tone == StateTone.Success) NagIcons.Check else NagIcons.Warning, contentDescription = null, tint = c.content,
-            modifier = Modifier.size(12.dp))
-        Text(text, style = NagTheme.type.labelSmall, color = c.content)
+            modifier = Modifier.size(14.dp))
+        Text(text, style = NagTheme.type.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = c.content)
     }
 }
 
+/**
+ * A state's sign. 1.1.0 (Ebru): a drop of the tone's ink on water, as marbling starts: the filled core (the tone's
+ * icon container, its icon at 3:1 on it) and two rings spreading round it, fainter outwards. [size] is the outer ring's.
+ */
 @Composable
 fun StateIconTile(icon: ImageVector, tone: StateTone, modifier: Modifier = Modifier, size: Dp = 40.dp) {
+    val colors = NagTheme.colors
     val c = toneColors(tone)
+    val outer = mixSrgb(c.base, colors.surface, if (colors.isDark) 0.16f else 0.13f)
+    val ring = mixSrgb(c.base, colors.surface, if (colors.isDark) 0.34f else 0.28f)
     Box(
         modifier
             .size(size)
-            .background(c.iconContainer, RoundedCornerShape(size * 0.3f)),
+            .drawBehind {
+                val radius = this.size.minDimension / 2
+                val thin = 1.dp.toPx()
+                val middle = 1.5.dp.toPx()
+                drawCircle(outer, radius = radius - thin / 2, style = Stroke(thin))
+                drawCircle(ring, radius = radius * DROP_RING - middle / 2, style = Stroke(middle))
+                drawCircle(c.iconContainer, radius = radius * DROP_CORE)
+            },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = c.icon, modifier = Modifier.size(size / 2))
+        Icon(icon, contentDescription = null, tint = c.icon, modifier = Modifier.size((size * 0.36f).coerceAtLeast(14.dp)))
     }
 }
+
+/** The drop's middle ring and its core, as parts of its outer ring's radius. */
+private const val DROP_RING = 0.82f
+private const val DROP_CORE = 0.64f
 
 private fun liveMode(tone: StateTone) =
     if (tone == StateTone.Error || tone == StateTone.Warning) LiveRegionMode.Assertive else LiveRegionMode.Polite
@@ -235,11 +255,12 @@ private fun StateText(tone: StateTone, icon: ImageVector, title: String, descrip
         modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = mode },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        StateIconTile(icon, tone)
-        Spacer(Modifier.height(if (dense) dimens.gapS else dimens.gapM))
+        // 1.1.0 (Ebru): the drop larger on a page, the title in Bodoni's italic there; a card keeps Bricolage
+        StateIconTile(icon, tone, size = if (dense) 44.dp else 64.dp)
+        Spacer(Modifier.height(if (dense) dimens.gapS else dimens.gapL))
         Text(
             title,
-            style = if (dense) NagTheme.type.bodyStrong.copy(fontWeight = FontWeight.SemiBold) else NagTheme.type.title,
+            style = if (dense) NagTheme.type.title.copy(fontSize = NagTheme.type.size(16f), lineHeight = NagTheme.type.size(22f)) else NagTheme.type.headline,
             color = colors.text,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() },
@@ -281,17 +302,26 @@ private fun StateActions(tone: StateTone, primary: StateAction?, secondary: Stat
 /** Text on the success colour used as a fill: deep green on the light green, white on the deep one. */
 fun successOnFill(colors: NagColors): Color = if (colors.isDark) Color(0xFF0B1F15) else Color.White
 
-/** Determinate ([progress] 0..1) or indeterminate (null) progress line with progress semantics. */
+/**
+ * Determinate ([progress] 0..1) or indeterminate (null) progress line with progress semantics. 1.1.0 (Ebru): 4 dp, its
+ * ends round; [track] is what it runs on ([NagColors.hover] on the page, a mix of the inverse colours in a notice).
+ */
 @Composable
-fun NagProgressBar(progress: Float?, label: String, modifier: Modifier = Modifier, color: Color = NagTheme.colors.accent) {
-    val colors = NagTheme.colors
-    val shape = RoundedCornerShape(3.dp)
+fun NagProgressBar(
+    progress: Float?,
+    label: String,
+    modifier: Modifier = Modifier,
+    color: Color = NagTheme.colors.accent,
+    track: Color = NagTheme.colors.hover,
+    thickness: Dp = 4.dp,
+) {
+    val shape = RoundedCornerShape(50)
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
-            .height(5.dp)
+            .height(thickness)
             .clip(shape)
-            .background(colors.hover)
+            .background(track)
             .semantics {
                 contentDescription = label
                 progressBarRangeInfo = if (progress == null) {
@@ -393,7 +423,7 @@ fun LoadingState(
 fun SkeletonBlock(modifier: Modifier = Modifier, shimmer: Boolean = false) {
     val colors = NagTheme.colors
     val base = mixSrgb(colors.hover, colors.surface, 0.6f)
-    val shape = RoundedCornerShape(7.dp)
+    val shape = RoundedCornerShape(6.dp)
     val loop = if (shimmer) NagTheme.motion.loop(NagMotion.SHIMMER) else null
     if (loop == null) {
         Box(modifier.background(base, shape))
@@ -497,28 +527,30 @@ fun AlertBanner(
 ) {
     val colors = NagTheme.colors
     val c = toneColors(tone)
-    val shape = RoundedCornerShape(9.dp)
+    // 1.1.0 (Ebru): a softer card; the tone's stripe is an ink stroke, inset and round at its ends
+    val shape = RoundedCornerShape(16.dp)
     Row(
         modifier
             .widthIn(max = 480.dp)
             .height(IntrinsicSize.Min)
             .shadow(12.dp, shape)
             .background(colors.alertBackground(tone), shape)
-            .border(1.dp, mixSrgb(c.base, colors.surfaceRaised, 0.45f), shape)
+            .border(1.dp, mixSrgb(c.base, colors.surfaceRaised, 0.30f), shape)
             .semantics {
                 liveRegion = LiveRegionMode.Assertive
                 paneTitle = title
             },
     ) {
-        Box(Modifier.width(3.dp).fillMaxHeight().background(c.base))
-        Column(Modifier.weight(1f).padding(start = 11.dp, top = 12.dp, end = 12.dp, bottom = 10.dp)) {
+        Box(Modifier.padding(start = 9.dp, top = 14.dp, bottom = 14.dp).width(4.dp).fillMaxHeight().background(c.base, RoundedCornerShape(50)))
+        Column(Modifier.weight(1f).padding(start = 11.dp, top = 14.dp, end = 14.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = c.base, modifier = Modifier.size(15.dp))
+                Icon(icon, contentDescription = null, tint = c.content, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(title, style = NagTheme.type.bodyStrong, color = c.content)
+                Text(title, style = NagTheme.type.bodyStrong.copy(fontWeight = SemiBoldPlus), color = c.content)
             }
-            Spacer(Modifier.height(6.dp))
-            Text(message, style = NagTheme.type.labelSmall, color = colors.textSecondary)
+            Spacer(Modifier.height(4.dp))
+            val words = NagTheme.type.label
+            Text(message, style = words.copy(fontWeight = FontWeight.Normal, lineHeight = words.fontSize * 1.43f), color = colors.textSecondary)
             if (actions.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 // 1.0.8 (Desktop Kit 2.8.0, DeskMail's request 6): two actions that do not fit side by side (a phone's
@@ -543,7 +575,7 @@ private fun ToneTextButton(action: StateAction, tone: StateTone, outlined: Boole
     val state = interaction.collectState()
     val colors = NagTheme.colors
     val c = toneColors(tone)
-    val shape = RoundedCornerShape(NagTheme.dimens.radiusControl)
+    val shape = RoundedCornerShape(50)
     val background = when {
         state.pressed -> mixSrgb(c.base, colors.surfaceRaised, 0.26f)
         state.hovered -> mixSrgb(c.base, colors.surfaceRaised, 0.16f)
@@ -556,10 +588,10 @@ private fun ToneTextButton(action: StateAction, tone: StateTone, outlined: Boole
             .background(background, shape)
             .then(if (outlined) Modifier.border(1.dp, mixSrgb(c.base, colors.surfaceRaised, 0.5f), shape) else Modifier)
             .nagClickable(interaction, action.onClick, role = Role.Button)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(action.label, style = NagTheme.type.label, color = c.content, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(action.label, style = NagTheme.type.label.copy(fontWeight = SemiBoldPlus), color = c.content, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -658,20 +690,23 @@ fun UndoBar(message: UndoMessage, onUndo: () -> Unit, onTimeout: () -> Unit, mod
         }
         if (remaining <= 0) timeout()
     }
-    val shape = RoundedCornerShape(9.dp)
+    // 1.1.0 (Ebru): the notices' card, a clock turning back before the words
+    val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = modifier
             .swipeToDismiss(message.id) { timeout() }
             .alpha(if (older) 0.75f else 1f)
-            .shadow(10.dp, shape)
+            .shadow(12.dp, shape)
             .background(colors.inverseSurface, shape)
             .hoverable(interaction)
             .onFocusChanged { focused = it.hasFocus }
-            .heightIn(min = 42.dp)
+            .heightIn(min = 48.dp)
             .semantics { liveRegion = LiveRegionMode.Polite }
-            .padding(start = 14.dp, end = 6.dp),
+            .padding(start = 16.dp, end = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Icon(NagIcons.History, contentDescription = null, tint = mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.62f), modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(10.dp))
         Text(
             message.text,
             style = NagTheme.type.body,
@@ -706,7 +741,8 @@ private fun InverseTextButton(label: String, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val state = interaction.collectState()
     val colors = NagTheme.colors
-    val shape = RoundedCornerShape(6.dp)
+    // 1.1.0 (Ebru): a pill
+    val shape = RoundedCornerShape(50)
     val background = when {
         state.pressed -> mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.16f)
         state.hovered -> mixSrgb(colors.onInverseSurface, colors.inverseSurface, 0.08f)
@@ -718,10 +754,10 @@ private fun InverseTextButton(label: String, onClick: () -> Unit) {
             .then(if (state.focused) Modifier.border(2.dp, colors.inverseAccent, shape) else Modifier)
             .background(background, shape)
             .nagClickable(interaction, onClick, role = Role.Button)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = NagTheme.type.label.copy(fontWeight = FontWeight.SemiBold), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, style = NagTheme.type.label.copy(fontWeight = SemiBoldPlus), color = colors.inverseAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

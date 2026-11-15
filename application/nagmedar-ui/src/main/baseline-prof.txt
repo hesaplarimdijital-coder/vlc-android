@@ -8,3 +8,9 @@ HSPLapp/nagmedar/ui/components/**->**(**)**
 HSPLapp/nagmedar/ui/shell/**->**(**)**
 HSPLapp/nagmedar/ui/theme/**->**(**)**
 HSPLapp/nagmedar/ui/input/**->**(**)**
+# 1.1.0 (Ebru): the Music page's new parts, which the generator's walk of 1.0.9 never saw: the grid of covers, the
+# listening traces, the quick filters and the marbled band (drawn off the main thread, its tray's maps in a loop)
+HSPLapp/nagmedar/ui/music/MusicGrid**->**(**)**
+HSPLapp/nagmedar/ui/music/*MusicGridKt**->**(**)**
+HSPLapp/nagmedar/ui/music/Ebru**->**(**)**
+HSPLapp/nagmedar/ui/music/*EbruBandKt**->**(**)**

@@ -88,7 +88,8 @@ sealed interface PrefDialog {
     data class Colour(val item: PrefItem) : PrefDialog
 
     /** A question VLC asked before a change it cannot take back: [onConfirm] makes it. */
-    data class Confirm(val title: String, val message: String, val button: String, val onConfirm: () -> Unit) : PrefDialog
+    /** 1.1.0: [destructive], what it does cannot be taken back (its button in the danger colour). */
+    data class Confirm(val title: String, val message: String, val button: String, val destructive: Boolean = false, val onConfirm: () -> Unit) : PrefDialog
 
     /** The change takes effect when the app starts again: now, or later. */
     data object Restart : PrefDialog
@@ -210,7 +211,8 @@ class AllSettingsController(
                 context.getString(R.string.clear_playback_history),
                 context.getString(R.string.clear_history_message),
                 context.getString(R.string.clear_history),
-                ::clearHistory,
+                destructive = true,
+                onConfirm = ::clearHistory,
             )
             "clear_media_db" -> if (libraryBusy()) {
                 notice(R.string.settings_ml_block_scan, error = true)
@@ -219,13 +221,15 @@ class AllSettingsController(
                     context.getString(R.string.clear_media_db),
                     context.getString(R.string.clear_media_db_message),
                     context.getString(R.string.clear),
-                    ::clearMediaDatabase,
+                    destructive = true,
+                    onConfirm = ::clearMediaDatabase,
                 )
             }
             "clear_app_data" -> dialog = PrefDialog.Confirm(
                 context.getString(R.string.clear_app_data),
                 context.getString(R.string.clear_app_data_message),
                 context.getString(R.string.clear),
+                destructive = true,
             ) { context.getSystemService<ActivityManager>()?.clearApplicationUserData() }
             "quit_app" -> Process.killProcess(Process.myPid())
             "dump_media_db" -> if (libraryBusy()) notice(R.string.settings_ml_block_scan, error = true) else fileRequest = PrefFile.MediaDatabase

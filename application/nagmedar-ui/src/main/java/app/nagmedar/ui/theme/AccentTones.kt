@@ -14,8 +14,9 @@ import kotlin.math.sin
 /**
  * What an accent gives the palettes (S-204): its light tone for the dark themes ([base]), its deep
  * tone for the light theme ([deep]), the tinted selection surfaces and the text on them, and the
- * accent of the undo bar on the dark themes ([darkInverse]). The four fixed accents are tuned by
- * hand; the system accent is derived from the wallpaper colour by [fromSeed].
+ * accent of the undo bar on the dark themes ([darkInverse]). The four fixed accents are fixed
+ * tones; the system accent is derived from the wallpaper colour by [fromSeed], the album's
+ * (1.1.0) from the cover's.
  */
 @Immutable
 data class AccentTones(
@@ -39,18 +40,40 @@ data class AccentTones(
             darkInverse = mixSrgb(base, Color.Black, 0.5f),
         )
 
-        val Blue = fixed(Accent.Blue.base, Color(0xFF1C2A49), Color(0xFF142039), Color(0xFFDCE6FF))
-        val Amber = fixed(Accent.Amber.base, Color(0xFF33290F), Color(0xFF2C230F), Color(0xFFF8E3BD))
-        val Green = fixed(Accent.Green.base, Color(0xFF12301F), Color(0xFF102B1F), Color(0xFFCFF3E2))
-        val Coral = fixed(Accent.Coral.base, Color(0xFF3A1E1B), Color(0xFF2E1816), Color(0xFFFFD9D4))
+        /**
+         * 1.1.0 (Ebru): the four inks on the Gece, Su and Kara grounds, each tone as [fromSeed] finds it with the 1.0
+         * colour as the seed ("mavi", "kehribar", "yeşil", "mercan" of the theme's sheet), kept here as they are.
+         */
+        val Blue = AccentTones(
+            base = Color(0xFF84A9F8), deep = Color(0xFF3F60A8), darkSelection = Color(0xFF1E2D4C), oledSelection = Color(0xFF152341),
+            onDarkSelection = Color(0xFFDDE8FF), lightSelection = Color(0xFFE2ECFF), darkInverse = Color(0xFF34549B),
+        )
+        val Amber = AccentTones(
+            base = Color(0xFFD8A02C), deep = Color(0xFF825B00), darkSelection = Color(0xFF3D2A02), oledSelection = Color(0xFF322000),
+            onDarkSelection = Color(0xFFF6E6CB), lightSelection = Color(0xFFFDE8C6), darkInverse = Color(0xFF745100),
+        )
+        val Green = AccentTones(
+            base = Color(0xFF48C58C), deep = Color(0xFF007048), darkSelection = Color(0xFF04321E), oledSelection = Color(0xFF002716),
+            onDarkSelection = Color(0xFFD2F1DF), lightSelection = Color(0xFFCFF6E0), darkInverse = Color(0xFF006943),
+        )
+        val Coral = AccentTones(
+            base = Color(0xFFFF7F73), deep = Color(0xFFAC312C), darkSelection = Color(0xFF47211D), oledSelection = Color(0xFF3C1713),
+            onDarkSelection = Color(0xFFFFE0DB), lightSelection = Color(0xFFFFE4E0), darkInverse = Color(0xFF972F29),
+        )
 
-        /** [systemSeed] is the wallpaper colour; without one (Android 11 and older) the system accent is blue. */
-        fun of(accent: Accent, systemSeed: Color? = null): AccentTones = when (accent) {
+        /** Where [fromSeed] starts: 1.0's blue, a tone at a time replaced by the seed's. */
+        private val Start = fixed(Color(0xFF8AB0FF), Color(0xFF1C2A49), Color(0xFF142039), Color(0xFFDCE6FF))
+
+        /**
+         * [seed] is the wallpaper colour for [Accent.System] (none on Android 11 and older), the playing album's cover
+         * colour for [Accent.Album] (none while nothing with a coloured cover plays); without one either is blue.
+         */
+        fun of(accent: Accent, seed: Color? = null): AccentTones = when (accent) {
             Accent.Blue -> Blue
             Accent.Amber -> Amber
             Accent.Green -> Green
             Accent.Coral -> Coral
-            Accent.System -> if (systemSeed == null) Blue else fromSeed(systemSeed)
+            Accent.System, Accent.Album -> if (seed == null) Blue else fromSeed(seed)
         }
 
         /**
@@ -68,7 +91,7 @@ data class AccentTones(
                 return (0..count).map { from + (to - from) * it / count.coerceAtLeast(1) }
             }
 
-            var tones = Blue
+            var tones = Start
             fun tune(lightness: List<Float>, candidate: AccentTones.(Float) -> AccentTones) {
                 tones = lightness.asSequence().map { tones.candidate(it) }.firstOrNull { it.passes() } ?: tones
             }

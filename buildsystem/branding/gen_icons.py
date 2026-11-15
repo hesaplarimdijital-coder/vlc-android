@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate application/nagmedar-ui/.../components/NagIcons.kt from the mockup icons.
 
-The mockups draw every icon on a 16 x 16 grid with 1.6 px round-capped strokes; some parts
+The mockups draw every icon on a 16 x 16 grid with round-capped strokes STROKE px wide (1.45 since
+Nağmedar 1.1.0's Ebru theme, 1.6 before); some parts
 are filled with currentColor. Rects and circles are converted to path data, then each icon
 becomes a lazily built Compose ImageVector (tinted by Icon()).
 
@@ -18,6 +19,9 @@ import math
 import os
 import re
 import sys
+
+# 1.1.0 (Ebru): the strokes of every icon, on the 16 x 16 grid
+STROKE = '1.45'
 
 ICONS = {
     'Home': '<path d="M3 7.5 8 3l5 4.5V13H9.5V9.5h-3V13H3z"/>',
@@ -126,6 +130,7 @@ ICONS = {
     'ChapterNext': '<path d="M3.5 4l4 4-4 4M8 4l4 4-4 4"/>',
     # the films' poster view: two upright posters
     'Posters': '<rect x="1.5" y="3" width="6" height="10" rx="1"/><rect x="8.5" y="3" width="6" height="10" rx="1"/>',
+    'Minus': '<path d="M4 8h8"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.
@@ -177,7 +182,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
 
-// Generated from the mockup icons (16 x 16 grid, 1.6 stroke, round caps) by
+// Generated from the mockup icons (16 x 16 grid, ''' + STROKE + ''' stroke, round caps) by
 // buildsystem/branding/gen_icons.py; edit the generator, not this file.
 object NagIcons {'''
 
@@ -207,7 +212,7 @@ private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false
                         pathData = addPathNodes(part.d),
                         fill = null,
                         stroke = SolidColor(Color.Black),
-                        strokeLineWidth = 1.6f,
+                        strokeLineWidth = ''' + STROKE + '''f,
                         strokeLineCap = StrokeCap.Round,
                         strokeLineJoin = StrokeJoin.Round,
                     )
@@ -218,12 +223,20 @@ private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false
 '''
 
 
+# what an icon is for, where its name does not say it (a line of KDoc above it)
+DOCS = {
+    'Minus': "1.0.8: a check box's third state (some of the rows).",
+}
+
+
 def main(out):
     lines = [HEADER]
     for name, svg in ICONS.items():
         args = ', '.join('%s("%s")' % ('fill' if filled else 'stroke', d) for d, filled in parts(svg))
         if name in MIRRORED:
             args += ', mirrored = true'
+        if name in DOCS:
+            lines.append('    /** %s */' % DOCS[name])
         lines.append('    val %s: ImageVector by lazy { icon("%s", %s) }' % (name, name, args))
     lines.append('')
     lines.append('    /** Every icon in the generator\'s order: the icon board and its tests. */')
@@ -298,7 +311,7 @@ def skip(comment, arc, seconds):
 
 
 def drawable_paths(svg, color, indent):
-    """The icon's parts as <path> elements: strokes 1.6 wide with round ends, fills."""
+    """The icon's parts as <path> elements: strokes STROKE wide with round ends, fills."""
     out = []
     for d, filled in parts(svg):
         if filled:
@@ -306,8 +319,8 @@ def drawable_paths(svg, color, indent):
         else:
             out.append(('%s<path\n%s    android:fillColor="#00000000"\n%s    android:pathData="%s"\n'
                         '%s    android:strokeColor="%s"\n%s    android:strokeLineCap="round"\n'
-                        '%s    android:strokeLineJoin="round"\n%s    android:strokeWidth="1.6" />\n') % (
-                indent, indent, indent, d, indent, color, indent, indent, indent))
+                        '%s    android:strokeLineJoin="round"\n%s    android:strokeWidth="%s" />\n') % (
+                indent, indent, indent, d, indent, color, indent, indent, indent, STROKE))
     return ''.join(out)
 
 

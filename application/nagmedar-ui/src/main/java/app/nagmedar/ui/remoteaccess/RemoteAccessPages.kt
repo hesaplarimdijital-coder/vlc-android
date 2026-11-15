@@ -270,9 +270,10 @@ private fun OneTimeCodeDialog(code: String, onNotMe: () -> Unit, onDismiss: () -
             DialogCard(stringResource(R.string.nag_ra_code_title), Modifier.testTag("ra-code"), cardWidth = 400.dp) {
                 Text(stringResource(R.string.nag_ra_code_hint), style = NagTheme.type.body, color = NagTheme.colors.textSecondary)
                 val spoken = code.toList().joinToString(" ")
+                // 1.1.0 (Ebru): the code in the mono face, its digits read one by one
                 Text(
                     code.chunked(3).joinToString(" "),
-                    style = NagTheme.type.display,
+                    style = NagTheme.type.mono.copy(fontSize = NagTheme.type.size(28f), lineHeight = NagTheme.type.size(36f)),
                     color = NagTheme.colors.text,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = spoken },

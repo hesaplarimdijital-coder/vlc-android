@@ -127,6 +127,8 @@ internal fun MusicToolbar(
                 NagIconButton(NagIcons.Shuffle, shuffleLabel, { actions.play(tracks.shuffled(), 0) }, enabled = ready)
             }
             Spacer(Modifier.width(dimens.gapS))
+            // 1.1.0 (Ebru): the groups as covers or as rows
+            if (state.view.grouped) LayoutToggle(state)
             FilterButton(state, probing)
         }
     }

@@ -154,6 +154,7 @@ private fun ChoiceBar(state: PlayerEqualizerState, controller: PlayerEqualizerCo
             button = stringResource(R.string.nag_peq_delete),
             onConfirm = controller::delete,
             onDismiss = { deleting = false },
+            destructive = true,
         )
     }
 }

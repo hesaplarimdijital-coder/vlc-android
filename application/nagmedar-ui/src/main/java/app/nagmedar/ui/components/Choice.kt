@@ -1,6 +1,7 @@
 package app.nagmedar.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
@@ -32,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -73,7 +76,8 @@ fun <T> SegmentedChoice(
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
-    val outer = RoundedCornerShape(dimens.radiusControl + 2.dp)
+    // 1.1.0 (Ebru): a pill holding pills
+    val outer = RoundedCornerShape(dimens.radiusPill)
     val gap = 2.dp
     val haptics = rememberNagHaptics()
     Layout(
@@ -88,7 +92,7 @@ fun <T> SegmentedChoice(
                 val interaction = remember { MutableInteractionSource() }
                 val state = interaction.collectState()
                 val isSelected = value == selected
-                val shape = RoundedCornerShape(dimens.radiusControl)
+                val shape = RoundedCornerShape(dimens.radiusPill - 2.dp)
                 Box(
                     modifier = Modifier
                         // by touch a 48 dp target either way (S-310)
@@ -193,11 +197,18 @@ internal fun segmentLines(widths: List<Int>, maxWidth: Int, gap: Int): List<IntR
 
 /**
  * Colour swatches for the accent choice. More colours than fit the width (a phone's, with touch
- * targets) go on to a second line (Desktop Kit 2.1).
+ * targets) go on to a second line (Desktop Kit 2.1). 1.1.0: a swatch of [marks] carries its sign while
+ * it is not chosen (the playing album's: a note).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSelect: (T) -> Unit, modifier: Modifier = Modifier) {
+fun <T> SwatchChoice(
+    options: List<Triple<T, Color, String>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    marks: Map<T, ImageVector> = emptyMap(),
+) {
     val colors = NagTheme.colors
     FlowRow(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp), itemVerticalAlignment = Alignment.CenterVertically) {
         options.forEach { (value, swatch, label) ->
@@ -223,7 +234,12 @@ fun <T> SwatchChoice(options: List<Triple<T, Color, String>>, selected: T, onSel
                         .border(if (isSelected) 2.dp else 1.dp, if (isSelected) colors.text else colors.borderStrong, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isSelected) Icon(NagIcons.Check, contentDescription = null, tint = NagPalette.onSwatch, modifier = Modifier.size(14.dp))
+                    val mark = marks[value]
+                    if (isSelected) {
+                        Icon(NagIcons.Check, contentDescription = null, tint = NagPalette.onSwatch, modifier = Modifier.size(14.dp))
+                    } else if (mark != null) {
+                        Icon(mark, contentDescription = null, tint = NagPalette.onSwatch, modifier = Modifier.size(14.dp))
+                    }
                 }
                 // a colour has no words: a resting mouse brings its name (S-404), and the keyboard's focus (1.0.8)
                 HoverTooltip(state.hovered && !state.pressed, label, focused = state.focused && !state.pressed)
@@ -362,31 +378,34 @@ internal fun SwitchTrack(checked: Boolean, modifier: Modifier = Modifier) {
     // the thumb's spring stops half a pixel from its end (Desktop Kit 2.3): without a threshold it ran on unseen to a
     // hundredth of a dp
     val halfPixel = with(LocalDensity.current) { NagMotion.PIXEL.toDp() }
-    // the thumb moves in the layout phase: its spring does not recompose the switch frame by frame
-    val thumbStart = animateDpAsState(if (checked) 18.dp else 4.dp, NagTheme.motion.fastSpatial(halfPixel), label = "switchThumb")
+    // 1.1.0 (Ebru): a pill of 52 × 32 dp by touch (40 × 24 with a pointer); off, an input's edge round an empty track
+    // (3:1 to the page, 1.0.8) and a small thumb in its colour; on, the accent filled with a large thumb on it
+    val touch = NagTheme.dimens.minTarget >= 48.dp
+    val width = if (touch) 52.dp else 40.dp
+    val height = if (touch) 32.dp else 24.dp
+    val large = if (touch) 24.dp else 18.dp
+    val small = if (touch) 16.dp else 12.dp
+    val inset = (height - large) / 2
+    // the thumb moves in the layout phase and grows in the draw phase: its spring does not recompose the switch frame by frame
+    val centre = animateDpAsState(if (checked) width - inset - large / 2 else height / 2, NagTheme.motion.fastSpatial(halfPixel), label = "switchThumb")
+    val scale = animateFloatAsState(if (checked) 1f else small / large, NagTheme.motion.fastSpatial(), label = "switchThumbSize")
+    val pill = RoundedCornerShape(50)
     Box(
         modifier
-            .size(width = 38.dp, height = 24.dp)
-            // 1.0.8 (Desktop Kit 2.8.0): off, the track is an input's edge (3:1 to the page)
-            .background(animateStateColor(if (checked) colors.accent else colors.controlBorder, "switchTrack"), RoundedCornerShape(12.dp)),
+            .size(width = width, height = height)
+            .background(animateStateColor(if (checked) colors.accent else colors.accent.copy(alpha = 0f), "switchTrack"), pill)
+            .border(2.dp, animateStateColor(if (checked) colors.accent else colors.controlBorder, "switchEdge"), pill),
         contentAlignment = Alignment.CenterStart,
     ) {
         Box(
             Modifier
-                .offset { IntOffset(thumbStart.value.roundToPx(), 0) }
-                .size(16.dp)
-                // 1.0.8: on the light theme's darker off track the thumb is the surface's colour
-                .background(
-                    animateStateColor(
-                        when {
-                            checked -> colors.onAccent
-                            colors.isDark -> colors.textSecondary
-                            else -> colors.surface
-                        },
-                        "switchThumbColor",
-                    ),
-                    CircleShape,
-                ),
+                .offset { IntOffset((centre.value - large / 2).roundToPx(), 0) }
+                .size(large)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+                .background(animateStateColor(if (checked) colors.onAccent else colors.controlBorder, "switchThumbColor"), CircleShape),
         )
     }
 }
@@ -459,18 +478,23 @@ fun NagCheckMark(state: ToggleableState, onClick: (() -> Unit)?, modifier: Modif
     }
 }
 
-/** The box of [NagCheckbox] and [NagCheckMark]: filled with the accent and ticked (or a dash) when on. */
+/**
+ * The box of [NagCheckbox] and [NagCheckMark]: filled with the accent and ticked (or a dash) when on. 1.1.0 (Ebru):
+ * 22 dp by touch (18 with a pointer), its corners rounder and its edge an input's (3:1 to the page).
+ */
 @Composable
 private fun CheckBox(on: Boolean, dash: Boolean = false) {
     val colors = NagTheme.colors
-    val box = RoundedCornerShape(3.dp)
+    val touch = NagTheme.dimens.minTarget >= 48.dp
+    val size = if (touch) 22.dp else 18.dp
+    val box = RoundedCornerShape(if (touch) 6.dp else 5.dp)
     Box(
         Modifier
-            .size(16.dp)
+            .size(size)
             .background(animateStateColor(if (on) colors.accent else colors.accent.copy(alpha = 0f), "checkFill"), box)
-            .border(1.5.dp, animateStateColor(if (on) colors.accent else colors.textTertiary, "checkBorder"), box),
+            .border(2.dp, animateStateColor(if (on) colors.accent else colors.controlBorder, "checkBorder"), box),
         contentAlignment = Alignment.Center,
     ) {
-        if (on) Icon(if (dash) NagIcons.Minus else NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(12.dp))
+        if (on) Icon(if (dash) NagIcons.Minus else NagIcons.Check, contentDescription = null, tint = colors.onAccent, modifier = Modifier.size(size - 6.dp))
     }
 }

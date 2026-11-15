@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +37,7 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -176,17 +181,26 @@ private class FieldLook(
 private fun FieldColumn(look: FieldLook, field: @Composable () -> Unit) {
     val colors = NagTheme.colors
     Column(if (look.fillWidth) Modifier.fillMaxWidth() else Modifier) {
-        if (look.showLabel) Text(look.label, style = NagTheme.type.labelSmall, color = colors.textSecondary)
+        // 1.1.0 (Ebru): the label a weight heavier, 6 dp over its field
+        if (look.showLabel) {
+            Text(look.label, style = NagTheme.type.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = colors.textSecondary,
+                modifier = Modifier.padding(bottom = 6.dp))
+        }
         field()
         if (look.supportingText != null) {
             val failing = look.error && look.enabled
-            Text(
-                look.supportingText,
-                style = NagTheme.type.labelSmall,
-                color = if (failing) colors.danger else colors.textTertiary,
-                // an error's words are said as they come, as the network form's were; 6 dp under the field, as there
-                modifier = Modifier.padding(top = 6.dp).then(if (failing) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier),
-            )
+            // an error's words are said as they come, as the network form's were; 6 dp under the field, as there; 1.1.0: after
+            // a warning sign
+            Row(
+                Modifier.padding(top = 6.dp).then(if (failing) Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite } else Modifier),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (failing) {
+                    Icon(NagIcons.Warning, contentDescription = null, tint = colors.danger, modifier = Modifier.size(15.dp))
+                    Spacer(Modifier.width(6.dp))
+                }
+                Text(look.supportingText, style = NagTheme.type.labelSmall, color = if (failing) colors.danger else colors.textTertiary)
+            }
         }
     }
 }
@@ -246,6 +260,6 @@ private fun fieldActions(onDone: (() -> Unit)?, focusManager: FocusManager) = Ke
 )
 
 /** Where a field's text sits in its frame. */
-private val FieldPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+private val FieldPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
 
 private const val DISABLED_ALPHA = 0.45f

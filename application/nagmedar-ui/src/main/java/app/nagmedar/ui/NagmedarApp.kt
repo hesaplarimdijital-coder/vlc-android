@@ -103,6 +103,7 @@ import app.nagmedar.ui.music.MusicScreen
 import app.nagmedar.ui.music.PhonePlayerHost
 import app.nagmedar.ui.music.PlaylistsScreen
 import app.nagmedar.ui.music.WindowPlayer
+import app.nagmedar.ui.music.rememberArtworkColor
 import app.nagmedar.ui.network.LibVlcDialogHost
 import app.nagmedar.ui.network.LocalNetworkHost
 import app.nagmedar.ui.network.NetworkScreen
@@ -182,6 +183,7 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.streams.StreamsCenter
 import app.nagmedar.ui.streams.StreamsScreen
 import app.nagmedar.ui.sleep.SleepTimerDialog
+import app.nagmedar.ui.theme.Accent
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.SystemBarsFollowTheme
@@ -218,7 +220,9 @@ fun NagmedarApp(
     val prefs = rememberNagmedarPreferences()
     val inputMode = rememberInputModeState()
     val mode = inputMode.effective(prefs.density)
-    NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode) {
+    // 1.1.0 (Ebru): "Çalan albüm" takes the page's ink from the cover of what plays
+    val albumSeed = if (prefs.accent == Accent.Album) rememberPlayingAlbumColor() else null
+    NagmedarTheme(themeMode = prefs.themeMode, accent = prefs.accent, inputMode = mode, albumSeed = albumSeed) {
         // in a desktop window the shell draws the caption bar (S-306); the first run stays below it
         SystemBarsFollowTheme(drawsCaption = prefs.firstRunDone)
         val caption = if (prefs.firstRunDone) rememberCaptionBar() else null
@@ -1049,4 +1053,11 @@ class AppActions(
         /** Global shortcuts whose features arrive in later MVPs; they show a notice instead. */
         val comingLater = emptySet<ShortcutId>()
     }
+}
+
+/** 1.1.0: the cover colour of the music that plays ([rememberArtworkColor]); null while nothing, or no music, plays. */
+@Composable
+private fun rememberPlayingAlbumColor(): androidx.compose.ui.graphics.Color? {
+    val nowPlaying = rememberNowPlaying()
+    return rememberArtworkColor(nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO })
 }
