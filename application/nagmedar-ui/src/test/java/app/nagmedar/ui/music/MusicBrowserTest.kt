@@ -2,43 +2,46 @@ package app.nagmedar.ui.music
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.components.LocalScreenCommands
+import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.ScreenCommands
-import androidx.compose.ui.test.assertCountEquals
 import app.nagmedar.ui.shell.LocalPaneWidths
+import app.nagmedar.ui.shell.LocalWidthClass
 import app.nagmedar.ui.shell.PaneWidths
 import app.nagmedar.ui.shell.WORKSTATION_PANE
-import androidx.compose.ui.input.InputMode as ComposeInputMode
-import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.nagmedar.ui.components.MenuEntry
-import app.nagmedar.ui.shell.LocalWidthClass
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -46,7 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import java.util.Locale
+import androidx.compose.ui.input.InputMode as ComposeInputMode
 
 /**
  * S-803, S-1001: the ways through the music library, its filter, its table's columns; Desktop Kit
@@ -100,14 +103,53 @@ class MusicBrowserTest {
         compose.onNodeWithText("Albümler").performClick()
         compose.waitForIdle()
         assertEquals(MusicView.Albums, state.view)
-        // the list of albums, then one album's tracks
+        // the albums (1.1.0: their covers, under their artists' letters), then one album's tracks
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Itrî'nin İzinde"))
         compose.onNodeWithText("Itrî'nin İzinde").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Neva Kâr").assertExists()
         compose.onNode(hasContentDescription("Listeye dön")).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Neva Kâr").assertDoesNotExist()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Gece Yolcusu"))
         compose.onNodeWithText("Gece Yolcusu").assertExists()
+    }
+
+    @Test
+    fun theAlbumsAsCoversAndAsRows() {
+        val state = show(WidthClass.Compact, InputMode.Touch, MusicBrowserState(view = MusicView.Albums))
+        // 1.1.0 (Ebru): the covers first
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Itrî'nin İzinde"))
+        compose.onNodeWithText("Itrî'nin İzinde").assertExists()
+        compose.onNode(hasContentDescription("Liste görünümü")).performClick()
+        compose.waitForIdle()
+        assertEquals(MusicLayout.List, state.layout)
+        compose.onNodeWithTag("music-grid").assertDoesNotExist()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Itrî'nin İzinde"))
+        compose.onNodeWithText("Itrî'nin İzinde").assertExists()
+        compose.onNode(hasContentDescription("Izgara görünümü")).performClick()
+        compose.waitForIdle()
+        assertEquals(MusicLayout.Grid, state.layout)
+    }
+
+    @Test
+    fun theQuickFiltersNarrowTheAlbums() {
+        val state = show(WidthClass.Compact, InputMode.Touch, MusicBrowserState(view = MusicView.Albums))
+        // nothing of the samples was played: every album is unheard, none heard in part
+        compose.onNodeWithText("Hiç dinlenmeyenler").performClick()
+        compose.waitForIdle()
+        assertEquals(QuickFilter.Unheard, state.quick)
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Itrî'nin İzinde"))
+        // the chips are the grid's first item
+        compose.onNodeWithTag("music-grid").performScrollToIndex(0)
+        compose.onNodeWithText("Yarım kalanlar").performClick()
+        compose.waitForIdle()
+        assertEquals(QuickFilter.Unfinished, state.quick)
+        compose.onNodeWithText("Itrî'nin İzinde").assertDoesNotExist()
+        compose.onNodeWithText("Filtreleri temizle").performClick()
+        compose.waitForIdle()
+        assertEquals(QuickFilter.All, state.quick)
+        compose.onNodeWithTag("music-grid").performScrollToNode(hasText("Itrî'nin İzinde"))
     }
 
     @Test
@@ -136,7 +178,7 @@ class MusicBrowserTest {
 
     @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
     fun aDesktopShowsTheGroupsBesideTheTableAndItsColumns() {
-        val state = show(WidthClass.Large, InputMode.Pointer, MusicBrowserState(view = MusicView.Genres))
+        val state = show(WidthClass.Large, InputMode.Pointer, MusicBrowserState(view = MusicView.Genres, layout = MusicLayout.List))
         // the first genre is open beside the list: its name in the list and over the table
         assertEquals(2, compose.onAllNodesWithText("Caz").fetchSemanticsNodes().size)
         compose.onNodeWithText("Ada").assertExists()

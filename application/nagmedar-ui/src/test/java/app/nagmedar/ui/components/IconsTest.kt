@@ -40,7 +40,8 @@ class IconsTest {
                 if (bounds.left - half < -0.01f || bounds.top - half < -0.01f || bounds.right + half > 16.01f || bounds.bottom + half > 16.01f) {
                     outside += "${icon.name} $bounds"
                 }
-                if (path.stroke != null) assertEquals(icon.name, 1.6f, path.strokeLineWidth)
+                // 1.1.0 (Ebru): 1.45 wide (1.6 before)
+                if (path.stroke != null) assertEquals(icon.name, 1.45f, path.strokeLineWidth)
             }
         }
         assertTrue(outside.joinToString("\n"), outside.isEmpty())

@@ -37,6 +37,8 @@ import app.nagmedar.ui.lyrics.LyricsLoad
 import app.nagmedar.ui.lyrics.LyricsPane
 import app.nagmedar.ui.lyrics.LyricsSamples
 import app.nagmedar.ui.music.Depth
+import app.nagmedar.ui.music.EbruBand
+import app.nagmedar.ui.music.EbruInks
 import app.nagmedar.ui.music.MusicActions
 import app.nagmedar.ui.music.MusicBrowser
 import app.nagmedar.ui.music.MusicBrowserState
@@ -130,20 +132,28 @@ class MusicScreenshotTest {
 
     /**
      * The music page as the app has it: its header (with the inspector's button on tablet and DeX) and the browser;
-     * with [inspector] (Desktop Kit 1.0) laid out under a floating player bar, as the app's music page is.
+     * with [inspector] (Desktop Kit 1.0) laid out under a floating player bar, as the app's music page is. 1.1.0 (Ebru):
+     * the band in the bozkır's inks (nothing with a cover plays here) across a wide window's top, a phone's list's first
+     * item; the masthead with the tracks and the albums.
      */
     @Composable
     private fun Library(library: MusicLibrary, state: MusicBrowserState, inspector: MusicInspectorContent? = null, inspectorState: InspectorState? = null) {
         val panel = inspectorState ?: rememberInspectorState()
+        val compact = currentWidthClass() == WidthClass.Compact
+        val albums = remember(library) { library.groups(MusicView.Albums).size }
+        val counts = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size) + " · " +
+            pluralStringResource(R.plurals.nag_music_albums, albums, albums)
+        val band = remember { @Composable { EbruBand(EbruInks.Default, 84.dp) } }
         val page = @Composable {
             Column(Modifier.fillMaxSize()) {
-                PageHeader(
-                    title = stringResource(R.string.nag_nav_music),
-                    subtitle = pluralStringResource(R.plurals.nag_tracks_count, library.tracks.size, library.tracks.size),
-                ) {
+                if (!compact) EbruBand(EbruInks.Default, 104.dp)
+                PageHeader(title = stringResource(R.string.nag_nav_music), subtitle = counts, masthead = true) {
                     if (inspector != null && currentWidthClass() >= WidthClass.Expanded) InspectorToggleButton(panel)
                 }
-                MusicBrowser(library, state, NoMusicActions, inspector = inspector, inspectorState = panel, stats = MusicSamples.stats)
+                MusicBrowser(
+                    library, state, NoMusicActions, inspector = inspector, inspectorState = panel, stats = MusicSamples.stats,
+                    shelf = band.takeIf { compact }, shelfPresent = if (compact) ({ true }) else null,
+                )
             }
         }
         if (inspector != null) UnderShellBars(content = page) else page()

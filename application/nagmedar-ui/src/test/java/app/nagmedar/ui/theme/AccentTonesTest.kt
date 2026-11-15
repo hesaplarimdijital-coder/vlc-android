@@ -6,20 +6,20 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
 
-/** S-204: the fixed accents keep their hand-tuned colours; the wallpaper accent is derived from its seed. */
+/** S-204: the fixed accents keep their tuned colours (1.1.0: the Ebru inks); the wallpaper's and the album's accents are derived from their seeds. */
 class AccentTonesTest {
 
     @Test
     fun fixedAccentsKeepTheirColours() {
         val dark = NagPalette.dark(Accent.Blue)
-        assertEquals(Color(0xFF8AB0FF), dark.accent)
-        assertEquals(Color(0xFF1C2A49), dark.selection)
-        assertEquals(Color(0xFFDCE6FF), dark.onSelection)
-        assertEquals(mixSrgb(Color(0xFF8AB0FF), Color.Black, 0.5f), dark.inverseAccent)
-        assertEquals(Color(0xFF2E1816), NagPalette.oled(Accent.Coral).selection)
+        assertEquals(Color(0xFF84A9F8), dark.accent)
+        assertEquals(Color(0xFF1E2D4C), dark.selection)
+        assertEquals(Color(0xFFDDE8FF), dark.onSelection)
+        assertEquals(Color(0xFF34549B), dark.inverseAccent)
+        assertEquals(Color(0xFF3C1713), NagPalette.oled(Accent.Coral).selection)
         val light = NagPalette.light(Accent.Green)
-        assertEquals(mixSrgb(Accent.Green.base, Color.Black, 0.55f), light.accent)
-        assertEquals(mixSrgb(Accent.Green.base, Color.White, 0.22f), light.selection)
+        assertEquals(Color(0xFF007048), light.accent)
+        assertEquals(Color(0xFFCFF6E0), light.selection)
         assertEquals(Accent.Green.base, light.inverseAccent)
     }
 
@@ -27,6 +27,8 @@ class AccentTonesTest {
     fun withoutAWallpaperColourTheSystemAccentIsBlue() {
         for (mode in ThemeMode.entries) {
             assertEquals(NagPalette.colors(mode, false, Accent.Blue), NagPalette.colors(mode, false, Accent.System, systemSeed = null))
+            // 1.1.0: nothing with a coloured cover plays
+            assertEquals(NagPalette.colors(mode, false, Accent.Blue), NagPalette.colors(mode, false, Accent.Album, systemSeed = null))
         }
     }
 

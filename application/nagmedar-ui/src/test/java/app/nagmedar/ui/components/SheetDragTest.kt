@@ -82,9 +82,11 @@ class SheetDragTest {
     fun aDragDownOnARowClosesItPastAThird() {
         sheet()
         val height = sheetHeight()
-        // slow (no fling): only the distance decides
+        // slow (no fling): only the distance decides. 1.1.0: 0.6 of the height, not 0.5: the sheet follows a slow drag that
+        // begins on a row less far than the finger goes (by about a third here), so at 0.5 the pull ended within a dp of the
+        // closing point, and the Ebru theme's sheet, a dp shorter, fell just short of it
         compose.onNodeWithText("Oynat").performTouchInput {
-            swipe(center, center + Offset(0f, height * 0.5f * density), durationMillis = 1500)
+            swipe(center, center + Offset(0f, height * 0.6f * density), durationMillis = 1500)
         }
         compose.waitForIdle()
         assertEquals(1, dismisses)

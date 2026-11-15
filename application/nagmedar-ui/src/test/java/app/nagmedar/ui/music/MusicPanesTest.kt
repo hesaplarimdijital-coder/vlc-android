@@ -119,7 +119,10 @@ class MusicPanesTest {
         compose.waitForIdle()
     }
 
-    /** The scrolling list of [rows] rows (the albums are 60, an album's tracks 40). */
+    /** 1.1.0: the albums' list holds the quick filters over the 60 albums. */
+    private val ALBUM_ROWS = 61
+
+    /** The scrolling list of [rows] rows (the albums are 61 with the quick filters, an album's tracks 40). */
     private fun listWith(rows: Int) = compose.onNode(
         hasScrollToNodeAction() and SemanticsMatcher("$rows rows") { it.config.getOrNull(SemanticsProperties.CollectionInfo)?.rowCount == rows },
     )
@@ -143,8 +146,8 @@ class MusicPanesTest {
 
     @Test
     fun theAlbumsKeepTheirPlaceAsTheWindowWidensAndNarrows() {
-        show(MusicBrowserState(view = MusicView.Albums))
-        listWith(60).performScrollToNode(hasText("Albüm 45"))
+        show(MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List))
+        listWith(ALBUM_ROWS).performScrollToNode(hasText("Albüm 45"))
         compose.waitForIdle()
         val top = topOnScreen("Albüm", 60)
         assertFalse(onScreen("Albüm 01"))
@@ -167,8 +170,8 @@ class MusicPanesTest {
      */
     @Test
     fun theAlbumsKeepTheirPlaceBesideTheInspector() {
-        show(MusicBrowserState(view = MusicView.Albums), withInspector = true)
-        listWith(60).performScrollToNode(hasText("Albüm 45"))
+        show(MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List), withInspector = true)
+        listWith(ALBUM_ROWS).performScrollToNode(hasText("Albüm 45"))
         compose.waitForIdle()
         val top = topOnScreen("Albüm", 60)
         width = WidthClass.Large
@@ -194,7 +197,7 @@ class MusicPanesTest {
     @Test
     fun anAlbumOpenBesideTheAlbumsStaysOpenWithItsPlaceOnceTheWindowNarrows() {
         width = WidthClass.Expanded
-        val state = MusicBrowserState(view = MusicView.Albums)
+        val state = MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List)
         show(state)
         compose.onNodeWithText("Albüm 03").performClick()
         compose.waitForIdle()
@@ -218,7 +221,7 @@ class MusicPanesTest {
     fun theDividerBetweenTheAlbumsAndTheirTracksIsKept() {
         width = WidthClass.Expanded
         val store = Store()
-        show(MusicBrowserState(view = MusicView.Albums), store)
+        show(MusicBrowserState(view = MusicView.Albums, layout = MusicLayout.List), store)
         val divider = compose.onNodeWithContentDescription("Listenin genişliği")
         // where the music view always had it
         assertTrue(abs(divider.fetchSemanticsNode().boundsInRoot.left - 260f) < 1f)

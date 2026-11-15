@@ -18,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,6 +28,7 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.music.MusicActions
 import app.nagmedar.ui.music.MusicBrowser
 import app.nagmedar.ui.music.MusicBrowserState
+import app.nagmedar.ui.music.MusicLayout
 import app.nagmedar.ui.music.MusicLibrary
 import app.nagmedar.ui.music.MusicSamples
 import app.nagmedar.ui.music.MusicView
@@ -125,7 +127,13 @@ class MediaFileMenuTest {
 
     /** An album's menu shares its tracks together and shows the first one in its folder. */
     @Test
-    fun anAlbumsMenuHasThemToo() {
+    fun anAlbumsMenuHasThemToo() = albumsMenu(MusicLayout.List)
+
+    /** 1.1.0: an album's cover in the grid has the same menu. */
+    @Test
+    fun anAlbumsCoverHasThemToo() = albumsMenu(MusicLayout.Grid)
+
+    private fun albumsMenu(layout: MusicLayout) {
         val shared = mutableListOf<List<String>>()
         val shown = mutableListOf<String>()
         val actions = object : MusicActions {
@@ -140,14 +148,16 @@ class MediaFileMenuTest {
         val library = MusicLibrary(MusicSamples.tracks, Locale.forLanguageTag("tr"))
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
-                // the albums alone, as a narrow window lists them: the album's name is its row's only
+                // the albums alone, as a narrow window shows them: the album's name is its row's (its cover's) only
                 CompositionLocalProvider(LocalWidthClass provides WidthClass.Compact) {
-                    MusicBrowser(library, MusicBrowserState(view = MusicView.Albums), actions, Modifier)
+                    MusicBrowser(library, MusicBrowserState(view = MusicView.Albums, layout = layout), actions, Modifier)
                 }
             }
         }
         compose.waitForIdle()
         val album = hasText("Itrî'nin İzinde") and hasClickAction()
+        // the grid's covers under their letters reach past the first screen
+        if (layout == MusicLayout.Grid) compose.onNodeWithTag("music-grid").performScrollToNode(album)
         fun openMenu() {
             compose.onNode(album).performMouseInput {
                 moveTo(center)
