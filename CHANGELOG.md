@@ -77,6 +77,7 @@ Ebru: Nağmedar'ın yeni tasarım dili (14 Kasım: “Peki tüm bunları kullana
   - Tablette Android 15 ve 17'de 66 denetimin hepsi geçti. Telefonda Android 17'de 71 denetimin hepsi geçti. Android Auto'nun görüntülerinde (API 34) 4 denetimin hepsi geçti. Sayfa açılışları ve bildirim kaydırma iki seviyede de yeşil.
   - Arama geçişi Müzik'in parça sayısını okuyamayınca durdu: başlığın yeni satırı (“64 tracks · 8 albums”) yürüyüşün kalıbına uymuyordu. Kalıp düzeltildi (`373e330`), arama yeniden yüründü (koşu 43710593943): iki seviyede 33 denetimin hepsi geçti.
   - Android 15'te telefonda tam oynatıcı aşağı çekilince kapanmadı; oynatıcı açık kalınca sonraki beş denetim de düştü. Yeniden yürüyüşte de aynısı oldu (koşu 43712066163). 1.0.9'da bu adım iki seviyede de geçmişti. Bir parça başlarken 1.1.0'ın getirdiği iki iş, yavaş emülatörde sürüklemelerin karelerini alıyordu: yeni albümün şeridi normal öncelikle çiziliyordu, palet de albümün rengine 150 ms'de geçerken her karede bütün renkleri yeniden çiziyordu. Artık şerit en düşük öncelikli kendi iş parçacığında çizilir, albümün rengi bir anda gelir (`77f8a40`). Telefon yeniden yüründü (koşu 43715779198): Android 15 ve 17'de 71 denetimin hepsi geçti.
+- Kişisel sürüm: CI 43719770744 (`77f8a40`), APK SHA-256 `537496c300c13350899df385108343ca46a425ba1c162d9a25ca3b201d8c293c`, 93,1 MB (97660786 bayt). İlk kişisel derleme (CI 43708562868, `bfa3b68`) bu düzeltmeden önceydi; `ci/personal-release` dalında artık bu var. Bu notların son commit'i yalnız bu dosyayı değiştirir.
 
 ## 1.0.9 (14 Kasım 2026)
 
