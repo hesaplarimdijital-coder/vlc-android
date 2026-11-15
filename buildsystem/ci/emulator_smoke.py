@@ -3895,7 +3895,8 @@ class Smoke:
             nodes = self.open_music()
             # the scan may still be going: the walk's tracks are waited for, then the Music's count of them
             library = self.search_library()
-            counted = re.compile(r"^(\d+) tracks?$")
+            # 1.1.0 (Ebru): the masthead's line has the albums after the tracks ("64 tracks · 8 albums")
+            counted = re.compile(r"^(\d+) tracks?(?: · \d+ albums?)?$")
             count_of = lambda ns: next((int(counted.match(n.text.strip()).group(1)) for n in self.app_nodes(ns) if counted.match(n.text.strip())), None)
             self.wait_for(lambda ns: [n for n in self.app_nodes(ns) if n.text.startswith("Profile track")], 40)
             nodes, _ = self.wait_for(lambda ns: (count_of(ns) or 0) >= len(library), 60)
