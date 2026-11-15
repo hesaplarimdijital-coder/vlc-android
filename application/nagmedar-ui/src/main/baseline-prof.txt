@@ -39,3 +39,8 @@ HSPLapp/nagmedar/ui/music/PanelTransport**->**(**)**
 HSPLapp/nagmedar/ui/music/WaveStyle**->**(**)**
 HSPLapp/nagmedar/ui/shell/ShellPlayerAside**->**(**)**
 HSPLapp/nagmedar/ui/shell/*PlayerAsideKt**->**(**)**
+# 1.1.3: the ebru top of Radio and Podcasts and the folding top (components, above), the band made before the eyes
+HSPLapp/nagmedar/ui/music/*EbruTopKt**->**(**)**
+HSPLapp/nagmedar/ui/music/*EbruMarblingKt**->**(**)**
+HSPLapp/nagmedar/ui/music/MarblingShader**->**(**)**
+HSPLapp/nagmedar/ui/music/ShownBand**->**(**)**

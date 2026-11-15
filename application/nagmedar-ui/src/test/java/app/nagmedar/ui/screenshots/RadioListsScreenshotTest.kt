@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.radio.FakeDirectory
 import app.nagmedar.ui.radio.FakeLibrary
@@ -104,7 +105,7 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dexSearchWithTheStrip() {
         capture("radio-dex-dark-strip", ThemeMode.Dark, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Large, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(RadioTab.Search, air(RadioSamples.jazz, "Miles Davis - So What"))
             }
         }
@@ -113,7 +114,7 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
     fun phoneFavouritesEnglish() {
         capture("radio-phone-light-favourites-en", ThemeMode.Light, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Compact, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(RadioTab.Favourites, air(RadioSamples.jazz, "Bill Evans - Waltz for Debby")) { favourites(it) }
             }
         }
@@ -122,7 +123,7 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "tr-w1000dp-h800dp-mdpi")
     fun tabletRecent() {
         capture("radio-tablet-dark-recent", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Expanded, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Expanded, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(RadioTab.Recent, air(RadioSamples.jazz, null)) { played(it); it.favourite(RadioSamples.jazz, true) }
             }
         }
@@ -131,7 +132,7 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
     fun phoneImported() {
         capture("radio-phone-dark-imported", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Compact, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(RadioTab.Imported) { it.import(imported) }
             }
         }
@@ -140,7 +141,7 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "en-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dexImportedEnglish() {
         capture("radio-dex-light-imported-en", ThemeMode.Light, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Large, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(RadioTab.Imported) { it.import(imported) }
             }
         }
@@ -149,14 +150,14 @@ class RadioListsScreenshotTest {
     @Test @Config(qualifiers = "tr-w411dp-h891dp-xhdpi")
     fun phoneNoFavourites() {
         capture("radio-phone-dark-favourites-empty", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Radio) { _, _ -> Radio(RadioTab.Favourites) }
+            TestShell(WidthClass.Compact, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio(RadioTab.Favourites) }
         }
     }
 
     @Test @Config(qualifiers = "en-w1000dp-h800dp-mdpi")
     fun tabletNothingImportedEnglish() {
         capture("radio-tablet-light-imported-empty-en", ThemeMode.Light, InputMode.Touch) {
-            TestShell(WidthClass.Expanded, startDestination = Destination.Radio) { _, _ -> Radio(RadioTab.Imported) }
+            TestShell(WidthClass.Expanded, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio(RadioTab.Imported) }
         }
     }
 }

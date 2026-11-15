@@ -47,6 +47,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.SamplePlayerBar
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.components.ActionGroup
 import app.nagmedar.ui.components.ExpandablePlayer
@@ -583,7 +584,7 @@ class MotionStripsTest {
     /** The Podcast page in the phone's shell, as the app has it: its subscriptions, and a show's page over them. */
     private fun podcastShell() {
         phoneContent {
-            TestShell(WidthClass.Compact, startDestination = Destination.Podcasts) { _, _ -> PodcastsContent(podcasts, podcastActions) }
+            TestShell(WidthClass.Compact, startDestination = Destination.Podcasts, ownTop = AppOwnTop) { _, _ -> PodcastsContent(podcasts, podcastActions) }
         }
     }
 

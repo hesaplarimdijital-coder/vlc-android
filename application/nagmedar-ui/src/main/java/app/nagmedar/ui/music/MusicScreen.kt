@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,7 @@ import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.components.ClearSelectionOnBack
+import app.nagmedar.ui.components.CollapsingTop
 import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.HorizontalSplitPane
@@ -94,6 +96,7 @@ import app.nagmedar.ui.components.collectState
 import app.nagmedar.ui.components.focusRing
 import app.nagmedar.ui.components.listAppear
 import app.nagmedar.ui.components.nagClickable
+import app.nagmedar.ui.components.rememberCollapsingTopState
 import app.nagmedar.ui.components.rememberInspectorState
 import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.components.rememberMultiSelection
@@ -652,6 +655,8 @@ internal fun PhoneMusicPage(
                 onSearch = onSearch,
                 options = options,
                 marked = filtered != null,
+                // 1.1.3: the way in shown, once the band has gone from under the chips
+                section = stringResource(viewLabel(state.view)),
                 optionsAnchor = { if (filterOpen) FilterPanel(state, probing, onDismiss = { filterOpen = false }) },
             )
         }
@@ -1248,23 +1253,36 @@ fun MusicBrowser(
     val playShown: () -> Unit = remember(actions) { { actions.play(playFrom.value ?: shuffleFrom.value.flatMap { it.tracks }, 0) } }
     val shuffleShown: () -> Unit = remember(actions) { { actions.play((playFrom.value ?: shuffleFrom.value.flatMap { it.tracks }).shuffled(), 0) } }
     val covers = grid && open == null
+    // 1.1.3: a wide window's band and masthead fold away as its covers, groups and tracks scroll, the tabs and the
+    // toolbar staying at the top, so that the lists have the window's height; back at a list's top they come down again
+    val top = rememberCollapsingTopState()
+    val folded by remember(top) { derivedStateOf { top.fraction > 0.5f } }
+    // (the panes in the same place in every width: a window crossing one keeps their lists where they were)
     val main: @Composable () -> Unit = {
-        Column(Modifier.fillMaxSize()) {
-            if (wideTop) {
-                wideHeader?.invoke(playShown.takeIf { canShuffle }, shuffleShown.takeIf { canShuffle })
-                WideTabs(state)
-                WideToolbar(
-                    state, probing,
-                    // the order of the covers; the table's columns where there is a table (its titles sort it)
-                    orderShown = covers || (!grouped && state.view != MusicView.Recent),
-                    columnsShown = !covers,
-                )
-                Spacer(Modifier.height(16.dp))
-            } else if (!phone) {
-                // 1.1.1: a phone's toolbar is in its header
-                MusicToolbar(state, openActions, shown, showColumns = false, probing = probing)
-            }
-            Box(Modifier.weight(1f).fillMaxWidth()) { panes() }
+        CollapsingTop(
+            top,
+            header = { if (wideTop) wideHeader?.invoke(playShown.takeIf { canShuffle }, shuffleShown.takeIf { canShuffle }) },
+            pinned = {
+                if (wideTop) {
+                    Column(Modifier.fillMaxWidth()) {
+                        WideTabs(state)
+                        WideToolbar(
+                            state, probing,
+                            // the order of the covers; the table's columns where there is a table (its titles sort it)
+                            orderShown = covers || (!grouped && state.view != MusicView.Recent),
+                            columnsShown = !covers,
+                            // the panel's button folds away with the masthead: here meanwhile
+                            trailing = { if (folded && inspector != null && inspectorState.hidden) InspectorToggleButton(inspectorState) },
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                } else if (!phone) {
+                    // 1.1.1: a phone's toolbar is in its header
+                    MusicToolbar(state, openActions, shown, showColumns = false, probing = probing)
+                }
+            },
+        ) {
+            Box(Modifier.fillMaxSize()) { panes() }
         }
     }
     // "music": what the scroll benchmark (S-803) looks for

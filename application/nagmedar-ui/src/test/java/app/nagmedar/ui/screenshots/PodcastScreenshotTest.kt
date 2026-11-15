@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.podcast.AddAddressSurface
 import app.nagmedar.ui.podcast.AddUi
@@ -85,7 +86,7 @@ class PodcastScreenshotTest {
     }
 
     private fun shell(width: WidthClass, model: PodcastScreenModel): @Composable () -> Unit = {
-        TestShell(width, startDestination = Destination.Podcasts) { _, _ -> PodcastsContent(model, PodcastActions()) }
+        TestShell(width, startDestination = Destination.Podcasts, ownTop = AppOwnTop) { _, _ -> PodcastsContent(model, PodcastActions()) }
     }
 
     private val results = PodcastSamples.hits

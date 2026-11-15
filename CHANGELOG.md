@@ -2,6 +2,37 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.3 (15 Kasım 2026)
+
+Ebru şeridi albüm değişince gözün önünde yapılır; Radyo'nun ve Podcastler'in de ebru şeridi var; tablette albümlere ve parçalara yer açıldı, şerit keskinleşti; telefonun çipi “Nağmedar” yazmaz, sayfa kayınca bulunulan sekmeyi yazar (15 Kasım'daki istekler).
+
+### Ebru şeridi
+- Başka bir albüm çalmaya başlayınca yeni şerit eskisinin üstünde yapılarak gelir, 2,5 saniyede: yeni albümün mürekkep damlaları teker teker eski şeridin üstüne düşüp açılır, her biri altındakini kenara iter; bu arada eski kâğıt ve renkler yeni kâğıda solar. Sonra görünmeyen bir biz şeridin boyunca çizgi çizgi aşağı ve yukarı çekilir (gelgit), ardından enine; en son ince tarak ve yavaş dalga. Renkler bizin peşinden uzar. Sonunda şerit eskisi gibi o albümün şeridi: renkler ve desen aynı, değişen yalnızca geçiş. Yırtık kenar da yolda eskisinden yenisine döner.
+- Android 13 ve sonrasında. Hareketler azaltılmışsa, Android 12'de ve pencerenin genişliği değişirken eskisi gibi yavaşça yenisine geçer. Markanın küçük halkası ve paneldeki plağın etiketi de solarak değişir.
+- Tablette şerit gösterildiği genişlikte yapılır. 1.1.0'dan beri en çok 1600 piksel genişliğinde yapılıp pencereye esnetiliyordu, çizgileri pikselli görünüyordu; artık 3200 pikselden dar her pencerede birebir. Tarağın ince çizgileri de en az bir pikselden biraz geniş çekilir.
+
+### Telefonda çipler
+- Markanın çipinde “Nağmedar” yazmaz: şerit altındayken yalnızca şeridin halkalı parçası. Sayfa kayıp şerit çiplerin altından çıkınca çip açılır ve bulunulan sekmenin adını yazar: Müzik'te seçili yol (“Albümler”, “Parçalar”), Radyo'da seçili sekme (“Favoriler”, “Kayıtlar”), Podcastler'de “Podcastler”. Liste başına dönünce kapanır. Tabletin kenar çubuğundaki “Nağmedar” yerinde.
+
+### Radyo ve Podcastler
+- İkisi de Müzik'in ebru üstüyle: çalan albümün şeridi (bir şey çalmıyorsa bozkırın renkleri) ve Bodoni'nin italiğiyle başlık; Radyo'nun altında “Radio Browser · topluluk rehberi” ve çalan istasyon, Podcastler'in altında abonelik sayısı.
+- Telefonda üst çubuk yok: şerit durum çubuğunun altından başlar, üstünde marka ve Ara çipleri. Bir podcast'in sayfası açılınca durum çubuğunun altından başlar, durum çubuğunun simgeleri sayfanın renginde.
+- Tablette ve DeX'te şeridin üstünde (dokunmatikte) arama alanı, başlığın yanında sayfanın düğmeleri (Podcastler'de görünüm, Ekle, ⋮).
+- Listeler kaydıkça şerit ve başlık yukarı katlanıp kaybolur, Radyo'nun sekmeleri ve Podcastler'in arama satırı yerinde kalır; liste başındayken aşağı çekince geri gelir. Podcastler'de yenilemek için çekmek şerit tamamen açılınca başlar; yukarı itmek önce yenilemenin dairesini geri alır.
+
+### Tablette ve DeX'te Müzik
+- Albümleri ve parçaları kaydırınca (parmakla, fareyle ya da dokunmatik yüzeyle) şerit ve “Müzikler” başlığı yukarı katlanıp kaybolur, sekmeler ve araç çubuğu üstte kalır: pencerenin yüksekliği listelere kalır. Liste başındayken aşağı çekince geri gelir; yarıda bırakılırsa yakın olan ucuna gider. Klavyeyle başlıktaki bir düğmeye gelince başlık açılır. Panel gizliyken başlıktaki panel düğmesi, başlık katlanınca araç çubuğunun sonunda durur.
+
+### Test
+- Yeni: `EbruMarblingTest`: geçişin gölgelendiricisi Robolectric'in Skia'sında derlenip çalıştırılır; ilk karesi eski şerit, son karesi yenisi (piksel piksel), aradaki kareler ikisi de değil. Damlaların resmi şeridi değiştirmez, saklanan bir şeridin damlaları yeniden yapılınca aynıdır. (Robolectric'in Skia'sı Android 13'ünkünden eski: testte gölgelendiricinin `child.eval(p)`'leri `sample(child, p)`'ye çevrilir.)
+- Yeni: `CollapsingTopTest` (üst önce katlanır, sabit satır üstte kalır, liste pencerenin altına kadar uzar; liste başında çekince geri gelir; yarıda bırakılınca bir uca gider; katlıyken çekmek önce üstü açar, yenileme sonra) ve `EbruPageTest` (telefonda çip şerit gidince sekmenin adını yazar, liste başında kapanır; tablette şerit ve başlık katlanır, sekmeler üstte kalır; telefon yan dönünce liste yerinde kalır).
+- `TestShell` kendi üstünü çizen sayfaları uygulamadaki gibi yerleştirir (çubukların altında, telefonda üst çubuksuz); Radyo'nun, Podcastler'in ve Kayıtlar'ın ekran görüntüleri ve podcast kabuğu testleri onunla. `PodcastPageOpensTest`'te sayfayı kaydıran parmak çubukların hemen üstünden başlar (sayfa uygulamadaki gibi çubukların altına uzanır), son podcast'e dokunmadan önce liste kaydırılır (şerit ve başlık son satırı oynatıcının altına itiyor).
+- Ekran görüntüleri: yeni `ebru-marbling` (geçiş yedi karede), `ebru-top-phone-dark-scrolled` (çipte “Favoriler”), `ebru-top-tablet-dark-folded`. Radyo, Podcastler ve Kayıtlar (ebru üstü), Müzik (“Nağmedar”sız çip) ve şeritlerin (tarak çizgileri) referansları yenilendi.
+
+### Sürüm
+- `versionCode` 4010103; kişisel arm64 APK'sı 14010109 (1.1.2'nin 14010108'inin üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+- Baseline Profile: Radyo'nun ve Podcastler'in ebru üstü, katlanan üst ve şeridin geçişi önceden derlenir.
+
 ## 1.1.2 (15 Kasım 2026)
 
 Tablet ve DeX'in Müzik sayfası tasarımın aynısı: 1.1.1'in “sıradaki sürümde” dediği. Sayfa tuvaldeki “Müzikler · tablet ve DeX” (ızgara ve liste) ölçüleriyle yeniden kuruldu; tuvalin çerçevesi Galaxy Tab S11 Ultra'nın penceresiyle aynı boyutta (1480 × 924 dp).

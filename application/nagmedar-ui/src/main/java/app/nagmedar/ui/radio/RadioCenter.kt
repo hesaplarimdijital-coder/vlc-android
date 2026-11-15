@@ -115,6 +115,7 @@ fun RadioScreen(
     recordingsRequested: Boolean = false,
     onRecordingsHandled: () -> Unit = {},
     undo: UndoBarState? = null,
+    onSearch: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -158,6 +159,7 @@ fun RadioScreen(
         onImport = { importer.launch(arrayOf("*/*")) },
         onTogglePlay = { PlaybackActions.togglePlayPause() },
         undo = undo,
+        onSearch = onSearch,
     )
 }
 

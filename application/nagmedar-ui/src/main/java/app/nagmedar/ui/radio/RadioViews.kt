@@ -87,12 +87,12 @@ import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.input.ShortcutId
 import app.nagmedar.ui.input.ShortcutRegistry
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.music.EbruPage
 import app.nagmedar.ui.music.PlaylistTab
 import app.nagmedar.ui.radio.record.RecordedTrack
 import app.nagmedar.ui.radio.record.RecordingsController
 import app.nagmedar.ui.radio.record.RecordingsTab
 import app.nagmedar.ui.radio.record.toRecording
-import app.nagmedar.ui.screens.PageHeader
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
@@ -133,6 +133,7 @@ fun RadioPage(
     recordingsRequested: Boolean = false,
     onRecordingsHandled: () -> Unit = {},
     recordingsLive: Boolean = true,
+    onSearch: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val res = context.resources
@@ -166,21 +167,30 @@ fun RadioPage(
         controller.noticed()
     }
     val onRecord: ((Station) -> Unit)? = recordings?.let { rec -> { station -> rec.record(station.toRecording()) } }
-    Column(modifier.fillMaxSize()) {
-        PageHeader(title = stringResource(R.string.nag_nav_radio), subtitle = stringResource(R.string.nag_radio_source))
-        controller.now?.let { NowStrip(it, onTogglePlay) }
-        RadioTabs(
-            tab,
-            mapOf(
-                RadioTab.Favourites to controller.favourites?.size,
-                RadioTab.Recent to controller.recent?.size,
-                RadioTab.Imported to controller.imported?.size,
-                RadioTab.Recordings to recordings?.live?.size?.takeIf { it > 0 },
-            ),
-            controller::select,
-            tabs = RadioTab.entries.filter { it != RadioTab.Recordings || recordings != null },
-        )
-        Box(Modifier.fillMaxWidth().weight(1f)) {
+    // 1.1.3: the Music page's ebru top: the band in the inks of what plays, the masthead, the station on the air under it,
+    // folding away as the lists scroll; the tabs stay (a phone's chips name the one shown once the band has gone)
+    EbruPage(
+        title = stringResource(R.string.nag_nav_radio),
+        subtitle = stringResource(R.string.nag_radio_source),
+        section = stringResource(tabName(tab)),
+        modifier = modifier,
+        onSearch = onSearch,
+        header = { controller.now?.let { NowStrip(it, onTogglePlay) } },
+        pinned = {
+            RadioTabs(
+                tab,
+                mapOf(
+                    RadioTab.Favourites to controller.favourites?.size,
+                    RadioTab.Recent to controller.recent?.size,
+                    RadioTab.Imported to controller.imported?.size,
+                    RadioTab.Recordings to recordings?.live?.size?.takeIf { it > 0 },
+                ),
+                controller::select,
+                tabs = RadioTab.entries.filter { it != RadioTab.Recordings || recordings != null },
+            )
+        },
+    ) {
+        Box(Modifier.fillMaxSize()) {
             when (tab) {
                 RadioTab.Search -> SearchTab(controller, focus, compact, now, onCopyAddress, onRecord)
                 RadioTab.Favourites -> SavedTab(tab, controller.favourites, controller, compact, now, onCopyAddress, onImport, onRecord)

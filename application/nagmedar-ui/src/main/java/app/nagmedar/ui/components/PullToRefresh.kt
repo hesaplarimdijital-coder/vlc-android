@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -94,6 +95,15 @@ fun PullToRefresh(
     }
     pull.enabled = enabled
     pull.tier = if (NagTheme.motion.reduced) MotionTier.Reduced else LocalMotionTier.current
+    // 1.1.3: under a folding top a pull brings the top down first and refreshes once all of it shows; a push back up
+    // takes the disc back before the top folds
+    val collapsing = LocalCollapsingTop.current
+    pull.allowed = { collapsing?.expanded != false }
+    DisposableEffect(collapsing, pull) {
+        val hold: () -> Boolean = { pull.distance > 0f }
+        collapsing?.holds?.add(hold)
+        onDispose { collapsing?.holds?.remove(hold) }
+    }
     // down by itself while refreshing, up once done
     LaunchedEffect(refreshing, pull) { pull.settle() }
     // Where the disc comes out: under the phone's top bar when the list lies beneath it, else at the list's own top (the
@@ -131,6 +141,9 @@ private class PullState(
 ) : NestedScrollConnection {
     var enabled = true
 
+    /** 1.1.3: whether a pull may bring the disc down now (read as it comes: a folding top over the list all shown). */
+    var allowed: () -> Boolean = { true }
+
     /** With reduced motion the disc jumps to its place instead of sliding there. */
     var tier = MotionTier.Timed
 
@@ -157,7 +170,7 @@ private class PullState(
 
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
         // the list is at its top: what is left of the pull brings the disc down
-        if (!enabled || source != NestedScrollSource.UserInput || available.y <= 0f) return Offset.Zero
+        if (!enabled || source != NestedScrollSource.UserInput || available.y <= 0f || !allowed()) return Offset.Zero
         pulledTo(distance + available.y * RESISTANCE)
         return Offset(0f, available.y)
     }

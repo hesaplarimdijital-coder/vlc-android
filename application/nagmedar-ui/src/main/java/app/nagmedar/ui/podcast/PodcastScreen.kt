@@ -98,7 +98,7 @@ import app.nagmedar.ui.components.verticalScrollbar
 import app.nagmedar.ui.covers.CoverTile
 import app.nagmedar.ui.input.ContextMenuArea
 import app.nagmedar.ui.openLink
-import app.nagmedar.ui.screens.PageHeader
+import app.nagmedar.ui.music.EbruPage
 import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.shell.OnReselect
 import app.nagmedar.ui.shell.detailSharedCard
@@ -108,6 +108,7 @@ import app.nagmedar.ui.shell.LocalDetailBeside
 import app.nagmedar.ui.shell.LocalNavKind
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.LocalShellBottomPadding
+import app.nagmedar.ui.shell.LocalWindowRootInsets
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
@@ -130,7 +131,7 @@ private val ListWidth = 960.dp
  * address" and the OPML import and export in the menu. Ctrl+Shift+P puts the keyboard in the search field.
  */
 @Composable
-fun PodcastsScreen(undo: UndoBarState?) {
+fun PodcastsScreen(undo: UndoBarState?, onSearch: (() -> Unit)? = null) {
     val context = LocalContext.current
     val app = context.applicationContext
     val scope = rememberCoroutineScope()
@@ -180,7 +181,7 @@ fun PodcastsScreen(undo: UndoBarState?) {
             runCatching { focus.requestFocus() }
         }
     }
-    PodcastsContent(controller.model, actions, focus, controller::listening)
+    PodcastsContent(controller.model, actions, focus, controller::listening, onSearch)
 }
 
 /**
@@ -196,8 +197,16 @@ fun PodcastsContent(
     actions: PodcastActions,
     focus: FocusRequester = remember { FocusRequester() },
     listening: () -> Listening? = { model.episode?.listening },
+    /** 1.1.3: the app's search, from a phone's chip over the band (the shell's top bar had it) and a tablet's field. */
+    onSearch: (() -> Unit)? = null,
 ) {
     val page = model.page
+    // 1.1.3: a phone's page draws its own top under the status bar: a show's page over it keeps clear of the status bar
+    val statusTop = if (LocalNavKind.current == NavKind.BottomBar) {
+        with(LocalDensity.current) { (LocalWindowRootInsets.current?.top?.getTop(this) ?: 0).toDp() }
+    } else {
+        0.dp
+    }
     var retained by remember { mutableStateOf(page) }
     LaunchedEffect(page) { if (page != null) retained = page }
     val episodeOpen = model.episodeId != null
@@ -210,7 +219,7 @@ fun PodcastsContent(
             if (LocalDetailBeside.current && episodeOpen && shown != null) {
                 PodcastPageView(shown, fullScreen = false, actions = actions, downloads = model.downloads, selected = model.episodeId, refreshing = model.refreshingOf(shown))
             } else {
-                PodcastList(model, actions, focus)
+                PodcastList(model, actions, focus, onSearch)
             }
         },
         detailPane = { _, fullScreen ->
@@ -220,13 +229,15 @@ fun PodcastsContent(
                 // (the predictive gesture) takes it away again (Desktop Kit 0.2.0)
                 val held = remember { EpisodeHold() }
                 model.episode?.let { held.ui = it }
-                DetailTransition(
-                    detail = model.episodeId,
-                    onBack = actions.onCloseEpisode,
-                    list = { shownPage?.let { PodcastPageView(it, fullScreen = true, actions = actions, downloads = model.downloads, refreshing = model.refreshingOf(it)) } },
-                ) { _ ->
-                    // closing, the page that was open stays until it has gone
-                    EpisodeDetailPane(if (model.episodeId == null) model.copy(episode = held.ui) else model, fullScreen = true, actions, listening)
+                Box(Modifier.fillMaxSize().padding(top = statusTop)) {
+                    DetailTransition(
+                        detail = model.episodeId,
+                        onBack = actions.onCloseEpisode,
+                        list = { shownPage?.let { PodcastPageView(it, fullScreen = true, actions = actions, downloads = model.downloads, refreshing = model.refreshingOf(it)) } },
+                    ) { _ ->
+                        // closing, the page that was open stays until it has gone
+                        EpisodeDetailPane(if (model.episodeId == null) model.copy(episode = held.ui) else model, fullScreen = true, actions, listening)
+                    }
                 }
             } else if (episodeOpen) {
                 EpisodeDetailPane(model, fullScreen = false, actions, listening)
@@ -252,7 +263,7 @@ private class EpisodeHold {
 }
 
 @Composable
-private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focus: FocusRequester) {
+private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focus: FocusRequester, onSearch: (() -> Unit)?) {
     val res = LocalContext.current.resources
     val subscriptions = model.subscriptions
     val wide = currentWidthClass() >= WidthClass.Medium
@@ -281,32 +292,37 @@ private fun PodcastList(model: PodcastScreenModel, actions: PodcastActions, focu
             modifier = Modifier.testTag("podcast-more"),
         )
     }
-    Column(Modifier.fillMaxSize()) {
-        // 1.0.1: a phone's top bar already names the page; its actions go beside the search instead of a line of their own
-        if (!phone) {
-            PageHeader(
-                title = stringResource(R.string.nag_nav_podcasts),
-                subtitle = subscriptions?.takeIf { it.isNotEmpty() }?.let { pluralStringResource(R.plurals.nag_pod_count, it.size, it.size) },
-            ) {
-                if (canToggleView) {
-                    NagIconButton(
-                        if (grid) NagIcons.ListView else NagIcons.Grid,
-                        stringResource(if (grid) R.string.nag_pod_view_list else R.string.nag_pod_view_grid),
-                        toggleView,
-                        modifier = Modifier.testTag("podcast-view-toggle"),
-                    )
-                }
-                add()
-                more()
+    val title = stringResource(R.string.nag_nav_podcasts)
+    val besideSearch: @Composable () -> Unit = {
+        add()
+        more()
+    }
+    // 1.1.3: the Music page's ebru top: the band in the inks of what plays and the masthead with the count fold away as
+    // the subscriptions scroll; the search stays, on a phone with the add and the menu beside it as before
+    EbruPage(
+        title = title,
+        subtitle = subscriptions?.takeIf { it.isNotEmpty() }?.let { pluralStringResource(R.plurals.nag_pod_count, it.size, it.size) },
+        section = title,
+        onSearch = onSearch,
+        // a show's page over the whole of a phone's
+        covered = { model.page != null },
+        actions = {
+            if (canToggleView) {
+                NagIconButton(
+                    if (grid) NagIcons.ListView else NagIcons.Grid,
+                    stringResource(if (grid) R.string.nag_pod_view_list else R.string.nag_pod_view_grid),
+                    toggleView,
+                    modifier = Modifier.testTag("podcast-view-toggle"),
+                )
             }
-        }
-        val besideSearch: @Composable () -> Unit = {
             add()
             more()
-        }
-        SearchRow(model.query, model.search, actions, focus, trailing = besideSearch.takeIf { phone })
+        },
+        pinned = { SearchRow(model.query, model.search, actions, focus, trailing = besideSearch.takeIf { phone }) },
+    ) {
         when (val search = model.search) {
-            // 1.0.8 (Desktop Kit 2.8.0): a finger pulling the subscriptions down reads every one again
+            // 1.0.8 (Desktop Kit 2.8.0): a finger pulling the subscriptions down reads every one again (1.1.3: once the
+            // top over them shows whole)
             SearchUi.Idle -> PullToRefresh(model.refreshing, actions.onRefresh, enabled = touch && !subscriptions.isNullOrEmpty()) {
                 Subscriptions(subscriptions, grid, actions, focus)
             }

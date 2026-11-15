@@ -220,13 +220,15 @@ private fun Record(artwork: @Composable (Dp) -> Unit, inks: EbruInks, spinning: 
                     .graphicsLayer { rotationZ = angle }
                     .clip(CircleShape),
             ) {
-                // the design's label: the band's middle, larger than the label
+                // the design's label: the band's middle, larger than the label (1.1.3: it fades into the next album's,
+                // the page's band beside it is the one made before the eyes)
                 EbruBand(
                     inks, 96.dp,
                     Modifier.layout { measurable, constraints ->
                         val placeable = measurable.measure(Constraints.fixed(332.dp.roundToPx(), 96.dp.roundToPx()))
                         layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(-132.dp.roundToPx(), -10.dp.roundToPx()) }
                     },
+                    marbled = false,
                 )
             }
             Box(Modifier.align(Alignment.Center).size(6.dp).background(panel, CircleShape))

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.playback.RadioMetadata
 import app.nagmedar.ui.NagmedarPreferences
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.radio.FakeDirectory
 import app.nagmedar.ui.radio.FakeLibrary
@@ -215,13 +216,13 @@ class RecordingsScreenshotTest {
 
     private fun shot(name: String, width: WidthClass, theme: ThemeMode, input: InputMode, scene: Scene, onAir: RadioNow? = null, expandAll: Boolean = true) {
         capture(name, theme, input) {
-            TestShell(width, startDestination = Destination.Radio) { _, _ -> Recordings(scene, onAir, expandAll) }
+            TestShell(width, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Recordings(scene, onAir, expandAll) }
         }
     }
 
     private fun editor(name: String, width: WidthClass, theme: ThemeMode, input: InputMode, draft: ScheduleDraft, scene: Scene) {
         capture(name, theme, input) {
-            TestShell(width, startDestination = Destination.Radio) { _, _ ->
+            TestShell(width, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Recordings(scene, expandAll = false) { controller, stations ->
                     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).padding(8.dp)) {
                         app.nagmedar.ui.components.DialogFrame({}) { ScheduleSurface(controller, draft, stations, zone) }

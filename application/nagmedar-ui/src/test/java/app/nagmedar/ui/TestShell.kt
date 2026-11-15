@@ -46,6 +46,7 @@ import app.nagmedar.ui.shell.NavIconBadges
 import app.nagmedar.ui.shell.NavKind
 import app.nagmedar.ui.shell.NavRules
 import app.nagmedar.ui.shell.ShellNavigator
+import app.nagmedar.ui.shell.UnderShellBars
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.NagTheme
 
@@ -125,7 +126,15 @@ fun TestShell(
         navigator = navigator,
         overlay = overlay,
         caption = caption,
-        screen = screen,
+        // a page with its own top (1.1.1: Müzik; 1.1.3: Radyo, Podcastler) as the app lays it out: under the bars, from the
+        // window's top on a phone
+        screen = { destination, shellNavigator ->
+            if (ownTop(destination)) {
+                UnderShellBars(ownTop = LocalNavKind.current == NavKind.BottomBar) { screen(destination, shellNavigator) }
+            } else {
+                screen(destination, shellNavigator)
+            }
+        },
         floatingPlayer = floatingPlayer,
         glass = glass,
         chromeGlass = chromeGlass,
@@ -134,6 +143,9 @@ fun TestShell(
         sidebarBrand = { collapsed -> SidebarBrand(collapsed) { BandMark(EbruInks.Default, Modifier.size(22.dp), ring = 2.dp) } },
     )
 }
+
+/** 1.1.3: the app's pages with the ebru top, which have no top bar on a phone (NagmedarApp's OwnTop). */
+val AppOwnTop: (Destination) -> Boolean = { it == Destination.Music || it == Destination.Radio || it == Destination.Podcasts }
 
 /**
  * The pages a person goes through to [destination] in a window of [kind]: a tab at once; Settings' pages

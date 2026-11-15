@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.shell.BOTTOM_GLASS_TAG
 import app.nagmedar.ui.shell.Destination
@@ -86,7 +87,7 @@ class PodcastPageOpensTest {
         compose.setContent {
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Touch) {
                 // glass B, whose one surface the bars' slide is read from (the product's opaque chrome slides the same way)
-                TestShell(WidthClass.Compact, startDestination = Destination.Podcasts, chromeGlass = ChromeGlass.Bottom) { _, _ -> PodcastsContent(model, actions) }
+                TestShell(WidthClass.Compact, startDestination = Destination.Podcasts, chromeGlass = ChromeGlass.Bottom, ownTop = AppOwnTop) { _, _ -> PodcastsContent(model, actions) }
             }
         }
         compose.waitForIdle()
@@ -129,12 +130,15 @@ class PodcastPageOpensTest {
 
     /**
      * A swipe up the page, as long as the page: its top (the header, with its back arrow) must go out of sight. A list
-     * that no longer takes the scroll gives some 25 dp, what its rows in sight have left, and stands still.
+     * that no longer takes the scroll gives some 25 dp, what its rows in sight have left, and stands still. 1.1.3: the
+     * page lies under the bars, as the app lays it out (Podcastler draws its own top): the finger starts just above them.
      */
     private fun assertThePageScrolls(message: String) {
         assertTrue("$message: the page is at its top", there("podcast-page-close"))
         val before = drawn("podcast-episode")
-        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(durationMillis = 400) }
+        val page = drawn("podcast-page")
+        val bars = drawn(BOTTOM_GLASS_TAG).top
+        compose.onNodeWithTag("podcast-page").performTouchInput { swipeUp(startY = bars - page.top - 20f, endY = top + 20f, durationMillis = 400) }
         compose.waitForIdle()
         assertThePageIsInItsPlace("$message, swiped")
         val after = drawn("podcast-episode")
@@ -144,8 +148,16 @@ class PodcastPageOpensTest {
         )
     }
 
-    /** Taps the row of the show that is [index]th in the list, and lets its opening play to the end. */
+    /**
+     * Taps the row of the show that is [index]th in the list, and lets its opening play to the end. 1.1.3: the band and
+     * the masthead over the shows leave the last ones under the player in this window: a finger first scrolls them up,
+     * the top folding away.
+     */
     private fun tapRow(index: Int) {
+        if (index > 0) {
+            compose.onAllNodesWithTag("podcast-row")[0].performTouchInput { swipeUp(startY = centerY, endY = centerY - 600f, durationMillis = 400) }
+            compose.waitForIdle()
+        }
         compose.onAllNodesWithTag("podcast-row")[index].performClick()
         compose.waitForIdle()
     }

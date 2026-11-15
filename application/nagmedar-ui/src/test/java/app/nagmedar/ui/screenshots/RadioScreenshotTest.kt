@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.radio.FakeDirectory
 import app.nagmedar.ui.radio.FakeLibrary
@@ -90,14 +91,14 @@ class RadioScreenshotTest {
     @Test @Config(qualifiers = "tr-w1440dp-h900dp-mdpi-keysexposed-qwerty")
     fun dex() {
         capture("radio-dex-dark", ThemeMode.Dark, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ -> Radio() }
+            TestShell(WidthClass.Large, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio() }
         }
     }
 
     @Test @Config(qualifiers = "en-w411dp-h891dp-xhdpi")
     fun phoneEnglish() {
         capture("radio-phone-light-en", ThemeMode.Light, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Radio) { _, _ -> Radio() }
+            TestShell(WidthClass.Compact, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio() }
         }
     }
 
@@ -105,7 +106,7 @@ class RadioScreenshotTest {
     fun tabletFiltered() {
         val directory = FakeDirectory().apply { onSearch = { listOf(RadioSamples.classical) } }
         capture("radio-tablet-light-filtered", ThemeMode.Light, InputMode.Touch) {
-            TestShell(WidthClass.Expanded, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Expanded, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(directory, StationFilters(countryCode = "DE", codec = "OGG", minBitrate = 192), StationOrder.Bitrate)
             }
         }
@@ -115,7 +116,7 @@ class RadioScreenshotTest {
     fun phoneOffline() {
         val directory = FakeDirectory().apply { onSearch = { throw RadioFailure.Offline() } }
         capture("radio-phone-dark-offline", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Compact, startDestination = Destination.Radio) { _, _ -> Radio(directory) }
+            TestShell(WidthClass.Compact, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio(directory) }
         }
     }
 
@@ -123,7 +124,7 @@ class RadioScreenshotTest {
     fun tabletNothingFound() {
         val directory = FakeDirectory().apply { onSearch = { emptyList() } }
         capture("radio-tablet-dark-empty", ThemeMode.Dark, InputMode.Touch) {
-            TestShell(WidthClass.Expanded, startDestination = Destination.Radio) { _, _ ->
+            TestShell(WidthClass.Expanded, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ ->
                 Radio(directory, StationFilters(tag = "gregoryen", minBitrate = 320))
             }
         }
@@ -134,7 +135,7 @@ class RadioScreenshotTest {
         val never = CompletableDeferred<List<Station>>()
         val directory = FakeDirectory().apply { onSearch = { never.await() } }
         capture("radio-dex-light-loading-en", ThemeMode.Light, InputMode.Pointer) {
-            TestShell(WidthClass.Large, startDestination = Destination.Radio) { _, _ -> Radio(directory) }
+            TestShell(WidthClass.Large, startDestination = Destination.Radio, ownTop = AppOwnTop) { _, _ -> Radio(directory) }
         }
     }
 }

@@ -176,11 +176,19 @@ private fun BandSearchField(onSearch: () -> Unit, modifier: Modifier) {
 }
 
 /**
- * The wide page's masthead: "Müzikler" in Bodoni's italic (60 sp under a tall band, [large]), the counts under it; Oynat
- * and Karıştır beside it ([play], [shuffle]), then [trailing].
+ * The wide page's masthead: "Müzikler" (1.1.3: another page's [title]) in Bodoni's italic (60 sp under a tall band,
+ * [large]), the counts under it; Oynat and Karıştır beside it ([play], [shuffle]; none without [pills]), then [trailing].
  */
 @Composable
-internal fun WideMasthead(counts: String?, play: (() -> Unit)?, shuffle: (() -> Unit)?, large: Boolean, trailing: @Composable () -> Unit = {}) {
+internal fun WideMasthead(
+    counts: String?,
+    play: (() -> Unit)?,
+    shuffle: (() -> Unit)?,
+    large: Boolean,
+    title: String? = null,
+    pills: Boolean = true,
+    trailing: @Composable () -> Unit = {},
+) {
     val colors = NagTheme.colors
     val type = NagTheme.type
     Row(
@@ -190,7 +198,7 @@ internal fun WideMasthead(counts: String?, play: (() -> Unit)?, shuffle: (() -> 
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                stringResource(R.string.nag_music_masthead),
+                title ?: stringResource(R.string.nag_music_masthead),
                 style = if (large) type.masthead.copy(fontSize = type.size(60f), lineHeight = type.size(64f), letterSpacing = (-0.015).em) else type.masthead.copy(letterSpacing = (-0.015).em),
                 color = colors.text,
                 maxLines = 1,
@@ -199,8 +207,10 @@ internal fun WideMasthead(counts: String?, play: (() -> Unit)?, shuffle: (() -> 
             )
             if (counts != null) Text(counts, style = designText(14f, 20f), color = colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
-        PlayPill(play, Modifier.padding(bottom = 4.dp))
-        ShufflePill(shuffle, Modifier.padding(bottom = 4.dp))
+        if (pills) {
+            PlayPill(play, Modifier.padding(bottom = 4.dp))
+            ShufflePill(shuffle, Modifier.padding(bottom = 4.dp))
+        }
         Box(Modifier.padding(bottom = 4.dp)) { trailing() }
     }
 }
@@ -230,10 +240,11 @@ internal fun WideTabs(state: MusicBrowserState) {
 
 /**
  * The row under the tabs: the quick filters over a way in's groups; the order of the covers ([orderShown]: "Ada göre"),
- * the table's columns ([columnsShown]: "Sütunlar"), the filter, the covers or the rows.
+ * the table's columns ([columnsShown]: "Sütunlar"), the filter, the covers or the rows; 1.1.3: [trailing] (the panel's
+ * button while the masthead it stands in has folded away).
  */
 @Composable
-internal fun WideToolbar(state: MusicBrowserState, probing: Int, orderShown: Boolean, columnsShown: Boolean) {
+internal fun WideToolbar(state: MusicBrowserState, probing: Int, orderShown: Boolean, columnsShown: Boolean, trailing: @Composable () -> Unit = {}) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -249,6 +260,7 @@ internal fun WideToolbar(state: MusicBrowserState, probing: Int, orderShown: Boo
         if (columnsShown) ColumnsButton(state)
         WideFilterButton(state, probing)
         if (state.view.grouped) LayoutSegment(state, button = 44.dp, inset = 2.dp)
+        trailing()
     }
 }
 

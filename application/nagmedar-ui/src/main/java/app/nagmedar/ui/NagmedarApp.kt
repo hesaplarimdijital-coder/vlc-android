@@ -538,8 +538,9 @@ private fun NagmedarMain(
                 glass = false,
                 // 1.0.3: the phone's bars on glass only for the user's decision's screenshots (a debuggable build's walk)
                 chromeGlass = DebugChrome.glass,
-                // 1.1.1 (the design): Müzik on a phone has no top bar, its band lies under the status bar
-                ownTop = { it == Destination.Music },
+                // 1.1.1 (the design): Müzik on a phone has no top bar, its band lies under the status bar; 1.1.3: Radyo's and
+                // Podcastler's too
+                ownTop = { it in OwnTop },
                 // 1.1.2 (the design's tablet page): a tablet's sidebar by touch: the brand in the inks of what plays, the albums
                 // not opened for a year under the entries
                 sidebarBrand = { collapsed -> SidebarBrand(collapsed) { BandMark(brandInks, Modifier.size(22.dp), ring = 2.dp) } },
@@ -644,9 +645,11 @@ private fun NagmedarMain(
                                 recordingsRequested = radioRecordingsRequested,
                                 onRecordingsHandled = { radioRecordingsRequested = false },
                                 undo = undo,
+                                // 1.1.3: the band's chip and field, in place of the top bar's button
+                                onSearch = { shellNavigator.open(Destination.Search) },
                             )
                             // S-1101, S-1102: subscriptions, the search of Podcast Index and iTunes, OPML
-                            Destination.Podcasts -> PodcastsScreen(undo = undo)
+                            Destination.Podcasts -> PodcastsScreen(undo = undo, onSearch = { shellNavigator.open(Destination.Search) })
                             Destination.Search -> SearchScreen(repository, searchQuery) { searchQuery = it }
                             Destination.About -> AboutScreen(rememberThirdParties(), onOpenLink = { url -> openLink(context, url) })
                             // S-1301: SMB, FTP, SFTP, NFS, UPnP/DLNA and WebDAV through libVLC
@@ -710,11 +713,11 @@ private fun NagmedarMain(
                         }
                     }
                     // Desktop Kit 1.0: on a phone these pages lie under the bars, their lists scrolling beneath the glass
-                    // 1.1.1 (the design): Müzik on a phone draws its own top, under the status bar
+                    // 1.1.1 (the design): Müzik on a phone draws its own top, under the status bar (1.1.3: Radyo and Podcastler too)
                     if (destination in UnderBars) {
                         UnderShellBars(
                             listOnTop = destination in ListOnTop,
-                            ownTop = destination == Destination.Music && NavKind.forWidth(widthClass) == NavKind.BottomBar,
+                            ownTop = destination in OwnTop && NavKind.forWidth(widthClass) == NavKind.BottomBar,
                             content = page,
                         )
                     } else {
@@ -806,6 +809,12 @@ private val UnderBars = setOf(
 
 /** Of [UnderBars], the pages that are one list from the top: they scroll beneath the top bar too. */
 private val ListOnTop = setOf(Destination.Settings, Destination.Search, Destination.More)
+
+/**
+ * The pages with the ebru top (1.1.1: Müzik; 1.1.3: Radyo and Podcastler): no top bar over them on a phone and by touch
+ * on the rail's window; they draw their band under the status bar, their chips or their search field over it.
+ */
+private val OwnTop = setOf(Destination.Music, Destination.Radio, Destination.Podcasts)
 
 /** A web page in the browser (S-209: the source code, the licences); nothing when there is none. */
 fun openLink(context: Context, url: String) {

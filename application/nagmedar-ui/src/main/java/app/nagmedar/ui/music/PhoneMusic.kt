@@ -3,6 +3,17 @@ package app.nagmedar.ui.music
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -48,6 +59,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -110,6 +122,9 @@ import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.shell.LocalShellOverlayHost
 import app.nagmedar.ui.theme.Bricolage
 import app.nagmedar.ui.theme.BodoniHeadline
+import app.nagmedar.ui.theme.LocalMotionTier
+import app.nagmedar.ui.theme.MotionTier
+import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import app.nagmedar.ui.theme.SemiBoldPlus
 import app.nagmedar.ui.theme.rememberNagHaptics
@@ -161,10 +176,14 @@ internal fun tickOff(): Color = NagTheme.colors.text.copy(alpha = 0.14f)
 
 // ------------------------------------------------------------------- where the band is
 
-/** One header's band on screen: its bottom in the window (px), as it was last laid out. */
+/**
+ * One header's band on screen: its bottom in the window (px), as it was last laid out; 1.1.3: [gone] while it is folded
+ * away under the chips (what is left of it lies under their scrim).
+ */
 @Stable
 internal class BandPlace {
     var bottom by mutableFloatStateOf(Float.MAX_VALUE)
+    var gone: () -> Boolean = { false }
 }
 
 /**
@@ -177,23 +196,29 @@ internal class PhoneTop {
     internal val bands = mutableStateListOf<BandPlace>()
     var pageTop by mutableFloatStateOf(0f)
 
-    /** The band's bottom from the page's top (px); null while no band is composed (the list scrolled past its header). */
-    fun bandBottom(): Float? = bands.lastOrNull()?.let { it.bottom - pageTop }
+    /**
+     * The band's bottom from the page's top (px); null while no band is composed (the list scrolled past its header) or
+     * it has folded away.
+     */
+    fun bandBottom(): Float? = bands.lastOrNull()?.takeIf { !it.gone() }?.let { it.bottom - pageTop }
 }
 
 internal val LocalPhoneTop = staticCompositionLocalOf<PhoneTop?> { null }
 
-/** This band tells the page's [PhoneTop] where it is while it is composed. */
+/** This band tells the page's [PhoneTop] where it is while it is composed; [gone]: while it has folded away. */
 @Composable
-internal fun Modifier.reportsBand(): Modifier {
+internal fun Modifier.reportsBand(gone: (() -> Boolean)? = null): Modifier {
     val top = LocalPhoneTop.current ?: return this
     val place = remember { BandPlace() }
+    place.gone = gone ?: NEVER_GONE
     DisposableEffect(top, place) {
         top.bands.add(place)
         onDispose { top.bands.remove(place) }
     }
     return onGloballyPositioned { place.bottom = it.positionInWindow().y + it.size.height }
 }
+
+private val NEVER_GONE: () -> Boolean = { false }
 
 /**
  * While [paper] (the band's light paper under the status bar) the status bar's icons are dark, whatever the theme; the
@@ -221,8 +246,10 @@ private tailrec fun Context.activity(): Activity? = when (this) {
 
 /**
  * The chips over the band, which stay where they are as the list scrolls: the brand's (a group's page: the way back), the
- * search's, the options'. Once the list's rows pass beneath them the page's colour comes up behind them and the status
- * bar. [optionsAnchor] lies over the options' chip (the filter's panel opens under it).
+ * search's, the options' ([options] null: none). Once the list's rows pass beneath them the page's colour comes up behind
+ * them and the status bar; 1.1.3: the brand's mark then names [section] (the tab the page is on: "Albümler",
+ * "Favoriler"), in place of 1.1.1's "Nağmedar". [optionsAnchor] lies over the options' chip (the filter's panel opens
+ * under it); [covered]: a page over the whole of this one (a show's on a phone), whose colour lies under the status bar.
  */
 @Composable
 internal fun PhoneMusicChips(
@@ -230,9 +257,11 @@ internal fun PhoneMusicChips(
     inks: EbruInks,
     onBack: (() -> Unit)?,
     onSearch: (() -> Unit)?,
-    options: () -> List<MenuEntry>,
+    options: (() -> List<MenuEntry>)?,
     marked: Boolean,
     modifier: Modifier = Modifier,
+    section: String? = null,
+    covered: () -> Boolean = NOT_COVERED,
     optionsAnchor: @Composable BoxScope.() -> Unit = {},
 ) {
     val top = LocalPhoneTop.current
@@ -243,8 +272,19 @@ internal fun PhoneMusicChips(
     val fade = with(density) { CHIPS_FADE.toPx() }
     val host = LocalShellOverlayHost.current
     val paper by remember(top, statusPx) { derivedStateOf { (top?.bandBottom() ?: Float.NEGATIVE_INFINITY) > statusPx / 2f } }
-    val covered by remember(host) { derivedStateOf { host != null && (host.expandProgress() > 0.5f || host.windowCovered) } }
-    StatusIconsOverPaper(paper && !covered)
+    val latestCovered = rememberUpdatedState(covered)
+    val over by remember(host) { derivedStateOf { latestCovered.value() || (host != null && (host.expandProgress() > 0.5f || host.windowCovered)) } }
+    // the band gone from under the chips' row: the page's colour behind them, the tab's name beside the mark. A band says
+    // where it is once laid out, after the chips' first frame: until then the chip names nothing (no name flashing as a
+    // page opens)
+    var settled by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        withFrameNanos {}
+        withFrameNanos {}
+        settled = true
+    }
+    val named by remember(top, rowBottom) { derivedStateOf { settled && (top?.bandBottom() ?: Float.NEGATIVE_INFINITY) < rowBottom } }
+    StatusIconsOverPaper(paper && !over)
     val scrim = colors.background
     Box(modifier.fillMaxWidth().testTag("music-chips")) {
         Box(
@@ -264,55 +304,97 @@ internal fun PhoneMusicChips(
                     )
                 },
         )
-        Row(
+        Box(
             Modifier
                 .padding(top = statusTop + CHIPS_TOP, start = 12.dp, end = 12.dp, bottom = 16.dp)
                 .fillMaxWidth()
                 .height(CHIP),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // the brand's chip opens towards the others, never under them: a long name is cut short
+            val trailing = (if (onSearch != null) 1 else 0) + (if (options != null) 1 else 0)
             if (onBack != null) {
-                ChipButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), onBack, Modifier.testTag("music-back"))
+                ChipButton(NagIcons.ChevronLeft, stringResource(R.string.nag_music_back), onBack, Modifier.align(Alignment.CenterStart).testTag("music-back"))
             } else {
-                BrandChip(inks)
+                BrandChip(inks, section, named, Modifier.align(Alignment.CenterStart).padding(end = (CHIP + 8.dp) * trailing))
             }
-            Spacer(Modifier.weight(1f))
-            if (onSearch != null) ChipButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch, Modifier.testTag("music-search"))
-            var open by remember { mutableStateOf(false) }
-            var height by remember { mutableIntStateOf(0) }
-            Box(Modifier.onSizeChanged { height = it.height }) {
-                ChipButton(NagIcons.MoreVertical, stringResource(R.string.nag_music_options), { open = true }, Modifier.testTag("music-options"),
-                    dot = marked, selected = open)
-                MenuPopup(visible = open, onDismiss = { open = false }, entries = if (open) options() else emptyList(), offset = IntOffset(0, height))
-                optionsAnchor()
+            Row(
+                Modifier.align(Alignment.CenterEnd),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (onSearch != null) ChipButton(NagIcons.Search, stringResource(R.string.nag_search), onSearch, Modifier.testTag("music-search"))
+                if (options != null) {
+                    var open by remember { mutableStateOf(false) }
+                    var height by remember { mutableIntStateOf(0) }
+                    Box(Modifier.onSizeChanged { height = it.height }) {
+                        ChipButton(NagIcons.MoreVertical, stringResource(R.string.nag_music_options), { open = true }, Modifier.testTag("music-options"),
+                            dot = marked, selected = open)
+                        MenuPopup(visible = open, onDismiss = { open = false }, entries = if (open) options() else emptyList(), offset = IntOffset(0, height))
+                        optionsAnchor()
+                    }
+                }
             }
         }
     }
 }
 
-/** The brand's chip: the band's mark in the ink's ring, "Nağmedar" in Bodoni's italic. */
+private val NOT_COVERED: () -> Boolean = { false }
+
+/**
+ * The brand's chip: the band's mark in the ink's ring, a round chip while the band lies under it; 1.1.3: once the band
+ * has gone from under it ([named]) it opens and names [section] in Bodoni's italic, the tab the page is on.
+ */
 @Composable
-private fun BrandChip(inks: EbruInks) {
+private fun BrandChip(inks: EbruInks, section: String?, named: Boolean, modifier: Modifier = Modifier) {
     val colors = NagTheme.colors
     val type = NagTheme.type
+    val instant = NagTheme.motion.reduced || LocalMotionTier.current == MotionTier.Reduced
+    // the last name stays while the chip closes over it
+    var last by remember { mutableStateOf(section) }
+    if (section != null) last = section
     Row(
-        Modifier
+        modifier
             .height(CHIP)
             .clip(RoundedCornerShape(CHIP / 2))
             .background(chipColor())
-            .padding(start = 14.dp, end = 16.dp)
-            .semantics(mergeDescendants = true) {},
+            .padding(horizontal = 15.dp)
+            .semantics(mergeDescendants = true) {}
+            .testTag("music-brand"),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         BandMark(inks, Modifier.size(18.dp))
-        Text(
-            stringResource(R.string.nagmedar_shell_title),
-            style = TextStyle(fontFamily = BodoniHeadline, fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Italic, fontSize = type.size(20f), lineHeight = type.size(22f)),
-            color = colors.text,
-            maxLines = 1,
-        )
+        AnimatedVisibility(
+            visible = named && section != null,
+            enter = if (instant) EnterTransition.None else {
+                expandHorizontally(tween(NagMotion.MEDIUM, easing = NagMotion.Emphasized), expandFrom = Alignment.Start) +
+                    fadeIn(tween(NagMotion.MEDIUM, delayMillis = NagMotion.SHORT / 2))
+            },
+            exit = if (instant) ExitTransition.None else {
+                shrinkHorizontally(tween(NagMotion.MEDIUM, easing = NagMotion.Emphasized), shrinkTowards = Alignment.Start) + fadeOut(tween(NagMotion.SHORT))
+            },
+        ) {
+            // another tab chosen while the chip is open: its name fades in over the last one's
+            AnimatedContent(
+                last.orEmpty(),
+                transitionSpec = {
+                    if (instant) {
+                        fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                    } else {
+                        fadeIn(tween(NagMotion.MEDIUM, delayMillis = NagMotion.SHORT / 2)) togetherWith fadeOut(tween(NagMotion.SHORT))
+                    } using SizeTransform(clip = false)
+                },
+                label = "chipSection",
+            ) { name ->
+                Text(
+                    name,
+                    style = TextStyle(fontFamily = BodoniHeadline, fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Italic, fontSize = type.size(20f), lineHeight = type.size(22f)),
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 10.dp, end = 1.dp).testTag("music-section"),
+                )
+            }
+        }
     }
 }
 
@@ -327,7 +409,8 @@ internal fun BandMark(inks: EbruInks, modifier: Modifier = Modifier, ring: Dp = 
             .clearAndSetSemantics {},
         contentAlignment = Alignment.Center,
     ) {
-        EbruBand(inks, 26.dp, Modifier.requiredSize(90.dp, 26.dp))
+        // (too small to be made before the eyes: it fades into the next album's)
+        EbruBand(inks, 26.dp, Modifier.requiredSize(90.dp, 26.dp), marbled = false)
     }
 }
 
@@ -402,13 +485,13 @@ internal fun PhoneMusicTopOnly(inks: EbruInks, statusTop: Dp, counts: String?, m
     }
 }
 
-/** "Müzikler" in Bodoni's italic, the counts under it. */
+/** "Müzikler" (1.1.3: another page's [title]) in Bodoni's italic, the counts under it. */
 @Composable
-private fun Masthead(counts: String?) {
+internal fun Masthead(counts: String?, title: String? = null) {
     val colors = NagTheme.colors
     Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            stringResource(R.string.nag_music_masthead),
+            title ?: stringResource(R.string.nag_music_masthead),
             style = NagTheme.type.masthead.copy(letterSpacing = (-0.015).em),
             color = colors.text,
             maxLines = 1,
