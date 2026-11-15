@@ -10,6 +10,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
@@ -151,6 +153,15 @@ class MusicBrowserTest {
         compose.onNode(hasContentDescription("Izgara görünümü")).performClick()
         compose.waitForIdle()
         assertEquals(MusicLayout.Grid, state.layout)
+    }
+
+    /** 1.1.0 (the independent review): a 360 dp phone with large text keeps the toolbar's buttons; the way in's name gives way. */
+    @Test @Config(qualifiers = "tr-w360dp-h800dp-xhdpi", fontScale = 1.3f)
+    fun aNarrowPhoneKeepsTheToolbarsButtons() {
+        show(WidthClass.Compact, InputMode.Touch, MusicBrowserState(view = MusicView.Albums))
+        compose.onNode(hasContentDescription("Filtrele")).assertIsDisplayed().assertWidthIsAtLeast(40.dp)
+        compose.onNode(hasContentDescription("Liste görünümü")).assertIsDisplayed().assertWidthIsAtLeast(40.dp)
+        compose.onNodeWithTag("music-views").assertIsDisplayed()
     }
 
     @Test

@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.Role
@@ -225,9 +226,10 @@ fun MenuButton(text: String, entries: () -> List<MenuEntry>, modifier: Modifier 
                 Icon(icon, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(dimens.icon))
                 Spacer(Modifier.width(6.dp))
             }
-            // cut short, not the chevron, where the button is given less room than its words (a narrow toolbar)
+            // cut short, not the chevron, where the button is given less room than its words (a narrow toolbar); in a row
+            // that scrolls (unbounded) the words take what they need
             Text(text, style = NagTheme.type.label, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false))
+                modifier = Modifier.leaveRoom(CHEVRON_ROOM))
             Spacer(Modifier.width(6.dp))
             Icon(NagIcons.ChevronDown, contentDescription = null, tint = colors.textSecondary, modifier = Modifier.size(14.dp))
         }
@@ -257,4 +259,15 @@ fun IconMenuButton(icon: ImageVector, contentDescription: String, entries: () ->
         MenuPopup(visible = menu.isOpen, onDismiss = menu::close, entries = if (menu.isOpen) entries() else emptyList(), offset = menu.offset ?: IntOffset.Zero,
             minWidth = 180.dp, focusFirst = byKeys)
     }
+}
+
+/** The menu button's chevron and the gap before it, which its words leave room for. */
+private val CHEVRON_ROOM = 20.dp
+
+/** Measured [room] narrower than it is given, where what it is given is bounded. */
+private fun Modifier.leaveRoom(room: Dp): Modifier = layout { measurable, constraints ->
+    val keep = room.roundToPx()
+    val max = if (constraints.hasBoundedWidth) (constraints.maxWidth - keep).coerceAtLeast(0) else constraints.maxWidth
+    val placeable = measurable.measure(constraints.copy(minWidth = constraints.minWidth.coerceAtMost(max), maxWidth = max))
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }
