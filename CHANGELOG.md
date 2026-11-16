@@ -2,6 +2,51 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.2.0 (16 Kasım 2026)
+
+Metamatik'in etiket düzenleyicisi Nağmedar'da (16 Kasım'daki istek: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”). Bu sürüm düzenleyicinin kendisi; çevrimiçi bilgi arama, kapak bulucu ve albüm toplu işlemleri 1.3.0'da, sahte FLAC denetimi ve listeler 1.4.0'da gelecek.
+
+### Etiket düzenleyici
+- Tablette ve DeX'te Müzik'in sağdaki panelinde yeni “Düzenle” görünümü (⋯ › Düzenle): seçili parçanın, birkaç parça seçiliyse hepsinin etiketleri; seçili parça yoksa çalanınki.
+- Parçanın menüsünde (sağ tık, uzun basma) ve seçimin menüsünde “Etiketleri düzenle…”: tablette paneli “Düzenle”de açar, telefonda ve çalma listelerinde “Etiketleri düzenle” sayfasını. Telefonda oynatıcının ⋯ menüsünde de var (çalan parça için).
+- Alanlar Metamatik'teki gibi: Temel (Başlık, Sanatçılar, Albüm, Albüm sanatçıları, Tarih, Türler, Parça no ve toplamı, Disk no ve toplamı), Katkıda bulunanlar (Besteciler, Söz yazarları, Şefler, Remiks, İcracılar), Diğer (Yorum, BPM, ISRC, Telif, Plak şirketi, Gruplama), Sözler ve Tüm etiketler: adı olan alanların dışındaki bütün etiketler, adlarıyla (MUSICBRAINZ_TRACKID, REPLAYGAIN_TRACK_GAIN…); “Etiket ekle” yenisini ekler.
+- Birden çok değerli alanlar (sanatçılar, türler, besteciler…) değer değer: Enter, ayırıcı (öntanımlı “; ”) ya da alandan çıkmak yazılanı değer yapar; değere dokunmak onu yeniden düzenlemeye alır, çarpısı kaldırır. “Tyler, The Creator” tek sanatçıdır.
+- Değişen alan “değişti” der; yanındaki düğme yalnızca o alanı geri alır. Alttaki şerit kaç değişiklik beklediğini söyler; “Vazgeç” hepsini bırakır, “Kaydet” (Ctrl+S) yazar.
+- Kapak: kapağın ⋯ menüsünde “Kapak seç…” (sistemin resim seçicisi), “Kapağı kaldır”, “Kapak değişikliğini geri al”. Arka kapak, sanatçı resmi gibi öteki resimler yerinde kalır. Kaydedilince Nağmedar albümün kapağını yeniden okur.
+- Bozuk görünen yazılar (“MoÄŸollar”, “Moðollar”): düzenleyici alanların düzeltilmiş hallerini gösterir; “Düzelt” onları kaydedilecek değişiklik yapar.
+- Parça ve disk numarası biçimin sakladığı gibi yazılır: FLAC'ta ve Ogg'da toplamı ayrı etikette (TRACKTOTAL), MP3'te ve M4A'da “3/12”.
+- Kaydedilmemiş değişiklikler varken başka bir parça seçilirse düzenleyici o parçada kalır ve söyler; değişiklikler kaydedilince ya da bırakılınca yeni seçime geçer. Panel kapanınca, başka görünüme geçilince yazılanlar kaybolmaz. Telefonun sayfası kaydedilmemiş değişiklikle kapatılmak istenirse önce sorar.
+
+### Birkaç parça birlikte
+- Birkaç parça seçiliyken düzenleyici ortak değerleri gösterir; parçalarda ayrı olan alan “Farklı değerler” der. Bir alana yazılan her parçaya yazılır; dokunulmayan alanlar her parçada kendi değeriyle kalır. Hepsinde aynı olan bir alanı boşaltmak onu her parçadan siler; farklı değerli bir alan boş kalırsa her parça kendininkini korur.
+- Başlık, sözler, BPM ve ISRC her parçanın kendisinindir: birkaç parçada gösterilmez. Parça numaraları da her parçada kendi kalır; parça toplamı ve disk numarası hepsine yazılabilir.
+- Tek bir kapak bütün parçalara yazılabilir ya da bütün kapaklar kaldırılabilir.
+- Kayıt arka planda sürer, panel kapansa da biter; ilerlemesi alttaki şeritte, “Durdur” ile durur. Sonunda kısa haber kaç parçanın yazıldığını söyler; “Geri al” hepsini geri yükler. En çok 1.000 parça birlikte düzenlenir; okunamayan parça dışarıda kalır ve söylenir.
+
+### Güvenlik: yalnızca değişen, önce yedek
+- Dosyaya yalnızca değiştirilen alanlar yazılır: ReplayGain, MusicBrainz kimlikleri ve düzenleyicinin adını bilmediği bütün etiketler olduğu gibi kalır. Kaydetmeden hemen önce dosya yeniden okunur: o arada başka yerde değişen etiketler de korunur.
+- Her kayıttan önce dosyanın etiketleri ve resimleri yedeklenir; kısa haberdeki “Geri al” onları geri yükler. En yeni 100 yedek saklanır (Ayarlar › Etiket düzenleyici › Yedekler: sayısı, kapladığı yer, “Yedekleri sil”). Birkaç parçalık bir kaydın yedekleri, sonraki tek parça kayıtlarında silinmez: bir sonraki toplu kayda kadar hepsi geri alınabilir.
+- Yazma, sözlerin yazıldığı korumayla yapılır (S-1005): dosyanın bir kopyası alınır, dosya yazılır, sesi eskisi gibi okunmazsa kopya geri konur; işlem yarıda kesilirse bir sonraki açılışta düzeltilir.
+- Yazılan dosyaların klasörüne kütüphane yeniden bakar (yeni başlık, sanatçı, albüm listede görünür); sistemin medya dizini de güncellenir.
+- Yazma izni yoksa (tüm dosyalara erişim verilmemiş, salt okunur bir SD kart) kısa haber söyler; “İzin ver” sistemin izin sayfasını açar. CUE sayfasındaki parçaların etiketleri sayfanın kendisindedir: düzenlenmez.
+
+### Başka bir uygulamadan
+- Dosya yöneticisinde ya da başka bir uygulamada bir ya da birkaç ses dosyası “Paylaş” ya da “Düzenle” ile Nağmedar'ın “Etiketleri düzenle”sine verilebilir: düzenleyici kendi penceresinde açılır, kapanınca o uygulamaya dönülür. Dosyanın yolu biliniyorsa (ve tüm dosyalara erişim varsa) kütüphanedeki dosyalar gibi yazılır, bilinmiyorsa o uygulamanın verdiği izinle. Bir ses dosyasını açmak (Görüntüle) eskisi gibi çalar.
+
+### Ayarlar
+- Ayarlar › Etiket düzenleyici: birden çok değerli alanların ayrı ayrı mı (her sanatçı kendi değeri) birleştirerek mi (aralarında ayırıcıyla tek değer; bazı eski oynatıcılar yalnızca ilkini gösterir) yazılacağı, ayırıcı ve yedekler.
+
+### Kaynak
+- Metamatik'in (Metadator'un bir çatalı, AGPL-3.0) etiket alanları, değişiklik ve kayıt kuralları, toplu düzenlemesi, bozuk yazı düzeltmesi ve TagLib bağlayıcısı yeni `nagmedar-tags` modülüne taşındı; dosyaların başında nereden geldikleri yazar. TagLib'e Kotlin'den `io.github.kyant0:taglib` 1.0.6 ile erişilir (Apache-2.0); yazma, Nağmedar'ın kendi TagLib'iyle yapılan ses denetiminin içinde olur. Metamatik'in yedekleri Room'daydı; Nağmedar'da uygulamanın klasöründe dosyalar.
+
+### Test
+- `nagmedar-tags`: Metamatik'in kuralları ve testleri, yedeklerin dosya deposu (`FileTagBackupStoreTest`); 75 test.
+- `TagEditorModelTest`: yalnızca değişenin yazıldığı, öteki etiketlerin kaldığı; kaydın kısa haberinden geri alındığı; birleştirerek yazma; numaraların biçime göre yazıldığı; yazma izni yokken değişikliklerin beklediği ve yedek kalmadığı; kapağın değiştiği, öteki resimlerin kaldığı; bozuk yazının düzeltildiği; birkaç parçada ortak ve farklı değerler, hepsine yazılan ve her parçada kendi kalan alanlar, toplu geri alma; kaydedilmemiş değişikliklerin başka parça seçilince beklediği.
+- `TagEditorScreenTest`: alan yazılıp kaydedilir; birden çok değerli alana değer eklenir; iki parçaya birlikte yazılır; etiket adıyla eklenir.
+
+### Sürüm
+- `versionCode` 4010200; kişisel arm64 APK'sı 14010206 (1.1.6'nın 14010112'sinin üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.1.6 (16 Kasım 2026)
 
 Tablette liste en başa dönünce ebru şeridi ve başlık hep yeniden görünür (16 Kasım'daki istek).

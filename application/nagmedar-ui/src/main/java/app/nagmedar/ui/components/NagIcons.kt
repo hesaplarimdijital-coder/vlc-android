@@ -109,6 +109,8 @@ object NagIcons {
     val Minus: ImageVector by lazy { icon("Minus", stroke("M4 8h8")) }
     /** 1.1.2 (the design's tablet page): the track table's columns ("Sütunlar"). */
     val Columns: ImageVector by lazy { icon("Columns", stroke("M4,3H12A1.5,1.5 0 0 1 13.5,4.5V11.5A1.5,1.5 0 0 1 12,13H4A1.5,1.5 0 0 1 2.5,11.5V4.5A1.5,1.5 0 0 1 4,3Z"), stroke("M6.3 3v10M9.7 3v10")) }
+    /** 1.2.0: the tag editor (a pencil). */
+    val Edit: ImageVector by lazy { icon("Edit", stroke("M10.6 2.8l2.6 2.6-7.9 7.9-3.3.7.7-3.3zM9.2 4.2l2.6 2.6")) }
 
     /** Every icon in the generator's order: the icon board and its tests. */
     val all: List<ImageVector> get() = listOf(
@@ -124,6 +126,7 @@ object NagIcons {
         FlipVertical, Sleep, Alarm, Star, StarFilled, Record, Stop, Cast,
         Visualizer, Filter, Unlock, Rotate, Speed, AspectRatio, Brightness, Headphones,
         Bookmark, Chapters, Share, ChapterPrevious, ChapterNext, Posters, Minus, Columns,
+        Edit,
     )
 }
 

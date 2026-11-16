@@ -102,6 +102,7 @@ import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.shell.DetailTransition
 import app.nagmedar.ui.stats.TrackStats
+import app.nagmedar.ui.tags.TagEditRequest
 import app.nagmedar.ui.stats.TrackStatsIndex
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
@@ -144,7 +145,13 @@ fun PlaylistsScreen(repository: MediaRepository, undo: UndoBarState?, onBrowseMu
     // S-808: "Puan ver…" from a line's menu
     var rating by remember { mutableStateOf<List<Track>?>(null) }
     val actions = remember(context, store, byUri) {
-        ServiceMusicActions(context, lookup = { uri -> store.media[uri] ?: byUri[uri] }, onAskRating = { tracks -> rating = tracks })
+        ServiceMusicActions(
+            context,
+            lookup = { uri -> store.media[uri] ?: byUri[uri] },
+            onAskRating = { tracks -> rating = tracks },
+            // 1.2.0: the tag editor as a page over the window
+            onEditTags = { tracks -> TagEditRequest.openPage(context, tracks) },
+        )
     }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult

@@ -131,6 +131,8 @@ ICONS = {
     # the films' poster view: two upright posters
     'Posters': '<rect x="1.5" y="3" width="6" height="10" rx="1"/><rect x="8.5" y="3" width="6" height="10" rx="1"/>',
     'Minus': '<path d="M4 8h8"/>',
+    'Columns': '<rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6.3 3v10M9.7 3v10"/>',
+    'Edit': '<path d="M10.6 2.8l2.6 2.6-7.9 7.9-3.3.7.7-3.3zM9.2 4.2l2.6 2.6"/>',
 }
 
 # Icons that point along the reading direction: drawn mirrored in right-to-left layouts.
@@ -226,6 +228,8 @@ private fun icon(name: String, vararg parts: IconPart, mirrored: Boolean = false
 # what an icon is for, where its name does not say it (a line of KDoc above it)
 DOCS = {
     'Minus': "1.0.8: a check box's third state (some of the rows).",
+    'Columns': "1.1.2 (the design's tablet page): the track table's columns (\"Sütunlar\").",
+    'Edit': "1.2.0: the tag editor (a pencil).",
 }
 
 

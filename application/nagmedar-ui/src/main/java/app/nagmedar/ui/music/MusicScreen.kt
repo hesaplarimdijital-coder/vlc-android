@@ -149,6 +149,7 @@ import app.nagmedar.ui.shell.plus
 import app.nagmedar.ui.shell.rememberMovableDetails
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
+import app.nagmedar.ui.tags.TagEditRequest
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
@@ -373,6 +374,9 @@ interface MusicActions {
 
     /** [track]'s file in its folder ("Dosyada göster"); null where it cannot be. */
     val reveal: ((Track) -> Unit)? get() = null
+
+    /** 1.2.0: [tracks]' tags in the editor (Metamatik's); null where there is none. */
+    val editTags: ((List<Track>) -> Unit)? get() = null
 }
 
 /** These actions with their plays coming from [source] (a group of the music view, a playlist); themselves for none. */
@@ -457,12 +461,15 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     // S-1010: the tracks being converted, while the converter's window is open
     var converting by remember { mutableStateOf<List<Track>?>(null) }
     val scope = rememberCoroutineScope()
+    // 1.2.0: the tag editor as a page over a phone's window, in the panel's "Düzenle" on a tablet's and a DeX window
+    val compactNow by rememberUpdatedState(compact)
     val actions = remember(context, byUri) {
         ServiceMusicActions(
             context, byUri,
             onAddToPlaylist = { tracks -> adding = tracks },
             onAskRating = { tracks -> rating = tracks },
             onConvert = { tracks -> converting = tracks },
+            onEditTags = { tracks -> if (compactNow) TagEditRequest.openPage(context, tracks) else TagEditRequest.toInspector(tracks) },
         )
     }
     val state = rememberMusicBrowserState()
@@ -797,6 +804,8 @@ internal class ServiceMusicActions(
     private val onAddToPlaylist: ((List<Track>) -> Unit)? = null,
     private val onAskRating: ((List<Track>) -> Unit)? = null,
     private val onConvert: ((List<Track>) -> Unit)? = null,
+    /** 1.2.0: "Etiketleri düzenle…". */
+    private val onEditTags: ((List<Track>) -> Unit)? = null,
 ) : MusicActions {
 
     constructor(
@@ -805,13 +814,16 @@ internal class ServiceMusicActions(
         onAddToPlaylist: ((List<Track>) -> Unit)? = null,
         onAskRating: ((List<Track>) -> Unit)? = null,
         onConvert: ((List<Track>) -> Unit)? = null,
-    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating, onConvert)
+        onEditTags: ((List<Track>) -> Unit)? = null,
+    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating, onConvert, onEditTags)
 
     override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
 
     override val askRating: ((List<Track>) -> Unit)? get() = onAskRating
 
     override val convert: ((List<Track>) -> Unit)? get() = onConvert
+
+    override val editTags: ((List<Track>) -> Unit)? get() = onEditTags
 
     override val share: (List<Track>) -> Unit get() = { tracks -> MediaSharing.share(context, tracks.map { fileOf(it) }) }
 
@@ -837,11 +849,12 @@ internal class ServiceMusicActions(
 
     override fun menu(track: Track, play: () -> Unit, select: (() -> Unit)?): List<MenuEntry> {
         val entries = lookup(track.uri)?.let { mediaMenu(context, it, play, select = select) }.orEmpty()
-        // after "Sıraya ekle": "Listeye ekle…", "Puan ver…", "Dönüştür…"
+        // after "Sıraya ekle": "Listeye ekle…", "Puan ver…", "Dönüştür…", 1.2.0: "Etiketleri düzenle…"
         val added = listOfNotNull(
             onAddToPlaylist?.let { add -> MenuEntry.Item(context.getString(R.string.nag_pl_add), { add(listOf(track)) }, icon = NagIcons.PlaylistAdd) },
             onAskRating?.let { ask -> MenuEntry.Item(context.getString(R.string.nag_rate), { ask(listOf(track)) }, icon = NagIcons.Star) },
             onConvert?.let { convert -> MenuEntry.Item(context.getString(R.string.nag_convert), { convert(listOf(track)) }, icon = NagIcons.Convert) },
+            onEditTags?.let { edit -> MenuEntry.Item(context.getString(R.string.nag_tag_edit), { edit(listOf(track)) }, icon = NagIcons.Edit) },
         )
         if (added.isEmpty()) return entries
         val queueLabel = context.getString(R.string.nag_add_to_queue)
@@ -1104,6 +1117,19 @@ fun MusicBrowser(
         withFrameNanos { }
         if (!inspectorState.docked) inspectorState.sheetOpen = true
     }
+    // 1.2.0: "Etiketleri düzenle…" from a menu: those tracks selected, the panel up on its "Düzenle"
+    val tagsAsked = TagEditRequest.inspector
+    LaunchedEffect(tagsAsked, inspector != null) {
+        val asked = tagsAsked ?: return@LaunchedEffect
+        if (inspector == null) return@LaunchedEffect
+        TagEditRequest.taken()
+        val keys = asked.map { it.uri }
+        selection.restore(LinkedHashSet<Any>(keys), keys.firstOrNull())
+        inspectorState.selectedTab = MUSIC_EDIT_TAB
+        if (inspectorState.collapsed) inspectorState.updateCollapsed(false)
+        withFrameNanos { }
+        if (!inspectorState.docked) inspectorState.sheetOpen = true
+    }
     // a phone's group closing keeps the order its tracks were shown in
     val closing = remember { ClosingOrder() }
     if (inspector != null) InspectorCommands(inspectorState::toggle)
@@ -1317,7 +1343,9 @@ fun MusicBrowser(
             // the selected track (the last clicked of several), else what plays
             val chosen = selection.keys
             val key = selection.anchor?.takeIf { it in chosen } ?: chosen.firstOrNull()
-            val subject = InspectorSubject(key?.let { k -> shown.firstOrNull { it.uri == k } }, chosen.size)
+            // 1.2.0: the selected tracks themselves, for the tag editor
+            val chosenTracks = remember(chosen, shown) { if (chosen.isEmpty()) emptyList() else shown.filter { it.uri in chosen } }
+            val subject = InspectorSubject(key?.let { k -> shown.firstOrNull { it.uri == k } }, chosen.size, chosenTracks)
             // 1.1.2 (the design's tablet page): the panel beside the page shows the transport of what plays: the shell's
             // floating player stands aside meanwhile. 1.1.5 (the owner, 16 Nov: "Tablet ve Dex modunda altta oynatıcı
             // çıkmasın"): whatever the panel shows (a track selected with Ctrl, its lyrics, the queue), the player is the
@@ -1508,6 +1536,7 @@ internal fun tracksMenu(res: android.content.res.Resources, tracks: List<Track>,
         actions.addToPlaylist?.let { add -> MenuEntry.Item(res.getString(R.string.nag_pl_add), { add(tracks) }, icon = NagIcons.PlaylistAdd) },
         if (rate) actions.askRating?.let { ask -> MenuEntry.Item(res.getString(R.string.nag_rate), { ask(tracks) }, icon = NagIcons.Star) } else null,
         actions.convert?.let { convert -> MenuEntry.Item(res.getString(R.string.nag_convert), { convert(tracks) }, icon = NagIcons.Convert) },
+        if (first != null) actions.editTags?.let { edit -> MenuEntry.Item(res.getString(R.string.nag_tag_edit), { edit(tracks) }, icon = NagIcons.Edit) } else null,
         if (first != null && (share != null || reveal != null)) MenuEntry.Separator else null,
         if (first != null) share?.let { MenuEntry.Item(res.getString(R.string.nag_media_share), { it(tracks) }, icon = NagIcons.Share) } else null,
         if (first != null) reveal?.let { MenuEntry.Item(res.getString(R.string.nag_media_reveal), { it(first) }, icon = NagIcons.Folder) } else null,

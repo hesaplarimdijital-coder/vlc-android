@@ -121,6 +121,8 @@ import app.nagmedar.ui.playback.playbackPositionMs
 import app.nagmedar.ui.playback.playbackRate
 import app.nagmedar.ui.playback.rememberChapterMarks
 import app.nagmedar.ui.playback.rememberNowPlaying
+import app.nagmedar.ui.tags.TagEditRequest
+import app.nagmedar.ui.tags.TagTarget
 import app.nagmedar.ui.playback.rememberPlayQueue
 import app.nagmedar.ui.playback.rememberPlaybackProgress
 import app.nagmedar.ui.playback.rememberPlayingChapters
@@ -222,6 +224,11 @@ fun PhonePlayer(
     val top = remember(colors, tint) { tint?.let { backdropTop(colors, it) } }
     // what the window's root keeps clear (1.0.3: the system's buttons are the shell's, the player reaches behind them)
     val insets = LocalWindowRootInsets.current?.padding ?: WindowInsets.safeDrawing
+    // 1.2.0: what plays, when it is a file whose tags can be edited
+    val playingMedia = rememberNowPlaying().media
+    val editTarget = remember(playingMedia) {
+        playingMedia?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }?.let { media -> media.uri?.toString()?.let { TagTarget.of(it, media.title, media.artistName) } }
+    }
     val menu: () -> List<MenuEntry> = {
         listOfNotNull(
             // S-1004
@@ -248,6 +255,8 @@ fun PhonePlayer(
             onEqualizer?.let { MenuEntry.Item(res.getString(R.string.nag_sc_equalizer), it, icon = NagIcons.Equalizer) },
             // S-808
             onRate?.let { MenuEntry.Item(res.getString(R.string.nag_rate), it, icon = NagIcons.Star) },
+            // 1.2.0: the tag editor on what plays, a page over the window
+            editTarget?.let { target -> MenuEntry.Item(res.getString(R.string.nag_tag_edit), { TagEditRequest.openPage(listOf(target)) }, icon = NagIcons.Edit) },
         )
     }
     BoxWithConstraints(

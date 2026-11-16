@@ -31,6 +31,7 @@ include ':application:nagmedar-data'
 include ':application:nagmedar-session'
 include ':application:nagmedar-lab'
 include ':application:nagmedar-audio'
+include ':application:nagmedar-tags'
 // S-1404: the macrobenchmarks, against the app's benchmark build
 include ':application:benchmark'
 include ':application:remote-access-client'

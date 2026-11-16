@@ -1,0 +1,463 @@
+/*
+ * Copyright (C) 2026  Gabriel Fontán (BobbyESP)
+ * Nağmedar 1.2.0: from Metamatik (core/domain/src/test/kotlin/com/bobbyesp/metadator/core/domain/batch/BatchTest.kt), a fork of Metadator, under the AGPL-3.0.
+ */
+package app.nagmedar.tags.batch
+
+import app.nagmedar.tags.FakeBackupStore
+import app.nagmedar.tags.FakeIndexer
+import app.nagmedar.tags.FakeTagFiles
+import app.nagmedar.tags.editor.withMultiValueMode
+import app.nagmedar.tags.save.BackupHold
+import app.nagmedar.tags.save.RestoreBackupUseCase
+import app.nagmedar.tags.save.RestoreOutcome
+import app.nagmedar.tags.save.SaveOutcome
+import app.nagmedar.tags.save.SaveTagChangesUseCase
+import app.nagmedar.tags.ContentRef
+import app.nagmedar.tags.editor.MultiValueMode
+import app.nagmedar.tags.EmbeddedPicture
+import app.nagmedar.tags.TagChanges
+import app.nagmedar.tags.TagMap
+import app.nagmedar.tags.TagSnapshot
+import app.nagmedar.tags.TagWriteResult
+import app.nagmedar.tags.TagWriter
+import java.io.IOException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class BatchTest {
+
+    @Test
+    fun `patterns read tags out of file names`() {
+        val pattern = FileNamePattern("{track} - {artist} - {title}")
+        assertEquals(
+            mapOf(
+                "TRACKNUMBER" to listOf("03"),
+                "ARTIST" to listOf("AC/DC"),
+                "TITLE" to listOf("Back In Black - Live"),
+            ),
+            pattern.parse("03 - AC/DC - Back In Black - Live.flac"),
+        )
+        assertNull(pattern.parse("no separators here.mp3"))
+    }
+
+    @Test
+    fun `patterns format file names from tags`() {
+        val tags =
+            TagMap.of(
+                "ARTIST" to listOf("AC/DC"),
+                "TITLE" to listOf("Hells Bells"),
+                "TRACKNUMBER" to listOf("1/10"),
+            )
+        assertEquals(
+            "1 - AC_DC - Hells Bells",
+            FileNamePattern("{track} - {artist} - {title}").format(tags),
+        )
+        assertNull(FileNamePattern("{album} - {title}").format(tags))
+    }
+
+    @Test
+    fun `invalid patterns are recognised`() {
+        assertFalse(FileNamePattern("no placeholders").isValid)
+        assertFalse(FileNamePattern("{title} {title}").isValid)
+        assertFalse(FileNamePattern("{nope}").isValid)
+    }
+
+    @Test
+    fun `a batch sets common fields, numbers tracks and keeps the rest`() = runTest {
+        val refs = (1..3).map { ContentRef("content://$it") }
+        val files =
+            FakeTagFiles(
+                refs.associateWith {
+                    TagSnapshot(
+                        TagMap.of("TITLE" to listOf(it.uri), "BPM" to listOf("120")),
+                        emptyList(),
+                    )
+                }
+            )
+        val backups = FakeBackupStore()
+        val hold = BackupHold()
+        val runner =
+            BatchRunner(
+                this,
+                SaveTagChangesUseCase(files, files, backups, FakeIndexer(), hold),
+                backups,
+                hold,
+            )
+
+        runner.start(
+            refs.mapIndexed { index, ref -> BatchItem(ref, "song$index.mp3") },
+            BatchEdit(fields = mapOf("ALBUM" to listOf("Live")), numbering = TrackNumbering()),
+        )
+        finish(runner)
+
+        val progress = runner.progress.value!!
+        assertFalse(progress.isRunning)
+        assertEquals(3, progress.saved.size)
+        refs.forEachIndexed { index, ref ->
+            val tags = files.files.getValue(ref).tags
+            assertEquals(listOf("Live"), tags["ALBUM"])
+            assertEquals(listOf("${index + 1}/3"), tags["TRACKNUMBER"])
+            assertEquals(listOf("120"), tags["BPM"])
+            assertEquals(listOf(ref.uri), tags["TITLE"])
+        }
+    }
+
+    /** Runs [runner]'s batch to its end, whatever runs this scope's coroutines. */
+    private suspend fun TestScope.finish(runner: BatchRunner) {
+        advanceUntilIdle()
+        while (runner.isRunning) yield()
+    }
+
+    /**
+     * Three songs, and a runner and a save that keep only [keep] backups. The batch stops before
+     * writing its song number [pauseAt] (from 1), until its writer is resumed.
+     */
+    private class Songs(scope: CoroutineScope, keep: Int, pauseAt: Int = 0) {
+        val refs = (1..3).map { ContentRef("content://$it") }
+        val originals = refs.associateWith {
+            TagSnapshot(TagMap.of("TITLE" to listOf(it.uri)), emptyList())
+        }
+        val files = FakeTagFiles(originals)
+        val backups = FakeBackupStore()
+        val indexer = FakeIndexer()
+        val writer = PausingWriter(files, pauseAt)
+        val hold = BackupHold()
+        val save = SaveTagChangesUseCase(files, writer, backups, indexer, hold, keep = keep)
+        val runner = BatchRunner(scope, save, backups, hold, keep = keep)
+        /**
+         * The save of an editor beside the batch editor: its own, with the same hold, as in the
+         * app.
+         */
+        val editor = SaveTagChangesUseCase(files, files, backups, indexer, hold, keep = keep)
+        val items = refs.mapIndexed { index, ref -> BatchItem(ref, "song$index.mp3") }
+        val edit = BatchEdit(fields = mapOf("ALBUM" to listOf("Live")))
+
+        /** A song that is not in the batch. */
+        val other =
+            ContentRef("content://other").also {
+                files.files[it] = TagSnapshot(TagMap.of("TITLE" to listOf("Other")), emptyList())
+            }
+
+        /** What "Undo all" does: every song of the batch is put back as it was. */
+        suspend fun undoAll() {
+            val progress = runner.progress.value!!
+            assertEquals(refs.size, progress.backups.size)
+            val restore = RestoreBackupUseCase(backups, files, indexer)
+            progress.backups.forEach { assertEquals(RestoreOutcome.Restored, restore(it)) }
+            assertEquals(originals, files.files.filterKeys { it in refs })
+        }
+    }
+
+    /** Writes to [files], but stops before its write number [at] (from 1) until [resume]. */
+    private class PausingWriter(private val files: FakeTagFiles, private val at: Int) : TagWriter {
+        val paused = CompletableDeferred<Unit>()
+        private val resumed = CompletableDeferred<Unit>()
+        private var writes = 0
+
+        fun resume() {
+            resumed.complete(Unit)
+        }
+
+        override suspend fun write(
+            ref: ContentRef,
+            tags: TagMap,
+            pictures: List<EmbeddedPicture>?,
+        ): TagWriteResult {
+            if (++writes == at) {
+                paused.complete(Unit)
+                resumed.await()
+            }
+            return files.write(ref, tags, pictures)
+        }
+    }
+
+    @Test
+    fun `a batch keeps the backup of every song it saved, however few are kept`() = runTest {
+        // Pruned after each song, a batch of three keeping one backup could undo only its last.
+        val songs = Songs(this, keep = 1)
+
+        songs.runner.start(songs.items, songs.edit)
+        finish(songs.runner)
+
+        assertEquals(1, songs.backups.prunes.size)
+        songs.undoAll()
+    }
+
+    @Test
+    fun `a save made while a batch runs keeps the batch's backups`() = runTest {
+        // Pruned to what it keeps, the editor's save dropped the songs the batch had backed up.
+        val songs = Songs(this, keep = 1, pauseAt = 2)
+
+        songs.runner.start(songs.items, songs.edit)
+        songs.writer.paused.await()
+        songs.editor(songs.other, TagChanges(fields = mapOf("TITLE" to listOf("x"))))
+        songs.writer.resume()
+        finish(songs.runner)
+
+        songs.undoAll()
+    }
+
+    @Test
+    fun `a save made before a batch's result is dismissed keeps the batch's backups`() = runTest {
+        val songs = Songs(this, keep = 1)
+        songs.runner.start(songs.items, songs.edit)
+        finish(songs.runner)
+
+        // Its done dialog, with "Undo all", is still up.
+        songs.editor(songs.other, TagChanges(fields = mapOf("TITLE" to listOf("x"))))
+
+        songs.undoAll()
+    }
+
+    @Test
+    fun `once a batch's result is dismissed, the next save drops its backups beyond those kept`() =
+        runTest {
+            val songs = Songs(this, keep = 1)
+            songs.runner.start(songs.items, songs.edit)
+            finish(songs.runner)
+            songs.runner.clear()
+
+            val outcome =
+                songs.editor(songs.refs.first(), TagChanges(fields = mapOf("TITLE" to listOf("x"))))
+                    as SaveOutcome.Saved
+
+            assertEquals(setOf(outcome.backupId), songs.backups.backups.keys)
+        }
+
+    @Test
+    fun `a cancelled batch prunes too, and keeps what it backed up`() = runTest {
+        val songs = Songs(this, keep = 1)
+        var seen = 0
+
+        // Cancelled while the third song is being saved, before its backup: Room's save throws.
+        songs.runner.start(songs.items, songs.edit) { changes ->
+            if (++seen == 3) songs.runner.cancel()
+            changes
+        }
+        finish(songs.runner)
+
+        val progress = songs.runner.progress.value!!
+        assertTrue(progress.wasCancelled)
+        assertFalse(songs.runner.isRunning)
+        assertEquals(2, progress.saved.size)
+        assertEquals(1, songs.backups.prunes.size)
+        assertEquals(progress.backups.toSet(), songs.backups.backups.keys)
+    }
+
+    @Test
+    fun `a backup that fails stops the batch where it got to, and keeps the app`() = runTest {
+        // Thrown on, the failure ended the app's scope, and the app with it, halfway.
+        val songs = Songs(this, keep = 1)
+        songs.backups.failingSave = 2
+
+        songs.runner.start(songs.items, songs.edit)
+        finish(songs.runner)
+
+        val progress = songs.runner.progress.value!!
+        assertFalse(progress.isRunning)
+        assertTrue(progress.failure is IOException)
+        assertEquals(1, progress.saved.size)
+        assertEquals(1, songs.backups.prunes.size)
+        assertEquals(songs.originals.getValue(songs.refs[1]), songs.files.files[songs.refs[1]])
+        assertEquals(songs.originals.getValue(songs.refs[2]), songs.files.files[songs.refs[2]])
+        // What it saved can still be undone.
+        val restore = RestoreBackupUseCase(songs.backups, songs.files, songs.indexer)
+        assertEquals(RestoreOutcome.Restored, restore(progress.backups.single()))
+    }
+
+    @Test
+    fun `a prune that fails at the end still ends the batch`() = runTest {
+        val songs = Songs(this, keep = 1)
+        songs.backups.pruneFailure = IOException("Database disk image is malformed")
+
+        songs.runner.start(songs.items, songs.edit)
+        finish(songs.runner)
+
+        val progress = songs.runner.progress.value!!
+        assertFalse(progress.isRunning)
+        assertEquals(3, progress.saved.size)
+        assertTrue(progress.failure is IOException)
+    }
+
+    /** The path the batch editor's "Apply to all" takes, with the multi-value mode applied last. */
+    private suspend fun TestScope.applyToAll(
+        files: FakeTagFiles,
+        edit: BatchEdit,
+        mode: MultiValueMode = MultiValueMode.Separate,
+    ): BatchProgress {
+        val backups = FakeBackupStore()
+        val hold = BackupHold()
+        val runner =
+            BatchRunner(
+                this,
+                SaveTagChangesUseCase(files, files, backups, FakeIndexer(), hold),
+                backups,
+                hold,
+            )
+        runner.start(files.files.keys.map { BatchItem(it, it.uri.substringAfterLast('/')) }, edit) {
+            it.withMultiValueMode(mode, "; ")
+        }
+        advanceUntilIdle()
+        // Whatever runs this scope's coroutines, the batch is done before its files are read.
+        while (runner.isRunning) yield()
+        return runner.progress.value!!
+    }
+
+    private fun albumArtistFiles() =
+        FakeTagFiles(
+            linkedMapOf(
+                ContentRef("content://1/a.flac") to
+                    TagSnapshot(TagMap.of("ALBUMARTIST" to listOf("Old")), emptyList()),
+                ContentRef("content://2/b.mp3") to
+                    TagSnapshot(TagMap.of("ARTIST" to listOf("Daft Punk")), emptyList()),
+                ContentRef("content://3/c.m4a") to
+                    TagSnapshot(TagMap.of("ALBUMARTIST" to listOf("A", "B")), emptyList()),
+                ContentRef("content://4/d.flac") to
+                    TagSnapshot(TagMap.of("ALBUMARTIST" to listOf("Daft Punk")), emptyList()),
+            )
+        )
+
+    @Test
+    fun `an album artist set for all reaches every file, whatever each had`() = runTest {
+        val files = albumArtistFiles()
+
+        val progress =
+            applyToAll(
+                files,
+                BatchEdit(fields = mapOf("ALBUMARTIST" to listOf("Daft Punk", "Pharrell"))),
+            )
+
+        assertEquals(4, progress.saved.size)
+        files.files.values.forEach { snapshot ->
+            assertEquals(listOf("Daft Punk", "Pharrell"), snapshot.tags["ALBUMARTIST"])
+        }
+        assertEquals(listOf("Daft Punk"), files.files.values.elementAt(1).tags["ARTIST"])
+    }
+
+    @Test
+    fun `an album artist set for all is joined in every file when values are joined`() = runTest {
+        val files = albumArtistFiles()
+
+        applyToAll(
+            files,
+            BatchEdit(fields = mapOf("ALBUMARTIST" to listOf("Daft Punk", "Pharrell"))),
+            MultiValueMode.Joined,
+        )
+
+        files.files.values.forEach { snapshot ->
+            assertEquals(listOf("Daft Punk; Pharrell"), snapshot.tags["ALBUMARTIST"])
+        }
+    }
+
+    @Test
+    fun `a field a format drops is told, not counted as kept`() = runTest {
+        val files =
+            FakeTagFiles(
+                mapOf(ContentRef("content://1/a.wav") to TagSnapshot(TagMap.Empty, emptyList())),
+                unsupportedKeys = setOf("ALBUMARTIST"),
+            )
+
+        val progress =
+            applyToAll(
+                files,
+                BatchEdit(
+                    fields = mapOf("ALBUM" to listOf("X"), "ALBUMARTIST" to listOf("Daft Punk"))
+                ),
+            )
+
+        assertEquals(1, progress.saved.size)
+        assertEquals(mapOf("ALBUMARTIST" to 1), progress.notStored)
+    }
+
+    @Test
+    fun `positions are set file by file, in each file's style, the rest kept`() = runTest {
+        val mp3 = ContentRef("content://1/a.mp3")
+        val flac = ContentRef("content://2/b.flac")
+        val other = ContentRef("content://3/c.mp3")
+        val files =
+            FakeTagFiles(
+                linkedMapOf(
+                    mp3 to
+                        TagSnapshot(
+                            TagMap.of(
+                                "TRACKNUMBER" to listOf("5/10"),
+                                "DISCNUMBER" to listOf("1/2"),
+                            ),
+                            emptyList(),
+                        ),
+                    flac to
+                        TagSnapshot(
+                            TagMap.of("TRACKNUMBER" to listOf("5"), "TRACKTOTAL" to listOf("10")),
+                            emptyList(),
+                        ),
+                    other to TagSnapshot(TagMap.of("TRACKNUMBER" to listOf("7")), emptyList()),
+                )
+            )
+
+        applyToAll(
+            files,
+            BatchEdit(
+                positions =
+                    mapOf(
+                        mp3 to FilePositions(track = PositionEdit(3, 12), disc = PositionEdit(2)),
+                        flac to FilePositions(track = PositionEdit(total = 12)),
+                    )
+            ),
+        )
+
+        val first = files.files.getValue(mp3).tags
+        assertEquals(listOf("3/12"), first["TRACKNUMBER"])
+        assertEquals(listOf("2/2"), first["DISCNUMBER"])
+        val second = files.files.getValue(flac).tags
+        assertEquals(listOf("5"), second["TRACKNUMBER"])
+        assertEquals(listOf("12"), second["TRACKTOTAL"])
+        assertEquals(listOf("7"), files.files.getValue(other).tags["TRACKNUMBER"])
+    }
+
+    @Test
+    fun `a track total keeps the number read from the file name`() {
+        val ref = ContentRef("content://1")
+        val edit =
+            BatchEdit(
+                fileNamePattern = FileNamePattern("{track} - {title}"),
+                positions = mapOf(ref to FilePositions(track = PositionEdit(total = 12))),
+            )
+
+        val changes =
+            edit.changesFor(
+                BatchItem(ref, "03 - Digital Love.mp3"),
+                0,
+                1,
+                TagSnapshot(TagMap.of("TRACKNUMBER" to listOf("9/9")), emptyList()),
+            )
+
+        assertEquals(listOf("03/12"), changes.fields["TRACKNUMBER"])
+        assertEquals(listOf("Digital Love"), changes.fields["TITLE"])
+    }
+
+    @Test
+    fun `positions that set nothing are no edit`() {
+        assertTrue(
+            BatchEdit(positions = mapOf(ContentRef("content://1") to FilePositions())).isEmpty
+        )
+        assertFalse(
+            BatchEdit(
+                    positions =
+                        mapOf(ContentRef("content://1") to FilePositions(disc = PositionEdit(1)))
+                )
+                .isEmpty
+        )
+    }
+}

@@ -201,6 +201,10 @@ Sözlüğü testler denetler:
 | süre sınırı | time limit | | | Android 15'in arka plandaki (ön plan hizmeti olarak süren) işlere koyduğu günlük sınır: veri eşitleme ve medya işleme için ayrı ayrı günde altı saat; “Android'in süre sınırı doldu” |
 | Kurtarılan (klasör) | Recovered (folder) | | | Yarıda kalmış bir etiket yazımının, dosyaya geri konamayan (dosya o arada başka yerde değişmiş ya da bir hafta bulunamamış) önceki kopyasının konduğu klasör; uygulamanın depodaki klasöründe (Android/data/…/files). Kısa haber nerede olduğunu söyler |
 | geliştirici araçları | developer tools | | | Ayarlar'ın sonunda kapalı duran satır (1.0.1): açılınca Laboratuvar ve Performans altında görünür; günlük kullanım için gerekmez |
+| etiket düzenleyici | tag editor | | | 1.2.0 (Metamatik'in): bir ya da birkaç parçanın etiketlerini dosyaya yazan düzenleyici. Tablette ve DeX'te ayrıntı panelinin “Düzenle” görünümü, telefonda “Etiketleri düzenle” sayfası; parçanın menüsünde “Etiketleri düzenle…”. Dosyaya yalnızca değişen yazılır; her kayıttan önce yedek alınır ve kısa haberdeki “Geri al” geri yükler. Başka uygulamanın paylaştığı dosya da “Etiketleri düzenle” ile açılır |
+| tüm etiketler | all tags | | | Etiket düzenleyicinin son bölümü: adı olan alanların dışındaki bütün etiketler adlarıyla (MUSICBRAINZ_TRACKID, REPLAYGAIN_TRACK_GAIN); “Etiket ekle” yenisini ekler |
+| farklı değerler | different values | | | Birkaç parça birlikte düzenlenirken bir alanda parçaların değerleri ayrıysa alanın yerinde yazan; yazılan değer hepsine yazılır, boş bırakılan alan her parçada kendi değeriyle kalır |
+| bozuk yazı | garbled text | | mojibake | Yanlış karakter setiyle okunmuş yazı (“MoÄŸollar”, “Moðollar”): düzenleyici düzeltilmiş halini önerir, “Düzelt” onu kaydedilecek değişiklik yapar |
 
 ## Özel adlar
 

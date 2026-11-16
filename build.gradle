@@ -74,14 +74,14 @@ allprojects {
 
 ext {
     appId = "app.nagmedar" // Nağmedar; code namespaces stay org.videolan.*
-    // Nağmedar 1.1.6. versionCode = 4000000 + major * 10000 + minor * 100 + patch (minor and patch
+    // Nağmedar 1.2.0. versionCode = 4000000 + major * 10000 + minor * 100 + patch (minor and patch
     // 0 to 99); the 4000000 base keeps it above the VLC 3.x codes that StartActivity's settings
     // migrations compare against. An APK's own code is 10000000 + this + its ABI's digit
-    // (app/build.gradle): 14010112 for the arm64 personal build of 1.1.6, 14010106 for a debug one.
-    versionCode = 4010106
+    // (app/build.gradle): 14010206 for the arm64 personal build of 1.2.0, 14010200 for a debug one.
+    versionCode = 4010200
     // libVLC 4 by default; -PforceVlc3 selects the VLC 3 branch (-PforceVlc4 is accepted and ignored)
     vlcMajorVersion = project.hasProperty('forceVlc3') ? 3 : 4
-    versionName = vlcMajorVersion == 3 ? '1.1.6-vlc3' : '1.1.6'
+    versionName = vlcMajorVersion == 3 ? '1.2.0-vlc3' : '1.2.0'
     remoteAccessVersion = '0.24.0'
     libvlcVersion = vlcMajorVersion == 3 ? '3.7.7' :'4.0.0-eap29'
     medialibraryVersion = (vlcMajorVersion == 3 ? '0.13.24' : '0.13.22-vlc4')
@@ -147,6 +147,8 @@ ext {
     lifecycleComposeVersion = '2.11.0'
     // 4.17 runs Android 16 (API 36) too; the tests stay on API 34 (robolectric.properties)
     nagmedarRobolectricVersion = '4.17'
+    // Nağmedar 1.2.0: TagLib for Metamatik's tag editing (nagmedar-tags), the version Metamatik builds with
+    nagmedarTaglibVersion = '1.0.6'
     // S-1010: the converter's jobs (application/nagmedar-ui)
     workManagerVersion = '2.10.5'
     // S-1404: the macrobenchmarks (application/benchmark)

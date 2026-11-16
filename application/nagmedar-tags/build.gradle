@@ -1,0 +1,48 @@
+// Nağmedar 1.2.0: Metamatik's tag editing (the owner's own app, a fork of Metadator, under the
+// AGPL-3.0; LICENSE beside this file): a file's tags and pictures read and written with TagLib,
+// only what was changed, every save backed up first and undoable; many files at once. Plain
+// Kotlin but for TagLib's descriptors, so the rules are tested on the JVM.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.tags'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                // Robolectric 4.17 reads FileDescriptor internals on Java 17+
+                jvmArgs '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED'
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    // TagLib's native library with its JNI binding (Apache-2.0; TagLib itself LGPL-2.1/MPL-1.1)
+    implementation "io.github.kyant0:taglib:$rootProject.ext.nagmedarTaglibVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.nagmedarRobolectricVersion"
+    testImplementation "androidx.test:core:$rootProject.ext.testCore"
+    testImplementation "androidx.test.ext:junit:$rootProject.ext.junitExtVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"
+}

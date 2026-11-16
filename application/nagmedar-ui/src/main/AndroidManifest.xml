@@ -41,6 +41,38 @@
                 android:value="true" />
         </activity>
 
+        <!-- 1.2.0: the tag editor (Metamatik's) for an audio file another app hands over: a file manager's Edit or
+             Share, several shared at once. Not for View: opening a file plays it, as before. A window of its own,
+             wide enough for the cover beside the fields; closing it goes back to that app. -->
+        <activity
+            android:name="app.nagmedar.ui.tags.ExternalTagEditorActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|keyboard|keyboardHidden|navigation|uiMode|fontScale"
+            android:exported="true"
+            android:label="@string/nag_tag_external_label"
+            android:resizeableActivity="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Nagmedar"
+            android:windowSoftInputMode="adjustResize">
+            <layout
+                android:defaultWidth="720dp"
+                android:defaultHeight="760dp"
+                android:gravity="center"
+                android:minWidth="360dp"
+                android:minHeight="480dp" />
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity>
+
         <!-- S-1010: WorkManager's foreground service with the types the converter's workers ask for -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"

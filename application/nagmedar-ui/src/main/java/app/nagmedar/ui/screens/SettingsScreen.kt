@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.NagmedarPreferences
 import app.nagmedar.ui.R
 import app.nagmedar.ui.audio.MusicSection
+import app.nagmedar.ui.tags.TagEditorSection
 import app.nagmedar.ui.audio.latency.LatencySection
 import app.nagmedar.ui.backup.BackupSection
 import app.nagmedar.ui.components.HorizontalRule
@@ -112,6 +113,9 @@ enum class SettingsItem(val key: String) {
     RadioRecording("radio_recording"),
     Lyrics("lyrics"),
     Covers("covers"),
+
+    /** 1.2.0: the tag editor's (Metamatik's) settings. */
+    Tags("tags"),
     Podcasts("podcasts"),
     RemoteAccess("remote_access"),
     Backup("backup"),
@@ -245,6 +249,8 @@ fun SettingsScreen(
                 SettingsItem.Lyrics -> LyricsSection()
                 // S-1006: where album covers come from
                 SettingsItem.Covers -> CoversSection()
+                // 1.2.0: the tag editor
+                SettingsItem.Tags -> TagEditorSection()
                 // S-1103, S-1104: refreshing the podcasts, their downloads and the skip buttons
                 SettingsItem.Podcasts -> PodcastSection()
                 // S-1304: the web page that browses and plays from another device

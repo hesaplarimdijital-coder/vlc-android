@@ -73,6 +73,8 @@ import app.nagmedar.ui.playback.softLevels
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.stats.TrackStats
 import app.nagmedar.ui.stats.TrackStatsIndex
+import app.nagmedar.ui.tags.TagEditorPane
+import app.nagmedar.ui.tags.TagTarget
 import app.nagmedar.ui.theme.NagTheme
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
 import java.text.NumberFormat
@@ -85,14 +87,21 @@ internal object InspectorTabs {
     const val SIGNAL = "signal"
     const val LYRICS = "lyrics"
     const val QUEUE = "queue"
+
+    /** 1.2.0: the tag editor (Metamatik's) on the selection, else on what plays. */
+    const val EDIT = "edit"
 }
+
+/** 1.2.0: where "Düzenle" is among the music panel's views ([MusicInspectorPane]'s order): the last. */
+internal const val MUSIC_EDIT_TAB = 4
 
 /**
  * What the music view's inspector is about (Desktop Kit 1.0): the [track] selected in the table
- * (the last one clicked when [selected] are), or none, and then what plays.
+ * (the last one clicked when [selected] are), or none, and then what plays. 1.2.0: the selected [tracks] themselves,
+ * for the tag editor.
  */
 @Immutable
-data class InspectorSubject(val track: Track?, val selected: Int = if (track == null) 0 else 1)
+data class InspectorSubject(val track: Track?, val selected: Int = if (track == null) 0 else 1, val tracks: List<Track> = listOfNotNull(track))
 
 /**
  * 1.1.5 (the owner, 16 Nov: "Tam ekran oynatıcıyı da iptal edelim tablet ve dex modunda"): the player asked for on a
@@ -130,6 +139,8 @@ class MusicInspectorContent(
     val queue: @Composable () -> Unit,
     /** 1.1.2 (the design's tablet page): more in the panel's "⋯" after its views (the visualiser, casting). */
     val menu: @Composable () -> List<MenuEntry> = { emptyList() },
+    /** 1.2.0 "Düzenle": the tag editor on the selected tracks, else on what plays. */
+    val edit: @Composable (InspectorSubject) -> Unit = {},
 )
 
 /**
@@ -145,6 +156,7 @@ internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorCo
         InspectorTab(InspectorTabs.SIGNAL, stringResource(R.string.nag_sp_title)),
         InspectorTab(InspectorTabs.LYRICS, stringResource(R.string.nag_lyrics_title)),
         InspectorTab(InspectorTabs.QUEUE, stringResource(R.string.nag_inspector_queue)),
+        InspectorTab(InspectorTabs.EDIT, stringResource(R.string.nag_tag_tab)),
     )
     // the last lines rest clear of a floating player bar
     val bottom = LocalShellBottomPadding.current
@@ -154,6 +166,7 @@ internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorCo
                 InspectorTabs.TAGS -> content.tags(subject)
                 InspectorTabs.SIGNAL -> content.signal(subject)
                 InspectorTabs.LYRICS -> content.lyrics(subject)
+                InspectorTabs.EDIT -> content.edit(subject)
                 else -> content.queue()
             }
         }
@@ -318,6 +331,7 @@ fun rememberMusicInspector(onFullScreenLyrics: () -> Unit, onFullScreenVisualize
             lyrics = { subject -> LyricsTab(subject) { lyrics() } },
             queue = { QueueTab(undo) },
             menu = { panelMenu { visualizer() } },
+            edit = { subject -> EditTab(subject) },
         )
     }
 }
@@ -431,6 +445,28 @@ private fun LyricsTab(subject: InspectorSubject, onFullScreen: () -> Unit) {
         if (subject.notPlaying(playing)) InspectorNote(stringResource(R.string.nag_inspector_not_playing))
         PlayingLyrics(Modifier.weight(1f).fillMaxWidth(), onFullScreen = onFullScreen)
     }
+}
+
+/**
+ * 1.2.0 "Düzenle": the tag editor (Metamatik's) on the selected tracks, else on what plays; a CUE sheet's tracks are
+ * left out (their tags are their sheet's).
+ */
+@Composable
+private fun EditTab(subject: InspectorSubject) {
+    val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
+    val tracks = subject.tracks
+    val wanted = remember(tracks, playing) {
+        if (tracks.isNotEmpty()) {
+            tracks.mapNotNull(TagTarget::of)
+        } else {
+            listOfNotNull(playing?.uri?.toString()?.let { TagTarget.of(it, playing.title, playing.artistName) })
+        }
+    }
+    TagEditorPane(
+        wanted,
+        Modifier.fillMaxSize(),
+        empty = if (tracks.isNotEmpty()) stringResource(R.string.nag_tag_cue) else null,
+    )
 }
 
 /** The play queue, as "Sıradaki" has it, without its close button. */

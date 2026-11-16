@@ -25,9 +25,9 @@ object FileTags {
      * [block] on a read-write descriptor of [track] and its name (S-1005: the lyrics editor writes tags), guarded by
      * [TagBackups]: a copy of the file is kept while it is written and put back if the file does not read as it was.
      * Only a file of its own: a CUE track (S-808) shares its file with the others and is not written. [TagWrite.Failed]
-     * when the engine is missing or the file cannot be opened for writing.
+     * when the engine is missing or the file cannot be opened for writing. 1.2.0: the tag editor's writes too (Metamatik's).
      */
-    internal fun write(context: Context, track: Uri, block: (fd: Int, name: String) -> Boolean): TagWrite {
+    fun write(context: Context, track: Uri, block: (fd: Int, name: String) -> Boolean): TagWrite {
         if (!NativeAudio.available || CueUri.isTrack(track)) return TagWrite.Failed
         val app = context.applicationContext
         val descriptor = runCatching { openWritable(app, track) }

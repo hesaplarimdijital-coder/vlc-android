@@ -95,6 +95,8 @@ import app.nagmedar.ui.lyrics.LyricsTrack
 import app.nagmedar.ui.lyrics.PlayingLyricsFullScreen
 import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
+import app.nagmedar.ui.tags.TagEditRequest
+import app.nagmedar.ui.tags.TagEditorPage
 import app.nagmedar.ui.lyrics.delayNumber
 import app.nagmedar.ui.audio.locale
 import app.nagmedar.ui.shell.SidebarBrand
@@ -602,6 +604,11 @@ private fun NagmedarMain(
                         // 1.0.9 (Desktop Kit 2.9.0): its buttons at the window's bottom on a phone, no bottom bar under them
                         PhoneWindowPage(null)
                         PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false }, modifier = Modifier.blockInputBelow())
+                    }
+                    // 1.2.0: the tag editor as a page over the window (a phone's track menu, a playlist's)
+                    TagEditRequest.page?.let { targets ->
+                        PhoneWindowPage(null)
+                        TagEditorPage(targets, onClose = { TagEditRequest.closePage() }, modifier = Modifier.blockInputBelow())
                     }
                     AnimatedVisibility(visualizerOpen, enter = motion.detailEnter(rtl), exit = motion.detailExit(rtl)) {
                         PhoneWindowPage(this)
