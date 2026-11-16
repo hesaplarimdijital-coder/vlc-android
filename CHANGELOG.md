@@ -2,6 +2,21 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.6 (16 Kasım 2026)
+
+Tablette liste en başa dönünce ebru şeridi ve başlık hep yeniden görünür (16 Kasım'daki istek).
+
+### Katlanan üst
+- Liste aşağı kaydırılıp sonra en başına geri getirilince başlık (ebru şeridi, sayfanın adı) yalnızca yarıdan fazlası göründüyse geri geliyordu. Liste başa savrulup savrulmanın kalanı başlığın yarısından azını gösterdiyse ya da parmak başlığın yarısına varmadan bırakıldıysa başlık yeniden katlanıyordu; liste en başta olduğu hâlde şerit görünmüyor, ikinci bir aşağı-yukarı kaydırma gerekiyordu. Artık aşağı inmekte olan başlık bırakılınca sonuna kadar iner. Yukarı itilip yarıda bırakılan başlık eskisi gibi yakın uca gider.
+- Fare tekerleği ve dokunmatik yüzey de aynı: kaydırma bitince başlık sonuna kadar iner.
+- Müzik, Radyo ve Podcastler'de; tablette, DeX'te ve telefonda.
+
+### Test
+- `CollapsingTopTest`: listesi en baştayken inmekte olan başlığın bırakılınca sonuna kadar indiği; parmakla listeyi en başa ve biraz ötesine çekip bırakınca başlığın tümüyle göründüğü (1.1.5'te ikisi de başarısız).
+
+### Sürüm
+- `versionCode` 4010106; kişisel arm64 APK'sı 14010112 (1.1.5'in 14010111'inin üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.1.5 (16 Kasım 2026)
 
 Tablette ve DeX'te parçaya bir kez tıklamak onu çalar ve oynatıcı sağdaki panelde kalır; alttaki oynatıcı Müzik'te çıkmaz, büyük (tam ekran) oynatıcı açılmaz. Ebru şeridi enine bir kez çizilir. Radyo'nun ve Podcastler'in şeridi çalanın resminden. Masaüstü penceresinin rayında iki Nağmedar işareti üst üste gelmez (16 Kasım'daki istekler).

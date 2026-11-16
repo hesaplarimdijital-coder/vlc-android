@@ -14,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -21,6 +23,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.theme.InputMode
@@ -98,6 +101,58 @@ class CollapsingTopTest {
         // pulled down past the list's top, it comes back whole
         repeat(3) { compose.onNodeWithTag("list").performTouchInput { swipeDown(startY = top + 10f, endY = bottom - 10f, durationMillis = 800) } }
         compose.waitForIdle()
+        assertEquals(0f, top.fraction, 0.001f)
+        assertEquals(200f, tabsTop(), 0.5f)
+    }
+
+    /**
+     * 1.1.6 (the owner, 16 Nov: "sayfa tamamen yukarı çıkmıyor"): coming down with its list back at its top, the header
+     * comes all the way down when let go, however little of it showed; pushed back up, it goes to the nearer end.
+     */
+    @Test
+    fun comingDownAtItsListsTopItComesAllTheWay() {
+        val state = CollapsingTopState().apply { instant = true }
+        state.resized(300f)
+        state.connection.onPreScroll(Offset(0f, -400f), NestedScrollSource.UserInput)
+        assertEquals(1f, state.fraction, 0.001f)
+        // a fling back to the list's top, its rest bringing a third of the header down
+        state.connection.onPostScroll(Offset(0f, 250f), Offset(0f, 100f), NestedScrollSource.UserInput)
+        assertEquals(2f / 3f, state.fraction, 0.001f)
+        runBlocking { state.connection.onPostFling(Velocity.Zero, Velocity.Zero) }
+        assertEquals(0f, state.fraction, 0.001f)
+        // pushed up a little and let go: back down; most of the way: folded away
+        state.connection.onPreScroll(Offset(0f, -60f), NestedScrollSource.UserInput)
+        runBlocking { state.connection.onPostFling(Velocity.Zero, Velocity.Zero) }
+        assertEquals(0f, state.fraction, 0.001f)
+        state.connection.onPreScroll(Offset(0f, -200f), NestedScrollSource.UserInput)
+        runBlocking { state.connection.onPostFling(Velocity.Zero, Velocity.Zero) }
+        assertEquals(1f, state.fraction, 0.001f)
+    }
+
+    /**
+     * 1.1.6: the same with a finger: the list pulled back to its top and a little past it (a third of the header shows),
+     * held still and let go: the header comes all the way down (1.1.3-1.1.5: it folded away again, no band on the list).
+     */
+    @Test
+    fun aListPulledBackToItsTopShowsTheHeader() {
+        page()
+        compose.onNodeWithTag("list").performTouchInput { swipeUp(startY = bottom - 10f, endY = top + 10f, durationMillis = 800) }
+        compose.waitForIdle()
+        compose.runOnIdle { runBlocking { list.scrollToItem(3) } }
+        compose.waitForIdle()
+        assertEquals(1f, top.fraction, 0.001f)
+        compose.onNodeWithTag("list").performTouchInput {
+            down(Offset(centerX, top + 20f))
+            // past the touch slop, the list's 168 px to its top, then some 70 of the header's 200
+            repeat(25) {
+                moveBy(Offset(0f, 10f))
+                advanceEventTime(16)
+            }
+            advanceEventTime(400)
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals(0, list.firstVisibleItemIndex)
         assertEquals(0f, top.fraction, 0.001f)
         assertEquals(200f, tabsTop(), 0.5f)
     }

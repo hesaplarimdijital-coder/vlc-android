@@ -39,7 +39,8 @@ import kotlinx.coroutines.launch
 /**
  * 1.1.3: where a [CollapsingTop]'s header is: how far it has gone up ([offset], px; 0 while all of it shows) of how far
  * it may ([fraction]: 0 shown, 1 folded away). A list scrolled towards its end takes the header up before it moves
- * itself; a list back at its top, pulled on, brings it down again; let go halfway, it goes to the nearer end.
+ * itself; a list back at its top, pulled on, brings it down again; let go halfway, it goes to the nearer end, 1.1.6: or
+ * all the way down when it was coming down.
  */
 @Stable
 class CollapsingTopState {
@@ -58,6 +59,9 @@ class CollapsingTopState {
 
     /** What a push back up takes back before the header folds: a pull to refresh's disc on its way down. */
     internal val holds = ArrayList<() -> Boolean>()
+
+    /** Whether the header last moved down: its list back at its top and pulled on (or a finger on the header itself). */
+    private var cameDown = false
 
     /** 0 while the header shows, 1 once it has folded away. */
     val fraction: Float get() = if (limit <= 0f) 0f else (-offset / limit).coerceIn(0f, 1f)
@@ -99,6 +103,7 @@ class CollapsingTopState {
         val old = offset.coerceIn(-limit, 0f)
         val new = (old + dy).coerceIn(-limit, 0f)
         offset = new
+        if (new != old) cameDown = new > old
         return new - old
     }
 
@@ -119,11 +124,16 @@ class CollapsingTopState {
         }
     }
 
-    /** A header let go halfway, to the nearer end. */
+    /**
+     * A header let go halfway, to the nearer end; one coming down, all the way down. 1.1.6 (the owner, 16 Nov: "sayfa
+     * tamamen yukarı çıkmıyor"): a list flung back to its top brought the header down only as far as its fling's rest
+     * went, and that let go past halfway folded it away again: the list at its top under no band, until another push
+     * down and up. The end of a wheel's or a touchpad's scroll lets go the same way.
+     */
     internal suspend fun settle() {
         val f = fraction
         if (f <= 0f || f >= 1f) return
-        val target = if (f < 0.5f) 0f else -limit
+        val target = if (cameDown || f < 0.5f) 0f else -limit
         if (instant) {
             offset = target
             return
