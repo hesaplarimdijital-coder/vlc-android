@@ -2,6 +2,22 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.4 (16 Kasım 2026)
+
+Ebru şeridi yalnızca müzik değişince gözün önünde yapılır; sekme değiştirince yapılmaz (16 Kasım'daki istek).
+
+### Ebru şeridi
+- 1.1.3'te her sekme değişiminde şerit yeniden yapılarak geliyordu: sayfa her açıldığında çalan albümün renklerini kapaktan yeniden çıkarıyor, o arada bozkırın renkleriyle başlıyordu; kapak okununca bu bir müzik değişimi sanılıyordu. Artık bir albümün renkleri bir kez çıkarılınca uygulama açık kaldıkça bilinir: Müzik, Radyo, Podcastler arasında geçerken, bir sayfaya geri dönünce şerit hemen o albümün şeridi, geçiş yok.
+- Geçiş yalnızca çalan albüm değişince (başka bir albüm, kapaksız bir parça, çalma bitince bozkır) oynar; aynı albümün başka parçası şeridi değiştirmez.
+- Uygulama yeni açılınca çalan albümün kapağı okunana kadar bozkırın şeridi durur, albümün şeridi onun üstüne yavaşça gelir (geçiş değil: müzik değişmedi).
+- Kapağı olmayan bir albümde kapak 0,8 saniye beklenir, gelmezse şerit bozkırın; bu da hatırlanır.
+
+### Test
+- Yeni: `EbruInksTest`: geçişin yalnızca bilinen iki albümün renkleri arasında oynadığı (renkler bilinir olunca, sayfa açılınca, uygulama başlayınca oynamaz); bir sayfanın ilk karesinden beri albümün bilinen renkleri; kapaksız albümde önce bilinmiyor, sonra bozkırın ve hatırlanması; bir şey çalmıyorken hemen bozkırın.
+
+### Sürüm
+- `versionCode` 4010104; kişisel arm64 APK'sı 14010110 (1.1.3'ün 14010109'unun üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.1.3 (15 Kasım 2026)
 
 Ebru şeridi albüm değişince gözün önünde yapılır; Radyo'nun ve Podcastler'in de ebru şeridi var; tablette albümlere ve parçalara yer açıldı, şerit keskinleşti; telefonun çipi “Nağmedar” yazmaz, sayfa kayınca bulunulan sekmeyi yazar (15 Kasım'daki istekler).

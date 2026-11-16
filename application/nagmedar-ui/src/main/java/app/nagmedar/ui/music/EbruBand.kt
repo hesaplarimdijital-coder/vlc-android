@@ -69,7 +69,16 @@ data class EbruInks(val inks: List<Int>, val paper: Int, val seed: Long) {
             0xFFF0E3C8.toInt(),
             103L,
         )
+
+        /**
+         * 1.1.3: the inks of an album whose cover has not been read since the app started: its band is the bozkır's
+         * meanwhile, and the album's fades in over it once they are known (not made before the eyes: no music changed).
+         */
+        val Unknown = Default.copy(seed = Long.MIN_VALUE)
     }
+
+    /** The inks a band of these is drawn in ([Unknown]'s: the bozkır's). */
+    internal val drawn: EbruInks get() = if (this == Unknown) Default else this
 }
 
 /**
@@ -477,6 +486,18 @@ internal object Ebru {
 
     fun cached(inks: EbruInks, width: Int, height: Int): Bitmap? = kept.get(key(inks, width, height))
 
+    /**
+     * 1.1.3: the inks worked out from the albums' covers since the app started, by album: a page shown again (another
+     * tab, the way back) has its band's at once; only another album's are new.
+     */
+    private val albumInks = LruCache<String, EbruInks>(128)
+
+    fun keptInks(album: String): EbruInks? = albumInks.get(album)
+
+    fun keepInks(album: String, inks: EbruInks) {
+        albumInks.put(album, inks)
+    }
+
     fun make(inks: EbruInks, width: Int, height: Int, check: () -> Unit = {}): Bitmap =
         cached(inks, width, height) ?: band(inks, width, height, check).also { kept.put(key(inks, width, height), it) }
 
@@ -523,10 +544,24 @@ internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
     val track = remember(media?.id, media?.uri) { media?.let { CoverTrack.of(it) } }
     val cover = rememberCover(track, COVER_SAMPLE_PX)
     val currentTrack by rememberUpdatedState(track)
-    val inks by produceState(EbruInks.Default, cover) {
-        val track = currentTrack
-        val image = cover ?: run {
+    // 1.1.3: an album's inks once worked out are known from then on, so a page shown again (another tab) has its band's
+    // at once and makes none before the eyes: only another album's are new (1.1.0-1.1.2 started each page on the
+    // bozkır's). Until an album's cover is read for the first time they are unknown.
+    val known = remember { track?.let { Ebru.keptInks(it.key) ?: EbruInks.Unknown } ?: EbruInks.Default }
+    val inks by produceState(known, cover) {
+        val track = currentTrack ?: run {
             value = EbruInks.Default
+            return@produceState
+        }
+        val image = cover ?: run {
+            // a cover on its way: the album's inks if known; none come: the bozkır's, for this album from now on
+            Ebru.keptInks(track.key)?.let {
+                value = it
+                return@produceState
+            }
+            delay(COVER_WAIT_MS)
+            value = EbruInks.Default
+            Ebru.keepInks(track.key, EbruInks.Default)
             return@produceState
         }
         value = withContext(Ebru.worker) {
@@ -536,9 +571,9 @@ internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
                 val small = Bitmap.createScaledBitmap(readable, 32, 32, true)
                 val pixels = IntArray(32 * 32)
                 small.getPixels(pixels, 0, 32, 0, 0, 32, 32)
-                Ebru.inksOf(pixels, (track?.key ?: "").hashCode().toLong())
+                Ebru.inksOf(pixels, track.key.hashCode().toLong())
             }.getOrNull() ?: EbruInks.Default
-        }
+        }.also { Ebru.keepInks(track.key, it) }
     }
     return inks
 }
@@ -566,7 +601,7 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier, marbled:
         val h = (fullHeight * scale).roundToInt().coerceAtLeast(16)
         // the band on screen stays until the next one is made, then becomes it (an album that plays after another)
         val shown = remember {
-            mutableStateOf((Ebru.cached(inks, w, h) ?: if (Ebru.synchronous) Ebru.make(inks, w, h) else null)?.let { ShownBand(it.asImageBitmap(), inks) })
+            mutableStateOf((Ebru.cached(inks.drawn, w, h) ?: if (Ebru.synchronous) Ebru.make(inks.drawn, w, h) else null)?.let { ShownBand(it.asImageBitmap(), inks) })
         }
         var marbling by remember { mutableStateOf<EbruMarbling?>(null) }
         val reduced = NagTheme.motion.reduced || LocalMotionTier.current == MotionTier.Reduced
@@ -574,10 +609,15 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier, marbled:
         LaunchedEffect(inks, w, h) {
             val before = shown.value
             val old = before?.image?.asAndroidBitmap()
-            val ready = Ebru.cached(inks, w, h)
-            if (ready != null && ready === old) return@LaunchedEffect
-            // another album's band over one as large: made before the reader's eyes
-            val marble = marbled && !latestReduced && EbruMarbling.supported && before != null && before.inks != inks &&
+            val ready = Ebru.cached(inks.drawn, w, h)
+            if (ready != null && before != null && ready === old) {
+                // (the bozkır's band stood in for these very inks: they are known now)
+                if (before.inks != inks) shown.value = ShownBand(before.image, inks)
+                return@LaunchedEffect
+            }
+            // another album's band over one as large: made before the reader's eyes. Only when the music changes: from
+            // one album's known inks to another's (1.1.3: not as a page is shown, nor as the app starts)
+            val marble = marbled && !latestReduced && EbruMarbling.supported && before != null && marblesBetween(before.inks, inks) &&
                 old?.width == w && old.height == h
             if (!marble) {
                 val band = ready ?: run {
@@ -585,7 +625,7 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier, marbled:
                     if (before != null) delay(SETTLE_MS)
                     withContext(Ebru.worker) {
                         val job = coroutineContext.job
-                        Ebru.make(inks, w, h) { job.ensureActive() }
+                        Ebru.make(inks.drawn, w, h) { job.ensureActive() }
                     }
                 }
                 shown.value = ShownBand(band.asImageBitmap(), inks)
@@ -593,10 +633,10 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier, marbled:
             }
             val made = withContext(Ebru.worker) {
                 val job = coroutineContext.job
-                Ebru.makeMarbled(inks, w, h) { job.ensureActive() }
+                Ebru.makeMarbled(inks.drawn, w, h) { job.ensureActive() }
             }
             val next = ShownBand(made.band!!.asImageBitmap(), inks)
-            val transition = EbruMarbling.of(old!!, before!!.inks, made)
+            val transition = EbruMarbling.of(old!!, before!!.inks.drawn, made)
             if (transition == null) {
                 shown.value = next
                 return@LaunchedEffect
@@ -623,11 +663,20 @@ fun EbruBand(inks: EbruInks, height: Dp, modifier: Modifier = Modifier, marbled:
     }
 }
 
+/**
+ * 1.1.3: whether a band in [from] becomes one in [to] before the eyes: only when the music changes, from one album's
+ * known inks to another's; not as the inks of what plays come to be known (a page shown, the app started).
+ */
+internal fun marblesBetween(from: EbruInks, to: EbruInks): Boolean = from != EbruInks.Unknown && to != EbruInks.Unknown && from.drawn != to.drawn
+
 /** A band on screen, and the inks it was made of. */
 private class ShownBand(val image: ImageBitmap, val inks: EbruInks)
 
 /** The cover is read this large for its inks. */
 private const val COVER_SAMPLE_PX = 96
+
+/** How long an album's cover may take to be read before its band is the bozkır's (it has none). */
+private const val COVER_WAIT_MS = 800L
 
 /** How long a new width stays before a band is made for it, while another band is on screen. */
 private const val SETTLE_MS = 250L
