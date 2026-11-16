@@ -21,7 +21,7 @@ Walkman Sync Nağmedar'ın içinde: tabletin kartındaki yeni müzikler Sony Wal
 ### Test
 - `nagmedar-walkman`: Walkman Sync'in çekirdek testleri (181 test: etiket okuyucuları, fark motoru, yol planlayıcı, aktarım kaydı, atomik kopya, koordinatör).
 - `WalkmanScreenTest`: kartlar önce seçilir; tarama bitince sayfa yeni müzik listesine geçer, ikisi de işaretli gelir ve Aktar onları verir; aktarımın sonu söylenir, Bitti kartlara döner; sayfa yeniden çizilince (tablet döndü, DeX penceresi yeniden kuruldu) seçilen görünüm yerinde kalır, iş ilerleyince görünüm de ilerler. Vurgulanan iki satır çubuktan birlikte hariç tutulup yeniden dahil edilir, satırın menüsü de ikisine birden uygulanır.
-- Onay için ekran görüntüleri (`WalkmanScreenshotTest`): telefonda kartlar, kaynak seçili ve hedef bekliyor (`walkman-cards-phone-dark`); DeX'te yeni müzikler (`walkman-plan-dex-light`).
+- Onay için ekran görüntüleri (`WalkmanScreenshotTest`): telefonda kartlar, kaynak seçili ve hedef bekliyor (`walkman-cards-phone-dark`); DeX'te yeni müzikler (`walkman-plan-dex-light`). Kenar çubuğunu ya da telefondaki Daha fazla sayfasını gösteren 52 görüntü, Araçlar'a eklenen “Walkman'e aktar” girişiyle yenilendi.
 
 ### Sürüm
 - `versionCode` 4010500; kişisel arm64 APK'sı 14010506 (1.4.0'ın 14010406'sının üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
