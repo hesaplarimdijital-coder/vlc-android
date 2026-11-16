@@ -1,11 +1,13 @@
 package app.nagmedar.ui.tags
 
 import android.text.format.Formatter
+import java.text.NumberFormat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,16 +23,19 @@ import app.nagmedar.tags.editor.MultiValueMode
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
 import app.nagmedar.ui.components.NagCheckbox
+import app.nagmedar.ui.components.NagSwitch
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
+import app.nagmedar.ui.audio.locale
+import app.nagmedar.ui.quality.LibraryChecks
 import app.nagmedar.ui.screens.SettingsSection
 import kotlinx.coroutines.launch
 
 /**
  * 1.2.0: Settings › Etiket düzenleyici (Metamatik's): how fields of several values are written (one by one, or joined
- * with the separator, which is also what typed values are split on), 1.3.0: the catalogues looked up, and the saves'
- * backups, which can be deleted.
+ * with the separator, which is also what typed values are split on), 1.3.0: the catalogues looked up, 1.4.0: the
+ * library's checks, and the saves' backups, which can be deleted.
  * The screenshot tests give [backups]; the app counts them itself.
  */
 @Composable
@@ -90,6 +95,29 @@ internal fun TagEditorSection(backups: Pair<Int, Long>? = null) {
                     )
                 }
             }
+        }
+        // 1.4.0: the library's checks (Metamatik's), in the background, and how far they have got
+        var checks by remember { mutableStateOf(TagSettings.libraryChecks(context)) }
+        val quality by LibraryChecks.quality.collectAsState()
+        val read by LibraryChecks.tags.collectAsState()
+        val numbers = remember(context) { NumberFormat.getIntegerInstance(context.resources.locale()) }
+        SettingRow(
+            stringResource(R.string.nag_tag_checks),
+            subtitle = listOfNotNull(
+                stringResource(R.string.nag_tag_checks_hint),
+                stringResource(R.string.nag_tag_checks_lossless, numbers.format(quality.checked), numbers.format(quality.total)).takeIf { checks && quality.total > 0 },
+                stringResource(R.string.nag_tag_checks_tags, numbers.format(read.checked), numbers.format(read.total)).takeIf { checks && read.total > 0 },
+            ).joinToString("\n"),
+        ) {
+            NagSwitch(
+                checks,
+                { on ->
+                    checks = on
+                    LibraryChecks.setEnabled(context, on)
+                },
+                stringResource(if (checks) R.string.nag_prefs_on else R.string.nag_prefs_off),
+                modifier = Modifier.testTag("tags-library-checks"),
+            )
         }
         val count = kept
         SettingRow(

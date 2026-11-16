@@ -142,14 +142,21 @@ data class GroupSort(val order: GroupOrder, val ascending: Boolean) {
     }
 }
 
-/** S-803: the bit depth and sample rate filter; empty sets let everything through. */
+/**
+ * S-803: the bit depth and sample rate filter; empty sets let everything through. 1.4.0: with the library's [checks]
+ * (Metamatik's lists), which the tracks do not carry: [rememberCheckedLibrary] lets through what they found.
+ */
 @Immutable
-data class TechFilter(val depths: Set<Depth> = emptySet(), val rates: Set<RateBand> = emptySet()) {
-    val active: Boolean get() = depths.isNotEmpty() || rates.isNotEmpty()
+data class TechFilter(
+    val depths: Set<Depth> = emptySet(),
+    val rates: Set<RateBand> = emptySet(),
+    val checks: Set<LibraryCheck> = emptySet(),
+) {
+    val active: Boolean get() = depths.isNotEmpty() || rates.isNotEmpty() || checks.isNotEmpty()
 
     /** A track the probe has not read yet passes only an empty filter. */
     fun matches(track: Track): Boolean {
-        if (!active) return true
+        if (depths.isEmpty() && rates.isEmpty()) return true
         val tech = track.tech ?: return false
         if (depths.isNotEmpty() && tech.depth !in depths) return false
         if (rates.isNotEmpty() && tech.rateBand !in rates) return false

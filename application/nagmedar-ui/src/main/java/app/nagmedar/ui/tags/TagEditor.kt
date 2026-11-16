@@ -107,6 +107,7 @@ import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.nagClickable
 import app.nagmedar.ui.library.currentLocale
+import app.nagmedar.ui.quality.LosslessCard
 import app.nagmedar.ui.onboarding.MediaAccess
 import app.nagmedar.ui.theme.NagTheme
 import java.text.NumberFormat
@@ -217,6 +218,8 @@ internal fun TagEditor(model: TagEditorModel, modifier: Modifier = Modifier, hel
                     Head(model)
                     // 1.3.0: looked up online
                     ToolButtons(model) { tool = it }
+                    // 1.4.0: whether a FLAC or WAV file is what it says
+                    if (!model.many) LosslessCard(model.lossless)
                     Notes(model)
                     if (model.many) BatchTools(model)
                     Fields(model)

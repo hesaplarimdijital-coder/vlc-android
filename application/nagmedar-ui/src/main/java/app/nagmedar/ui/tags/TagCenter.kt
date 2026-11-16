@@ -21,6 +21,8 @@ import app.nagmedar.tags.TagWriter
 import app.nagmedar.tags.batch.BatchRunner
 import app.nagmedar.tags.files.LocalAudioFiles
 import app.nagmedar.tags.files.MediaIndexer
+import app.nagmedar.tags.quality.LosslessCheckResult
+import app.nagmedar.tags.quality.LosslessVerdict
 import app.nagmedar.tags.save.BackupHold
 import app.nagmedar.tags.save.FileTagBackupStore
 import app.nagmedar.tags.save.RestoreBackupUseCase
@@ -28,6 +30,7 @@ import app.nagmedar.tags.save.SaveTagChangesUseCase
 import app.nagmedar.tags.taglib.TagLibTagFiles
 import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
+import app.nagmedar.ui.quality.LibraryChecks
 import java.io.File
 import java.io.FileNotFoundException
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +59,10 @@ class TagFiles(
     val scope: CoroutineScope,
     val covers: suspend (refs: List<ContentRef>, before: List<TagMap>, after: List<TagMap>) -> Unit = { _, _, _ -> },
     val hold: BackupHold = BackupHold(),
+    /** 1.4.0: whether a FLAC or WAV file's audio is what it says (Metamatik's check); none in tests that do not ask. */
+    val lossless: (suspend (ContentRef) -> LosslessCheckResult)? = null,
+    /** 1.4.0: where the editor's verdict goes, so that the library says the same without checking the file again. */
+    val verdicts: (ContentRef, LosslessVerdict?) -> Unit = { _, _ -> },
 ) {
     val save = SaveTagChangesUseCase(reader, writer, backups, indexer, hold)
     val restore = RestoreBackupUseCase(backups, writer, indexer)
@@ -103,6 +110,8 @@ object TagCenter {
             indexer = LibraryIndexer(context),
             scope = AppScope,
             covers = { refs, before, after -> refreshCovers(context, refs, before, after) },
+            lossless = { ref -> LibraryChecks.lossless(context)(ref) },
+            verdicts = { ref, verdict -> LibraryChecks.record(context, ref, verdict) },
         )
     }
 

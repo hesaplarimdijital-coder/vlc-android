@@ -374,6 +374,15 @@ object TagSettings {
     fun updateCatalogues(context: Context, ids: Set<String>) {
         Settings.getInstance(context).edit().putStringSet(KEY_CATALOGUES, ids).apply()
     }
+
+    private const val KEY_LIBRARY_CHECKS = "nagmedar_tags_library_checks"
+
+    /** 1.4.0: whether the library's files are checked in the background (Metamatik's): on until turned off. */
+    fun libraryChecks(context: Context): Boolean = Settings.getInstance(context).getBoolean(KEY_LIBRARY_CHECKS, true)
+
+    fun updateLibraryChecks(context: Context, on: Boolean) {
+        Settings.getInstance(context).edit().putBoolean(KEY_LIBRARY_CHECKS, on).apply()
+    }
 }
 
 /** The system's page that gives the app access to all files: what writing tags needs. */

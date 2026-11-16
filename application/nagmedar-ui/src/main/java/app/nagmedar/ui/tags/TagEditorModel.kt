@@ -47,11 +47,14 @@ import app.nagmedar.tags.lookup.LookupCandidate
 import app.nagmedar.tags.lookup.LookupQuery
 import app.nagmedar.tags.lookup.positionsFor
 import app.nagmedar.tags.lookup.proposalsFor
+import app.nagmedar.tags.quality.LosslessCheckResult
+import app.nagmedar.tags.quality.LosslessReport
 import app.nagmedar.tags.save.RestoreOutcome
 import app.nagmedar.tags.save.SaveOutcome
 import app.nagmedar.tags.text.textRepairs
 import app.nagmedar.ui.music.Track
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -112,6 +115,17 @@ sealed interface EditorPhase {
 }
 
 enum class TagProblem { NotFound, NeedsAccess, Unsupported, Failed }
+
+/** 1.4.0: the lossless check of the file the editor has open (Metamatik's card): none for a file it does not read. */
+sealed interface LosslessCheckState {
+    data object None : LosslessCheckState
+
+    data object Checking : LosslessCheckState
+
+    data object Failed : LosslessCheckState
+
+    data class Done(val report: LosslessReport) : LosslessCheckState
+}
 
 /** What the selected files have in a field: one value for all, different ones, or none. */
 sealed interface CommonValue {
@@ -212,6 +226,10 @@ class TagEditorModel(
     var positionStyle: PositionStyle by mutableStateOf(PositionStyle.Combined)
         private set
 
+    /** 1.4.0: whether one FLAC or WAV file's audio is what it says, as far as the check has got. */
+    var lossless: LosslessCheckState by mutableStateOf(LosslessCheckState.None)
+        private set
+
     // several files
 
     var loaded: List<LoadedFile> by mutableStateOf(emptyList())
@@ -303,11 +321,39 @@ class TagEditorModel(
                 positionStyle = TrackPositions.detectStyle(read.snapshot.tags, target.extension)
                 phase = EditorPhase.Ready
                 audio = runCatching { files.reader.readAudioProperties(target.ref) }.getOrNull()
+                checkLossless(target)
             }
             TagReadResult.NotFound -> phase = EditorPhase.Problem(TagProblem.NotFound)
             TagReadResult.AccessDenied -> phase = EditorPhase.Problem(TagProblem.NeedsAccess)
             TagReadResult.Unsupported -> phase = EditorPhase.Problem(TagProblem.Unsupported)
             is TagReadResult.Failed -> phase = EditorPhase.Problem(TagProblem.Failed, read.message)
+        }
+    }
+
+    /**
+     * 1.4.0 (Metamatik's): a FLAC or WAV file's audio looked at, after its tags are on screen: some twenty seconds of it,
+     * decoded here. The verdict goes to the library too ([TagFiles.verdicts]).
+     */
+    private suspend fun checkLossless(target: TagTarget) {
+        val check = files.lossless ?: return
+        if (target.extension !in LOSSLESS_EXTENSIONS) return
+        lossless = LosslessCheckState.Checking
+        val result = try {
+            check(target.ref)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            LosslessCheckResult.Unreadable
+        }
+        lossless = when (result) {
+            is LosslessCheckResult.Checked -> LosslessCheckState.Done(result.report)
+            LosslessCheckResult.NotApplicable -> LosslessCheckState.None
+            LosslessCheckResult.Unreadable -> LosslessCheckState.Failed
+        }
+        when (result) {
+            is LosslessCheckResult.Checked -> files.verdicts(target.ref, result.report.verdict)
+            LosslessCheckResult.Unreadable -> files.verdicts(target.ref, null)
+            LosslessCheckResult.NotApplicable -> Unit
         }
     }
 
@@ -832,6 +878,9 @@ class TagEditorModel(
     companion object {
         /** At most this many files are edited together. */
         const val MAX_FILES = 1000
+
+        /** 1.4.0: the files whose audio the lossless check reads. */
+        private val LOSSLESS_EXTENSIONS = setOf("flac", "wav", "wave")
 
         private const val PARALLEL_READS = 4
 

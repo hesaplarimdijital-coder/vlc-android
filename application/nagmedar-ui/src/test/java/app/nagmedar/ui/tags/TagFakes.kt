@@ -14,6 +14,11 @@ import app.nagmedar.tags.TagWriteResult
 import app.nagmedar.tags.TagWriter
 import app.nagmedar.tags.files.MediaIndexer
 import app.nagmedar.tags.cover.FindCoversUseCase
+import app.nagmedar.tags.quality.LosslessCheckResult
+import app.nagmedar.tags.quality.LosslessFormat
+import app.nagmedar.tags.quality.LosslessReport
+import app.nagmedar.tags.quality.LosslessVerdict
+import app.nagmedar.tags.quality.SpectrumCurve
 import app.nagmedar.tags.cover.ImageSample
 import app.nagmedar.tags.cover.ImageSampler
 import app.nagmedar.tags.lookup.ArtworkDownloader
@@ -95,11 +100,54 @@ class RecordingIndexer : MediaIndexer {
 }
 
 /** The editor's files over [tags], in [scope]; the covers looked for again are counted in [coversFound]. */
-class FakeTagFiles(val tags: MemoryTags = MemoryTags(), scope: CoroutineScope) {
+class FakeTagFiles(
+    val tags: MemoryTags = MemoryTags(),
+    scope: CoroutineScope,
+    /** 1.4.0: what the lossless check says of a file; none: the editor does not check. */
+    lossless: (suspend (ContentRef) -> LosslessCheckResult)? = null,
+) {
     val backups = MemoryBackups()
     val indexer = RecordingIndexer()
     var coversFound = 0
-    val files = TagFiles(tags, tags, backups, indexer, scope, covers = { refs, _, _ -> coversFound += refs.size })
+
+    /** 1.4.0: the verdicts the editor handed to the library. */
+    val verdicts = mutableListOf<Pair<ContentRef, LosslessVerdict?>>()
+    val files = TagFiles(
+        tags, tags, backups, indexer, scope,
+        covers = { refs, _, _ -> coversFound += refs.size },
+        lossless = lossless,
+        verdicts = { ref, verdict -> verdicts += ref to verdict },
+    )
+}
+
+/**
+ * 1.4.0: a check's report on a 16-bit 44.1 kHz FLAC: made from a 128 kbps MP3 by default, the sound stopping dead at 16
+ * kHz; a real one fills the band.
+ */
+fun losslessReport(verdict: LosslessVerdict = LosslessVerdict.Transcoded): LosslessReport {
+    val fake = verdict == LosslessVerdict.Transcoded || verdict == LosslessVerdict.ProbablyTranscoded
+    val bands = 64
+    val wall = (16_000 / (22_050f / bands)).toInt()
+    return LosslessReport(
+        format = LosslessFormat.Flac,
+        verdict = verdict,
+        confidence = 0.95,
+        unclearReason = null,
+        sampleRateHz = 44_100,
+        bitsPerSample = 16,
+        channels = 2,
+        cutoffHz = if (fake) 16_000 else null,
+        estimatedSourceKbps = if (fake) 128 else null,
+        shelfAt16kHz = false,
+        upsampled = false,
+        effectiveBitsPerSample = null,
+        spectrum = SpectrumCurve(
+            bandWidthHz = 22_050f / bands,
+            averageDb = FloatArray(bands) { i -> if (fake && i >= wall) -140f else -38f - i * 0.7f },
+            peakDb = FloatArray(bands) { i -> if (fake && i >= wall) -130f else -24f - i * 0.6f },
+        ),
+        analyzedSeconds = 20.0,
+    )
 }
 
 /** A file of the samples. */

@@ -68,6 +68,7 @@ import app.nagmedar.ui.components.SectionCaption
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
+import app.nagmedar.ui.quality.LibraryChecks
 import app.nagmedar.ui.theme.NagTheme
 
 /** The window width from which the ways in are chips side by side; narrower, a menu button. */
@@ -150,7 +151,7 @@ internal class FilterGroup(val title: String, val options: List<FilterOption>)
 
 /** The groups of the filter panel, in the order they show. */
 @Composable
-internal fun musicFilterGroups(state: MusicBrowserState): List<FilterGroup> {
+internal fun musicFilterGroups(state: MusicBrowserState, counts: Map<LibraryCheck, Int>? = null): List<FilterGroup> {
     val locale = LocalContext.current.resources.locale()
     return listOf(
         FilterGroup(
@@ -169,8 +170,22 @@ internal fun musicFilterGroups(state: MusicBrowserState): List<FilterGroup> {
                 }
             },
         ),
+        // 1.4.0: Metamatik's lists, from what the library's checks found
+        FilterGroup(
+            stringResource(R.string.nag_music_filter_checks),
+            LibraryCheck.entries.map { check ->
+                val count = counts?.get(check)
+                val label = stringResource(check.label)
+                FilterOption(if (count == null) label else stringResource(R.string.nag_check_count, label, count.formatted(locale)), check in state.filter.checks) { on ->
+                    state.filter = state.filter.copy(checks = if (on) state.filter.checks + check else state.filter.checks - check)
+                }
+            },
+        ),
     )
 }
+
+/** A count as the reader writes numbers: "1.234". */
+private fun Int.formatted(locale: java.util.Locale): String = java.text.NumberFormat.getIntegerInstance(locale).format(this)
 
 /** The filter's button, a dot on it while a filter holds; it opens [FilterPanel] under itself. */
 @Composable
@@ -211,7 +226,10 @@ internal fun FilterPanel(state: MusicBrowserState, probing: Int, onDismiss: () -
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val shape = RoundedCornerShape(dimens.radiusCard.coerceAtMost(10.dp))
-    val groups = musicFilterGroups(state)
+    // 1.4.0: how many files are on each of the checks' lists, and how far the checks have got
+    val findings = currentCheckFindings()
+    val counts = remember(findings) { findings.counts() }
+    val groups = musicFilterGroups(state, counts)
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Popup(
         popupPositionProvider = remember(rtl) { BelowEndPositionProvider(rtl) },
@@ -266,6 +284,7 @@ internal fun FilterPanel(state: MusicBrowserState, probing: Int, onDismiss: () -
                     color = colors.textTertiary,
                 )
             }
+            ChecksStatus(findings)
         }
         LaunchedEffect(Unit) { panel.requestFocus() }
     }
@@ -286,3 +305,28 @@ private class BelowEndPositionProvider(private val rtl: Boolean) : PopupPosition
         return IntOffset(x.coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0)), y.coerceAtLeast(0))
     }
 }
+
+/** 1.4.0: under the filter's Denetim: the checks turned off in Settings, or how far they have got while they work. */
+@Composable
+private fun ChecksStatus(findings: CheckFindings) {
+    val context = LocalContext.current
+    val locale = context.resources.locale()
+    val text = when {
+        !LibraryChecks.enabled(context) -> stringResource(R.string.nag_checks_off)
+        findings.running -> {
+            val done = findings.quality.checked + findings.tags.checked
+            val of = findings.quality.total + findings.tags.total
+            stringResource(R.string.nag_checks_progress, done.formatted(locale), of.formatted(locale))
+        }
+        else -> return
+    }
+    Text(text, style = NagTheme.type.labelSmall, color = NagTheme.colors.textTertiary, modifier = Modifier.testTag("music-checks-status"))
+}
+
+/** How many files are on each of the checks' lists. */
+internal fun CheckFindings.counts(): Map<LibraryCheck, Int> = mapOf(
+    LibraryCheck.NeedsFix to tags.needsAttention.size,
+    LibraryCheck.Fake to quality.qualities.values.count { it.isFake },
+    LibraryCheck.NoCover to tags.withoutCover.size,
+    LibraryCheck.Garbled to tags.garbled.size,
+)

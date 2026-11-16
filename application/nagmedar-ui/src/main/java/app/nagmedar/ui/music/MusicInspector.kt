@@ -235,7 +235,7 @@ fun TrackInspector(
 private val TAG_COLUMNS = listOf(
     MusicColumn.Title, MusicColumn.Artist, MusicColumn.AlbumArtist, MusicColumn.Album, MusicColumn.Number, MusicColumn.Year,
     MusicColumn.Genre, MusicColumn.Composer, MusicColumn.Duration, MusicColumn.Format, MusicColumn.Depth, MusicColumn.Rate,
-    MusicColumn.Bitrate, MusicColumn.Plays, MusicColumn.Skips, MusicColumn.LastPlayed, MusicColumn.Added,
+    MusicColumn.Bitrate, MusicColumn.Quality, MusicColumn.Plays, MusicColumn.Skips, MusicColumn.LastPlayed, MusicColumn.Added,
 )
 
 /**

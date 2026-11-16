@@ -154,6 +154,7 @@ import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
+import app.nagmedar.ui.quality.LibraryChecks
 import app.nagmedar.ui.theme.NagTheme
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
@@ -691,6 +692,7 @@ private fun filteredWords(state: MusicBrowserState): String? {
         if (state.view.grouped && state.quick != QuickFilter.All) add(stringResource(state.quick.label))
         state.filter.depths.forEach { add(depthLabel(it)) }
         state.filter.rates.forEach { add(rateLabel(it, locale)) }
+        state.filter.checks.forEach { add(stringResource(it.label)) }
     }
     return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
 }
@@ -754,6 +756,8 @@ fun rememberMusicRead(repository: MediaRepository): MusicRead? {
         read?.let { StartupPerf.musicListShown(it.media.size, it.kept) }
         // S-808: a CUE sheet's tracks share their file, probed once
         read?.media?.let { list -> runCatching { TrackTechIndex.update(context, list.mapNotNull { it.uri?.toString()?.let(CueUri::file) }.distinct()) } }
+        // 1.4.0: the library's checks, in the background, once for each version of a file
+        read?.media?.let { list -> runCatching { LibraryChecks.submit(context, list.mapNotNull { it.uri?.toString() }) } }
     }
     return read
 }
@@ -1002,10 +1006,13 @@ private class HeldGroups {
  * 1.0: the Recent view lists [recent] (the uris played last, newest first), which is not part of [library]; on a phone
  * [shelf] (the recently played) is the first item of the list while no group is open, and scrolls away with it.
  * 1.0.3: [shelfPresent] says whether it has tracks to show now (it may get them after the rows are on screen).
+ *
+ * 1.4.0: the filter's "Denetim" lets through what the library's checks found ([rememberCheckedLibrary]); a player's link
+ * looks in the [whole] library.
  */
 @Composable
 fun MusicBrowser(
-    library: MusicLibrary,
+    whole: MusicLibrary,
     state: MusicBrowserState,
     actions: MusicActions,
     modifier: Modifier = Modifier,
@@ -1032,6 +1039,7 @@ fun MusicBrowser(
 ) {
     val dimens = NagTheme.dimens
     val width = currentWidthClass()
+    val library = rememberCheckedLibrary(whole, state.filter.checks)
     val all = if (state.view == MusicView.Recent) {
         remember(library, recent, state.filter) { library.recentGroups(recent, state.filter) }
     } else {
@@ -1101,7 +1109,8 @@ fun MusicBrowser(
         val counts = stats
         // the groups are sorted with the reader's collator: off the main thread for a large library
         val found = withContext(Dispatchers.Default) {
-            val all = library.groups(asked.view)
+            // 1.4.0: in the whole library; the checks' lists hide it as a filter does
+            val all = whole.groups(asked.view)
             val key = asked.keys.firstOrNull { k -> all.any { it.key == k } } ?: return@withContext null
             val hidden = filter.active && library.groups(asked.view, filter).none { it.key == key }
             // 1.1.0: nor the quick filter, over the groups the tech filter leaves (all of them once it is cleared)

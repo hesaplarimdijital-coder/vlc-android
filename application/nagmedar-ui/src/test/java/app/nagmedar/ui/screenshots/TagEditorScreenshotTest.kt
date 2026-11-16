@@ -29,7 +29,10 @@ import app.nagmedar.ui.tags.LocalTagFiles
 import app.nagmedar.ui.tags.TagEditorPage
 import app.nagmedar.ui.tags.TagEditorPane
 import app.nagmedar.ui.tags.TagEditorSection
+import app.nagmedar.ui.tags.TagFiles
 import app.nagmedar.ui.tags.TagSessions
+import app.nagmedar.ui.tags.losslessReport
+import app.nagmedar.tags.quality.LosslessCheckResult
 import app.nagmedar.ui.tags.fakeTagLookups
 import app.nagmedar.ui.tags.musicBrainzMatch
 import app.nagmedar.ui.tags.rememberTagEditor
@@ -111,19 +114,22 @@ class TagEditorScreenshotTest {
         input: InputMode,
         data: () -> Unit = { songs() },
         withCover: Boolean = false,
+        files: TagFiles = fake.files,
+        waitFor: String? = null,
         content: @Composable () -> Unit,
     ) {
         data()
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
-                CompositionLocalProvider(LocalTagFiles provides fake.files) {
+                CompositionLocalProvider(LocalTagFiles provides files) {
                     Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) { content() }
                 }
             }
         }
         compose.waitForIdle()
         if (withCover) waitForCover()
+        if (waitFor != null) compose.waitUntil(10_000) { compose.onAllNodesWithTag(waitFor).fetchSemanticsNodes().isNotEmpty() }
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }
@@ -167,6 +173,15 @@ class TagEditorScreenshotTest {
                 model.readNames(true)
             }
             TagEditorPane(targets)
+        }
+    }
+
+    /** 1.4.0: a FLAC made from an MP3, as the editor's card says it, with its spectrum ending in a wall at 16 kHz. */
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
+    fun losslessDex() {
+        val checked = FakeTagFiles(fake.tags, scope, lossless = { LosslessCheckResult.Checked(losslessReport()) })
+        capture("tag-editor-lossless-dex-light", ThemeMode.Light, InputMode.Pointer, withCover = true, files = checked.files, waitFor = "tag-lossless-chart") {
+            Panel { TagEditorPane(listOf(sampleTarget("01 Bir Sana Bir Bana.flac"))) }
         }
     }
 

@@ -2,6 +2,35 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.4.0 (16 Kasım 2026)
+
+Metamatik'in kalite denetimi ve listeleri: FLAC ve WAV dosyalarının gerçekten kayıpsız olup olmadığı, kütüphanenin düzeltilecekleri (16 Kasım'daki istek: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”, üçüncü bölüm).
+
+### Sahte FLAC
+- Etiket düzenleyicide tek bir FLAC ya da WAV dosyası açılınca sesine bakılır: parçanın her yerinden toplam yaklaşık yirmi saniye bu cihazda çözülür ve spektrumu okunur. Kartta karar (“Gerçek kayıpsız görünüyor”, “Kayıplı bir dosyadan yapılmış”, “Büyük olasılıkla kayıplı bir dosyadan yapılmış”, “Kayıpsız, ama büyütülmüş”, “Gerçek kayıpsız mı, anlaşılmıyor”), nedeni bir cümleyle (ses kaç kHz'de kesiliyor, kaynağı yaklaşık kaç kbps), spektrumun çizimi ve kesildiği yerin işareti, dosyanın biçimi.
+- Kayıplı bir dosyadan yapılmış FLAC, gerçeği kadar büyüktür ama kayıplı olanın sesidir: MP3 ve AAC kodlayıcılarının kestiği yerde ses birden biter. Bit hızı çok yüksek kayıplı bir dosya bandın tamamını korur ve kayıpsız geçebilir; kart bunu da söyler.
+
+### Kütüphanenin denetimi
+- Arka planda, her dosya bir kez (değişirse yeniden): FLAC ve WAV dosyalarının sesi; bütün dosyaların etiketleri: kapak var mı, sanatçı, albüm, albüm sanatçısı, tarih ve parça numarasından eksik olan var mı, başlık, sanatçı ve albüm yazıları bozuk görünüyor mu. Bulunanlar uygulamanın kendi deposunda saklanır; hiçbir şey cihazdan çıkmaz.
+- Müzik › Filtre › **Denetim**: **Düzeltilecekler**, **Sahte FLAC**, **Kapaksızlar**, **Bozuk yazılılar**, her birinin yanında kaç dosya olduğu. Seçilenlerden herhangi birindeki parçalar gösterilir; bütün görünümlerde (albümler, sanatçılar, klasörler…) çalışır. Denetim sürerken filtrede kaç dosyanın bittiği yazar; liste birkaç saniyede bir güncellenir.
+- Tablonun yeni **Kalite** sütunu (sütun menüsünden açılır): FLAC ve WAV için “Gerçek kayıpsız”, “Sahte FLAC”, “Büyük olasılıkla sahte”, “Büyütülmüş”, “Belirsiz”, “Denetlenmedi”; kayıplı biçimlerde çizgi. Sütuna göre sıralanınca sahteler başa gelir. Ayrıntı panelinin etiketler sekmesinde de yazar.
+- Düzenleyicinin kararı kütüphaneye de gider: açılan dosya yeniden denetlenmez.
+- Ayarlar › Etiket düzenleyici › **Kütüphane denetimi**: açılıp kapatılır, kaç dosyanın denetlendiği yazar. Kapalıyken denetim o dosyadan sonra durur, listeler boş kalır; açılınca kaldığı yerden sürer.
+
+### Kaynak
+- `nagmedar-tags`: Metamatik'in FLAC çözücüsü (saf Kotlin), WAV okuyucusu, spektrum ve kayıpsızlık çözümlemesi, kütüphanenin kalite ve kapak denetimleri ve testleri taşındı. Kapak denetimi aynı okumada eksik etiketleri ve bozuk yazıları da kaydeder (Metamatik bunları MediaStore'dan okur; Nağmedar'ın kütüphanesi albüm sanatçısını sanatçıdan doldurduğu için dosyanın kendisine bakılır). Bulunanlar Room yerine satır satır dosyalarda tutulur (`LineStore`): her kayıt bir satır eklenir, dosya iki katına çıkınca yalnızca geçerli kayıtlarla yeniden yazılır, yarım kalmış satır atlanır.
+- Test dosyaları: FLAC çözücüsünün test parçaları (Martijn van Beurden'in kamuya açık test dosyalarından kısa kesitler, CC0).
+
+### Test
+- `nagmedar-tags`: FLAC çözümü, kayıpsızlık çözümlemesi, kütüphanenin kalite ve kapak denetimleri (eksik etiketler ve bozuk yazılar dahil), dosya depoları (`FileStoresTest`); 214 test.
+- `LosslessModelTest`: tek FLAC denetlenir ve karar kütüphaneye gider; okunamayan dosya söylenir; kayıplı dosyaya ve birkaç dosyaya bakılmaz.
+- `LosslessCardTest`: kart sahtenin nerede kesildiğini ve neyden yapıldığını, gerçeğin bandı doldurduğunu, beklerken ve okuyamayınca ne olduğunu söyler.
+- `LibraryCheckFilterTest`: her liste kendi denetiminin bulduklarını (CUE parçası kendi dosyasıyla) içerir; filtrede sayılarıyla seçilir; boş liste söylenir ve filtreler temizlenir.
+- Ekran görüntüsü: düzenleyicide sahte bir FLAC'ın kartı (`tag-editor-lossless-dex-light`); Ayarlar'ın Kütüphane denetimi satırı.
+
+### Sürüm
+- `versionCode` 4010400; kişisel arm64 APK'sı 14010406 (1.3.0'ın 14010306'sının üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.3.0 (16 Kasım 2026)
 
 Metamatik'in etiket düzenleyicisinin ikinci yarısı: internetten bilgi, kapak ve albüm bulmak, birkaç parçanın toplu işlemleri. Müzik'te parçaları dosyalarıyla silmek (16 Kasım'daki istekler: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”, “müzikleri silme özelliği olsun. Dosyadan da silsin”). Düzenleyicinin Vazgeç düğmesi her zaman çalışır.

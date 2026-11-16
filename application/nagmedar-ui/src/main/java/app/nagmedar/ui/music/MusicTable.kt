@@ -30,6 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
+import app.nagmedar.ui.quality.LibraryChecks
+import app.nagmedar.ui.quality.QualityCell
+import app.nagmedar.ui.quality.formatOf
+import app.nagmedar.ui.quality.qualityRank
+import app.nagmedar.ui.quality.qualityText
 import app.nagmedar.ui.audio.formatName
 import app.nagmedar.ui.audio.kiloHertz
 import app.nagmedar.ui.audio.locale
@@ -64,6 +69,8 @@ enum class MusicColumn(val key: String, @StringRes val label: Int, val width: Co
     Depth("depth", R.string.nag_column_depth, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
     Rate("rate", R.string.nag_column_rate, ColumnWidth.Fixed(88.dp), alignEnd = true, mono = true),
     Bitrate("bitrate", R.string.nag_column_bitrate, ColumnWidth.Fixed(96.dp), alignEnd = true, mono = true),
+    /** 1.4.0: what the library's check found of a FLAC or WAV file's audio (Metamatik's): "Gerçek kayıpsız", "Sahte FLAC". */
+    Quality("quality", R.string.nag_music_column_quality, ColumnWidth.Fixed(156.dp)),
     /** S-808: Nağmedar's own counts: a play once half the track (or four minutes) is heard. */
     Plays("plays", R.string.nag_column_plays, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
     Skips("skips", R.string.nag_column_skips, ColumnWidth.Fixed(72.dp), alignEnd = true, mono = true),
@@ -176,7 +183,8 @@ fun rememberMusicColumns(
                     filledTint = if (selected) NagTheme.colors.onSelection else NagTheme.colors.accent,
                 )
             }
-            val drawn: (@Composable (Track, Boolean) -> Unit)? = stars ?: if (!designed) null else when (column) {
+            val quality: (@Composable (Track, Boolean) -> Unit)? = if (column != MusicColumn.Quality) null else { track, selected -> QualityCell(track.uri, selected) }
+            val drawn: (@Composable (Track, Boolean) -> Unit)? = stars ?: quality ?: if (!designed) null else when (column) {
                 MusicColumn.Number -> { track, selected -> DesignedNumber(track, track.uri == playing, selected) }
                 MusicColumn.Plays -> { track, selected -> DesignedPlays(stats[track.statsKey]?.plays ?: 0, playing != null, selected) }
                 MusicColumn.Format -> { track, selected -> track.tech?.let { DesignedFormat(formatLabel(it), selected) } }
@@ -207,6 +215,7 @@ fun rememberMusicColumns(
                     }.orEmpty()
                     MusicColumn.Rate -> track.tech?.let { kiloHertz(if (it.dsdRate > 0) it.dsdRate else it.rate, locale) }.orEmpty()
                     MusicColumn.Bitrate -> track.tech?.bitrate?.takeIf { it > 0 }?.let { resources.getString(R.string.nag_sp_kbps, (it / 1000).toInt()) }.orEmpty()
+                    MusicColumn.Quality -> qualityText(resources, LibraryChecks.qualityOf(track.uri), formatOf(track.uri))?.first.orEmpty()
                     MusicColumn.Rating -> stats[track.statsKey]?.rating?.takeIf { it > 0 }?.let { "★".repeat(it) }.orEmpty()
                     MusicColumn.Plays -> stats[track.statsKey]?.plays?.takeIf { it > 0 }?.toString().orEmpty()
                     MusicColumn.Skips -> stats[track.statsKey]?.skips?.takeIf { it > 0 }?.toString().orEmpty()
@@ -242,6 +251,8 @@ fun sortTracks(tracks: List<Track>, sort: MusicSort?, locale: Locale, stats: Map
         MusicColumn.Depth -> { t -> t.tech?.let { if (it.dsdRate > 0) 1.0 else it.bits.toDouble() } }
         MusicColumn.Rate -> { t -> t.tech?.let { (if (it.dsdRate > 0) it.dsdRate else it.rate).toDouble() } }
         MusicColumn.Bitrate -> { t -> t.tech?.bitrate?.toDouble() }
+        // the made from lossy first, the real lossless last; the unchecked and the lossy after them either way
+        MusicColumn.Quality -> { t -> qualityRank(LibraryChecks.qualityOf(t.uri))?.toDouble() }
         // unrated, never played: last either way
         MusicColumn.Rating -> { t -> stats[t.statsKey]?.rating?.takeIf { it > 0 }?.toDouble() }
         MusicColumn.Plays -> { t -> (stats[t.statsKey]?.plays ?: 0).toDouble() }

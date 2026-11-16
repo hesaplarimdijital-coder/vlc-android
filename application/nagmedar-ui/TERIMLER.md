@@ -210,6 +210,10 @@ Sözlüğü testler denetler:
 | MusicBrainz kimlikleri | MusicBrainz identifiers | | | “Bilgi ara”nın MusicBrainz sonucuyla dosyaya yazılabilen kimlikler, MusicBrainz'in kendi adlarıyla: “MusicBrainz kaydı” (recording), “MusicBrainz yayını” (release), “MusicBrainz yayın grubu”, “MusicBrainz yayın parçası”, “MusicBrainz sanatçısı”. Podcast “yayını” (feed) ile karıştırılmaz: hep MusicBrainz adıyla anılır |
 | toplu işlemler | batch tools | | | 1.3.0: birkaç parça birlikte düzenlenirken albümleri birleştirmek, sırayla numaralamak, dosya adından etiket almak, bozuk yazıları her parçada düzeltmek |
 | silmek (parçayı) | delete (a track) | | | 1.3.0: Müzik'te “Sil…”: parçanın dosyası cihazdan silinir, sıradan ve kütüphaneden kalkar; önce sorulur, geri alınamaz. Çalma listesinden çıkarmak “Listeden kaldır”dır, dosyaya dokunmaz |
+| sahte FLAC, gerçek kayıpsız | fake FLAC, real lossless | | | 1.4.0 (Metamatik'in): kayıplı bir dosyadan (MP3, AAC) yapılmış FLAC ya da WAV; gerçeği kadar büyüktür ama kayıplı olanın sesidir. Karar spektrumdan okunur: “Gerçek kayıpsız görünüyor”, “Kayıplı bir dosyadan yapılmış”, “Büyük olasılıkla kayıplı bir dosyadan yapılmış”; tabloda “Sahte FLAC”, “Gerçek kayıpsız”. Filtredeki “Sahte FLAC” WAV'ları da kapsar |
+| büyütülmüş | upscaled | | | 1.4.0: kayıpsız ama taşıdığından yüksek çözünürlük söyleyen dosya: sesi düşük örnekleme hızında biten ya da bit derinliğinin bir kısmını kullanan |
+| kütüphane denetimi, Denetim | library checks | | | 1.4.0: arka planda, her dosya bir kez: kayıpsız dosyaların sesi ve bütün dosyaların etiketleri (Ayarlar › Etiket düzenleyici › Kütüphane denetimi). Müzik › Filtre › Denetim'in listeleri: “Düzeltilecekler” (sanatçı, albüm, albüm sanatçısı, tarih ya da parça numarası eksik), “Sahte FLAC”, “Kapaksızlar”, “Bozuk yazılılar” |
+| kalite (sütun) | quality (column) | | | 1.4.0: tablonun ve ayrıntı panelinin, FLAC ve WAV için denetimin kararını yazan sütunu: “Gerçek kayıpsız”, “Sahte FLAC”, “Denetlenmedi”; kayıplı biçimde çizgi |
 
 ## Özel adlar
 
