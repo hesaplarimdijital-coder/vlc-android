@@ -13,6 +13,18 @@ import app.nagmedar.tags.TagSnapshot
 import app.nagmedar.tags.TagWriteResult
 import app.nagmedar.tags.TagWriter
 import app.nagmedar.tags.files.MediaIndexer
+import app.nagmedar.tags.cover.FindCoversUseCase
+import app.nagmedar.tags.cover.ImageSample
+import app.nagmedar.tags.cover.ImageSampler
+import app.nagmedar.tags.lookup.ArtworkDownloader
+import app.nagmedar.tags.lookup.DownloadedImage
+import app.nagmedar.tags.lookup.FindAlbumUseCase
+import app.nagmedar.tags.lookup.LookupCandidate
+import app.nagmedar.tags.lookup.LookupQuery
+import app.nagmedar.tags.lookup.LookupResult
+import app.nagmedar.tags.lookup.LookupService
+import app.nagmedar.tags.lookup.MetadataProvider
+import app.nagmedar.tags.lookup.rank
 import kotlinx.coroutines.CoroutineScope
 
 /** 1.2.0: files' tags in memory, read and written as TagLib would: a key left out of a write is gone. */
@@ -93,4 +105,31 @@ class FakeTagFiles(val tags: MemoryTags = MemoryTags(), scope: CoroutineScope) {
 /** A file of the samples. */
 fun sampleRef(name: String) = ContentRef("file:///storage/emulated/0/Music/Mo%C4%9Follar/$name")
 
-fun sampleTarget(name: String, title: String? = null) = TagTarget(sampleRef(name), name, title)
+fun sampleTarget(name: String, title: String? = null, durationMs: Long? = null) = TagTarget(sampleRef(name), name, title, durationMs = durationMs)
+
+/** 1.3.0: a catalogue (MusicBrainz, by name) that has [found], and no cover to download. */
+fun fakeTagLookups(vararg found: LookupCandidate): TagLookupTools {
+    val provider = object : MetadataProvider {
+        override val id = "musicbrainz"
+        override val displayName = "MusicBrainz"
+        override val providesArtwork = true
+        override suspend fun search(query: LookupQuery) = LookupResult.Success(rank(query, found.toList()))
+    }
+    val service = LookupService(listOf(provider))
+    val downloader = object : ArtworkDownloader {
+        override suspend fun download(url: String): DownloadedImage? = null
+        override suspend fun peek(url: String, maxBytes: Int): ByteArray? = null
+    }
+    val sampler = object : ImageSampler {
+        override suspend fun sample(bytes: ByteArray): ImageSample? = null
+    }
+    return TagLookupTools(service, FindCoversUseCase(service, downloader, sampler), FindAlbumUseCase(service), downloader)
+}
+
+/** 1.3.0: the song as MusicBrainz has it: the same title, album and artist, with a date, genre, track and identifier. */
+fun musicBrainzMatch() = LookupCandidate(
+    providerId = "musicbrainz", providerName = "MusicBrainz", id = "rec/rel", title = "Bir Sana Bir Bana",
+    artists = listOf("Moğollar"), album = "Moğollar", albumArtists = listOf("Moğollar"), date = "1971-03-01",
+    trackNumber = 1, trackTotal = 10, genres = listOf("Anadolu Rock"), durationMs = 215_000,
+    identifiers = mapOf("MUSICBRAINZ_TRACKID" to "8f1c2d3e-0000-4000-8000-000000000002"),
+)

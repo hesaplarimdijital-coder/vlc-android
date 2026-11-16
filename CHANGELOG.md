@@ -2,6 +2,54 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.3.0 (16 Kasım 2026)
+
+Metamatik'in etiket düzenleyicisinin ikinci yarısı: internetten bilgi, kapak ve albüm bulmak, birkaç parçanın toplu işlemleri. Müzik'te parçaları dosyalarıyla silmek (16 Kasım'daki istekler: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”, “müzikleri silme özelliği olsun. Dosyadan da silsin”). Düzenleyicinin Vazgeç düğmesi her zaman çalışır.
+
+### Bilgi ara
+- Düzenleyicinin başında “Bilgi ara…”: parça MusicBrainz'de, Deezer'da ve iTunes'ta aynı anda aranır; başlık, sanatçı ve albüm değiştirilip yeniden aranabilir. Sonuçlar eşleşmeye göre sıralıdır (başlık, sanatçı, albüm, süre) ve her birinin yanında “çok iyi”, “iyi” ya da “zayıf eşleşme” yazar.
+- Bir sonuç açılınca alan alan karşılaştırılır: dosyadaki değer ve bulunan alt alta, aynı olanlar yalnızca yazılı. Dosyaya bir şey katanlar işaretli gelir (boş bir alan, başka bir albüm, daha tam bir tarih); dosyadan bir şey eksiltecek olanlar işaretsiz önerilir: dosyadakinden az sanatçı, daha kısa bir tarih, yalnızca büyük-küçük harfi farklı bir ad.
+- MusicBrainz kimlikleri de alınabilir, kendi adlarıyla: “MusicBrainz kaydı”, “MusicBrainz yayını”, “MusicBrainz yayın grubu”… Parça ve disk sayısı da “Parça sayısı”, “Disk sayısı” diye yazar.
+- “Seçilenleri al” onları kaydedilecek değişiklik yapar, “Kapağını da al” kapağı da; dosyaya Kaydet yazar.
+- Bir katalog yanıt vermezse ötekilerin sonuçları yine gelir; hangisinin yanıt vermediği yazar.
+
+### Kapak ara
+- “Kapak ara…”: katalogların bu parça (birkaç parçada, parçaların kaydedilince olacakları hal) için bildiği kapaklar, Metamatik'in puanlamasıyla en uygunu başta. Öne geçirenler: dosyanın MusicBrainz kimliğindeki albümün kapağı, aynı kayıt (ISRC), albüm, sanatçı ve yıl tutması, aynı resmin birkaç katalogda olması, şimdiki kapağın daha büyüğü olması, yüksek çözünürlük. Uyarılar: başka albüm, derleme, düşük çözünürlük, kare olmayan resim.
+- Her kapağın boyutu (1200 × 1200 gibi) ve hangi katalogda olduğu yazar. Seçilen indirilir ve kaydedilecek kapak olur; birkaç parçada hepsine yazılır.
+
+### Birkaç parça: toplu işlemler
+- “Albüm ara…”: parçaların albümü, önce albümün adıyla, sonra parçaların adlarıyla aranır (saniyede bir arama; ilerlemesi yazar). Her sürümün yanında yılı, parça sayısı, parçaların kaçının onda olduğu, katalogları. Seçilen sürümün adı, albüm sanatçısı, tarihi ve türleri bütün parçalara, onda bulunan parçalara parça ve disk numaraları gelir; kaydetmeden önce görülebilir.
+- Albümleri birleştir: parçalar birden çok albümdeyse (“Moğollar CD1”, “Moğollar CD2”) liste olarak gösterilir; ad ve albüm sanatçısı seçilip tek albüm yapılır. Albüm adlarında disk yazıyorsa disk numaraları da oradan alınır.
+- Sırayla numarala: parçalar listedeki sırayla, seçilen numaradan başlayarak, istenirse toplamıyla numaralanır.
+- Dosya adından etiket: “{track} - {title}” gibi bir desenle etiketler dosya adlarından okunur; hazır desenler var, ilk üç dosyanın nasıl okunacağı gösterilir, desene uymayan söylenir.
+- Bozuk yazıları düzelt: her parçanın kendi bozuk yazısı düzeltilir; kaç parçada olduğu ve birkaç örneği yazar.
+
+### Silmek
+- Müzik'te parçanın menüsünde ve seçimin menüsünde (birkaç parça, bir albüm, bir sanatçı) en sonda “Sil…”. Önce kaç parçanın silineceğini (ilk beşini adıyla) ve geri alınamayacağını söyleyip sorar.
+- “Sil” dosyaları cihazdan siler (sistemin medya dizininden de), parçalar sıradan çıkar, kütüphane klasörlerine yeniden bakar. Sonunda kısa haber kaç parçanın silindiğini, silinemeyen varsa onu söyler.
+- Android 11 ve sonrasında başka uygulamanın koyduğu dosya yalnızca tüm dosyalara erişim izniyle silinir (etiket yazmak gibi). İzin yoksa kısa haber bunu söyler ve “İzin ver” sistemin izin sayfasını açar.
+- CUE sayfasındaki parçalar silinmez: albümün tamamı tek dosyadadır; soruda söylenir.
+
+### Vazgeç
+- Düzenleyicinin “Vazgeç” düğmesi değişiklik yokken çalışmıyordu (yalnızca yazılanları geri alıyordu). Artık her zaman yazılanları bırakıp düzenlemeden çıkar: tablette panel “Düzenle”den önceki görünüme döner, telefonda sayfa kapanır, başka uygulamadan açılan düzenleyici kapanıp o uygulamaya dönülür.
+
+### Ayarlar
+- Ayarlar › Etiket düzenleyici › Kataloglar: MusicBrainz, Deezer ve iTunes ayrı ayrı açılıp kapatılır. Gönderilen yalnızca aranandır: parçanın adı, sanatçısı ve albümü.
+
+### Kaynak
+- Metamatik'in arama, kapak puanlama ve albüm birleştirme kuralları ve testleri `nagmedar-tags`'e taşındı. Katalogların yanıtları Ktor ve kotlinx.serialization yerine org.json ile okunur; istekler uygulamada OkHttp ile gider (MusicBrainz'in istediği kimlikle).
+
+### Test
+- `nagmedar-tags`: aramanın, albüm bulmanın, kapak puanlamanın, resim boyutlarının ve albüm birleştirmenin Metamatik'ten gelen testleri, katalogların yanıtlarının okunuşu (`ProvidersTest`); 164 test.
+- `TagToolsModelTest`: sırayla numaralama, dosya adından etiket, bozuk yazıların her parçada düzeltilmesi, albümlerin birleştirilmesi (disk numaralarıyla), bulunan albümün alanları ve numaraları (parça adıyla ve süresiyle bulunanlara; aynı adlı ama başka süreli kayda numara verilmez), bulunan bilgilerin dosyaya yazılmadan değişiklik olması, hangi alanların işaretli geldiği.
+- `TrackDeletionTest`: soru silinecek dosyaları sayar, CUE parçasını söyler; Sil yalnızca dosyası olanları verir, Vazgeç hiçbirini.
+- `TagEditorScreenTest`: Vazgeç değişiklik olsun olmasın düzenlemeden çıkar ve yazılanları bırakır; “Bilgi ara”da sonuç açılır, işaretli gelenler ve gelmeyenler doğru, seçilenler Kaydet'e kadar yazılmaz, sonra yazılır.
+- Ekran görüntüleri: bilgi karşılaştırması (`tag-lookup-compare-dex-light`) ve toplu işlemler (`tag-editor-batch-dex-light`).
+- Düzenleyicinin ekran görüntüleri kapağın çözülmesini bekleyip çekilir: kapak arka planda çözüldüğünden görüntü kimi zaman kapaksız çıkıyordu.
+
+### Sürüm
+- `versionCode` 4010300; kişisel arm64 APK'sı 14010306 (1.2.0'ın 14010206'sının üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.2.0 (16 Kasım 2026)
 
 Metamatik'in etiket düzenleyicisi Nağmedar'da (16 Kasım'daki istek: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”). Bu sürüm düzenleyicinin kendisi; çevrimiçi bilgi arama, kapak bulucu ve albüm toplu işlemleri 1.3.0'da, sahte FLAC denetimi ve listeler 1.4.0'da gelecek.

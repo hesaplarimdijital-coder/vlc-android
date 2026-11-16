@@ -106,6 +106,7 @@ import app.nagmedar.ui.music.ForgottenShelf
 import app.nagmedar.ui.music.BandMark
 import app.nagmedar.ui.music.MusicLink
 import app.nagmedar.ui.music.MusicLinks
+import app.nagmedar.ui.music.TrackDeleteHost
 import app.nagmedar.ui.music.MusicPanelRequest
 import app.nagmedar.ui.music.rememberAlbumSeed
 import app.nagmedar.ui.music.rememberMusicInspector
@@ -605,6 +606,8 @@ private fun NagmedarMain(
                         PhoneWindowPage(null)
                         PlayingLyricsEditor(onClose = { LyricsEditorRequest.open = false }, modifier = Modifier.blockInputBelow())
                     }
+                    // 1.3.0: the question before tracks are deleted, their files with them
+                    TrackDeleteHost()
                     // 1.2.0: the tag editor as a page over the window (a phone's track menu, a playlist's)
                     TagEditRequest.page?.let { targets ->
                         PhoneWindowPage(null)

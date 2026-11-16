@@ -2641,4 +2641,106 @@
     </plurals>
     <string name="nag_tag_backups_none">Yedek yok</string>
     <string name="nag_tag_backups_clear">Yedekleri sil</string>
+    <!-- 1.3.0: etiket düzenleyicinin aramaları (Metamatik'inki): MusicBrainz, Deezer ve iTunes'tan bilgi, kapak ve albüm -->
+    <string name="nag_tag_find_info">Bilgi ara…</string>
+    <string name="nag_tag_find_cover">Kapak ara…</string>
+    <string name="nag_tag_find_album">Albüm ara…</string>
+    <string name="nag_tag_lookup_title">Bilgi ara</string>
+    <string name="nag_tag_lookup_search">Ara</string>
+    <string name="nag_tag_lookup_searching">Aranıyor…</string>
+    <string name="nag_tag_lookup_none">Bir şey bulunamadı</string>
+    <string name="nag_tag_lookup_no_catalogues">Ayarlar › Etiket düzenleyici\'de açık katalog yok</string>
+    <string name="nag_tag_lookup_offline">Bağlantı yok</string>
+    <string name="nag_tag_lookup_busy">Kataloglar şimdilik yanıt vermiyor; biraz sonra yeniden deneyin</string>
+    <string name="nag_tag_lookup_failed">Arama yapılamadı</string>
+    <string name="nag_tag_lookup_partly">Yanıt vermeyen: %1$s</string>
+    <string name="nag_tag_lookup_back">Sonuçlar</string>
+    <string name="nag_tag_lookup_apply">Seçilenleri al</string>
+    <string name="nag_tag_lookup_cover">Kapağını da al</string>
+    <string name="nag_tag_lookup_note">Henüz bir şey yazılmaz: seçilen alanlar değişiklik olur, Kaydet yazar.</string>
+    <string name="nag_tag_track_total">Parça sayısı</string>
+    <string name="nag_tag_disc_total">Disk sayısı</string>
+    <string name="nag_tag_mb_recording">MusicBrainz kaydı</string>
+    <string name="nag_tag_mb_release_track">MusicBrainz yayın parçası</string>
+    <string name="nag_tag_mb_release">MusicBrainz yayını</string>
+    <string name="nag_tag_mb_release_group">MusicBrainz yayın grubu</string>
+    <string name="nag_tag_mb_artist">MusicBrainz sanatçısı</string>
+    <string name="nag_tag_lookup_applied">Alanlar dolduruldu; Kaydet dosyaya yazar</string>
+    <string name="nag_tag_match_high">çok iyi eşleşme</string>
+    <string name="nag_tag_match_medium">iyi eşleşme</string>
+    <string name="nag_tag_match_low">zayıf eşleşme</string>
+    <string name="nag_tag_covers_title">Kapak ara</string>
+    <string name="nag_tag_covers_asking">Kataloglar soruluyor…</string>
+    <string name="nag_tag_covers_looking">Kapaklara bakılıyor · %1$d / %2$d</string>
+    <string name="nag_tag_covers_none">Kapak bulunamadı</string>
+    <string name="nag_tag_cover_size">%1$d × %2$d</string>
+    <string name="nag_tag_reason_same_release">dosyanın albümü</string>
+    <string name="nag_tag_reason_same_recording">aynı kayıt</string>
+    <string name="nag_tag_reason_album">albüm tutuyor</string>
+    <string name="nag_tag_reason_artist">sanatçı tutuyor</string>
+    <string name="nag_tag_reason_title">parça albümde var</string>
+    <string name="nag_tag_reason_year">yıl tutuyor</string>
+    <string name="nag_tag_reason_sources">birkaç katalogda</string>
+    <string name="nag_tag_reason_current">şimdiki kapak</string>
+    <string name="nag_tag_reason_larger">şimdikinin büyüğü</string>
+    <string name="nag_tag_reason_high">yüksek çözünürlük</string>
+    <string name="nag_tag_reason_other_album">başka albüm</string>
+    <string name="nag_tag_reason_compilation">derleme</string>
+    <string name="nag_tag_reason_low">düşük çözünürlük</string>
+    <string name="nag_tag_reason_not_square">kare değil</string>
+    <string name="nag_tag_album_title">Albüm ara</string>
+    <string name="nag_tag_album_searching">Aranıyor · %1$d / %2$d</string>
+    <string name="nag_tag_album_songs_found">%1$d / %2$d parça bu albümde</string>
+    <string name="nag_tag_album_applied">%1$s: alanlar dolduruldu; Kaydet dosyalara yazar</string>
+    <string name="nag_tag_tools">Toplu işlemler</string>
+    <string name="nag_tag_merge_title">Bu parçalar %1$d albümde</string>
+    <string name="nag_tag_merge_discs">Disk numaralarını albüm adlarından al</string>
+    <string name="nag_tag_merge_apply">Tek albüm yap</string>
+    <plurals name="nag_tag_positions_found">
+        <item quantity="one">%d parçanın numaraları bulunan albümden</item>
+        <item quantity="other">%d parçanın numaraları bulunan albümden</item>
+    </plurals>
+    <string name="nag_tag_positions_reset">Kendilerininki kalsın</string>
+    <string name="nag_tag_numbering">Sırayla numarala</string>
+    <string name="nag_tag_numbering_start">İlk numara</string>
+    <string name="nag_tag_numbering_total">Toplamı da yaz</string>
+    <string name="nag_tag_pattern">Dosya adından etiket</string>
+    <string name="nag_tag_pattern_field">Desen</string>
+    <string name="nag_tag_pattern_no_match">uymuyor</string>
+    <string name="nag_tag_repair">Bozuk yazıları düzelt</string>
+    <plurals name="nag_tag_repair_count">
+        <item quantity="one">%d parçada bozuk görünen yazı var</item>
+        <item quantity="other">%d parçada bozuk görünen yazı var</item>
+    </plurals>
+    <string name="nag_tag_catalogues">Kataloglar</string>
+    <string name="nag_tag_catalogues_hint">Bilgi, kapak ve albüm buralarda aranır. Gönderilen, aranandır: parçanın adı, sanatçısı ve albümü.</string>
+    <!-- 1.3.0: parçalar cihazdan, dosyalarıyla silinir -->
+    <string name="nag_delete">Sil…</string>
+    <plurals name="nag_delete_title">
+        <item quantity="one">%d parça silinsin mi?</item>
+        <item quantity="other">%d parça silinsin mi?</item>
+    </plurals>
+    <string name="nag_delete_body">Dosyaları cihazdan silinir; kütüphaneden ve sıradan da kalkarlar. Bu geri alınamaz.</string>
+    <plurals name="nag_delete_more">
+        <item quantity="one">ve %d parça daha</item>
+        <item quantity="other">ve %d parça daha</item>
+    </plurals>
+    <plurals name="nag_delete_cue">
+        <item quantity="one">CUE sayfasındaki %d parça silinmez: albümün tamamı tek dosyadadır.</item>
+        <item quantity="other">CUE sayfasındaki %d parça silinmez: albümün tamamı tek dosyadadır.</item>
+    </plurals>
+    <string name="nag_delete_cancel">Vazgeç</string>
+    <string name="nag_delete_confirm">Sil</string>
+    <plurals name="nag_deleted">
+        <item quantity="one">%d parça silindi</item>
+        <item quantity="other">%d parça silindi</item>
+    </plurals>
+    <plurals name="nag_delete_needs_access">
+        <item quantity="one">%d parça silinemedi: Nağmedar\'ın tüm dosyalara erişim izni gerekiyor.</item>
+        <item quantity="other">%d parça silinemedi: Nağmedar\'ın tüm dosyalara erişim izni gerekiyor.</item>
+    </plurals>
+    <plurals name="nag_delete_failed">
+        <item quantity="one">%d parça silinemedi</item>
+        <item quantity="other">%d parça silinemedi</item>
+    </plurals>
 </resources>

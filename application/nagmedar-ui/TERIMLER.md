@@ -205,6 +205,11 @@ Sözlüğü testler denetler:
 | tüm etiketler | all tags | | | Etiket düzenleyicinin son bölümü: adı olan alanların dışındaki bütün etiketler adlarıyla (MUSICBRAINZ_TRACKID, REPLAYGAIN_TRACK_GAIN); “Etiket ekle” yenisini ekler |
 | farklı değerler | different values | | | Birkaç parça birlikte düzenlenirken bir alanda parçaların değerleri ayrıysa alanın yerinde yazan; yazılan değer hepsine yazılır, boş bırakılan alan her parçada kendi değeriyle kalır |
 | bozuk yazı | garbled text | | mojibake | Yanlış karakter setiyle okunmuş yazı (“MoÄŸollar”, “Moðollar”): düzenleyici düzeltilmiş halini önerir, “Düzelt” onu kaydedilecek değişiklik yapar |
+| katalog | catalogue | | | 1.3.0: etiket düzenleyicinin bilgi, kapak ve albüm aradığı yerler: MusicBrainz, Deezer, iTunes (Ayarlar › Etiket düzenleyici › Kataloglar); gönderilen yalnızca aranandır |
+| eşleşme | match | | | Bulunan sonucun parçaya ne kadar uyduğu: “çok iyi eşleşme”, “iyi eşleşme”, “zayıf eşleşme” |
+| MusicBrainz kimlikleri | MusicBrainz identifiers | | | “Bilgi ara”nın MusicBrainz sonucuyla dosyaya yazılabilen kimlikler, MusicBrainz'in kendi adlarıyla: “MusicBrainz kaydı” (recording), “MusicBrainz yayını” (release), “MusicBrainz yayın grubu”, “MusicBrainz yayın parçası”, “MusicBrainz sanatçısı”. Podcast “yayını” (feed) ile karıştırılmaz: hep MusicBrainz adıyla anılır |
+| toplu işlemler | batch tools | | | 1.3.0: birkaç parça birlikte düzenlenirken albümleri birleştirmek, sırayla numaralamak, dosya adından etiket almak, bozuk yazıları her parçada düzeltmek |
+| silmek (parçayı) | delete (a track) | | | 1.3.0: Müzik'te “Sil…”: parçanın dosyası cihazdan silinir, sıradan ve kütüphaneden kalkar; önce sorulur, geri alınamaz. Çalma listesinden çıkarmak “Listeden kaldır”dır, dosyaya dokunmaz |
 
 ## Özel adlar
 

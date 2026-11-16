@@ -19,6 +19,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -139,8 +140,8 @@ class MusicInspectorContent(
     val queue: @Composable () -> Unit,
     /** 1.1.2 (the design's tablet page): more in the panel's "⋯" after its views (the visualiser, casting). */
     val menu: @Composable () -> List<MenuEntry> = { emptyList() },
-    /** 1.2.0 "Düzenle": the tag editor on the selected tracks, else on what plays. */
-    val edit: @Composable (InspectorSubject) -> Unit = {},
+    /** 1.2.0 "Düzenle": the tag editor on the selected tracks, else on what plays; 1.3.0: its "Vazgeç" leaves it ([onClose]). */
+    val edit: @Composable (subject: InspectorSubject, onClose: () -> Unit) -> Unit = { _, _ -> },
 )
 
 /**
@@ -160,13 +161,16 @@ internal fun MusicInspectorPane(state: InspectorState, content: MusicInspectorCo
     )
     // the last lines rest clear of a floating player bar
     val bottom = LocalShellBottomPadding.current
+    // 1.3.0: the view "Düzenle" was opened from, where its "Vazgeç" goes back to
+    var beforeEdit by remember { mutableIntStateOf(0) }
+    LaunchedEffect(state.selectedTab) { if (state.selectedTab != MUSIC_EDIT_TAB) beforeEdit = state.selectedTab }
     InspectorPane(tabs, state.selectedTab, { state.selectedTab = it }, onCollapse = state::toggle, menu = content.menu) { tab ->
         Box(Modifier.fillMaxSize().padding(bottom)) {
             when (tab.id) {
                 InspectorTabs.TAGS -> content.tags(subject)
                 InspectorTabs.SIGNAL -> content.signal(subject)
                 InspectorTabs.LYRICS -> content.lyrics(subject)
-                InspectorTabs.EDIT -> content.edit(subject)
+                InspectorTabs.EDIT -> content.edit(subject) { state.selectedTab = beforeEdit.takeIf { it != MUSIC_EDIT_TAB } ?: 0 }
                 else -> content.queue()
             }
         }
@@ -331,7 +335,7 @@ fun rememberMusicInspector(onFullScreenLyrics: () -> Unit, onFullScreenVisualize
             lyrics = { subject -> LyricsTab(subject) { lyrics() } },
             queue = { QueueTab(undo) },
             menu = { panelMenu { visualizer() } },
-            edit = { subject -> EditTab(subject) },
+            edit = { subject, onClose -> EditTab(subject, onClose) },
         )
     }
 }
@@ -452,7 +456,7 @@ private fun LyricsTab(subject: InspectorSubject, onFullScreen: () -> Unit) {
  * left out (their tags are their sheet's).
  */
 @Composable
-private fun EditTab(subject: InspectorSubject) {
+private fun EditTab(subject: InspectorSubject, onClose: () -> Unit) {
     val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
     val tracks = subject.tracks
     val wanted = remember(tracks, playing) {
@@ -466,6 +470,7 @@ private fun EditTab(subject: InspectorSubject) {
         wanted,
         Modifier.fillMaxSize(),
         empty = if (tracks.isNotEmpty()) stringResource(R.string.nag_tag_cue) else null,
+        onCancel = onClose,
     )
 }
 

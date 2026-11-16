@@ -122,7 +122,14 @@ import org.videolan.tools.Notices
  * when there is nothing to edit.
  */
 @Composable
-fun TagEditorPane(wanted: List<TagTarget>, modifier: Modifier = Modifier, empty: String? = null, page: Boolean = false) {
+fun TagEditorPane(
+    wanted: List<TagTarget>,
+    modifier: Modifier = Modifier,
+    empty: String? = null,
+    page: Boolean = false,
+    /** 1.3.0: where "Vazgeç" leaves to (the panel's view before, the page's close); null: it only drops the changes. */
+    onCancel: (() -> Unit)? = null,
+) {
     if (wanted.isEmpty()) {
         EditorNote(empty ?: stringResource(R.string.nag_tag_none_selected), modifier)
         return
@@ -132,7 +139,7 @@ fun TagEditorPane(wanted: List<TagTarget>, modifier: Modifier = Modifier, empty:
         return
     }
     val model = rememberTagEditor(wanted)
-    TagEditor(model, modifier, held = model.targets != wanted, page = page)
+    TagEditor(model, modifier, held = model.targets != wanted, page = page, onCancel = onCancel)
 }
 
 /** The editor of [targets]: the one kept for them, else a new one (unless the one kept has changes not saved). */
@@ -165,9 +172,11 @@ private fun EditorNote(text: String, modifier: Modifier) {
  * them, always in sight. [held]: other files were asked for, and these have changes not saved yet. Ctrl+S saves.
  */
 @Composable
-internal fun TagEditor(model: TagEditorModel, modifier: Modifier = Modifier, held: Boolean = false, page: Boolean = false) {
+internal fun TagEditor(model: TagEditorModel, modifier: Modifier = Modifier, held: Boolean = false, page: Boolean = false, onCancel: (() -> Unit)? = null) {
     val dimens = NagTheme.dimens
     val focusManager = LocalFocusManager.current
+    // 1.3.0: the lookup open over the editor
+    var tool by remember(model) { mutableStateOf<TagTool?>(null) }
     // a value being typed into a field of several is one once the field lets go of the focus: let go before saving
     val save = {
         focusManager.clearFocus()
@@ -206,10 +215,14 @@ internal fun TagEditor(model: TagEditorModel, modifier: Modifier = Modifier, hel
                 ) {
                     if (held) HeldNote()
                     Head(model)
+                    // 1.3.0: looked up online
+                    ToolButtons(model) { tool = it }
                     Notes(model)
+                    if (model.many) BatchTools(model)
                     Fields(model)
                 }
-                Footer(model, save)
+                Footer(model, save, onCancel)
+                tool?.let { open -> ToolDialog(model, open) { tool = null } }
             }
         }
     }
@@ -358,7 +371,7 @@ private fun CoverButton(model: TagEditorModel) {
         ) {
             val image = rememberPicture(cover.picture)
             when {
-                image != null -> Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                image != null -> Image(image, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().testTag("tag-head-picture"))
                 else -> Icon(if (model.many && cover.own) NagIcons.Albums else NagIcons.Music, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(28.dp))
             }
             NagIconButton(

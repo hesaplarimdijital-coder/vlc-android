@@ -21,21 +21,37 @@ import app.nagmedar.tags.PictureType
 import app.nagmedar.tags.TagField
 import app.nagmedar.tags.TagMap
 import app.nagmedar.tags.TagReadResult
+import app.nagmedar.tags.TagSnapshot
+import app.nagmedar.tags.applying
+import app.nagmedar.tags.batch.AlbumMerge
 import app.nagmedar.tags.batch.BatchEdit
 import app.nagmedar.tags.batch.BatchItem
 import app.nagmedar.tags.batch.BatchProgress
+import app.nagmedar.tags.batch.FileNamePattern
 import app.nagmedar.tags.batch.FilePositions
 import app.nagmedar.tags.batch.PositionEdit
+import app.nagmedar.tags.batch.TrackNumbering
+import app.nagmedar.tags.batch.changesFor
+import app.nagmedar.tags.cover.CoverRequest
 import app.nagmedar.tags.editor.MultiValueMode
 import app.nagmedar.tags.editor.Position
 import app.nagmedar.tags.editor.PositionStyle
 import app.nagmedar.tags.editor.TagDraft
 import app.nagmedar.tags.editor.TrackPositions
 import app.nagmedar.tags.editor.withMultiValueMode
+import app.nagmedar.tags.lookup.AlbumProposal
+import app.nagmedar.tags.lookup.AlbumQuery
+import app.nagmedar.tags.lookup.AlbumSong
+import app.nagmedar.tags.lookup.FieldProposal
+import app.nagmedar.tags.lookup.LookupCandidate
+import app.nagmedar.tags.lookup.LookupQuery
+import app.nagmedar.tags.lookup.positionsFor
+import app.nagmedar.tags.lookup.proposalsFor
 import app.nagmedar.tags.save.RestoreOutcome
 import app.nagmedar.tags.save.SaveOutcome
 import app.nagmedar.tags.text.textRepairs
 import app.nagmedar.ui.music.Track
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -53,19 +69,27 @@ import kotlinx.coroutines.sync.withPermit
  * calls it ([title], [subtitle]) until its tags are read.
  */
 @Immutable
-data class TagTarget(val ref: ContentRef, val name: String, val title: String? = null, val subtitle: String? = null) {
+data class TagTarget(
+    val ref: ContentRef,
+    val name: String,
+    val title: String? = null,
+    val subtitle: String? = null,
+    /** 1.3.0: how long the library says it is, for finding its album; null where it does not know. */
+    val durationMs: Long? = null,
+) {
     val extension: String? get() = name.substringAfterLast('.', "").lowercase().ifEmpty { null }
 
     companion object {
         /** [track]'s file; null for a CUE sheet's track, whose tags are its sheet's, and for what is not a file. */
-        fun of(track: Track): TagTarget? = of(track.uri, track.title, listOfNotNull(track.artist, track.album).filter { it.isNotBlank() }.joinToString(" · "))
+        fun of(track: Track): TagTarget? =
+            of(track.uri, track.title, listOfNotNull(track.artist, track.album).filter { it.isNotBlank() }.joinToString(" · "), track.durationMs.takeIf { it > 0 })
 
-        fun of(uri: String, title: String? = null, subtitle: String? = null): TagTarget? {
+        fun of(uri: String, title: String? = null, subtitle: String? = null, durationMs: Long? = null): TagTarget? {
             val parsed = Uri.parse(uri)
             if (CueUri.isTrack(parsed)) return null
             if (parsed.scheme != null && parsed.scheme != "file" && parsed.scheme != "content") return null
             val name = parsed.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() } ?: title ?: uri
-            return TagTarget(ContentRef(uri), name, title?.takeIf { it.isNotBlank() }, subtitle?.takeIf { it.isNotBlank() })
+            return TagTarget(ContentRef(uri), name, title?.takeIf { it.isNotBlank() }, subtitle?.takeIf { it.isNotBlank() }, durationMs)
         }
     }
 }
@@ -209,6 +233,29 @@ class TagEditorModel(
 
     private var coverChange: ArtworkChange by mutableStateOf(ArtworkChange.Unchanged)
 
+    /** 1.3.0: the tracks numbered in the order they are listed, from [TrackNumbering.startAt]. */
+    var numbering: TrackNumbering? by mutableStateOf(null)
+        private set
+
+    /** 1.3.0: the pattern the files' names are read by, and whether they are. */
+    var pattern: String by mutableStateOf(FileNamePattern.Suggestions.first())
+        private set
+
+    var usePattern: Boolean by mutableStateOf(false)
+        private set
+
+    /** 1.3.0: whether each file's garbled text is put right, each its own way. */
+    var repairEach: Boolean by mutableStateOf(false)
+        private set
+
+    /** 1.3.0: each file's own track and disc: found on a release, or the disc a merged album's name said. */
+    var filePositions: Map<ContentRef, FilePositions> by mutableStateOf(emptyMap())
+        private set
+
+    /** 1.3.0: the albums the files are on, when they are on more than one. */
+    var merge: AlbumMerge? by mutableStateOf(null)
+        private set
+
     /** The batch writing the files, until it ends. */
     var progress: BatchProgress? by mutableStateOf(null)
         private set
@@ -226,12 +273,14 @@ class TagEditorModel(
     val ready: Boolean get() = phase == EditorPhase.Ready
 
     val dirty: Boolean
-        get() = if (many) edits.isNotEmpty() || positionEdits.isNotEmpty() || coverChange != ArtworkChange.Unchanged else draft?.isDirty == true
+        get() = if (many) changeCount > 0 else draft?.isDirty == true
 
     /** How many changes are waiting: fields, positions, the cover. */
     val changeCount: Int
         get() = if (many) {
-            edits.size + positionEdits.size + if (coverChange != ArtworkChange.Unchanged) 1 else 0
+            edits.size + positionEdits.size + (if (coverChange != ArtworkChange.Unchanged) 1 else 0) +
+                (if (numbering != null) 1 else 0) + (if (patternInUse != null) 1 else 0) + (if (repairEach && garbledFiles > 0) 1 else 0) +
+                (if (filePositions.values.any { !it.isEmpty }) 1 else 0)
         } else {
             val d = draft
             if (d == null) 0 else d.changedKeys.size + if (d.isCoverChanged) 1 else 0
@@ -275,6 +324,12 @@ class TagEditorModel(
         loaded = read
         skipped = targets.size - read.size
         common = commonValues(read.map { it.tags })
+        merge = AlbumMerge.of(read.map { it.tags })
+        val repairs = read.map { it to it.tags.textRepairs() }
+        garbledFiles = repairs.count { it.second.isNotEmpty() }
+        garbledExamples = repairs.asSequence().flatMap { (file, fixes) ->
+            fixes.map { (key, values) -> Triple(key, file.tags[key].joinToString(", "), values.joinToString(", ")) }.asSequence()
+        }.distinct().take(3).toList()
         phase = EditorPhase.Ready
     }
 
@@ -347,6 +402,14 @@ class TagEditorModel(
         positionEdits = emptyMap()
         positionTyped = emptyMap()
         coverChange = ArtworkChange.Unchanged
+        clearTools()
+    }
+
+    private fun clearTools() {
+        numbering = null
+        usePattern = false
+        repairEach = false
+        filePositions = emptyMap()
     }
 
     /** The keys with a place of their own in a section: every other key of the files is under "Tüm etiketler". */
@@ -550,14 +613,7 @@ class TagEditorModel(
         }
         runner.clear()
         val items = loaded.map { BatchItem(it.target.ref, it.target.name) }
-        val positions = positionEdits
-        val edit = BatchEdit(
-            fields = edits,
-            artwork = coverChange,
-            positions = if (positions.isEmpty()) emptyMap() else items.associate { item ->
-                item.ref to FilePositions(track = positions[TagField.TrackNumber], disc = positions[TagField.DiscNumber])
-            },
-        )
+        val edit = batchEdit()
         val before = loaded.associate { it.target.ref to it.tags }
         val coverWritten = coverChange != ArtworkChange.Unchanged
         val now = style()
@@ -575,6 +631,7 @@ class TagEditorModel(
             positionEdits = emptyMap()
             positionTyped = emptyMap()
             coverChange = ArtworkChange.Unchanged
+            clearTools()
             if (coverWritten) {
                 val written = done.saved.map { it.item.ref }
                 files.covers(written, written.map { before[it] ?: TagMap.Empty }, written.map { ref -> loaded.firstOrNull { it.target.ref == ref }?.tags ?: TagMap.Empty })
@@ -604,6 +661,174 @@ class TagEditorModel(
         }
     }
 
+    // ------------------------------------------------------------------ 1.3.0: the batch's tools
+
+    /** What the batch writes: the fields set for all, the cover, the numbers, the names read, each file's own. */
+    internal fun batchEdit(): BatchEdit {
+        val forAll = positionEdits
+        val positions = if (forAll.isEmpty()) filePositions else loaded.associate { file ->
+            val own = filePositions[file.target.ref] ?: FilePositions()
+            file.target.ref to (own + FilePositions(track = forAll[TagField.TrackNumber], disc = forAll[TagField.DiscNumber]))
+        }
+        return BatchEdit(
+            fields = edits,
+            artwork = coverChange,
+            numbering = numbering,
+            fileNamePattern = patternInUse,
+            positions = positions,
+            repairText = repairEach && garbledFiles > 0,
+        )
+    }
+
+    /** The tracks numbered in their order (from [startAt], with their total), or not. */
+    fun number(numbering: TrackNumbering?) {
+        this.numbering = numbering
+    }
+
+    fun choosePattern(pattern: String) {
+        this.pattern = pattern
+    }
+
+    fun readNames(on: Boolean) {
+        usePattern = on
+    }
+
+    /** The pattern the names are read by, when it is used and is one. */
+    val patternInUse: FileNamePattern? get() = FileNamePattern(pattern).takeIf { usePattern && it.isValid }
+
+    /** How the first files' names read with the pattern: a name and its tags, or null where it does not fit. */
+    val patternPreview: List<Pair<String, Map<String, List<String>>?>>
+        get() {
+            val parsed = FileNamePattern(pattern).takeIf { it.isValid } ?: return emptyList()
+            return loaded.take(3).map { it.target.name to parsed.parse(it.target.name) }
+        }
+
+    fun fixGarbledEach(on: Boolean) {
+        repairEach = on
+    }
+
+    /** How many files have text garbled in a way it can be put right from (read with them). */
+    var garbledFiles: Int by mutableStateOf(0)
+        private set
+
+    /** A few of the fields that would be put right, as they read and as they would. */
+    var garbledExamples: List<Triple<String, String, String>> by mutableStateOf(emptyList())
+        private set
+
+    /** The files as they will be once the batch is written: what a cover or an album is looked for by. */
+    fun editedTags(): List<TagMap> {
+        val edit = batchEdit()
+        return loaded.mapIndexed { index, file ->
+            val changes = edit.changesFor(BatchItem(file.target.ref, file.target.name), index, loaded.size, TagSnapshot(file.tags, emptyList()))
+            file.tags.applying(changes.fields)
+        }
+    }
+
+    /** The songs as the album search sees them, as they will be. */
+    private fun albumSongs(edited: List<TagMap>): List<AlbumSong> = loaded.zip(edited) { file, tags ->
+        AlbumSong(
+            title = tags.first(TagField.Title.key)?.ifBlank { null } ?: file.target.title ?: file.target.name,
+            durationMs = file.target.durationMs,
+            trackNumber = TrackPositions.read(tags, TagField.TrackNumber).number.toIntOrNull(),
+            discNumber = TrackPositions.read(tags, TagField.DiscNumber).number.toIntOrNull(),
+        )
+    }
+
+    /** What the album search asks: the album most of the files will be on, its artist, the songs. */
+    fun albumQuery(): AlbumQuery {
+        val edited = editedTags()
+        val artists = edited.mostCommon(TagField.AlbumArtist.key) ?: edited.mostCommon(TagField.Artist.key)
+        return AlbumQuery(album = edited.mostCommon(TagField.Album.key).orEmpty(), artist = artists.orEmpty(), songs = albumSongs(edited))
+    }
+
+    /**
+     * The fields [proposal] knows set for every file, and the songs found on it numbered: to be checked, and written with
+     * the rest. Its title is not taken: the songs keep theirs.
+     */
+    fun useAlbum(proposal: AlbumProposal) {
+        val found = proposal.positionsFor(albumSongs(editedTags()))
+        set(TagField.Album.key, listOf(proposal.album))
+        if (proposal.albumArtists.isNotEmpty()) set(TagField.AlbumArtist.key, proposal.albumArtists)
+        proposal.date?.let { set(TagField.Date.key, listOf(it)) }
+        if (proposal.genres.isNotEmpty()) set(TagField.Genre.key, proposal.genres)
+        val numbers = loaded.zip(found).mapNotNull { (file, position) ->
+            position?.let {
+                file.target.ref to FilePositions(
+                    track = PositionEdit(it.track, it.trackTotal).takeUnless { edit -> edit.isEmpty },
+                    disc = PositionEdit(it.disc, it.discTotal).takeUnless { edit -> edit.isEmpty },
+                )
+            }
+        }.filterNot { (_, positions) -> positions.isEmpty }.toMap()
+        filePositions = filePositions + numbers.mapValues { (ref, positions) -> (filePositions[ref] ?: FilePositions()) + positions }
+    }
+
+    /** The files made one album, called [album], by [albumArtists]; with [discNumbers], each its album's name's disc. */
+    fun mergeAlbums(album: String, albumArtists: List<String>, discNumbers: Boolean) {
+        val title = album.trim()
+        val artists = albumArtists.map { it.trim() }.filter { it.isNotEmpty() }
+        if (title.isEmpty() || artists.isEmpty()) return
+        set(TagField.Album.key, listOf(title))
+        set(TagField.AlbumArtist.key, artists)
+        if (discNumbers) {
+            val discs = merge?.discs.orEmpty().mapNotNull { (index, disc) ->
+                loaded.getOrNull(index)?.let { it.target.ref to FilePositions(disc = PositionEdit(number = disc)) }
+            }.toMap()
+            filePositions = filePositions + discs.mapValues { (ref, positions) -> (filePositions[ref] ?: FilePositions()) + positions }
+        }
+    }
+
+    /** Each file's numbers back as they are. */
+    fun resetFilePositions() {
+        filePositions = emptyMap()
+    }
+
+    // ------------------------------------------------------------------ 1.3.0: looking up
+
+    /** What one file is looked up by: its title, artist and album as edited, how long it is. */
+    fun lookupQuery(): LookupQuery {
+        val target = targets.first()
+        return LookupQuery(
+            title = field(TagField.Title.key).text.ifBlank { target.title.orEmpty() },
+            artist = field(TagField.Artist.key).values.firstOrNull(),
+            album = field(TagField.Album.key).text.ifBlank { null },
+            durationMs = audio?.durationMs ?: target.durationMs,
+        )
+    }
+
+    /** What [candidate] would set in the file, field by field, against its tags as edited. */
+    fun proposals(candidate: LookupCandidate): List<FieldProposal> = proposalsFor(candidate, draft?.tags ?: TagMap.Empty, positionStyle)
+
+    /** The fields a lookup found, as chosen: changes to save, as typed ones are. */
+    fun applyFields(fields: Map<String, List<String>>) {
+        if (!many) {
+            val d = draft ?: return
+            draft = d.setAll(fields)
+        } else {
+            fields.forEach { (key, values) -> set(key, values) }
+        }
+    }
+
+    /** What a cover is looked for by: the file (or the files, as they will be) and the cover it has now. */
+    fun coverRequest(): CoverRequest {
+        if (!many) {
+            val d = draft
+            val target = targets.first()
+            return CoverRequest.forSongs(
+                songs = listOfNotNull(d?.tags),
+                titleFallback = target.title ?: target.name,
+                durationMs = audio?.durationMs ?: target.durationMs,
+                currentCover = d?.cover?.data,
+            )
+        }
+        val first = loaded.firstOrNull()
+        return CoverRequest.forSongs(
+            songs = editedTags(),
+            titleFallback = first?.target?.title ?: first?.target?.name.orEmpty(),
+            durationMs = first?.target?.durationMs,
+            currentCover = (coverChange as? ArtworkChange.Replace)?.picture?.data,
+        )
+    }
+
     companion object {
         /** At most this many files are edited together. */
         const val MAX_FILES = 1000
@@ -615,6 +840,10 @@ class TagEditorModel(
 
         internal fun positionKeys(field: TagField): List<String> =
             listOf(field.key) + if (field == TagField.TrackNumber) TagField.TrackTotalKeys else TagField.DiscTotalKeys
+
+        /** The value most of these files have in [key], the first of them on a tie; null where none has one. */
+        internal fun List<TagMap>.mostCommon(key: String): String? =
+            mapNotNull { tags -> tags.first(key)?.trim()?.ifEmpty { null } }.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
 
         /** What [files] have in each of their keys. */
         internal fun commonValues(files: List<TagMap>): Map<String, CommonValue> {
@@ -630,3 +859,18 @@ class TagEditorModel(
         }
     }
 }
+
+/**
+ * Whether a field a lookup found is checked at first: it adds to the file. One that would take from it is offered but
+ * left unchecked: fewer artists than the file has, a date less precise than its own, the same names in other letters.
+ */
+internal val FieldProposal.takenAtFirst: Boolean
+    get() {
+        if (!differs) return false
+        val now = current.map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
+        if (now.isEmpty()) return true
+        val found = proposed.map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
+        if (now.containsAll(found)) return false
+        val date = field == TagField.Date && now.size == 1 && found.size == 1 && now[0].startsWith(found[0])
+        return !date
+    }

@@ -1,0 +1,103 @@
+/*
+ * Copyright (C) 2026  Gabriel Fontán (BobbyESP)
+ * Nağmedar 1.3.0: from Metamatik (core/domain/src/test/kotlin/com/bobbyesp/metadator/core/domain/lookup/LookupTest.kt), a fork of Metadator, under the AGPL-3.0.
+ */
+package app.nagmedar.tags.lookup
+
+import app.nagmedar.tags.editor.PositionStyle
+import app.nagmedar.tags.TagMap
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class LookupTest {
+    private fun candidate(provider: String, title: String) =
+        LookupCandidate(provider, provider, title, title, listOf("Queen"))
+
+    private class Provider(override val id: String, val result: LookupResult) : MetadataProvider {
+        override val displayName = id
+        override val providesArtwork = true
+
+        override suspend fun search(query: LookupQuery) = result
+    }
+
+    @Test
+    fun `results from every provider are merged, failures named`() = runTest {
+        val service =
+            LookupService(
+                listOf(
+                    Provider(
+                        "musicbrainz",
+                        LookupResult.Success(listOf(candidate("musicbrainz", "Bohemian Rhapsody"))),
+                    ),
+                    Provider("deezer", LookupResult.Failed("boom")),
+                ),
+            )
+
+        val outcome =
+            service.search(LookupQuery("Bohemian Rhapsody", "Queen")) as LookupOutcome.Results
+
+        assertEquals(1, outcome.candidates.size)
+        assertEquals(listOf("deezer"), outcome.failedProviders)
+    }
+
+    @Test
+    fun `a candidate a catalogue names twice is listed once`() = runTest {
+        val twice = candidate("musicbrainz", "Bohemian Rhapsody")
+        val service =
+            LookupService(
+                listOf(
+                    Provider(
+                        "musicbrainz",
+                        LookupResult.Success(listOf(twice, twice.copy(album = "Greatest Hits"))),
+                    )
+                ),
+            )
+
+        val outcome =
+            service.search(LookupQuery("Bohemian Rhapsody", "Queen")) as LookupOutcome.Results
+
+        assertEquals(1, outcome.candidates.size)
+    }
+
+    @Test
+    fun `offline everywhere is offline`() = runTest {
+        val service =
+            LookupService(
+                listOf(
+                    Provider("musicbrainz", LookupResult.Offline),
+                    Provider("deezer", LookupResult.Offline),
+                ),
+            )
+        assertEquals(LookupOutcome.Offline, service.search(LookupQuery("x")))
+    }
+
+    @Test
+    fun `proposals compare the file with the candidate`() {
+        val current = TagMap.of("TITLE" to listOf("bohemian rhapsody"), "ARTIST" to listOf("Queen"))
+        val proposals =
+            proposalsFor(
+                    LookupCandidate(
+                        providerId = "mb",
+                        providerName = "mb",
+                        id = "1",
+                        title = "Bohemian Rhapsody",
+                        artists = listOf("Queen"),
+                        album = "A Night at the Opera",
+                        trackNumber = 11,
+                        trackTotal = 12,
+                        identifiers = mapOf("MUSICBRAINZ_TRACKID" to "abc"),
+                    ),
+                    current,
+                    PositionStyle.Combined,
+                )
+                .associateBy { it.key }
+
+        assertTrue(proposals.getValue("TITLE").differs)
+        assertTrue(!proposals.getValue("ARTIST").differs)
+        assertEquals(listOf("11/12"), proposals.getValue("TRACKNUMBER").proposed)
+        assertEquals(listOf("abc"), proposals.getValue("MUSICBRAINZ_TRACKID").proposed)
+        assertTrue("GENRE" !in proposals)
+    }
+}

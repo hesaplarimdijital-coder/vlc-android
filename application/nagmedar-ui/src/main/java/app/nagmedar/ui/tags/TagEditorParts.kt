@@ -188,10 +188,11 @@ internal fun normalizeTagKey(key: String): String =
 
 /**
  * The editor's foot: how many changes wait, and the two things to do with them; a batch's progress and its Stop while
- * it writes. Always in sight, however far the fields are scrolled.
+ * it writes. Always in sight, however far the fields are scrolled. 1.3.0 (the owner, 16 Nov: "bir şey düzenlenmemişse
+ * vazgeç butonu çalışmıyor"): "Vazgeç" drops what was typed and, given [onCancel], leaves the editor, changes or not.
  */
 @Composable
-internal fun Footer(model: TagEditorModel, onSave: () -> Unit) {
+internal fun Footer(model: TagEditorModel, onSave: () -> Unit, onCancel: (() -> Unit)? = null) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     Column(Modifier.fillMaxWidth().background(colors.surface).testTag("tag-footer")) {
@@ -224,7 +225,15 @@ internal fun Footer(model: TagEditorModel, onSave: () -> Unit) {
                     modifier = Modifier.testTag("tag-count"),
                 )
             }
-            NagButton(stringResource(R.string.nag_tag_cancel), model::revertAll, enabled = model.dirty && !model.saving, modifier = Modifier.testTag("tag-discard"))
+            NagButton(
+                stringResource(R.string.nag_tag_cancel),
+                {
+                    model.revertAll()
+                    onCancel?.invoke()
+                },
+                enabled = !model.saving && (model.dirty || onCancel != null),
+                modifier = Modifier.testTag("tag-discard"),
+            )
             NagButton(
                 stringResource(if (model.saving) R.string.nag_tag_saving else R.string.nag_tag_save),
                 onSave,
@@ -273,7 +282,7 @@ fun TagEditorPage(targets: List<TagTarget>, onClose: () -> Unit, modifier: Modif
         if (model == null) {
             TagEditorPane(targets, Modifier.weight(1f), page = true)
         } else {
-            TagEditor(model, Modifier.weight(1f), held = model.targets != targets, page = true)
+            TagEditor(model, Modifier.weight(1f), held = model.targets != targets, page = true, onCancel = onClose)
         }
     }
     if (confirm) {
@@ -354,6 +363,16 @@ object TagSettings {
             .putString(KEY_MODE, style.mode.name)
             .putString(KEY_SEPARATOR, style.separator.takeIf { it.isNotBlank() } ?: MultiValueStyle.DEFAULT_SEPARATOR)
             .apply()
+    }
+
+    private const val KEY_CATALOGUES = "nagmedar_tags_catalogues"
+
+    /** 1.3.0: the catalogues the editor asks, by id: all of them until some are turned off. */
+    fun catalogues(context: Context): Set<String> =
+        Settings.getInstance(context).getStringSet(KEY_CATALOGUES, null)?.toSet() ?: TagLookups.catalogues.map { it.first }.toSet()
+
+    fun updateCatalogues(context: Context, ids: Set<String>) {
+        Settings.getInstance(context).edit().putStringSet(KEY_CATALOGUES, ids).apply()
     }
 }
 

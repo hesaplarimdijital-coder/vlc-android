@@ -16,16 +16,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.tags.EmbeddedPicture
 import app.nagmedar.tags.TagField
+import app.nagmedar.ui.tags.LocalTagLookups
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import app.nagmedar.ui.tags.FakeTagFiles
 import app.nagmedar.ui.tags.LocalTagFiles
 import app.nagmedar.ui.tags.TagEditorPage
 import app.nagmedar.ui.tags.TagEditorPane
 import app.nagmedar.ui.tags.TagEditorSection
 import app.nagmedar.ui.tags.TagSessions
+import app.nagmedar.ui.tags.fakeTagLookups
+import app.nagmedar.ui.tags.musicBrainzMatch
 import app.nagmedar.ui.tags.rememberTagEditor
 import app.nagmedar.ui.tags.sampleRef
 import app.nagmedar.ui.tags.sampleTarget
@@ -87,8 +93,27 @@ class TagEditorScreenshotTest {
         fake.tags.put(sampleRef("03 Haliç.mp3"), "TITLE" to listOf("Haliç'te Güneşin Batışı"), "ARTIST" to listOf("Moğollar"), "TRACKNUMBER" to listOf("3/10"))
     }
 
-    private fun capture(name: String, theme: ThemeMode, input: InputMode, content: @Composable () -> Unit) {
-        songs()
+    /** 1.3.0: three files on two discs of one album, one with its artist garbled, for the batch's tools. */
+    private fun twoDiscs() {
+        fake.tags.put(sampleRef("01 Bir Sana Bir Bana.flac"), "TITLE" to listOf("Bir Sana Bir Bana"), "ARTIST" to listOf("Moğollar"), "ALBUM" to listOf("Moğollar CD1"), "ALBUMARTIST" to listOf("Moğollar"))
+        fake.tags.put(sampleRef("02 Garip.flac"), "TITLE" to listOf("Garip"), "ARTIST" to listOf("MoÄŸollar"), "ALBUM" to listOf("Moğollar CD2"), "ALBUMARTIST" to listOf("Moğollar"))
+        fake.tags.put(sampleRef("03 Haliç.mp3"), "TITLE" to listOf("Haliç"), "ARTIST" to listOf("Moğollar"), "ALBUM" to listOf("Moğollar CD2"), "ALBUMARTIST" to listOf("Moğollar"))
+    }
+
+    /** The head's cover is decoded off the main thread: drawn only once it is there, else the shot is now with it, now without. */
+    private fun waitForCover() {
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("tag-head-picture").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    private fun capture(
+        name: String,
+        theme: ThemeMode,
+        input: InputMode,
+        data: () -> Unit = { songs() },
+        withCover: Boolean = false,
+        content: @Composable () -> Unit,
+    ) {
+        data()
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
@@ -98,6 +123,7 @@ class TagEditorScreenshotTest {
             }
         }
         compose.waitForIdle()
+        if (withCover) waitForCover()
         val window = compose.activity.window.decorView
         val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
         compose.runOnIdle { window.draw(Canvas(bitmap)) }
@@ -114,7 +140,7 @@ class TagEditorScreenshotTest {
     }
 
     @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
-    fun panelDex() = capture("tag-editor-panel-dex-light", ThemeMode.Light, InputMode.Pointer) {
+    fun panelDex() = capture("tag-editor-panel-dex-light", ThemeMode.Light, InputMode.Pointer, withCover = true) {
         Panel {
             val target = sampleTarget("01 Bir Sana Bir Bana.flac")
             val model = rememberTagEditor(listOf(target))
@@ -130,9 +156,64 @@ class TagEditorScreenshotTest {
         }
     }
 
+    /** 1.3.0: the batch's tools: the two discs made one album, the names read by a pattern, the garbled artist. */
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
+    fun batchToolsDex() = capture("tag-editor-batch-dex-light", ThemeMode.Light, InputMode.Pointer, data = { twoDiscs() }) {
+        Panel {
+            val targets = listOf(sampleTarget("01 Bir Sana Bir Bana.flac"), sampleTarget("02 Garip.flac"), sampleTarget("03 Haliç.mp3"))
+            val model = rememberTagEditor(targets)
+            LaunchedEffect(model) {
+                model.choosePattern("{track} {title}")
+                model.readNames(true)
+            }
+            TagEditorPane(targets)
+        }
+    }
+
     @Test @Config(qualifiers = "tr-w390dp-h844dp-hdpi")
-    fun phonePage() = capture("tag-editor-phone-light", ThemeMode.Light, InputMode.Touch) {
+    fun phonePage() = capture("tag-editor-phone-light", ThemeMode.Light, InputMode.Touch, withCover = true) {
         TagEditorPage(listOf(sampleTarget("01 Bir Sana Bir Bana.flac")), onClose = {})
+    }
+
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
+    fun lookupComparisonDex() {
+        val tools = fakeTagLookups(musicBrainzMatch())
+        songs()
+        compose.runOnUiThread { compose.activity.actionBar?.hide() }
+        compose.setContent {
+            NagmedarTheme(themeMode = ThemeMode.Light, inputMode = InputMode.Pointer) {
+                CompositionLocalProvider(LocalTagFiles provides fake.files, LocalTagLookups provides tools) {
+                    Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
+                        Panel { TagEditorPane(listOf(sampleTarget("01 Bir Sana Bir Bana.flac"))) }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        waitForCover()
+        compose.onNodeWithTag("tag-find-info").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("tag-lookup-result-0").performClick()
+        compose.waitForIdle()
+        val window = compose.activity.window.decorView
+        val bitmap = Bitmap.createBitmap(window.width, window.height, Bitmap.Config.ARGB_8888)
+        compose.runOnIdle { drawWindows(Canvas(bitmap)) }
+        ShellScreenshotTest.save("tag-lookup-compare-dex-light", bitmap)
+    }
+
+    /** Every window up, the activity's first, each where it is: a dialog is a window of its own. */
+    private fun drawWindows(canvas: Canvas) {
+        val global = Class.forName("android.view.WindowManagerGlobal").getMethod("getInstance").invoke(null)
+        val roots = global.javaClass.getDeclaredField("mRoots").apply { isAccessible = true }.get(global) as List<*>
+        roots.forEach { root ->
+            val view = root?.javaClass?.getMethod("getView")?.invoke(root) as? android.view.View ?: return@forEach
+            val at = IntArray(2)
+            view.getLocationOnScreen(at)
+            canvas.save()
+            canvas.translate(at[0].toFloat(), at[1].toFloat())
+            view.draw(canvas)
+            canvas.restore()
+        }
     }
 
     @Test @Config(qualifiers = "tr-w1280dp-h800dp-mdpi-keysexposed-qwerty")

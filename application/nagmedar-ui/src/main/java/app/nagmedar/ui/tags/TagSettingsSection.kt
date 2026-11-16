@@ -2,6 +2,7 @@ package app.nagmedar.ui.tags
 
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import app.nagmedar.tags.editor.MultiValueMode
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.NagButton
+import app.nagmedar.ui.components.NagCheckbox
 import app.nagmedar.ui.components.NagTextField
 import app.nagmedar.ui.components.SegmentedChoice
 import app.nagmedar.ui.components.SettingRow
@@ -27,7 +29,8 @@ import kotlinx.coroutines.launch
 
 /**
  * 1.2.0: Settings › Etiket düzenleyici (Metamatik's): how fields of several values are written (one by one, or joined
- * with the separator, which is also what typed values are split on), and the saves' backups, which can be deleted.
+ * with the separator, which is also what typed values are split on), 1.3.0: the catalogues looked up, and the saves'
+ * backups, which can be deleted.
  * The screenshot tests give [backups]; the app counts them itself.
  */
 @Composable
@@ -69,6 +72,23 @@ internal fun TagEditorSection(backups: Pair<Int, Long>? = null) {
                     showLabel = false,
                     modifier = Modifier.testTag("tags-separator"),
                 )
+            }
+        }
+        // 1.3.0: where details, covers and albums are looked up
+        var catalogues by remember { mutableStateOf(TagSettings.catalogues(context)) }
+        SettingRow(stringResource(R.string.nag_tag_catalogues), subtitle = stringResource(R.string.nag_tag_catalogues_hint)) {
+            Column {
+                TagLookups.catalogues.forEach { (id, name) ->
+                    NagCheckbox(
+                        id in catalogues,
+                        { on ->
+                            catalogues = if (on) catalogues + id else catalogues - id
+                            TagSettings.updateCatalogues(context, catalogues)
+                        },
+                        name,
+                        modifier = Modifier.testTag("tags-catalogue-$id"),
+                    )
+                }
             }
         }
         val count = kept

@@ -3,6 +3,8 @@ package app.nagmedar.ui.tags
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -110,6 +112,65 @@ class TagEditorScreenTest {
         compose.onNodeWithTag("tag-save").performClick()
         compose.waitForIdle()
         assertEquals(listOf("5"), tags.tags(sampleRef("01.flac"))["RATING_MOOD"])
+    }
+
+    @Test
+    fun cancelLeavesTheEditorWithChangesOrWithout() {
+        var left = 0
+        tags.put(sampleRef("01.flac"), "TITLE" to listOf("Bir Sana Bir Bana"))
+        compose.setContent {
+            NagmedarTheme {
+                CompositionLocalProvider(LocalTagFiles provides fake.files) {
+                    TagEditorPane(listOf(sampleTarget("01.flac")), onCancel = { left++ })
+                }
+            }
+        }
+        compose.waitForIdle()
+        // 1.3.0 (the owner: "bir şey düzenlenmemişse vazgeç butonu çalışmıyor"): nothing typed, it leaves all the same
+        compose.onNodeWithTag("tag-discard").assertIsEnabled().performClick()
+        assertEquals(1, left)
+        compose.onNodeWithTag("tag-field-TITLE").performTextReplacement("Başka")
+        compose.onNodeWithTag("tag-discard").performClick()
+        compose.waitForIdle()
+        assertEquals(2, left)
+        // what was typed is dropped, and nothing was written
+        compose.onNodeWithTag("tag-count").assertTextContains("Değişiklik yok")
+        assertEquals(listOf("Bir Sana Bir Bana"), tags.tags(sampleRef("01.flac"))["TITLE"])
+    }
+
+    @Test
+    fun aSongsDetailsFoundAreChosenThenSavedWithTheRest() {
+        tags.put(sampleRef("01.flac"), "TITLE" to listOf("Bir Sana Bir Bana"), "ARTIST" to listOf("Moğollar", "Cahit Berkay"), "ALBUM" to listOf("Moğollar"))
+        compose.setContent {
+            NagmedarTheme {
+                CompositionLocalProvider(LocalTagFiles provides fake.files, LocalTagLookups provides fakeTagLookups(musicBrainzMatch())) {
+                    TagEditorPane(listOf(sampleTarget("01.flac")))
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("tag-find-info").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("tag-lookup-result-0").performClick()
+        compose.waitForIdle()
+        // what adds to the file is checked; one artist for the file's two would take one away: offered, not checked
+        compose.onNodeWithTag("tag-lookup-field-DATE").assertIsOn()
+        compose.onNodeWithTag("tag-lookup-field-GENRE").assertIsOn()
+        compose.onNodeWithTag("tag-lookup-field-ARTIST").assertIsOff()
+        compose.onNodeWithText("MusicBrainz kaydı").assertExists()
+        compose.onNodeWithTag("tag-lookup-field-GENRE").performClick()
+        compose.onNodeWithTag("tag-lookup-apply").performClick()
+        compose.waitForIdle()
+        // chosen, not written: they wait with the rest for Kaydet
+        assertEquals(emptyList<Any>(), tags.written)
+        compose.onNodeWithTag("tag-save").assertIsEnabled().performClick()
+        compose.waitForIdle()
+        val saved = tags.tags(sampleRef("01.flac"))
+        assertEquals(listOf("1971-03-01"), saved["DATE"])
+        assertEquals(emptyList<String>(), saved["GENRE"])
+        assertEquals(listOf("Moğollar", "Cahit Berkay"), saved["ARTIST"])
+        assertEquals(listOf("1"), saved["TRACKNUMBER"])
+        assertEquals(listOf("8f1c2d3e-0000-4000-8000-000000000002"), saved["MUSICBRAINZ_TRACKID"])
     }
 
     @Test

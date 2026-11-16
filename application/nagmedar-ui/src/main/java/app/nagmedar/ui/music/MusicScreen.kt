@@ -377,6 +377,9 @@ interface MusicActions {
 
     /** 1.2.0: [tracks]' tags in the editor (Metamatik's); null where there is none. */
     val editTags: ((List<Track>) -> Unit)? get() = null
+
+    /** 1.3.0: [tracks]' files deleted from the device, after a question; null where they cannot be. */
+    val delete: ((List<Track>) -> Unit)? get() = null
 }
 
 /** These actions with their plays coming from [source] (a group of the music view, a playlist); themselves for none. */
@@ -470,6 +473,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
             onAskRating = { tracks -> rating = tracks },
             onConvert = { tracks -> converting = tracks },
             onEditTags = { tracks -> if (compactNow) TagEditRequest.openPage(context, tracks) else TagEditRequest.toInspector(tracks) },
+            canDelete = true,
         )
     }
     val state = rememberMusicBrowserState()
@@ -806,6 +810,8 @@ internal class ServiceMusicActions(
     private val onConvert: ((List<Track>) -> Unit)? = null,
     /** 1.2.0: "Etiketleri düzenle…". */
     private val onEditTags: ((List<Track>) -> Unit)? = null,
+    /** 1.3.0: "Sil…": the files deleted, after a question. */
+    private val canDelete: Boolean = false,
 ) : MusicActions {
 
     constructor(
@@ -815,7 +821,8 @@ internal class ServiceMusicActions(
         onAskRating: ((List<Track>) -> Unit)? = null,
         onConvert: ((List<Track>) -> Unit)? = null,
         onEditTags: ((List<Track>) -> Unit)? = null,
-    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating, onConvert, onEditTags)
+        canDelete: Boolean = false,
+    ) : this(context, { uri: String -> byUri[uri] }, onAddToPlaylist, onAskRating, onConvert, onEditTags, canDelete)
 
     override val addToPlaylist: ((List<Track>) -> Unit)? get() = onAddToPlaylist
 
@@ -824,6 +831,8 @@ internal class ServiceMusicActions(
     override val convert: ((List<Track>) -> Unit)? get() = onConvert
 
     override val editTags: ((List<Track>) -> Unit)? get() = onEditTags
+
+    override val delete: ((List<Track>) -> Unit)? get() = if (canDelete) ({ tracks -> TrackDeleteRequest.ask(tracks, media(tracks)) }) else null
 
     override val share: (List<Track>) -> Unit get() = { tracks -> MediaSharing.share(context, tracks.map { fileOf(it) }) }
 
@@ -856,10 +865,16 @@ internal class ServiceMusicActions(
             onConvert?.let { convert -> MenuEntry.Item(context.getString(R.string.nag_convert), { convert(listOf(track)) }, icon = NagIcons.Convert) },
             onEditTags?.let { edit -> MenuEntry.Item(context.getString(R.string.nag_tag_edit), { edit(listOf(track)) }, icon = NagIcons.Edit) },
         )
-        if (added.isEmpty()) return entries
+        // 1.3.0: "Sil…" last, apart: it takes the file away
+        val deleting = if (canDelete && entries.isNotEmpty()) {
+            listOf(MenuEntry.Separator, MenuEntry.Item(context.getString(R.string.nag_delete), { TrackDeleteRequest.ask(listOf(track), media(listOf(track))) }, icon = NagIcons.Delete, destructive = true))
+        } else {
+            emptyList()
+        }
+        if (added.isEmpty()) return entries + deleting
         val queueLabel = context.getString(R.string.nag_add_to_queue)
         val at = entries.indexOfFirst { it is MenuEntry.Item && it.label == queueLabel } + 1
-        return if (at > 0) entries.subList(0, at) + added + entries.subList(at, entries.size) else entries + added
+        return (if (at > 0) entries.subList(0, at) + added + entries.subList(at, entries.size) else entries + added) + deleting
     }
 
     override fun rowModifier(track: Track, atOnce: () -> Boolean, others: () -> List<Track>): Modifier =
@@ -1540,6 +1555,9 @@ internal fun tracksMenu(res: android.content.res.Resources, tracks: List<Track>,
         if (first != null && (share != null || reveal != null)) MenuEntry.Separator else null,
         if (first != null) share?.let { MenuEntry.Item(res.getString(R.string.nag_media_share), { it(tracks) }, icon = NagIcons.Share) } else null,
         if (first != null) reveal?.let { MenuEntry.Item(res.getString(R.string.nag_media_reveal), { it(first) }, icon = NagIcons.Folder) } else null,
+        // 1.3.0: last, apart: it takes the files away
+        if (first != null && actions.delete != null) MenuEntry.Separator else null,
+        if (first != null) actions.delete?.let { delete -> MenuEntry.Item(res.getString(R.string.nag_delete), { delete(tracks) }, icon = NagIcons.Delete, destructive = true) } else null,
     )
 }
 
