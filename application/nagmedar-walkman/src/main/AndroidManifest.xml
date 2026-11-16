@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nağmedar 1.5.0: Walkman Sync's service and card events (the owner's own app). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- the copy goes on while the window changes or the screen is off -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- a USB-C card reader; not required -->
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+
+    <application>
+        <service
+            android:name="app.nagmedar.walkman.service.SyncForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- A card put in or taken out is heard while the page's objects live (SafVolumeRegistry's own receivers):
+             a receiver here would start Nağmedar's process for every card put in, whoever uses it. -->
+    </application>
+</manifest>

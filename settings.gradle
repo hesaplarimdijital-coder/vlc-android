@@ -32,6 +32,8 @@ include ':application:nagmedar-session'
 include ':application:nagmedar-lab'
 include ':application:nagmedar-audio'
 include ':application:nagmedar-tags'
+// 1.5.0: Walkman Sync (the owner's own app): new music copied onto a Walkman's card, only added
+include ':application:nagmedar-walkman'
 // S-1404: the macrobenchmarks, against the app's benchmark build
 include ':application:benchmark'
 include ':application:remote-access-client'

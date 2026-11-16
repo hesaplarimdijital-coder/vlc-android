@@ -95,6 +95,7 @@ import app.nagmedar.ui.lyrics.LyricsTrack
 import app.nagmedar.ui.lyrics.PlayingLyricsFullScreen
 import app.nagmedar.ui.lyrics.editor.LyricsEditorRequest
 import app.nagmedar.ui.lyrics.editor.PlayingLyricsEditor
+import app.nagmedar.ui.walkman.WalkmanScreen
 import app.nagmedar.ui.tags.TagEditRequest
 import app.nagmedar.ui.tags.TagEditorPage
 import app.nagmedar.ui.lyrics.delayNumber
@@ -738,6 +739,8 @@ private fun NagmedarMain(
                             Destination.Device -> DeviceScreen(prefs)
                             // the podcast episodes and the subtitle tools' models downloaded, coming down or failed
                             Destination.Downloads -> DownloadsScreen()
+                            // 1.5.0: new music copied onto a Walkman's card (Walkman Sync)
+                            Destination.Walkman -> WalkmanScreen()
                         }
                     }
                     // Desktop Kit 1.0: on a phone these pages lie under the bars, their lists scrolling beneath the glass

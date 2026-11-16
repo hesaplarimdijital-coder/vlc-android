@@ -2,6 +2,30 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.5.0 (16 Kasım 2026)
+
+Walkman Sync Nağmedar'ın içinde: tabletin kartındaki yeni müzikler Sony Walkman'in kartına, yalnızca eklenerek kopyalanır (16 Kasım'daki istek: “Walkman sync uygulamasını da yedirelim”).
+
+### Walkman'e aktar
+- Kenar çubuğunda Araçlar › **Walkman'e aktar** (telefonda Daha fazla'da). Üç görünüm: **Kartlar**, **Yeni müzikler**, **Aktarım**; sayfa işi izleyip kendiliğinden ilerler, tablet dönünce ya da DeX penceresi yeniden kurulunca seçilen görünümde kalır. **Yenile** (F5) kartları yeniden okur.
+- Kartlar: kaynak kart (tabletin SD kartı, yalnızca okunur) ve hedef kart (Walkman'in kartı, USB-C kart okuyucuyla) “Klasör seç”le bir kez seçilir; her kartın durumu, UUID'si, klasörü, bağlantısı, erişimi, dosya sistemi ve boş alanı yazar. Takılı kartlar ayrıca listelenir. İki kart UUID'leriyle eşlenir ve her açılışta yeniden doğrulanır; kaynak ve hedef aynı kart olamaz, aynı UUID'yi bildiren iki kart kullanılmaz.
+- **Tara**: Walkman kartındaki aktarım kaydı (`.walkman_sync_index.json`), iki kartın dosyaları ve etiketleri okunur; yeni olanlar bulunur. Kayıt Walkman Sync'inkiyle aynı biçimdedir: Walkman Sync ile daha önce aktarılanlar yeniden kopyalanmaz. Düz klasörlere (`Download/`, `Telegram/`…) inen parçalar etiketlerine göre `MUSIC/{Sanatçı}/{Albüm}/{NN} - {Başlık}` düzenine yerleştirilir; FAT/exFAT için geçersiz karakterler temizlenir.
+- Yeni müzikler: aktarılacaklar (hepsi işaretli) ve atlananlar nedenleriyle (daha önce aktarıldı, hedefte var, aynı içerik, FAT32 için çok büyük…), biçime ve nedene göre filtrelenir, aranır, sütuna göre sıralanır; satır açılınca ayrıntıları (etiketler, kaynak ve hedef yolu) görünür. Zorlanabilen atlananlar yine de seçilebilir. Satırlar işaretten ayrı olarak birlikte vurgulanabilir (Ctrl ya da Shift ile tıklama, Ctrl+A; dokunmatikte satırın menüsündeki “Seç”), vurgulananlar tablonun üstündeki çubuktan ya da satırın menüsünden birlikte dahil edilir ya da hariç tutulur. Altta seçilenlerin boyutu ve hedefteki boş alan; **Aktar**.
+- Aktarım ön plan hizmetinde sürer (pencere değişse de ekran kapansa da): yüzde, hız, kalan süre, yazılan dosya; Duraklat, Sürdür, İptal (onayla). Bildirim ilerlemeyi gösterir, dokununca bu sayfa açılır. Sonunda özet ve kopyalanamayan dosyalar.
+- **Yalnızca ekleme**: Walkman kartında hiçbir dosyanın üzerine yazılmaz, hiçbir dosya silinmez ya da yeniden adlandırılmaz. Her dosya önce `ad.wsync.part` olarak yazılır, diske işlenir, boyutu doğrulanır, sonra gerçek adına çevrilir; kart çekilirse yarım dosya bir sonraki taramada temizlenir.
+
+### Kaynak
+- Yeni modül `nagmedar-walkman`: Walkman Sync'in çekirdeği (etiket okuyucuları, fark motoru, yol planlayıcı, JSON aktarım kaydı, atomik kopya, tek işlik koordinatör) ve Android katmanları (SAF ağaçları, kart kaydı, ön plan hizmeti, bildirimler) testleriyle taşındı; kod Walkman Sync'teki kendi Türkçe açıklamalarıyla kaldı. Sayfa Nağmedar'ın parçalarıyla yeniden çizildi.
+- Kartların takılıp çıkarılması, sayfa bu süreçte açıldıysa izlenir; Nağmedar her kart takılışında kendiliğinden açılmaz.
+
+### Test
+- `nagmedar-walkman`: Walkman Sync'in çekirdek testleri (181 test: etiket okuyucuları, fark motoru, yol planlayıcı, aktarım kaydı, atomik kopya, koordinatör).
+- `WalkmanScreenTest`: kartlar önce seçilir; tarama bitince sayfa yeni müzik listesine geçer, ikisi de işaretli gelir ve Aktar onları verir; aktarımın sonu söylenir, Bitti kartlara döner; sayfa yeniden çizilince (tablet döndü, DeX penceresi yeniden kuruldu) seçilen görünüm yerinde kalır, iş ilerleyince görünüm de ilerler. Vurgulanan iki satır çubuktan birlikte hariç tutulup yeniden dahil edilir, satırın menüsü de ikisine birden uygulanır.
+- Onay için ekran görüntüleri (`WalkmanScreenshotTest`): telefonda kartlar, kaynak seçili ve hedef bekliyor (`walkman-cards-phone-dark`); DeX'te yeni müzikler (`walkman-plan-dex-light`).
+
+### Sürüm
+- `versionCode` 4010500; kişisel arm64 APK'sı 14010506 (1.4.0'ın 14010406'sının üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.4.0 (16 Kasım 2026)
 
 Metamatik'in kalite denetimi ve listeleri: FLAC ve WAV dosyalarının gerçekten kayıpsız olup olmadığı, kütüphanenin düzeltilecekleri (16 Kasım'daki istek: “Metamatik uygulamasının tüm özelliklerini nağmedara yedirelim”, üçüncü bölüm).

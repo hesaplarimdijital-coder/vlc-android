@@ -28,6 +28,9 @@ enum class Destination(
     Network("network", R.string.nag_nav_network, NavSection.Sources),
     Streams("streams", R.string.nag_nav_streams, NavSection.Sources, R.string.nag_coming_streams),
     Downloads("downloads", R.string.nag_nav_downloads, NavSection.Tools, R.string.nag_coming_downloads),
+
+    /** 1.5.0: Walkman Sync's copy of new music onto a Walkman's card. */
+    Walkman("walkman", R.string.nag_nav_walkman, NavSection.Tools, R.string.nag_walkman_description),
     Settings("settings", R.string.nag_nav_settings, NavSection.Footer),
     More("more", R.string.nag_nav_more, NavSection.Footer),
 
@@ -59,6 +62,7 @@ enum class Destination(
             Network -> NagIcons.Network
             Streams -> NagIcons.Streams
             Downloads -> NagIcons.Downloads
+            Walkman -> NagIcons.Headphones
             Settings -> NagIcons.Settings
             More -> NagIcons.Menu
             Search -> NagIcons.Search

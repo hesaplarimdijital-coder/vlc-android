@@ -1,0 +1,41 @@
+// Nağmedar 1.5.0: Walkman Sync (the owner's own app): new music from the tablet's card copied onto a Sony Walkman's
+// card, only added: nothing on the Walkman's card is overwritten, renamed or deleted. Its core is plain Kotlin (the
+// tag parsers, the delta engine, the path planner, the index, the atomic copy, the coordinator), tested on the JVM;
+// beside it the Storage Access Framework's trees, the cards' registry and the foreground service.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace = 'app.nagmedar.walkman'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
+    }
+
+    testOptions {
+        unitTests {
+            all {
+                testLogging {
+                    events 'failed'
+                    exceptionFormat 'full'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.kotlinx_version"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.ext.kotlinx_version"
+}

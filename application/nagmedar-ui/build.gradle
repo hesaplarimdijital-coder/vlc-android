@@ -61,6 +61,8 @@ dependencies {
     implementation project(':application:nagmedar-audio')
     // 1.2.0: Metamatik's tag editing (TagLib, saves that keep everything else and can be undone)
     implementation project(':application:nagmedar-tags')
+    // 1.5.0: Walkman Sync's copy onto a Walkman's card ("Walkman'e aktar" under Araçlar)
+    implementation project(':application:nagmedar-walkman')
 
     implementation platform("androidx.compose:compose-bom:$rootProject.ext.composeBomVersion")
     implementation 'androidx.compose.ui:ui'

@@ -214,6 +214,9 @@ Sözlüğü testler denetler:
 | büyütülmüş | upscaled | | | 1.4.0: kayıpsız ama taşıdığından yüksek çözünürlük söyleyen dosya: sesi düşük örnekleme hızında biten ya da bit derinliğinin bir kısmını kullanan |
 | kütüphane denetimi, Denetim | library checks | | | 1.4.0: arka planda, her dosya bir kez: kayıpsız dosyaların sesi ve bütün dosyaların etiketleri (Ayarlar › Etiket düzenleyici › Kütüphane denetimi). Müzik › Filtre › Denetim'in listeleri: “Düzeltilecekler” (sanatçı, albüm, albüm sanatçısı, tarih ya da parça numarası eksik), “Sahte FLAC”, “Kapaksızlar”, “Bozuk yazılılar” |
 | kalite (sütun) | quality (column) | | | 1.4.0: tablonun ve ayrıntı panelinin, FLAC ve WAV için denetimin kararını yazan sütunu: “Gerçek kayıpsız”, “Sahte FLAC”, “Denetlenmedi”; kayıplı biçimde çizgi |
+| Walkman'e aktar | Copy to Walkman | | | 1.5.0 (Walkman Sync): Araçlar'daki sayfa; tabletin kartındaki yeni müzikler Walkman'in kartına yalnızca eklenerek kopyalanır. Görünümleri “Kartlar”, “Yeni müzikler”, “Aktarım” |
+| kaynak kart, hedef kart | source card, target card | | | 1.5.0: müziğin okunduğu tabletin SD kartı (yalnızca okunur) ve kopyalandığı Walkman'in kartı |
+| aktarım kaydı | transfer record | | | 1.5.0: Walkman kartının kökünde, ne aktarıldığını tutan dosya (`.walkman_sync_index.json`); yalnızca eklenir, yedeği tutulur |
 
 ## Özel adlar
 
