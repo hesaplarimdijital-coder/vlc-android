@@ -1,5 +1,6 @@
 package app.nagmedar.ui.music
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -29,22 +31,25 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
+import app.nagmedar.ui.covers.CoverCenter
 import app.nagmedar.ui.covers.CoverTrack
-import app.nagmedar.ui.covers.rememberCover
 import app.nagmedar.ui.theme.LocalMotionTier
 import app.nagmedar.ui.theme.MotionTier
 import app.nagmedar.ui.theme.NagMotion
 import app.nagmedar.ui.theme.NagTheme
 import java.util.concurrent.Executors
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import org.videolan.medialibrary.interfaces.media.MediaWrapper
+import org.videolan.vlc.util.ThumbnailsProvider
 import java.util.Random
 import kotlin.math.PI
 import kotlin.math.abs
@@ -75,6 +80,13 @@ data class EbruInks(val inks: List<Int>, val paper: Int, val seed: Long) {
          * meanwhile, and the album's fades in over it once they are known (not made before the eyes: no music changed).
          */
         val Unknown = Default.copy(seed = Long.MIN_VALUE)
+
+        /**
+         * 1.1.5: the bozkır's inks in a drawing of their own, for what plays without a picture ([key]: its album, its
+         * station): another such one still makes another band before the eyes (1.1.0-1.1.4: one band for all of them,
+         * a station without a logo after another left Radio's band as it was).
+         */
+        fun bozkirOf(key: String): EbruInks = Default.copy(seed = key.hashCode().toLong())
     }
 
     /** The inks a band of these is drawn in ([Unknown]'s: the bozkır's). */
@@ -83,9 +95,9 @@ data class EbruInks(val inks: List<Int>, val paper: Int, val seed: Long) {
 
 /**
  * 1.1.3: what a band is made of, in the order it was made: the drops as they fell ([drops]: x, y, radius and ink, four
- * floats each, in pixels of the band), the stylus' lines down and up the band ([vertical]), across it ([horizontal]),
- * the fine comb's ([comb]) and the slow wave ([wave]: its amplitude, length and phase). The transition from one album's
- * band to the next draws the next being made from it.
+ * floats each, in pixels of the band), the stylus' lines down and up the band ([vertical]), then across it
+ * ([horizontal]). The transition from one album's band to the next draws the next being made from it. 1.1.5: the stylus
+ * goes across once: no fine comb and slow wave after it (the band was drawn across twice).
  */
 internal class EbruPlan(
     val width: Int,
@@ -95,8 +107,6 @@ internal class EbruPlan(
     val drops: FloatArray,
     val vertical: EbruLines,
     val horizontal: EbruLines,
-    val comb: EbruLines,
-    val wave: FloatArray,
 ) {
     val count: Int get() = drops.size / 4
 }
@@ -114,8 +124,8 @@ internal class EbruMade(val band: Bitmap?, val plan: EbruPlan, val stones: Bitma
 /**
  * 1.1.0 (Ebru): marbled paper, as the mockup's bands were made, with the mathematical marbling of Lu, Jaffer et al.:
  * ink drops spread on the tray, each pushing the outlines before it outwards (an area-preserving map), then a stylus is
- * drawn back and forth through them, a fine comb and a slow wave; the bottom edge is torn as handmade paper is. The
- * same [EbruInks] give the same band.
+ * drawn back and forth through them, down and up the band, then across it (1.1.5: no fine comb and slow wave after it);
+ * the bottom edge is torn as handmade paper is. The same [EbruInks] give the same band.
  */
 internal object Ebru {
 
@@ -173,21 +183,9 @@ internal object Ebru {
             k++
         }
         val horizontal = EbruLines(h / 6f * 0.5f, h / 6f, k, w * 0.05f, h * 0.01f, alternate = true)
-        // a fine comb, then a slow wave along the band. 1.1.3: the comb's lines at least a little more than a pixel
-        // wide, as on a tablet's band they were thinner than one (the band looked made of pixels there)
-        val combLambda = max(h * 0.003f, MIN_COMB_LAMBDA)
-        k = 0
-        y = h / 30f / 2f
-        while (y < h + h / 30f) {
-            if (stylus) tray.tine(0f, y, 1f, 0f, w * 0.012f, combLambda)
-            check()
-            y += h / 30f
-            k++
-        }
-        val comb = EbruLines(h / 30f / 2f, h / 30f, k, w * 0.012f, combLambda, alternate = false)
-        val wave = floatArrayOf(h * 0.05f, w * 0.18f, 1.2f)
-        if (stylus) tray.wave(wave[0], wave[1], wave[2])
-        val plan = EbruPlan(bw, bh, colours.toIntArray(), inks.paper, drops, vertical, horizontal, comb, wave)
+        // 1.1.5 (the owner, 16 Nov: "iki kere yatay çiziliyor ... sadece bir kere çizilsin"): the band is as the stylus
+        // left it across; 1.1.0-1.1.4 drew a fine comb across it after that, then a slow wave along it
+        val plan = EbruPlan(bw, bh, colours.toIntArray(), inks.paper, drops, vertical, horizontal)
         return EbruMade(if (stylus) render(tray, inks.paper, bw, bh, random) else null, plan, beforeStylus)
     }
 
@@ -203,7 +201,7 @@ internal object Ebru {
 
     /**
      * 1.1.3: the drops as they lie before the stylus, for the transition, with what lies around the band too ([stonesMargin]):
-     * the stylus and the comb pull it in.
+     * the stylus pulls it in.
      */
     private fun stonesOf(tray: Tray, paper: Int, width: Int, height: Int): Bitmap {
         val (mx, my) = stonesMargin(width, height)
@@ -217,7 +215,7 @@ internal object Ebru {
 
     /** How far around a band [width] × [height] its drops are drawn for the transition: as far as its steps pull. */
     fun stonesMargin(width: Int, height: Int): Pair<Int, Int> =
-        ceil(0.07f * width + 0.05f * height).toInt() to ceil(0.36f * height).toInt()
+        ceil(0.07f * width).toInt() to ceil(0.36f * height).toInt()
 
     private fun drawDrops(canvas: Canvas, tray: Tray) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
@@ -315,16 +313,6 @@ internal object Ebru {
                     val shift = alpha * lambda / (dist + lambda)
                     out[0] = x + shift * mx
                     out[1] = y + shift * my
-                }
-            }
-        }
-
-        /** Every outline moved sideways by a sine of its height on the band. */
-        fun wave(amplitude: Float, length: Float, phase: Float) {
-            for (d in drops) {
-                map(d) { x, y, out ->
-                    out[0] = x + amplitude * sin(2f * PI.toFloat() * y / length + phase)
-                    out[1] = y
                 }
             }
         }
@@ -535,45 +523,115 @@ internal object Ebru {
 }
 
 /**
- * 1.1.0 (Ebru): the inks of [media]'s cover (its album's), read off the main thread and kept for it; [EbruInks.Default]
- * while nothing with a cover plays. Made again when the cover itself changes, not when the track does: the last cover
- * stays while the next is read, and the new track's seed with it would make a band of neither album on the way.
+ * 1.1.5: what the band's inks of what plays are worked out from, and what they are kept under ([key]): music of the
+ * library by its album's cover ([track]: its tags', its folder's, Cover Art Archive's or one chosen; then its own
+ * picture) under its album; an episode by its picture (its show's), a station by its logo ([art]: the player bars' too)
+ * under that picture; what has none under its album, else its address. 1.1.0-1.1.4 took music's covers alone: Radio's
+ * and Podcasts' bands stayed the bozkır's whatever played there.
+ */
+private class EbruSource(val key: String, val track: CoverTrack?, val art: String?, val media: MediaWrapper) {
+    /** Music of an album: its cover first, its own picture after; else the other way round. */
+    val coverFirst: Boolean get() = !track?.album.isNullOrBlank() || art == null
+
+    companion object {
+        /** [media]'s; none while nothing, or a video, plays. */
+        fun of(media: MediaWrapper?): EbruSource? {
+            val item = media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO || it.type == MediaWrapper.TYPE_STREAM } ?: return null
+            val track = if (item.type == MediaWrapper.TYPE_AUDIO) CoverTrack.of(item) else null
+            val art = item.artworkMrl?.takeIf { it.isNotBlank() }
+            val key = when {
+                !track?.album.isNullOrBlank() -> track!!.key
+                art != null -> "art|$art"
+                track != null -> track.key
+                else -> "stream|${item.uri}"
+            }
+            return EbruSource(key, track, art, item)
+        }
+    }
+}
+
+/** 1.1.5: the picture read for the source kept under [key]; [image] null: it has none. */
+private class EbruPicture(val key: String, val image: ImageBitmap?)
+
+/** [source]'s picture, [COVER_SAMPLE_PX] large: its album's cover, its own picture; null without one. */
+private suspend fun pictureOf(context: Context, source: EbruSource): ImageBitmap? {
+    val cover: suspend () -> ImageBitmap? = { source.track?.let { orNull { CoverCenter.image(context, it, COVER_SAMPLE_PX) } } }
+    val own: suspend () -> ImageBitmap? = {
+        if (source.art == null) null else orNull { ThumbnailsProvider.obtainBitmap(source.media, COVER_SAMPLE_PX)?.asImageBitmap() }
+    }
+    return if (source.coverFirst) cover() ?: own() else own() ?: cover()
+}
+
+/** [block]'s result, null when it fails (a picture that does not decode, an address that does not answer); a cancellation goes on. */
+private inline fun <T> orNull(block: () -> T?): T? = try {
+    block()
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    null
+}
+
+/** The inks of [image] (a small copy of it looked at), seeded by [key]; null where it cannot be read. */
+private fun inksOfPicture(image: ImageBitmap, key: String): EbruInks? = orNull {
+    val source = image.asAndroidBitmap()
+    val readable = if (source.config == Bitmap.Config.HARDWARE) source.copy(Bitmap.Config.ARGB_8888, false) else source
+    val small = Bitmap.createScaledBitmap(readable, 32, 32, true)
+    val pixels = IntArray(32 * 32)
+    small.getPixels(pixels, 0, 32, 0, 0, 32, 32)
+    Ebru.inksOf(pixels, key.hashCode().toLong())
+}
+
+/**
+ * 1.1.0 (Ebru): the inks of what plays, worked out from its picture off the main thread ([EbruSource]: an album's cover,
+ * 1.1.5: an episode's picture, a station's logo) and kept for it; [EbruInks.Default] while nothing (or a video) plays,
+ * the bozkır's in a drawing of its own ([EbruInks.bozkirOf]) for what has no picture. Worked out again when the picture
+ * read changes, not when the track does: the last picture stays while the next is read, and the new track's seed with
+ * it would make a band of neither album on the way.
  */
 @Composable
 internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
-    val track = remember(media?.id, media?.uri) { media?.let { CoverTrack.of(it) } }
-    val cover = rememberCover(track, COVER_SAMPLE_PX)
-    val currentTrack by rememberUpdatedState(track)
+    val context = LocalContext.current
+    val source = remember(media?.id, media?.uri, media?.artworkMrl, media?.type) { EbruSource.of(media) }
+    val currentSource by rememberUpdatedState(source)
+    val changes by CoverCenter.changes.collectAsState()
+    // read for the source it is of (two without one in a row are two reads); shown a moment ago: there at once
+    val picture by produceState(
+        source?.let { shown -> shown.track?.let { CoverCenter.shown(it, COVER_SAMPLE_PX) }?.let { EbruPicture(shown.key, it) } },
+        source?.key,
+        source?.art,
+        changes,
+    ) {
+        val read = source ?: run {
+            value = null
+            return@produceState
+        }
+        value = EbruPicture(read.key, pictureOf(context, read))
+    }
     // 1.1.3: an album's inks once worked out are known from then on, so a page shown again (another tab) has its band's
     // at once and makes none before the eyes: only another album's are new (1.1.0-1.1.2 started each page on the
     // bozkır's). Until an album's cover is read for the first time they are unknown.
-    val known = remember { track?.let { Ebru.keptInks(it.key) ?: EbruInks.Unknown } ?: EbruInks.Default }
-    val inks by produceState(known, cover) {
-        val track = currentTrack ?: run {
+    val known = remember { source?.let { Ebru.keptInks(it.key) ?: EbruInks.Unknown } ?: EbruInks.Default }
+    val inks by produceState(known, picture, source == null) {
+        val playing = currentSource ?: run {
             value = EbruInks.Default
             return@produceState
         }
-        val image = cover ?: run {
-            // a cover on its way: the album's inks if known; none come: the bozkır's, for this album from now on
-            Ebru.keptInks(track.key)?.let {
+        val read = picture?.takeIf { it.key == playing.key }
+        val image = read?.image ?: run {
+            // its picture on its way, or none to be read (now): its inks if known; else the last ones stay while it is on
+            // its way (the bozkır's at first), and without one the bozkır's in a drawing of its own, from now on
+            Ebru.keptInks(playing.key)?.let {
                 value = it
                 return@produceState
             }
-            delay(COVER_WAIT_MS)
-            value = EbruInks.Default
-            Ebru.keepInks(track.key, EbruInks.Default)
+            if (read != null) {
+                value = EbruInks.bozkirOf(playing.key)
+                Ebru.keepInks(playing.key, value)
+            }
             return@produceState
         }
-        value = withContext(Ebru.worker) {
-            runCatching {
-                val source = image.asAndroidBitmap()
-                val readable = if (source.config == Bitmap.Config.HARDWARE) source.copy(Bitmap.Config.ARGB_8888, false) else source
-                val small = Bitmap.createScaledBitmap(readable, 32, 32, true)
-                val pixels = IntArray(32 * 32)
-                small.getPixels(pixels, 0, 32, 0, 0, 32, 32)
-                Ebru.inksOf(pixels, track.key.hashCode().toLong())
-            }.getOrNull() ?: EbruInks.Default
-        }.also { Ebru.keepInks(track.key, it) }
+        value = withContext(Ebru.worker) { inksOfPicture(image, playing.key) } ?: EbruInks.bozkirOf(playing.key)
+        Ebru.keepInks(playing.key, value)
     }
     return inks
 }
@@ -586,8 +644,8 @@ internal fun rememberEbruInks(media: MediaWrapper?): EbruInks {
  *
  * 1.1.3: another album's band is made before the reader's eyes over the last one ([marbled]; Android 13 and later,
  * without reduced motion): its drops fall on the last one's paper and spread, pushing what lay there aside, while that
- * fades into the new paper; an unseen stylus is drawn down and up through them, then across, a comb and the slow wave,
- * in [MARBLING_MS] ([EbruMarbling]). The same inks, the same band as before at its end. Else, as in 1.1.0, the new one
+ * fades into the new paper; an unseen stylus is drawn down and up through them, then across (1.1.5: once), in
+ * [MARBLING_MS] ([EbruMarbling]). The same inks, the same band as before at its end. Else, as in 1.1.0, the new one
  * fades in over the last one.
  */
 @Composable
@@ -675,9 +733,6 @@ private class ShownBand(val image: ImageBitmap, val inks: EbruInks)
 /** The cover is read this large for its inks. */
 private const val COVER_SAMPLE_PX = 96
 
-/** How long an album's cover may take to be read before its band is the bozkır's (it has none). */
-private const val COVER_WAIT_MS = 800L
-
 /** How long a new width stays before a band is made for it, while another band is on screen. */
 private const val SETTLE_MS = 250L
 
@@ -689,6 +744,3 @@ private const val MAX_BAND_PX = 3200
 
 /** The most drops a band has (the transition's shader takes as many). */
 internal const val MAX_DROPS = 150
-
-/** The comb's lines fade over at least this many pixels from where they pass (1.1.3). */
-private const val MIN_COMB_LAMBDA = 1.2f

@@ -1,5 +1,7 @@
 package app.nagmedar.ui.components
 
+import android.os.SystemClock
+import android.view.ViewConfiguration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -240,9 +242,11 @@ class ClickModifiers {
 
 /**
  * What a click on an item of a list that selects does (1.0.3, Desktop Kit 2.1): a finger's or a
- * pen's tap opens (plays) it, unless items are being picked (the "Seç" mode); a mouse's click selects
- * it, Ctrl and Shift as on desktops, whatever the layout. [finger] is the press's (null without one:
- * the layout's input decides, [touchLayout]).
+ * pen's tap opens (plays) it, unless items are being picked (the "Seç" mode). 1.1.5 (the owner, 16
+ * Nov: "Bir kere tıklandığında müzik açılmalı"): a mouse's click too, on a tablet's and a DeX window
+ * as on a phone; with Ctrl or Shift held ([extending]) it selects, as on desktops (1.0.3-1.1.4: any
+ * mouse click selected, a double click played). [finger] is the press's (null without one, a key or
+ * TalkBack: the layout's input decides, [touchLayout]; Space selects on a desktop's).
  */
 enum class ListClick {
     /** Taken in or out of the selection being made. */
@@ -255,10 +259,56 @@ enum class ListClick {
     Open;
 
     companion object {
-        fun of(selecting: Boolean, finger: Boolean?, touchLayout: Boolean): ListClick = when {
+        fun of(selecting: Boolean, finger: Boolean?, touchLayout: Boolean, extending: Boolean = false): ListClick = when {
             selecting -> Toggle
-            finger ?: touchLayout -> Open
+            extending -> Select
+            finger != null -> Open
+            touchLayout -> Open
             else -> Select
+        }
+    }
+}
+
+/**
+ * 1.1.5: the track a click has just played, by its row's key: the next click of a double click (or a third) within the
+ * double-tap time does not start it again (a list's double click played it until 1.1.4); a click on another track, or
+ * on it later, does.
+ */
+@Stable
+class ClickPlays(
+    private val clock: () -> Long = SystemClock::uptimeMillis,
+    private val window: () -> Long = { ViewConfiguration.getDoubleTapTimeout().toLong() },
+) {
+    private var key: Any? = null
+    private var at = 0L
+
+    /** Whether a click (or Enter) on [key] plays it: not within the double-tap time of the last one on it. */
+    fun fresh(key: Any): Boolean {
+        val now = clock()
+        val again = key == this.key && now - at <= window()
+        this.key = key
+        at = now
+        return !again
+    }
+}
+
+@Composable
+fun rememberClickPlays(): ClickPlays = remember { ClickPlays() }
+
+/**
+ * 1.1.5: a click on [key], one of a list's tracks ([order]): the "Seç" mode picks it, Ctrl or Shift with it select as
+ * desktops do, any other click plays it ([play]; [ListClick]) and lets go of a selection made before, so that what plays
+ * shows beside the list (Müzik's panel), not the track selected before. [plays]: not again for a double click's next one.
+ */
+fun MultiSelection.trackClick(key: Any, order: List<Any>, modifiers: ClickModifiers, touchLayout: Boolean, plays: ClickPlays, play: () -> Unit) {
+    val finger = modifiers.takeFinger()
+    val (ctrl, shift) = modifiers.take()
+    when (ListClick.of(selecting, finger, touchLayout, extending = ctrl || shift)) {
+        ListClick.Toggle -> toggle(key)
+        ListClick.Select -> click(key, order, ctrl, shift)
+        ListClick.Open -> if (plays.fresh(key)) {
+            clear()
+            play()
         }
     }
 }

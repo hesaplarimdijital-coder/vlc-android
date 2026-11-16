@@ -51,6 +51,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -76,8 +77,9 @@ import app.nagmedar.ui.components.HorizontalSplitPane
 import app.nagmedar.ui.components.InspectorCommands
 import app.nagmedar.ui.components.InspectorState
 import app.nagmedar.ui.components.InspectorToggleButton
-import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
+import app.nagmedar.ui.components.rememberClickPlays
+import app.nagmedar.ui.components.trackClick
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.MultiSelection
@@ -430,8 +432,7 @@ fun MusicScreen(repository: MediaRepository, onAddFolder: () -> Unit, inspector:
     // on a phone the shelf is the list's first item, scrolling away with it; it alone reads (and follows) the history.
     // 1.1.0 (Ebru): the band over it, in the inks of what plays (the bozkır's while nothing does); across the page's top on
     // a wide window
-    val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
-    val inks = rememberEbruInks(playing)
+    val inks = rememberEbruInks(rememberNowPlaying().media)
     // 1.1.1 (the design's phone page): the recently played are the phone's last tab too
     val recentKeys = recent.value.orEmpty().let { list -> remember(list) { list.mapNotNull { it.uri?.toString() } } }
     val tech by TrackTechIndex.tech.collectAsState()
@@ -1013,7 +1014,10 @@ fun MusicBrowser(
     val groups = remember(all, quick, stats) { all.quick(quick, stats, currentYear()) }
     // 1.1.0: the covers of the groups, where they are groups
     val grid = state.view.grouped && state.layout == MusicLayout.Grid
-    val playingUri = rememberNowPlaying().media?.uri?.toString()
+    val playingMedia = rememberNowPlaying().media
+    val playingUri = playingMedia?.uri?.toString()
+    // 1.1.5: what the panel beside the page shows as what plays: music, an episode (nothing: it says so); not a station
+    val panelShowsPlaying = playingMedia == null || playingMedia.type == MediaWrapper.TYPE_AUDIO
     // the phone's only: over the groups, or over the whole library's tracks. 1.1.1: the design's header in its place, its
     // Karıştır the shown groups' tracks (the whole library's in the Tracks view)
     val phone = width == WidthClass.Compact && phoneHeader != null
@@ -1088,6 +1092,18 @@ fun MusicBrowser(
     val openActions = remember(actions, state.view, open?.title) { actions.playingFrom(groupSource(state.view, open)) }
     // the table's selection, which the inspector follows (S-405, Desktop Kit 1.0)
     val selection = rememberMultiSelection()
+    // 1.1.5: the player asked for on a tablet's or a DeX window: the panel up on what plays (no big player there)
+    val panelAsked = MusicPanelRequest.pending
+    LaunchedEffect(panelAsked, inspector != null) {
+        if (!panelAsked || inspector == null) return@LaunchedEffect
+        MusicPanelRequest.taken()
+        selection.clear()
+        inspectorState.selectedTab = 0
+        if (inspectorState.collapsed) inspectorState.updateCollapsed(false)
+        // once laid out: beside the page, or as its sheet in a window too narrow for it
+        withFrameNanos { }
+        if (!inspectorState.docked) inspectorState.sheetOpen = true
+    }
     // a phone's group closing keeps the order its tracks were shown in
     val closing = remember { ClosingOrder() }
     if (inspector != null) InspectorCommands(inspectorState::toggle)
@@ -1303,11 +1319,11 @@ fun MusicBrowser(
             val key = selection.anchor?.takeIf { it in chosen } ?: chosen.firstOrNull()
             val subject = InspectorSubject(key?.let { k -> shown.firstOrNull { it.uri == k } }, chosen.size)
             // 1.1.2 (the design's tablet page): the panel beside the page shows the transport of what plays: the shell's
-            // floating player stands aside meanwhile
-            PlayerAside(
-                inspectorState.docked && !inspectorState.collapsed && inspectorState.selectedTab == 0 &&
-                    (subject.track == null || subject.track.uri == playingUri),
-            )
+            // floating player stands aside meanwhile. 1.1.5 (the owner, 16 Nov: "Tablet ve Dex modunda altta oynatıcı
+            // çıkmasın"): whatever the panel shows (a track selected with Ctrl, its lyrics, the queue), the player is the
+            // panel's on a tablet's and a DeX window, not a bar that comes and goes as the panel changes; a station, which
+            // the panel does not show, keeps the bar
+            PlayerAside(inspectorState.docked && !inspectorState.collapsed && panelShowsPlaying)
             WorkstationLayout(
                 state = inspectorState,
                 main = main,
@@ -1594,6 +1610,7 @@ private fun TrackPane(
     val words = rememberColumnMenuWords()
     val res = LocalContext.current.resources
     val modifiers = LocalClickModifiers.current
+    val plays = rememberClickPlays()
     val keys = remember(shown) { shown.map { it.uri } }
     LaunchedEffect(keys) { selection.retain(keys) }
     SelectionCommands(selection, keys)
@@ -1663,18 +1680,12 @@ private fun TrackPane(
             selectedKeys = selection.keys,
             sort = sort?.let { s -> columns.indexOf(s.column).takeIf { it >= 0 }?.let { TableSort(it, s.ascending) } },
             onSortChange = { s -> state.sort = MusicSort(columns[s.column], s.ascending) },
-            // 1.0.3 (Desktop Kit 2.1): the press decides, not the layout: a finger's tap plays, a mouse's click selects
+            // 1.1.5: a click plays as a tap does (Ctrl and Shift select; 1.0.3-1.1.4: a mouse's click selected), and the
+            // panel beside the table shows it; Enter plays the focused row, a double click's next click starts nothing
             onRowClick = { track, index ->
-                when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
-                    ListClick.Toggle -> selection.toggle(track.uri)
-                    ListClick.Select -> {
-                        val (ctrl, shift) = modifiers.take()
-                        selection.click(track.uri, keys, ctrl, shift)
-                    }
-                    ListClick.Open -> actions.play(shown, index)
-                }
+                selection.trackClick(track.uri, keys, modifiers, touchLayout = !pointer, plays) { actions.play(shown, index) }
             },
-            onRowDoubleClick = if (pointer && !selection.selecting) ({ _, index -> actions.play(shown, index) }) else null,
+            onRowDoubleClick = if (pointer && !selection.selecting) ({ track, index -> if (plays.fresh(track.uri)) actions.play(shown, index) }) else null,
             rowMenu = { track, index ->
                 // on one of several selected rows, the menu is the selection's (Desktop Kit 1.0)
                 if (track.uri in selection && selection.count > 1) {

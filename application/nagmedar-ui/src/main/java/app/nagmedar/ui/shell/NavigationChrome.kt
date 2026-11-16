@@ -347,6 +347,12 @@ private fun NavIndicator(selected: Boolean, state: InteractionState, shape: Roun
 
 // ---------------------------------------------------------------- medium/expanded: rail
 
+/**
+ * The rail of a medium or expanded window: the mark, the screen's main action, the entries. 1.1.5: where a desktop
+ * window's [caption] bar has the system's app chip (the app's icon and name; DeX, Android's desktop windows) over the
+ * rail's top, the rail's chrome reaches up under it and its mark and entries start below it (the two Nağmedar marks lay
+ * one over the other there).
+ */
 @Composable
 fun NavRail(
     selected: Destination?,
@@ -356,10 +362,12 @@ fun NavRail(
     iconBadges: NavIconBadges = emptyMap(),
     /** 1.0.8 (Desktop Kit 2.8.0): the screen's main action above the entries ([ShellPrimaryAction]). */
     action: (@Composable () -> Unit)? = null,
+    caption: CaptionBar? = null,
 ) {
     val colors = NagTheme.colors
     val dimens = NagTheme.dimens
     val label = stringResource(R.string.nag_main_navigation)
+    val belowChip = if (caption.showsAppChip()) caption?.height ?: 0.dp else 0.dp
     Row(modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
@@ -367,10 +375,11 @@ fun NavRail(
                 .fillMaxHeight()
                 .background(colors.chrome)
                 .semantics { paneTitle = label }
+                .padding(top = belowChip)
                 .padding(vertical = dimens.gapS),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            BrandMark(Modifier.padding(vertical = dimens.gapS).size(28.dp))
+            BrandMark(Modifier.padding(vertical = dimens.gapS).size(28.dp).testTag("rail-mark"))
             if (action != null) {
                 Box(Modifier.padding(top = dimens.gapXs, bottom = dimens.gapS)) { action() }
             }

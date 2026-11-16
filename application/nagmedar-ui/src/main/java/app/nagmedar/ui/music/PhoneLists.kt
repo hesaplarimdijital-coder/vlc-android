@@ -48,8 +48,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.nagmedar.ui.R
 import app.nagmedar.ui.components.ListAppear
-import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
+import app.nagmedar.ui.components.rememberClickPlays
+import app.nagmedar.ui.components.trackClick
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MoreButton
 import app.nagmedar.ui.components.MultiSelection
@@ -333,6 +334,7 @@ internal fun PhoneTrackList(
     val locale = currentLocale()
     val pointer = NagTheme.inputMode == InputMode.Pointer
     val modifiers = LocalClickModifiers.current
+    val plays = rememberClickPlays()
     val reduced = NagTheme.motion.reduced
     val room = with(LocalDensity.current) { chipsRoom.roundToPx() }
     val keys = remember(shown) { shown.map { it.uri } }
@@ -386,14 +388,7 @@ internal fun PhoneTrackList(
                                     if (track.uri in selection && selection.count > 1) shown.filter { it.uri in selection } else listOf(track)
                                 },
                             ) {
-                                when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
-                                    ListClick.Toggle -> selection.toggle(track.uri)
-                                    ListClick.Select -> {
-                                        val (ctrl, shift) = modifiers.take()
-                                        selection.click(track.uri, keys, ctrl, shift)
-                                    }
-                                    ListClick.Open -> actions.play(shown, index)
-                                }
+                                selection.trackClick(track.uri, keys, modifiers, touchLayout = !pointer, plays) { actions.play(shown, index) }
                             }
                         }
                     }

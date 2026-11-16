@@ -25,10 +25,12 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.nagmedar.ui.AppOwnTop
 import app.nagmedar.ui.TestShell
 import app.nagmedar.ui.screenshots.ShellScreenshotTest
 import app.nagmedar.ui.theme.InputMode
@@ -68,13 +70,14 @@ class CaptionBarTest {
         theme: ThemeMode = ThemeMode.Dark,
         input: InputMode = InputMode.Pointer,
         caption: CaptionBar = this.caption,
+        ownTop: (Destination) -> Boolean = { false },
     ) {
         compose.runOnUiThread { compose.activity.actionBar?.hide() }
         compose.setContent {
             NagmedarTheme(themeMode = theme, inputMode = input) {
                 view = LocalView.current
                 Box(Modifier.fillMaxSize().background(NagTheme.colors.background)) {
-                    TestShell(widthClass, startDestination = Destination.Music, caption = caption)
+                    TestShell(widthClass, startDestination = Destination.Music, caption = caption, ownTop = ownTop)
                     // where the system draws its chip and its buttons, for the eye
                     if (caption.left > 0.dp) SystemChip(Modifier.align(Alignment.TopStart).width(caption.left))
                     SystemButtons(Modifier.align(Alignment.TopEnd))
@@ -134,6 +137,32 @@ class CaptionBarTest {
         // the top bar's title, above the page's own
         val title = compose.onAllNodesWithText("Müzik").fetchSemanticsNodes().minBy { it.boundsInRoot.top }.boundsInRoot
         assertFalse(excluded(title.center.x, title.center.y))
+    }
+
+    /**
+     * 1.1.5 (the owner, 16 Nov: "nağmedar logosu üstteki barın nağmedar logosu ile çakışıyor"): a desktop window of the
+     * rail's width: the system's app chip lies over the rail's top, the rail's mark below it; the page's top bar is the
+     * caption bar beside the rail (by touch too: no page's own top under the chip), clear of the chip.
+     */
+    private fun assertRailBelowTheChip(input: InputMode) {
+        shell(WidthClass.Expanded, ThemeMode.Light, input, caption = dexCaption, ownTop = AppOwnTop)
+        val mark = compose.onNodeWithTag("rail-mark", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertTrue("the mark below the caption: ${mark.top}", mark.top >= 40f)
+        val title = compose.onAllNodesWithText("Müzik").fetchSemanticsNodes().minBy { it.boundsInRoot.top }.boundsInRoot
+        assertTrue("the title in the caption bar: ${title.bottom}", title.bottom <= 48f)
+        assertTrue("the title clear of the chip: ${title.left}", title.left >= 160f)
+    }
+
+    @Test @Config(qualifiers = "tr-w900dp-h700dp-mdpi")
+    fun theRailsMarkIsBelowTheAppChipByTouch() = assertRailBelowTheChip(InputMode.Touch)
+
+    @Test @Config(qualifiers = "tr-w900dp-h700dp-mdpi")
+    fun theRailsMarkIsBelowTheAppChipWithAPointer() = assertRailBelowTheChip(InputMode.Pointer)
+
+    @Test @Config(qualifiers = "tr-w900dp-h700dp-mdpi")
+    fun railWindowScreenshot() {
+        shell(WidthClass.Expanded, ThemeMode.Light, InputMode.Touch, caption = dexCaption, ownTop = AppOwnTop)
+        capture("caption-rail-chip-light")
     }
 
     private fun capture(name: String) {

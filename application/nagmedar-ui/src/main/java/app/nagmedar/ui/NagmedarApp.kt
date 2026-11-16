@@ -104,6 +104,7 @@ import app.nagmedar.ui.music.ForgottenShelf
 import app.nagmedar.ui.music.BandMark
 import app.nagmedar.ui.music.MusicLink
 import app.nagmedar.ui.music.MusicLinks
+import app.nagmedar.ui.music.MusicPanelRequest
 import app.nagmedar.ui.music.rememberAlbumSeed
 import app.nagmedar.ui.music.rememberMusicInspector
 import app.nagmedar.ui.music.MusicScreen
@@ -186,6 +187,8 @@ import app.nagmedar.ui.shell.ShellNavigator
 import app.nagmedar.ui.shell.ShellRequests
 import app.nagmedar.ui.shell.UnderShellBars
 import app.nagmedar.ui.shell.WidthClass
+import app.nagmedar.ui.shell.HeightClass
+import app.nagmedar.ui.shell.LocalHeightClass
 import app.nagmedar.ui.streams.StreamsCenter
 import app.nagmedar.ui.streams.StreamsScreen
 import app.nagmedar.ui.sleep.SleepTimerDialog
@@ -424,15 +427,24 @@ private fun NagmedarMain(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val widthClass = WidthClass.fromWidth(maxWidth.value)
         val nowPlaying = rememberNowPlaying()
-        // 1.1.2: the sidebar's brand in the inks of the music that plays (the bozkır's while nothing does)
-        val brandInks = rememberEbruInks(nowPlaying.media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO })
+        // 1.1.2: the sidebar's brand in the inks of the music that plays (the bozkır's while nothing does); 1.1.5: of a
+        // station, an episode too
+        val brandInks = rememberEbruInks(nowPlaying.media)
+        // 1.1.5 (the owner, 16 Nov): a tablet's and a DeX window have no big player over the window: the player is Müzik's
+        // panel there (a phone on its side keeps the big one: the panel has no room)
+        val short = LocalHeightClass.current == HeightClass.Compact
+        val showPanel: () -> Unit = {
+            MusicPanelRequest.ask()
+            navigator.navigate(Destination.Music)
+        }
         val openNowPlaying: (NavKind) -> Unit = { navKind ->
             val page = PlaybackActions.nowPlayingDestination()
             if (page == Destination.Music) {
                 // on a phone the mini player grown; 1.0.2: on a tablet and a desktop window the big player over the window
-                when (navKind) {
-                    NavKind.BottomBar -> scope.launch { expandingPlayer.expand() }
-                    NavKind.Rail, NavKind.Sidebar -> windowPlayer = true
+                when {
+                    navKind == NavKind.BottomBar -> scope.launch { expandingPlayer.expand() }
+                    short -> windowPlayer = true
+                    else -> showPanel()
                 }
             } else if (page != null) {
                 navigator.navigate(page)
@@ -455,17 +467,23 @@ private fun NagmedarMain(
         LaunchedEffect(nothingPlays) {
             if (nothingPlays) expandingPlayer.snapTo(PlayerValue.Collapsed)
         }
-        // turned sideways (a phone's window becomes a rail's) or back: the open player stays open in the other form
+        // turned sideways (a phone's window becomes a rail's) or back: the open player stays open in the other form. 1.1.5:
+        // on a tablet's or a DeX window that is Müzik's panel
         val navKindNow = NavKind.forWidth(widthClass)
-        LaunchedEffect(navKindNow) {
+        val panelPlayer = navKindNow != NavKind.BottomBar && !short
+        LaunchedEffect(navKindNow, panelPlayer) {
             when {
                 navKindNow != NavKind.BottomBar && expandingPlayer.currentValue == PlayerValue.Expanded -> {
                     expandingPlayer.snapTo(PlayerValue.Collapsed)
-                    windowPlayer = true
+                    if (panelPlayer) showPanel() else windowPlayer = true
                 }
                 navKindNow == NavKind.BottomBar && windowPlayer -> {
                     windowPlayer = false
                     expandingPlayer.snapTo(PlayerValue.Expanded)
+                }
+                panelPlayer && windowPlayer -> {
+                    windowPlayer = false
+                    showPanel()
                 }
             }
         }
@@ -477,7 +495,7 @@ private fun NagmedarMain(
         }
         // S-1002, 1.0.2: the big player of a tablet and a desktop window; it has the whole window (below a desktop
         // window's caption bar) and the bars stand aside once it covers it (the shell's WindowPage)
-        val windowPlayerShown = windowPlayer && navKindNow != NavKind.BottomBar
+        val windowPlayerShown = windowPlayer && navKindNow != NavKind.BottomBar && !panelPlayer
         CompositionLocalProvider(
             LocalLibraryAccess provides libraryAccess,
             LocalPaneWidths provides prefs,

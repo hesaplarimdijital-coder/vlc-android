@@ -1,6 +1,9 @@
 package app.nagmedar.ui.music
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.nagmedar.ui.covers.CoverTrack
@@ -17,7 +20,8 @@ import org.videolan.medialibrary.interfaces.media.MediaWrapper
 /**
  * 1.1.3: the band is made before the eyes only when the music changes. A page shown again (another tab) has the playing
  * album's inks from its first frame, as they were worked out once; an album whose cover has not been read since the app
- * started is unknown meanwhile, and its band fades in over the bozkır's.
+ * started is unknown meanwhile, and its band fades in over the bozkır's. 1.1.5: a station's and an episode's too (their
+ * logo, their picture), and what has no picture has the bozkır's in a drawing of its own.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -69,6 +73,7 @@ class EbruInksTest {
     @Test
     fun anAlbumNotReadYetIsUnknownThenTheBozkirsWithoutACover() {
         val playing = track(2, "Hiç Kapaksız")
+        val key = CoverTrack.of(playing)!!.key
         val seen = mutableListOf<EbruInks>()
         compose.mainClock.autoAdvance = false
         compose.setContent { seen += rememberEbruInks(playing) }
@@ -77,9 +82,60 @@ class EbruInksTest {
         compose.mainClock.advanceTimeBy(2_000)
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        assertEquals(EbruInks.Default, seen.last())
+        // 1.1.5: the bozkır's in a drawing of the album's own
+        assertEquals(EbruInks.bozkirOf(key), seen.last())
+        assertEquals(EbruInks.Default.inks, seen.last().inks)
+        assertTrue(marblesBetween(EbruInks.Default, seen.last()))
         // known from now on: the next page has them at once
-        assertEquals(EbruInks.Default, Ebru.keptInks(CoverTrack.of(playing)!!.key))
+        assertEquals(EbruInks.bozkirOf(key), Ebru.keptInks(key))
+    }
+
+    private fun station(address: String): MediaWrapper = MLServiceLocator.getAbstractMediaWrapper(Uri.parse(address)).apply {
+        type = MediaWrapper.TYPE_STREAM
+        title = "İstasyon"
+    }
+
+    /** 1.1.5: Radio's band changes with the station: one without a logo has a band of its own too. */
+    @Test
+    fun aStationWithoutALogoHasABandOfItsOwn() {
+        var playing by mutableStateOf(station("https://radyo.example/gece"))
+        val seen = mutableListOf<EbruInks>()
+        compose.setContent { seen += rememberEbruInks(playing) }
+        compose.waitForIdle()
+        val first = seen.last()
+        assertEquals(EbruInks.bozkirOf("stream|https://radyo.example/gece"), first)
+        assertEquals(first, Ebru.keptInks("stream|https://radyo.example/gece"))
+        // another station: another band, made before the eyes
+        compose.runOnIdle { playing = station("https://radyo.example/sabah") }
+        compose.waitForIdle()
+        assertEquals(EbruInks.bozkirOf("stream|https://radyo.example/sabah"), seen.last())
+        assertTrue(marblesBetween(first, seen.last()))
+    }
+
+    /** 1.1.5: an episode's inks are its picture's (its show's), kept under the picture: its show's other episodes share them. */
+    @Test
+    fun anEpisodesInksAreKeptUnderItsPicture() {
+        val episode = MLServiceLocator.getAbstractMediaWrapper(Uri.parse("file:///storage/emulated/0/Podcasts/bolum-12.mp3")).apply {
+            type = MediaWrapper.TYPE_AUDIO
+            setArtist("Tarih Sohbetleri")
+            setArtworkURL("file:///storage/emulated/0/Podcasts/tarih.png")
+        }
+        val seen = mutableListOf<EbruInks>()
+        compose.setContent { seen += rememberEbruInks(episode) }
+        // read off the main thread
+        compose.waitUntil(5_000) { seen.last() != EbruInks.Unknown }
+        // the picture does not read here: the bozkır's in the show's own drawing
+        assertEquals(EbruInks.bozkirOf("art|file:///storage/emulated/0/Podcasts/tarih.png"), seen.last())
+        assertEquals(seen.last(), Ebru.keptInks("art|file:///storage/emulated/0/Podcasts/tarih.png"))
+    }
+
+    @Test
+    fun aVideoLeavesTheBozkirs() {
+        val video = MLServiceLocator.getAbstractMediaWrapper(Uri.parse("file:///storage/emulated/0/Movies/yol.mp4")).apply { type = MediaWrapper.TYPE_VIDEO }
+        val seen = mutableListOf<EbruInks>()
+        compose.setContent { seen += rememberEbruInks(video) }
+        compose.waitForIdle()
+        assertTrue(seen.all { it == EbruInks.Default })
     }
 
     @Test

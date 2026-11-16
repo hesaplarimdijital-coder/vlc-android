@@ -39,8 +39,10 @@ import app.nagmedar.ui.components.LocalScreenCommands
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.ScreenCommands
 import app.nagmedar.ui.shell.LocalPaneWidths
+import app.nagmedar.ui.shell.LocalShellPlayerAside
 import app.nagmedar.ui.shell.LocalWidthClass
 import app.nagmedar.ui.shell.PaneWidths
+import app.nagmedar.ui.shell.ShellPlayerAside
 import app.nagmedar.ui.shell.WORKSTATION_PANE
 import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.theme.InputMode
@@ -48,6 +50,7 @@ import app.nagmedar.ui.theme.NagmedarTheme
 import app.nagmedar.ui.theme.ThemeMode
 import java.util.Locale
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -318,13 +321,21 @@ class MusicBrowserTest {
     /** The window's commands: Ctrl+I goes to the music view through them. */
     private val commands = ScreenCommands()
 
+    /** The shell's floating player's standing aside, as the music view tells it. */
+    private val aside = ShellPlayerAside()
+
     private fun workstation(store: PaneWidths) {
         val itri = library.groups(MusicView.Albums).first { it.title == "Itrî'nin İzinde" }.key
         val state = MusicBrowserState(view = MusicView.Albums, group = itri, columns = listOf(MusicColumn.Title, MusicColumn.Duration))
         compose.setContent {
             inputModes = LocalInputModeManager.current
             NagmedarTheme(themeMode = ThemeMode.Dark, inputMode = InputMode.Pointer) {
-                CompositionLocalProvider(LocalWidthClass provides WidthClass.Large, LocalPaneWidths provides store, LocalScreenCommands provides commands) {
+                CompositionLocalProvider(
+                    LocalWidthClass provides WidthClass.Large,
+                    LocalPaneWidths provides store,
+                    LocalScreenCommands provides commands,
+                    LocalShellPlayerAside provides aside,
+                ) {
                     MusicBrowser(library, state, actions, Modifier, inspector = tabs)
                 }
             }
@@ -360,6 +371,38 @@ class MusicBrowserTest {
         compose.waitForIdle()
         compose.onNodeWithTag("inspector").assertDoesNotExist()
         assertEquals(true, store.hidden[WORKSTATION_PANE])
+    }
+
+    /**
+     * 1.1.5 (the owner, 16 Nov: "Tablet ve Dex modunda altta oynatıcı çıkmasın"): while the panel is beside the page the
+     * player is the panel's, whatever it shows: the floating bar does not come for a selected track; it comes back with
+     * the panel hidden.
+     */
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
+    fun theBarStaysAsideWhileThePanelIsBesideThePage() {
+        workstation(MapPaneWidths())
+        assertTrue(compose.runOnIdle { aside.aside })
+        row("Neva Kâr").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("etiketler Neva Kâr 1").assertExists()
+        assertTrue(compose.runOnIdle { aside.aside })
+        assertEquals(true, compose.runOnIdle { commands.toggleInspector() })
+        compose.waitForIdle()
+        assertFalse(compose.runOnIdle { aside.aside })
+    }
+
+    /** 1.1.5: the player asked for on a tablet's or a DeX window: the hidden panel comes back on what plays, the selection let go of. */
+    @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")
+    fun thePlayerAskedForIsThePanel() {
+        workstation(MapPaneWidths().apply { hidden[WORKSTATION_PANE] = true })
+        row("Neva Kâr").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("inspector").assertDoesNotExist()
+        compose.runOnIdle { MusicPanelRequest.ask() }
+        compose.waitForIdle()
+        compose.onNodeWithTag("inspector").assertExists()
+        compose.onNodeWithText("etiketler çalan 0").assertExists()
+        assertFalse(MusicPanelRequest.pending)
     }
 
     @Test @Config(qualifiers = "tr-w1280dp-h900dp-mdpi-keysexposed-qwerty")

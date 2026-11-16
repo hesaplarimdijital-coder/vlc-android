@@ -27,6 +27,7 @@ import app.nagmedar.ui.components.StateAction
 import app.nagmedar.ui.components.StatePanel
 import app.nagmedar.ui.components.StateTone
 import app.nagmedar.ui.components.TableColumn
+import app.nagmedar.ui.components.rememberClickPlays
 import app.nagmedar.ui.components.rememberListAppear
 import app.nagmedar.ui.shell.LocalShellBottomPadding
 import app.nagmedar.ui.shell.WidthClass
@@ -119,9 +120,9 @@ internal fun smartSummary(list: SmartList): String {
 /**
  * S-805: a smart list open in the playlists screen: its head (cover, name, what it asks, play and
  * shuffle, its rules to edit, its menu), its tracks (null: the library still being read). The
- * tracks are the library's, in the list's order; a click plays (a pointer's: selects, a double
- * click plays). S-1601: the name is changed where it stands ([renaming]); with [onBack] a button
- * leads back to the lists.
+ * tracks are the library's, in the list's order; a click plays (1.1.5: a pointer's too; it
+ * selected, a double click played). S-1601: the name is changed where it stands ([renaming]); with
+ * [onBack] a button leads back to the lists.
  */
 @Composable
 internal fun SmartPane(
@@ -175,6 +176,7 @@ internal fun SmartPane(
             }
             else -> {
                 var selected by remember(list.id) { mutableStateOf<String?>(null) }
+                val plays = rememberClickPlays()
                 val columns = if (compact) {
                     listOf(MusicColumn.Title, MusicColumn.Artist, MusicColumn.Duration)
                 } else {
@@ -190,8 +192,13 @@ internal fun SmartPane(
                     rows = tracks,
                     key = { it.statsKey },
                     selectedKey = selected,
-                    onRowClick = { track, index -> if (pointer) selected = track.statsKey else actions.play(tracks, index) },
-                    onRowDoubleClick = if (pointer) ({ _, index -> actions.play(tracks, index) }) else null,
+                    // 1.1.5: a click plays as a tap does (1.0.3-1.1.4: a mouse's click only lit the row, a double click
+                    // played); a double click's next click starts nothing, Enter plays the focused row
+                    onRowClick = { track, index ->
+                        selected = track.statsKey
+                        if (plays.fresh(track.statsKey)) actions.play(tracks, index)
+                    },
+                    onRowDoubleClick = if (pointer) ({ track, index -> if (plays.fresh(track.statsKey)) actions.play(tracks, index) }) else null,
                     rowMenu = { track, index -> actions.menu(track, play = { actions.play(tracks, index) }, select = null) },
                     rowMenuLabel = stringResource(R.string.nag_more_actions),
                     rowMenuAsSheet = true,

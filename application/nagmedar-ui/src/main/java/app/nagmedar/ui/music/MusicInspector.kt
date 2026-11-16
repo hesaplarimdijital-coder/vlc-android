@@ -19,8 +19,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -91,6 +93,26 @@ internal object InspectorTabs {
  */
 @Immutable
 data class InspectorSubject(val track: Track?, val selected: Int = if (track == null) 0 else 1)
+
+/**
+ * 1.1.5 (the owner, 16 Nov: "Tam ekran oynatıcıyı da iptal edelim tablet ve dex modunda"): the player asked for on a
+ * tablet's or a DeX window (the bar's cover, title and "Oynatıcıyı aç", the notification) is Müzik's panel of what
+ * plays, not the big player over the window (1.0.2-1.1.4). The shell goes to Müzik; the page brings its
+ * panel up on what plays (beside it, or as its sheet in a window too narrow), lets go of its selection and takes the request.
+ */
+object MusicPanelRequest {
+    /** A request the page has not taken yet. */
+    var pending by mutableStateOf(false)
+        private set
+
+    fun ask() {
+        pending = true
+    }
+
+    internal fun taken() {
+        pending = false
+    }
+}
 
 /**
  * What the music view's inspector shows in each tab (Desktop Kit 1.0): the playback service's in

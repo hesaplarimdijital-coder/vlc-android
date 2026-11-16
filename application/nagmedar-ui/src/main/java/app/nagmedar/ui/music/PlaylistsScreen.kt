@@ -65,8 +65,9 @@ import app.nagmedar.ui.components.DenseTable
 import app.nagmedar.ui.components.HorizontalRule
 import app.nagmedar.ui.components.HorizontalSplitPane
 import app.nagmedar.ui.components.ClearSelectionOnBack
-import app.nagmedar.ui.components.ListClick
 import app.nagmedar.ui.components.LocalClickModifiers
+import app.nagmedar.ui.components.rememberClickPlays
+import app.nagmedar.ui.components.trackClick
 import app.nagmedar.ui.components.MenuEntry
 import app.nagmedar.ui.components.MultiSelection
 import app.nagmedar.ui.components.NagButton
@@ -691,6 +692,7 @@ private fun PlaylistTable(
 ) {
     val res = LocalContext.current.resources
     val modifiers = LocalClickModifiers.current
+    val plays = rememberClickPlays()
     val lines = state.lines
     val tracks = remember(lines) { lines.map { it.track } }
     val keys = remember(lines) { lines.map { it.key } }
@@ -726,18 +728,12 @@ private fun PlaylistTable(
         selection = selection,
         // 1.0.8 (Desktop Kit 2.8.0): Shift+↑ and Shift+↓ grow the selection, as in the library's table
         onExtendSelection = if (compact) null else ({ line, delta -> selection.extend(line.key, keys, delta) }),
-        // 1.0.3 (Desktop Kit 2.1): the press decides, not the layout: a finger's tap plays, a mouse's click selects
+        // 1.1.5: a click plays as a tap does (Ctrl and Shift select; 1.0.3-1.1.4: a mouse's click selected); Enter plays
+        // the focused row, a double click's next click starts nothing
         onRowClick = { line, index ->
-            when (ListClick.of(selection.selecting, modifiers.takeFinger(), touchLayout = !pointer)) {
-                ListClick.Toggle -> selection.toggle(line.key)
-                ListClick.Select -> {
-                    val (ctrl, shift) = modifiers.take()
-                    selection.click(line.key, keys, ctrl, shift)
-                }
-                ListClick.Open -> actions.play(tracks, index)
-            }
+            selection.trackClick(line.key, keys, modifiers, touchLayout = !pointer, plays) { actions.play(tracks, index) }
         },
-        onRowDoubleClick = if (pointer && !selection.selecting) ({ _, index -> actions.play(tracks, index) }) else null,
+        onRowDoubleClick = if (pointer && !selection.selecting) ({ line, index -> if (plays.fresh(line.key)) actions.play(tracks, index) }) else null,
         rowMenu = { line, index ->
             actions.menu(line.track, play = { actions.play(tracks, index) }, select = if (pointer) null else ({ selection.startSelecting(line.key) })) +
                 listOf(

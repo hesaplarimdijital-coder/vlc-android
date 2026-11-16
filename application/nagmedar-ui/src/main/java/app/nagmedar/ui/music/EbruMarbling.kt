@@ -28,9 +28,9 @@ import kotlin.math.sqrt
  * 1.1.3: one album's band becoming the next's as ebru is made, over [MARBLING_MS]: the new inks' drops fall one after
  * another on the band there was and spread, each pushing what lay there before it outwards (the band's own drop map,
  * undone pixel by pixel), while the old paper and inks fade into the new paper; then an unseen stylus is drawn down and
- * up the band, line after line, pulling the inks after it, then across it, a fine comb and the slow wave: the band's own
- * steps ([EbruPlan]), each drawn as a tip going through the tray. At its end it is the new band, made as before
- * (its torn edge too, the old one's becoming it on the way).
+ * up the band, line after line, pulling the inks after it, then across it: the band's own steps ([EbruPlan]), each drawn
+ * as a tip going through the tray. At its end it is the new band, made as before (its torn edge too, the old one's
+ * becoming it on the way). 1.1.5: across once, over the time the fine comb and the slow wave had after it.
  *
  * Drawn by an AGSL shader (Android 13 and later), at most [BUDGET_PX] pixels a frame (a larger band drawn smaller and
  * stretched while it moves).
@@ -140,10 +140,8 @@ internal object MarblingShader {
         colour("oldPaper", oldPaper)
         lines("vert", plan.vertical, VERTICAL_LINES)
         lines("horiz", plan.horizontal, HORIZONTAL_LINES)
-        lines("comb", plan.comb, COMB_LINES)
-        floats("alphas", plan.vertical.alpha, plan.horizontal.alpha, plan.comb.alpha)
-        floats("lambdas", plan.vertical.lambda, plan.horizontal.lambda, plan.comb.lambda)
-        floats("wave", plan.wave[0], plan.wave[1], plan.wave[2])
+        floats("alphas", plan.vertical.alpha, plan.horizontal.alpha)
+        floats("lambdas", plan.vertical.lambda, plan.horizontal.lambda)
     }
 
     fun frame(shader: Shader, t: Float, toBandX: Float, toBandY: Float) {
@@ -166,14 +164,13 @@ internal object MarblingShader {
         filterMode = BitmapShader.FILTER_MODE_LINEAR
     }
 
-    /** The lines the shader undoes at most: a band has 15 down and up, 7 across and 31 of the comb's. */
+    /** The lines the shader undoes at most: a band has 15 down and up, 7 across. */
     private const val VERTICAL_LINES = 16
     private const val HORIZONTAL_LINES = 8
-    private const val COMB_LINES = 32
 
     /**
      * Each pixel of the band at time t (0…1) is found where it came from: through the steps made by then, undone from
-     * the last (the wave, the comb, the stylus across, the stylus down: each line as far as its tip has gone), into the
+     * the last (the stylus across, then the stylus down: each line as far as its tip has gone), into the
      * drops before the stylus ([stones]); while they are still falling, through the drops fallen (each growing to its
      * size as it spreads) into the band there was, its paper and inks fading into the new paper.
      */
@@ -196,10 +193,8 @@ internal object MarblingShader {
         uniform half4 oldPaper;
         uniform float4 vert;
         uniform float4 horiz;
-        uniform float4 comb;
-        uniform float3 alphas;
-        uniform float3 lambdas;
-        uniform float3 wave;
+        uniform float2 alphas;
+        uniform float2 lambdas;
 
         half4 inkOf(float i) {
             if (i < 0.5) { return ink0; }
@@ -211,10 +206,6 @@ internal object MarblingShader {
 
         float ease(float x) {
             return x * x * (3.0 - 2.0 * x);
-        }
-
-        float span(float a, float b) {
-            return clamp((t - a) / (b - a), 0.0, 1.0);
         }
 
         // line k of n drawn one after another over [a, b], each overlapping the next by half
@@ -283,26 +274,19 @@ internal object MarblingShader {
                 colour = fallen(p);
             } else {
                 float2 q = p;
-                q.x -= wave.x * ease(span(0.80, 0.92)) * sin(6.2831853 * q.y / wave.y + wave.z);
-                float pc = span(0.74, 0.86);
-                for (int i = 0; i < 32; i++) {
-                    float k = comb.z - 1.0 - float(i);
-                    if (k < 0.0) { break; }
-                    q = untine(q, float2(0.0, comb.x + k * comb.y), float2(1.0, 0.0), alphas.z, lambdas.z, pc, size.x * 0.06, size.x);
-                }
                 for (int i = 0; i < 8; i++) {
                     float k = horiz.z - 1.0 - float(i);
                     if (k < 0.0) { break; }
                     float back = (horiz.w > 0.5 && mod(k, 2.0) > 0.5) ? -1.0 : 1.0;
                     q = untine(q, float2(0.0, horiz.x + k * horiz.y), float2(back, 0.0), alphas.y, lambdas.y,
-                        lineAt(k, horiz.z, 0.58, 0.78), size.x * 0.10, size.x);
+                        lineAt(k, horiz.z, 0.62, 0.90), size.x * 0.10, size.x);
                 }
                 for (int i = 0; i < 16; i++) {
                     float k = vert.z - 1.0 - float(i);
                     if (k < 0.0) { break; }
                     float back = (vert.w > 0.5 && mod(k, 2.0) > 0.5) ? -1.0 : 1.0;
                     q = untine(q, float2(vert.x + k * vert.y, 0.0), float2(0.0, back), alphas.x, lambdas.x,
-                        lineAt(k, vert.z, 0.33, 0.62), size.y * 0.20, size.y);
+                        lineAt(k, vert.z, 0.33, 0.66), size.y * 0.20, size.y);
                 }
                 colour = stones.eval(q + stonesAt);
             }

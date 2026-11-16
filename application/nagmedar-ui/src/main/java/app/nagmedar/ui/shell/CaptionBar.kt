@@ -58,6 +58,13 @@ fun rememberCaptionBar(): CaptionBar? {
     return with(density) { CaptionBar(top.toDp(), left.toDp(), right.toDp()) }
 }
 
+/**
+ * 1.1.5: this caption bar as a bar [start] in from the window's start sees it (the page's top bar beside the rail): what
+ * the system takes at that end, less what lies before the bar ([direction]: which end the start is).
+ */
+fun CaptionBar.from(start: Dp, direction: LayoutDirection): CaptionBar =
+    if (direction == LayoutDirection.Ltr) copy(left = (left - start).coerceAtLeast(0.dp)) else copy(right = (right - start).coerceAtLeast(0.dp))
+
 /** 1.0.3: whether the system's app chip shows at the start of this caption bar, in the window's direction; false without one. */
 @Composable
 fun CaptionBar?.showsAppChip(): Boolean = this?.showsAppChip(LocalLayoutDirection.current) == true

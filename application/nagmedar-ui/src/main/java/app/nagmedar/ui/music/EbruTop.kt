@@ -40,7 +40,6 @@ import app.nagmedar.ui.shell.WidthClass
 import app.nagmedar.ui.shell.currentWidthClass
 import app.nagmedar.ui.theme.InputMode
 import app.nagmedar.ui.theme.NagTheme
-import org.videolan.medialibrary.interfaces.media.MediaWrapper
 
 /**
  * 1.1.3: a page with the Music page's ebru top (Radio's, Podcasts'): the band in the inks of what plays and the masthead
@@ -67,8 +66,8 @@ internal fun EbruPage(
     pinned: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val playing = rememberNowPlaying().media?.takeIf { it.type == MediaWrapper.TYPE_AUDIO }
-    val inks = rememberEbruInks(playing)
+    // 1.1.5: what plays of any kind (a station's logo, an episode's picture too)
+    val inks = rememberEbruInks(rememberNowPlaying().media)
     val top = rememberCollapsingTopState()
     val compact = currentWidthClass() == WidthClass.Compact
     val phoneTop = remember { PhoneTop() }

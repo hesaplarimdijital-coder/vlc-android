@@ -75,16 +75,58 @@ class ComponentRulesTest {
     }
 
     @Test
-    fun aFingersTapOpensAMouseClickSelectsWhateverTheLayout() {
-        // the press decides
+    fun aTapAndAClickPlayCtrlAndShiftSelect() {
+        // 1.1.5: a finger's tap and a mouse's click play, whatever the layout (a mouse's click selected until 1.1.4)
         assertEquals(ListClick.Open, ListClick.of(selecting = false, finger = true, touchLayout = false))
-        assertEquals(ListClick.Select, ListClick.of(selecting = false, finger = false, touchLayout = true))
-        // without a press (a key, TalkBack) the layout does
+        assertEquals(ListClick.Open, ListClick.of(selecting = false, finger = false, touchLayout = true))
+        assertEquals(ListClick.Open, ListClick.of(selecting = false, finger = false, touchLayout = false))
+        // Ctrl or Shift with it select, as on desktops
+        assertEquals(ListClick.Select, ListClick.of(selecting = false, finger = false, touchLayout = false, extending = true))
+        assertEquals(ListClick.Select, ListClick.of(selecting = false, finger = true, touchLayout = true, extending = true))
+        // without a press (a key, TalkBack) the layout does: Space selects on a desktop's
         assertEquals(ListClick.Open, ListClick.of(selecting = false, finger = null, touchLayout = true))
         assertEquals(ListClick.Select, ListClick.of(selecting = false, finger = null, touchLayout = false))
         // while picking ("Seç") every tap and click takes an item in or out
         assertEquals(ListClick.Toggle, ListClick.of(selecting = true, finger = true, touchLayout = true))
-        assertEquals(ListClick.Toggle, ListClick.of(selecting = true, finger = false, touchLayout = false))
+        assertEquals(ListClick.Toggle, ListClick.of(selecting = true, finger = false, touchLayout = false, extending = true))
+    }
+
+    @Test
+    fun aDoubleClicksNextClickDoesNotPlayAgain() {
+        var now = 1_000L
+        val plays = ClickPlays(clock = { now }, window = { 300L })
+        assertTrue(plays.fresh("a"))
+        // the double click's second click, then a third
+        now += 180
+        assertFalse(plays.fresh("a"))
+        now += 180
+        assertFalse(plays.fresh("a"))
+        // another track at once, the same one later
+        now += 50
+        assertTrue(plays.fresh("b"))
+        now += 400
+        assertTrue(plays.fresh("b"))
+    }
+
+    @Test
+    fun aClickLetsGoOfTheSelectionAndPlays() {
+        val selection = MultiSelection()
+        val order = listOf<Any>("a", "b", "c")
+        val modifiers = ClickModifiers()
+        val plays = ClickPlays(clock = { 0L }, window = { 300L })
+        var played = 0
+        // Ctrl with a mouse's click selects
+        modifiers.pressed(ctrl = true, shift = false, finger = false)
+        selection.trackClick("a", order, modifiers, touchLayout = false, plays) { played++ }
+        modifiers.pressed(ctrl = true, shift = false, finger = false)
+        selection.trackClick("c", order, modifiers, touchLayout = false, plays) { played++ }
+        assertEquals(setOf<Any>("a", "c"), selection.keys)
+        assertEquals(0, played)
+        // a plain click plays, and what was selected is let go of
+        modifiers.pressed(ctrl = false, shift = false, finger = false)
+        selection.trackClick("b", order, modifiers, touchLayout = false, plays) { played++ }
+        assertEquals(1, played)
+        assertTrue(selection.keys.isEmpty())
     }
 
     @Test

@@ -44,3 +44,5 @@ HSPLapp/nagmedar/ui/music/*EbruTopKt**->**(**)**
 HSPLapp/nagmedar/ui/music/*EbruMarblingKt**->**(**)**
 HSPLapp/nagmedar/ui/music/MarblingShader**->**(**)**
 HSPLapp/nagmedar/ui/music/ShownBand**->**(**)**
+# 1.1.5: the player asked for on a tablet's or a DeX window is Müzik's panel (the band's sources are Ebru*, above)
+HSPLapp/nagmedar/ui/music/MusicPanelRequest**->**(**)**

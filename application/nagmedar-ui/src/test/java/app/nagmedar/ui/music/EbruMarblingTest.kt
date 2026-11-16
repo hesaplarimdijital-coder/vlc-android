@@ -73,7 +73,8 @@ class EbruMarblingTest {
         val old = Ebru.band(EbruInks.Default, w, h)
         val made = Ebru.made(night, w, h, stones = true)
         val shader = MarblingShader.make(old, EbruInks.Default.paper, made.band!!, made.stones!!, made.plan, olderSource())
-        val times = listOf(0f, 0.12f, 0.3f, 0.45f, 0.7f, 0.85f, 1f)
+        // 1.1.5: the drops, the stylus down and up, across once (to 0.9), the new band
+        val times = listOf(0f, 0.12f, 0.3f, 0.45f, 0.62f, 0.78f, 1f)
         val frames = times.map { frame(shader, it, w, h) }
         // the first frame is the band there was (its edges' anti-aliasing aside), the last the new one
         assertTrue(differing(frames.first(), shown(old), 16) < w * h / 1000)
@@ -114,11 +115,10 @@ class EbruMarblingTest {
     @Test
     fun theBandsStepsAreTheShadersSteps() {
         val plan = Ebru.made(night, 1079, 420).plan
-        // the stylus down and up 15 times, across 7, the comb's 31 teeth: within what the shader undoes
+        // the stylus down and up 15 times, across 7 (1.1.5: once across, no comb after it): within what the shader undoes
         assertEquals(15, plan.vertical.count)
         assertEquals(7, plan.horizontal.count)
-        assertEquals(31, plan.comb.count)
         assertTrue(plan.count in 48..MAX_DROPS)
-        assertTrue(plan.vertical.alternate && plan.horizontal.alternate && !plan.comb.alternate)
+        assertTrue(plan.vertical.alternate && plan.horizontal.alternate)
     }
 }

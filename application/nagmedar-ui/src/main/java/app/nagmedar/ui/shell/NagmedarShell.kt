@@ -332,7 +332,9 @@ fun NagmedarShell(
     // keeps its title below it; Müzik draws its own top there: its band under the status bar, its chips over the band
     val statusTop = rootInsets?.top
     // 1.1.2 (the design's tablet page): by touch the rail's window too, whose page has the search over its band
-    val ownTop = (navKind == NavKind.BottomBar || (navKind == NavKind.Rail && !pointer)) && ownTop(current) && !contentOnly
+    // 1.1.5: not a desktop window's rail by touch: the page's top bar is its caption bar (the page's band under the
+    // system's chip and buttons otherwise)
+    val ownTop = (navKind == NavKind.BottomBar || (navKind == NavKind.Rail && !pointer && caption == null)) && ownTop(current) && !contentOnly
     val systemBottom: () -> Int = remember(rootInsets, density) { { rootInsets?.navigationBottom?.getBottom(density) ?: 0 } }
     // the phone's one bottom glass, the user's decision (B): behind the mini player, the bottom bar and the band; thick, so
     // that the card's grey artist line and times keep 4.5:1 over a white cover
@@ -429,7 +431,8 @@ fun NagmedarShell(
                     PageTopBar(
                         title = stringResource(current.label),
                         onSearch = onSearch.takeIf { current != Destination.Search },
-                        caption = caption,
+                        // 1.1.5: beside the rail, the system's chip reaches over the rail first
+                        caption = if (navKind == NavKind.Rail) caption?.from(NagTheme.dimens.railWidth, LocalLayoutDirection.current) else caption,
                         onBack = onBack.takeIf { NavRules.showsBack(current, navKind) },
                         modifier = Modifier.onSizeChanged { metrics.topPx = it.height }.underPlayer(playerOver),
                         statusBar = statusTop.takeIf { navKind == NavKind.BottomBar },
@@ -473,6 +476,8 @@ fun NagmedarShell(
                         iconBadges = iconBadges,
                         // 1.0.8: the screen's main action at the rail's top, named by a tooltip
                         action = primary?.let { action -> { PrimaryActionButton(action, extended = false, height = 48.dp) } },
+                        // 1.1.5: below a desktop window's caption bar, out from under the system's app chip
+                        caption = caption,
                     )
                     NavKind.Sidebar -> Sidebar(
                         selected = selected,

@@ -2,6 +2,41 @@
 
 Nağmedar'ın sürümleri, en yenisi üstte. 1.0'dan beri sürüm yalnızca depo sahibinin iki cihazı (Galaxy S24, Galaxy Tab S11 Ultra) için kişisel olarak derlenir: R8 ve Baseline Profile ile iyileştirilmiş bir release APK'sı, depodaki ortak anahtarla imzalı. Bu yüzden önceki deneme derlemesinin üzerine güncelleme olarak kurulur, bütün veriler yerinde kalır. Hiçbir sürüm yayımlanmaz. Bir sürümün nasıl hazırlandığı: [`buildsystem/release/README.md`](buildsystem/release/README.md).
 
+## 1.1.5 (16 Kasım 2026)
+
+Tablette ve DeX'te parçaya bir kez tıklamak onu çalar ve oynatıcı sağdaki panelde kalır; alttaki oynatıcı Müzik'te çıkmaz, büyük (tam ekran) oynatıcı açılmaz. Ebru şeridi enine bir kez çizilir. Radyo'nun ve Podcastler'in şeridi çalanın resminden. Masaüstü penceresinin rayında iki Nağmedar işareti üst üste gelmez (16 Kasım'daki istekler).
+
+### Müzik: bir tıklama çalar
+- Tablette ve DeX'te bir parçaya bir kez tıklamak (fareyle, dokunmatik yüzeyle) onu çalar, dokunmak gibi. 1.0.3'ten beri fareyle tıklamak parçayı seçiyor, sağdaki panel parçanın bilgisini gösteriyor ve alttaki oynatıcı çıkıyordu; çalmak için çift tıklamak gerekiyordu.
+- Ctrl ya da Shift ile tıklamak eskisi gibi seçer (birkaç parçaya birden iş için). Klavyede Enter odaktaki parçayı çalar, Boşluk seçer.
+- Tıklayınca daha önce seçilmiş parçalar bırakılır: sağdaki panel seçili bir parçayı değil, çalanı gösterir.
+- Çift tıklamanın ikinci tıklaması (ve üçüncüsü) parçayı yeniden başlatmaz.
+- Müzik'in listelerinde, açık albümün ve sanatçının parçalarında, çalma listelerinde ve akıllı listelerde.
+
+### Oynatıcı: tablette ve DeX'te
+- Müzik'te sağdaki panel (ayrıntı paneli) açıkken alttaki oynatıcı hiç çıkmaz; panel başka bir şey gösterirken de (Ctrl ile seçilmiş bir parçanın bilgisi, sözler, sıra). 1.1.2'den beri panel çalanı göstermeyince alttaki oynatıcı çıkıp kayboluyordu. Panel gizlenince (Ctrl+I) ya da pencere panele dar gelince alttaki oynatıcı gelir; radyo istasyonu çalarken de gelir, panel istasyonu göstermez.
+- Büyük (tam ekran) oynatıcı açılmaz: alttaki oynatıcının kapağına ya da parçanın adına dokunmak, “Oynatıcıyı aç” düğmesi ve bildirimden açmak Müzik'e gidip sağdaki paneli çalanla açar (gizliyse gösterir, dar pencerede panelin sayfasını açar). Telefonda açık oynatıcıyla tablete geçilince de panel açılır. Yan dönmüş telefonda (panele yer yok) büyük oynatıcı eskisi gibi.
+- Radyo'da, Podcastler'de ve diğer sayfalarda alttaki oynatıcı yerinde: oralarda sağda bir oynatıcı yok.
+
+### Ebru şeridi
+- Şerit yapılırken enine bir kez çizilir (deneme): 1.1.0'dan beri bizin enine geçişinden sonra ince bir tarak ve yavaş bir dalga da çekiliyordu, şerit iki kez enine çizilmiş görünüyordu. Şeridin son hali artık bizin enine geçişinden sonraki hali; tarağın ince çizgileri ve dalga yok. Geçiş yine 2,5 saniye: enine geçiş tarağın ve dalganın süresine yayıldı. Bütün şeritler (bozkırınki de) buna göre yeniden yapılır.
+- Şerit her sayfada çalanın resminden: albümün kapağı, istasyonun logosu, bölümün (ya da podcast'in) resmi. 1.1.4'e kadar yalnızca albüm kapakları sayılıyordu: radyo ya da podcast çalarken şerit hep bozkırındı, istasyon ya da bölüm değişince değişmiyordu. Artık başka bir istasyon, başka bir podcast çalınca şerit gözün önünde yapılır; aynı podcast'in aynı resimli bölümleri şeridi değiştirmez. Kenar çubuğundaki markanın halkası da öyle.
+- Resmi olmayanın (kapaksız albüm, logosuz istasyon) şeridi bozkırın renkleriyle kendi deseninde: logosuz bir istasyondan ötekine geçince de şerit değişir. 1.1.4'te hepsinin şeridi aynıydı.
+- Kapağı okunmayı bekleyen albümde 0,8 saniye sonra bozkıra geçilmez: kapak okunana kadar şerit olduğu gibi kalır.
+
+### Masaüstü penceresinde ray
+- DeX'te ve Android'in masaüstü pencerelerinde, rayın genişliğindeki bir pencerede sistemin başlık çubuğundaki uygulama çipi (Nağmedar'ın simgesi ve adı) rayın üstüne geliyor, rayın Nağmedar işareti onun altında kalıp çakışıyordu. Artık çipin olduğu pencerede ray başlık çubuğunun altından başlar. Başlık çubuğu olan her pencerede, dokunmatikte de sayfanın üst çubuğu başlık çubuğunda, çipin yanında; Müzik'in, Radyo'nun ve Podcastler'in ebru üstü çipin ve pencere düğmelerinin altına girmez.
+
+### Test
+- `ComponentRulesTest`: tıklamanın da dokunmanın da çaldığı, Ctrl ve Shift'in seçtiği; çift tıklamanın sonraki tıklamalarının çalmadığı; tıklamanın seçimi bırakıp çaldığı.
+- `MusicBrowserTest`: panel açıkken seçili bir parçada alttaki oynatıcı çekilmiş kalır, panel gizlenince gelir; oynatıcı istenince gizli panel çalanla açılır, seçim bırakılır.
+- `EbruInksTest`: logosuz istasyonun kendi şeridi ve istasyon değişince geçiş; bölümün renklerinin resmi altında tutulması; videoda bozkır; kapaksız albümde bozkırın kendi deseni.
+- `EbruMarblingTest`: enine tek geçiş; geçişin yolu yeni zamanlarla. `CaptionBarTest`: rayın işareti çipin altında, sayfanın başlığı başlık çubuğunda, çipin yanında (dokunmatikte ve fareyle); yeni onay görüntüsü `caption-rail-chip-light`.
+- Şeritli onay görüntüleri yenilendi.
+
+### Sürüm
+- `versionCode` 4010105; kişisel arm64 APK'sı 14010111 (1.1.4'ün 14010110'unun üzerine güncelleme olarak kurulur). Veritabanı değişmedi.
+
 ## 1.1.4 (16 Kasım 2026)
 
 Ebru şeridi yalnızca müzik değişince gözün önünde yapılır; sekme değiştirince yapılmaz (16 Kasım'daki istek).
